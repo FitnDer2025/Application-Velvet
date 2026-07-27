@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Velvet — V4 Profil central</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#09090b}
+    iframe{border:0;width:100%;height:100%;display:block}
+  </style>
+</head>
+<body>
+<iframe id="app" src="./velvet-v1-locked-dense-demo-v3.html" title="Velvet V1"></iframe>
+<script>
+const frame=document.getElementById('app');
+frame.addEventListener('load',()=>{
+  const w=frame.contentWindow,d=w.document,oldGo=w.go;
+  const style=d.createElement('style');
+  style.textContent=`
+    :root{--cream:#f1e8dc;--ink:#09090b;--wine:#7c2749;--wine2:#4e182f;--gold2:#d7b77a}
+    .v4{max-width:1280px;margin:auto;color:var(--txt)}
+    .v4 button{font:inherit}
+    .v4-back{margin-bottom:14px}
+    .v4-hero{position:relative;min-height:620px;border-radius:32px;overflow:hidden;background:#111}
+    .v4-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .25s ease}
+    .v4-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#050506e8 0%,#08080b9c 37%,transparent 72%),linear-gradient(0deg,#050506f2 0%,transparent 52%)}
+    .v4-hero-copy{position:absolute;z-index:3;left:42px;bottom:38px;width:min(620px,68%)}
+    .v4-kicker{display:flex;align-items:center;gap:8px;color:var(--gold);font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+    .v4-title{font-family:Georgia;font-size:clamp(48px,7vw,86px);line-height:.95;margin:13px 0 16px}
+    .v4-lead{font-size:18px;line-height:1.65;color:#e8e1d9;max-width:610px}
+    .v4-badges{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+    .v4-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff26;background:#09090ba8;backdrop-filter:blur(10px);padding:8px 11px;border-radius:999px;font-size:12px}
+    .v4-actions{display:flex;gap:9px;flex-wrap:wrap}
+    .v4-primary,.v4-secondary{border:0;border-radius:999px;padding:12px 17px;color:white;cursor:pointer}
+    .v4-primary{background:linear-gradient(135deg,#96395f,var(--wine))}
+    .v4-secondary{background:#0b0b0db8;border:1px solid #ffffff2d}
+    .v4-arrow{position:absolute;z-index:4;top:50%;width:46px;height:46px;border-radius:50%;border:1px solid #ffffff35;background:#09090ba6;color:white;font-size:22px;cursor:pointer}
+    .v4-arrow.prev{left:18px}.v4-arrow.next{right:18px}
+    .v4-photo-count{position:absolute;z-index:4;right:22px;bottom:22px;background:#09090bc9;border:1px solid #ffffff25;border-radius:999px;padding:8px 12px;font-size:12px}
+    .v4-thumbs{display:flex;gap:8px;overflow:auto;padding:12px 2px 3px}
+    .v4-thumb{width:82px;height:62px;border-radius:13px;object-fit:cover;border:2px solid transparent;opacity:.55;cursor:pointer}
+    .v4-thumb.active{opacity:1;border-color:var(--gold)}
+    .v4-tabs{position:sticky;top:72px;z-index:9;display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:14px 0;background:#09090bee;backdrop-filter:blur(18px)}
+    .v4-tab{border:1px solid var(--line);border-radius:17px;background:#151518;color:var(--muted);padding:13px;cursor:pointer;text-align:left}
+    .v4-tab b{display:block;color:#fff;font-size:14px}.v4-tab small{display:block;margin-top:4px}
+    .v4-tab.active{border-color:#d7b77a88;background:linear-gradient(135deg,#d7b77a16,#7c274925);color:var(--gold)}
+    .v4-snapshot{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin:16px 0}
+    .v4-stat{padding:14px;border-radius:16px;background:#ffffff07;border:1px solid var(--line)}
+    .v4-stat small{display:block;color:var(--muted);margin-bottom:6px}.v4-stat strong{font-size:14px}
+    .v4-toc{display:flex;gap:8px;overflow:auto;margin:18px 0;padding-bottom:3px}
+    .v4-toc button{white-space:nowrap;border:1px solid var(--line);border-radius:999px;background:#ffffff06;color:#d9d4cf;padding:9px 12px;cursor:pointer}
+    .v4-layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.72fr);gap:18px}
+    .v4-section{scroll-margin-top:145px;border:1px solid var(--line);border-radius:26px;background:linear-gradient(145deg,#ffffff0d,#ffffff04);padding:25px;margin-bottom:18px}
+    .v4-section h2{font-family:Georgia;font-size:30px;margin:6px 0 14px}.v4-section h3{font-family:Georgia}
+    .v4-copy{color:#d8d2cc;font-size:16px;line-height:1.75}
+    .v4-quote{border-left:3px solid var(--gold);padding:7px 0 7px 17px;margin:18px 0;font-family:Georgia;font-size:21px;line-height:1.5;color:var(--cream)}
+    .v4-pill-grid{display:flex;gap:8px;flex-wrap:wrap}
+    .v4-pill{border-radius:999px;padding:9px 12px;background:#ffffff08;border:1px solid var(--line);font-size:12px}
+    .v4-practices{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .v4-practice{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:14px;border-radius:17px;background:#ffffff06;border:1px solid var(--line)}
+    .v4-level{color:var(--gold);font-size:11px;border:1px solid #d7b77a55;border-radius:999px;padding:6px 8px}
+    .v4-timeline{display:grid;gap:12px}
+    .v4-time{display:grid;grid-template-columns:74px 14px 1fr;gap:12px}
+    .v4-time i{width:12px;height:12px;border-radius:50%;background:var(--gold);margin-top:5px;box-shadow:0 0 0 5px #d7b77a18}
+    .v4-time strong{color:var(--gold)}
+    .v4-venues{display:grid;gap:11px}
+    .v4-venue{display:grid;grid-template-columns:92px 1fr auto;gap:13px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:19px;background:#ffffff05}
+    .v4-venue img{width:92px;height:76px;border-radius:14px;object-fit:cover}
+    .v4-venue p{margin:5px 0 0;color:var(--muted);font-size:13px}
+    .v4-reco{padding:17px;border:1px solid var(--line);border-radius:19px;background:#ffffff05;margin-top:10px}
+    .v4-reco-head{display:flex;gap:11px;align-items:center}.v4-reco img{width:48px;height:48px;border-radius:50%;object-fit:cover}
+    .v4-reco p{margin:10px 0 0;color:#d8d2cc;line-height:1.55}
+    .v4-side-card{border:1px solid var(--line);border-radius:22px;background:#ffffff07;padding:19px;margin-bottom:14px}
+    .v4-side-card h3{margin-top:0}
+    .v4-list{display:grid;gap:0}.v4-list div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #ffffff0d}
+    .v4-list span{color:var(--muted)}.v4-list strong{text-align:right}
+    .v4-map{height:190px;border-radius:18px;position:relative;overflow:hidden;background:radial-gradient(circle at 54% 48%,#d7b77a44 0 6px,transparent 7px),linear-gradient(35deg,#242832,#11151a)}
+    .v4-map:before,.v4-map:after{content:"";position:absolute;border:1px solid #ffffff16;border-radius:50%}
+    .v4-map:before{width:170px;height:170px;left:calc(54% - 85px);top:calc(48% - 85px)}.v4-map:after{width:90px;height:90px;left:calc(54% - 45px);top:calc(48% - 45px)}
+    .v4-map-label{position:absolute;left:14px;bottom:13px;z-index:2;background:#09090bc9;border-radius:12px;padding:9px 11px;font-size:12px}
+    .v4-person-hero{display:grid;grid-template-columns:minmax(280px,.8fr) 1.2fr;gap:22px;align-items:stretch}
+    .v4-person-photo{min-height:530px;border-radius:27px;overflow:hidden;position:relative;background:#121214}
+    .v4-person-photo img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+    .v4-person-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,#000d)}
+    .v4-person-photo .v4-photo-count{bottom:15px;right:15px}
+    .v4-person-story{display:flex;flex-direction:column;justify-content:center;border:1px solid var(--line);border-radius:27px;background:linear-gradient(145deg,#7c274922,#ffffff06);padding:32px}
+    .v4-person-story h1{font-family:Georgia;font-size:52px;margin:8px 0 14px}
+    .v4-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:18px}
+    .v4-fact{padding:13px;border-radius:15px;background:#ffffff07;border:1px solid var(--line)}
+    .v4-fact small{display:block;color:var(--muted);margin-bottom:5px}.v4-private{color:var(--gold);font-style:italic}
+    .v4-consent{display:grid;gap:9px}
+    .v4-consent-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:13px;border:1px solid var(--line);border-radius:15px;background:#ffffff05}
+    .v4-status{border-radius:999px;padding:6px 9px;font-size:11px}.v4-status.yes{color:#8be0b6;border:1px solid #8be0b655}.v4-status.talk{color:var(--gold);border:1px solid #d7b77a55}.v4-status.no{color:#e58ca8;border:1px solid #e58ca855}
+    .v4-albums-intro{display:flex;justify-content:space-between;gap:20px;align-items:end;margin:20px 0}
+    .v4-albums-intro h1{font-family:Georgia;font-size:52px;margin:6px 0}
+    .v4-albums{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+    .v4-album{min-height:260px;border:1px solid #d7b77a38;border-radius:25px;background:radial-gradient(circle at 80% 15%,#d7b77a18,transparent 38%),linear-gradient(145deg,#1b1719,#0d0c0e);padding:22px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+    .v4-lock{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:#d7b77a12;border:1px solid #d7b77a44;font-size:22px}
+    .v4-album h3{font-family:Georgia;font-size:24px;margin:20px 0 7px}.v4-album p{color:var(--muted);line-height:1.5}
+    .v4-conf{display:inline-flex;align-self:flex-start;border:1px solid var(--line);border-radius:999px;padding:7px 9px;color:var(--gold);font-size:10px}
+    .v4-album-foot{display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .v4-create{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+    .v4-create input,.v4-create select,.v4-edit input,.v4-edit textarea{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:13px;background:#17171b;color:white;padding:11px}
+    .v4-create .wide,.v4-edit .wide{grid-column:1/-1}
+    .v4-edit{display:grid;grid-template-columns:1fr 1fr;gap:10px}.v4-edit textarea{min-height:120px}
+    .v4-note{padding:14px;border-radius:16px;border:1px solid #d7b77a35;background:#d7b77a0d;color:#d9d2c8;line-height:1.55;margin-top:14px}
+    @media(max-width:1000px){.v4-snapshot{grid-template-columns:repeat(3,1fr)}.v4-layout{grid-template-columns:1fr}.v4-tabs{grid-template-columns:repeat(2,1fr)}.v4-albums{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:760px){
+      .v4-hero{min-height:650px;border-radius:0;margin:-14px -14px 0}.v4-hero:after{background:linear-gradient(0deg,#050506fa 0%,#07070a91 62%,transparent)}
+      .v4-hero-copy{left:19px;right:19px;bottom:24px;width:auto}.v4-title{font-size:48px}.v4-lead{font-size:15px}.v4-arrow{top:39%}
+      .v4-tabs{top:72px;margin:0 -14px;padding:10px 14px;display:flex;overflow:auto}.v4-tab{min-width:150px}
+      .v4-snapshot{grid-template-columns:repeat(2,1fr)}.v4-section{padding:18px;border-radius:21px}.v4-section h2{font-size:26px}
+      .v4-practices{grid-template-columns:1fr}.v4-venue{grid-template-columns:72px 1fr}.v4-venue img{width:72px;height:66px}.v4-venue>span{grid-column:2}
+      .v4-person-hero{grid-template-columns:1fr}.v4-person-photo{min-height:520px}.v4-person-story{padding:21px}.v4-person-story h1{font-size:43px}
+      .v4-facts{grid-template-columns:repeat(2,1fr)}.v4-albums{grid-template-columns:1fr}.v4-albums-intro{display:block}.v4-albums-intro h1{font-size:43px}
+      .v4-create,.v4-edit{grid-template-columns:1fr}.v4-create .wide,.v4-edit .wide{grid-column:auto}
+    }
+  `;
+  d.head.appendChild(style);
+
+  const PHOTO={
+    couple:[
+      w.I.c1,
+      'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1600&q=84',
+      'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=84',
+      'https://images.unsplash.com/photo-1544078751-58fee2d8a03b?auto=format&fit=crop&w=1600&q=84'
+    ],
+    women:[w.I.w1,w.I.w2,'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=84'],
+    men:[w.I.m1,w.I.m2,'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1000&q=84']
+  };
+
+  w.S.profileV4=w.S.profileV4||{};
+  w.S.profileV4Albums=w.S.profileV4Albums||[];
+  w.S.profileV4Requests=w.S.profileV4Requests||{};
+  w.save();
+  let activeId='self',activeTab='couple',photoIndex=0,personPhotoIndex=0,editing=false;
+
+  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
+  const split=value=>String(value||'').split(' & ').map(x=>x.trim());
+
+  const SELF={
+    id:'self',name:'Camille & Julien',type:'Couple',city:'Lille',dist:'Centre-ville',compat:98,ages:'34 & 38',
+    orient:'Elle bi-curieuse · Lui hétéro',smoke:'Non-fumeurs',morph:'Féminine / Sportif',height:'168 / 181 cm',
+    search:'Couples et femmes',tags:['Rencontres suivies','Spa','Soirées privées'],img:w.I.c1
+  };
+
+  const PERSON_BANK={
+    Camille:{age:'34 ans',height:'168 cm',weight:'61 kg',hair:'Bruns',eyes:'Bleus',morph:'Féminine et naturelle',children:'Oui',job:'Information privée',attracted:'Femmes et hommes',bio:'Spontanée, sensible et très attentive au feeling. Camille aime la séduction progressive, les personnalités féminines naturelles et les ambiances où personne ne joue un rôle.',likes:['Douceur','Féminité','Humour','Confiance'],withWomen:['Séduction','Massage','Découverte bi','Moments à trois'],withMen:['Échanges complices','Mélangisme','Moments à quatre'],partnerRules:[['Rencontrer une femme seul','À discuter'],['Partager un moment avec une femme','D’accord'],['Échanger avec un autre couple','D’accord'],['Rencontrer sans elle','Non']]},
+    Julien:{age:'38 ans',height:'181 cm',weight:'79 kg',hair:'Châtains',eyes:'Verts',morph:'Sportif',children:'Oui',job:'Information privée',attracted:'Femmes',bio:'Calme, protecteur sans être directif et très attaché au confort de chacun. Julien aime prendre le temps de discuter et préfère une vraie connexion à une approche trop assurée.',likes:['Naturel','Élégance','Dialogue','Humour'],withWomen:['Séduction','Massage','Moments à trois'],withMen:['Complicité','Échanges sans ambiguïté','Moments à quatre'],partnerRules:[['Découvrir une femme seule','D’accord'],['Partager un moment sans lui','À discuter'],['Échanger avec un autre couple','D’accord'],['Rencontrer sans échange préalable','Non']]},
+    Emma:{age:'38 ans',height:'168 cm',weight:'59 kg',hair:'Châtains',eyes:'Verts',morph:'Féminine et sportive',children:'Oui',job:'Information privée',attracted:'Femmes et hommes',bio:'Solaire et curieuse, Emma aime la sensualité, les échanges vrais et la séduction qui s’installe sans scénario.',likes:['Spontanéité','Femmes naturelles','Spa','Danse'],withWomen:['Séduction','Massage','Découverte bi'],withMen:['Mélangisme','Moments à quatre'],partnerRules:[['Découverte avec une femme','D’accord'],['Rencontre seule','À discuter'],['Moments à quatre','D’accord'],['Échange sans dialogue','Non']]},
+    Nicolas:{age:'41 ans',height:'182 cm',weight:'81 kg',hair:'Bruns',eyes:'Noisette',morph:'Élancé',children:'Oui',job:'Entrepreneur',attracted:'Femmes',bio:'Posé, drôle et attentif, Nicolas privilégie la qualité du lien et veille à ce que personne ne se sente pressé.',likes:['Humour','Élégance','Discrétion','Dialogue'],withWomen:['Séduction','Massage','Moments à trois'],withMen:['Complicité','Moments à quatre'],partnerRules:[['Emma avec une femme','D’accord'],['Emma seule avec un couple','À discuter'],['Moments à quatre','D’accord'],['Rencontre imposée','Non']]}
+  };
+
+  function personTemplate(name,index,p){
+    if(PERSON_BANK[name])return PERSON_BANK[name];
+    const femalePair=p.type==='Couple femmes',female=index===0||femalePair;
+    const age=split(p.ages)[index]||p.ages;
+    const height=String(p.height||'').replaceAll(' cm','').split(' / ')[index]||p.height;
+    return {
+      age:`${age} ans`,height:`${height} cm`,weight:index===0?'60 kg':'80 kg',
+      hair:index===0?'Châtains':'Bruns',eyes:index===0?'Verts':'Noisette',morph:split(p.morph)[index]||p.morph,
+      children:'Information privée',job:index===0?'Information privée':'Profession renseignée',attracted:female?'Femmes et hommes':'Femmes',
+      bio:`${name} privilégie les personnalités naturelles, le dialogue et les rencontres qui prennent le temps de devenir évidentes.`,
+      likes:['Naturel','Respect','Humour','Complicité'],
+      withWomen:['Séduction','Massage','Moments partagés'],withMen:['Complicité','Moments à plusieurs'],
+      partnerRules:[['Découverte avec une femme','D’accord'],['Rencontre en solo','À discuter'],['Moments avec un couple','D’accord'],['Expérience non discutée','Non']]
+    };
+  }
+
+  function profileModel(p){
+    const names=split(p.name),isOwn=p.id==='self';
+    const saved=isOwn?w.S.profileV4:{};
+    const since=isOwn?'2016':p.id==='af'?'2014':'2018';
+    const model={
+      ...p,names,since,
+      description:saved.description||`${p.name} forme un couple complice, curieux et profondément attaché à la qualité des rencontres. Leur priorité n’est pas de multiplier les expériences, mais de partager des moments qui ont du sens avec des personnes naturelles et bienveillantes.`,
+      searchLong:saved.searchLong||`Ils recherchent avant tout ${p.search.toLowerCase()}, avec du dialogue, du respect et une vraie envie de se découvrir. Ils aiment échanger avant une sortie et ne prévoient jamais à l’avance ce qui doit se passer.`,
+      desires:saved.desires||'Des rencontres suivies, des soirées privées, des spas, des dîners et quelques escapades où la complicité peut se construire sans pression.',
+      story:saved.story||`Ensemble depuis ${since}, leur histoire s’est construite autour d’une grande liberté de parole. Ils ont découvert cet univers progressivement, après en avoir longuement discuté. Chaque nouvelle étape est décidée à deux et chacun conserve sa propre voix.`,
+      location:saved.location||p.city,
+      radius:saved.radius||'80 km · Hauts-de-France et Belgique',
+      availability:saved.availability||'Vendredi soir, samedi et week-ends choisis',
+      publicPhotos:PHOTO.couple,
+      practices:[
+        ['Mélangisme','Apprécie'],['Trios avec une femme','À découvrir'],['Massage','Apprécie'],
+        ['Soirées privées','Recherche'],['Clubs élégants','Occasionnel'],['Voyages','À découvrir'],
+        ['Échangisme','Selon le feeling'],['Jeux de séduction','Apprécie']
+      ],
+      values:['Consentement','Communication','Bienveillance','Sensualité','Humour','Aucune pression'],
+      timeline:[[since,'Le début de leur histoire et d’une grande complicité.'],['Premiers échanges','Une découverte faite de discussions, de limites posées et d’envies partagées.'],['Première expérience','Une soirée privée rassurante, vécue sans scénario imposé.'],['Aujourd’hui','Des rencontres plus rares mais plus fortes, avec l’envie de créer des liens suivis.']],
+      venues:[['O’Pulsions','Club · Lille','Pour l’ambiance et la qualité de l’accueil',w.I.club],['O’Relax','Spa · Hauts-de-France','Pour prendre le temps de se découvrir',w.I.spa],['Suite Velours','Love room · Arras','Pour les escapades intimistes',w.I.room]],
+      recos:[['Emma & Nicolas','Un couple naturel, attentionné et très respectueux. On se sent rapidement en confiance.',w.I.c1],['Léa & Hugo','Beaucoup de dialogue et une vraie élégance dans leur manière de vivre les rencontres.',w.I.c2]],
+      people:names.map((name,index)=>({
+        ...personTemplate(name,index,p),
+        ...(isOwn?w.S.profileV4[`person-${name}`]||{}:{})
+      }))
+    };
+    return model;
+  }
+
+  function currentProfile(){
+    if(activeId==='self')return profileModel(SELF);
+    return profileModel(w.P.find(p=>p.id===activeId)||w.P[0]);
+  }
+
+  function isCouple(p){return p.names.length===2&&p.type.toLowerCase().includes('couple')}
+
+  function hero(p,isOwn){
+    const photos=p.publicPhotos,src=photos[photoIndex%photos.length];
+    return `<section class="v4-hero">
+      <img src="${src}" alt="Photo publique de ${esc(p.name)}">
+      <button class="v4-arrow prev" onclick="parent.v4Photo(-1)">‹</button><button class="v4-arrow next" onclick="parent.v4Photo(1)">›</button>
+      <div class="v4-hero-copy">
+        <div class="v4-kicker">Données fictives · Couple vérifié · En ligne récemment</div>
+        <h1 class="v4-title">${esc(p.name)}</h1>
+        <p class="v4-lead">${esc(p.description)}</p>
+        <div class="v4-badges"><span class="v4-badge">♥ ${p.compat}% compatible</span><span class="v4-badge">⌖ ${esc(p.location)}</span><span class="v4-badge">Ensemble depuis ${esc(p.since)}</span><span class="v4-badge">Trust 96</span></div>
+        <div class="v4-actions">
+          ${isOwn?'<button class="v4-primary" onclick="parent.v4Edit()">Modifier la fiche</button>':'<button class="v4-primary" onclick="parent.v4Message()">Écrire au couple</button>'}
+          <button class="v4-secondary" onclick="parent.v4Toast('Couple ajouté aux favoris')">♡ Favori</button>
+          <button class="v4-secondary" onclick="parent.v4Toast('Sélection du cercle ouverte')">Ajouter à un cercle</button>
+        </div>
+      </div>
+      <span class="v4-photo-count">${photoIndex%photos.length+1} / ${photos.length} · Photos publiques</span>
+    </section>
+    <div class="v4-thumbs">${photos.map((photo,index)=>`<img class="v4-thumb ${index===photoIndex%photos.length?'active':''}" src="${photo}" onclick="parent.v4SetPhoto(${index})" alt="">`).join('')}</div>`;
+  }
+
+  function tabs(p){
+    const couple=isCouple(p);
+    const items=couple?[
+      ['couple',p.name,'La vie intime du couple'],
+      ['person0',p.names[0],`Tout savoir sur ${p.names[0]}`],
+      ['person1',p.names[1],`Tout savoir sur ${p.names[1]}`],
+      ['albums','Albums privés','Contenus verrouillés']
+    ]:[['person0',p.names[0],'Profil complet'],['albums','Albums privés','Contenus verrouillés']];
+    return `<nav class="v4-tabs">${items.map(item=>`<button class="v4-tab ${activeTab===item[0]?'active':''}" onclick="parent.v4Tab('${item[0]}')"><b>${esc(item[1])}</b><small>${esc(item[2])}</small></button>`).join('')}</nav>`;
+  }
+
+  function snapshot(p){
+    return `<div class="v4-snapshot">${[
+      ['Localisation',p.location],['Distance',p.dist===0?'Votre profil':`${p.dist} km`],['Recherche',p.search],
+      ['Disponibilités','Week-ends choisis'],['Tabac',p.smoke],['Réponse','96% sous 24 h']
+    ].map(item=>`<div class="v4-stat"><small>${esc(item[0])}</small><strong>${esc(item[1])}</strong></div>`).join('')}</div>`;
+  }
+
+  function editCouple(p){
+    return `<section class="v4-section"><div class="v4-kicker">Édition du profil commun</div><h2>Raconter votre couple</h2>
+      <div class="v4-edit">
+        <label class="wide">Description du couple<textarea data-v4="description">${esc(p.description)}</textarea></label>
+        <label class="wide">Ce que vous recherchez<textarea data-v4="searchLong">${esc(p.searchLong)}</textarea></label>
+        <label class="wide">Vos envies<textarea data-v4="desires">${esc(p.desires)}</textarea></label>
+        <label class="wide">Votre histoire<textarea data-v4="story">${esc(p.story)}</textarea></label>
+        <label>Localisation<input data-v4="location" value="${esc(p.location)}"></label>
+        <label>Zone de déplacement<input data-v4="radius" value="${esc(p.radius)}"></label>
+        <label class="wide">Disponibilités<input data-v4="availability" value="${esc(p.availability)}"></label>
+      </div>
+      <div class="v4-actions" style="margin-top:14px"><button class="v4-primary" onclick="parent.v4Save()">Enregistrer</button><button class="v4-secondary" onclick="parent.v4Edit()">Annuler</button></div>
+    </section>`;
+  }
+
+  function couplePage(p,isOwn){
+    if(editing&&isOwn)return editCouple(p);
+    return `${snapshot(p)}
+      <div class="v4-toc">${[['about','Le couple'],['search','Recherche'],['practice','Pratiques'],['story','Histoire'],['venues','Lieux'],['reco','Recommandations'],['location','Localisation']].map(x=>`<button onclick="parent.v4Scroll('${x[0]}')">${x[1]}</button>`).join('')}</div>
+      <div class="v4-layout"><main>
+        <section id="about" class="v4-section"><div class="v4-kicker">Le couple</div><h2>Qui sont-ils vraiment ?</h2><p class="v4-copy">${esc(p.description)}</p>
+          <div class="v4-quote">« Les plus belles rencontres commencent bien avant le premier geste : elles commencent dans la façon de se parler. »</div>
+          <div class="v4-pill-grid">${p.values.map(value=>`<span class="v4-pill">${esc(value)}</span>`).join('')}</div>
+        </section>
+        <section id="search" class="v4-section"><div class="v4-kicker">Leurs envies & leur recherche</div><h2>Ce qu’ils souhaitent partager</h2><p class="v4-copy">${esc(p.searchLong)}</p><p class="v4-copy">${esc(p.desires)}</p>
+          <div class="v4-pill-grid">${p.tags.map(tag=>`<span class="v4-pill">${esc(tag)}</span>`).join('')}</div>
+        </section>
+        <section id="practice" class="v4-section"><div class="v4-kicker">Leurs pratiques communes</div><h2>Ce qu’ils aiment — et à quel rythme</h2>
+          <div class="v4-practices">${p.practices.map(item=>`<div class="v4-practice"><b>${esc(item[0])}</b><span class="v4-level">${esc(item[1])}</span></div>`).join('')}</div>
+          <div class="v4-note">Une pratique indiquée n’est jamais un consentement automatique. Chaque envie reste contextuelle, discutée et révocable.</div>
+        </section>
+        <section id="story" class="v4-section"><div class="v4-kicker">Leur parcours</div><h2>L’histoire de leur vie intime</h2>
+          <div class="v4-timeline">${p.timeline.map(step=>`<div class="v4-time"><strong>${esc(step[0])}</strong><i></i><div class="v4-copy">${esc(step[1])}</div></div>`).join('')}</div>
+        </section>
+        <section id="venues" class="v4-section"><div class="v4-kicker">Leurs lieux préférés</div><h2>Où peut-on les croiser ?</h2>
+          <div class="v4-venues">${p.venues.map(venue=>`<div class="v4-venue"><img src="${venue[3]}" alt=""><div><b>${esc(venue[0])}</b><p>${esc(venue[1])}<br>${esc(venue[2])}</p></div><button class="v4-secondary" onclick="parent.v4Toast('Fiche du lieu ouverte')">Voir le lieu</button></div>`).join('')}</div>
+        </section>
+        <section id="reco" class="v4-section"><div class="v4-kicker">Recommandations reçues</div><h2>Ce que les autres couples disent d’eux</h2>
+          ${p.recos.map(reco=>`<div class="v4-reco"><div class="v4-reco-head"><img src="${reco[2]}" alt=""><div><b>${esc(reco[0])}</b><div class="muted">Rencontre certifiée · ★★★★★</div></div></div><p>« ${esc(reco[1])} »</p></div>`).join('')}
+        </section>
+      </main><aside>
+        <section class="v4-side-card"><h3>Le couple en bref</h3><div class="v4-list">
+          <div><span>Ensemble depuis</span><strong>${esc(p.since)}</strong></div><div><span>Âges</span><strong>${esc(p.ages)} ans</strong></div>
+          <div><span>Orientations</span><strong>${esc(p.orient)}</strong></div><div><span>Recherche</span><strong>${esc(p.search)}</strong></div>
+          <div><span>Zone</span><strong>${esc(p.radius)}</strong></div><div><span>Disponibilités</span><strong>${esc(p.availability)}</strong></div>
+        </div></section>
+        <section id="location" class="v4-side-card"><h3>Localisation</h3><div class="v4-map"><span class="v4-map-label">⌖ ${esc(p.location)} · Position approximative</span></div><p class="muted">${esc(p.radius)}. L’adresse exacte n’est jamais affichée.</p></section>
+        <section class="v4-side-card"><h3>Confiance Velvet</h3><div class="v4-list"><div><span>Identités</span><strong class="verified">Vérifiées</strong></div><div><span>Couple</span><strong class="verified">Vérifié</strong></div><div><span>Photos</span><strong class="verified">Vérifiées</strong></div><div><span>Rencontres</span><strong>27 certifiées</strong></div></div></section>
+        <section class="v4-side-card"><h3>Découvrir chacun</h3><p class="muted">Le profil commun raconte leur histoire. Leurs fiches personnelles précisent leurs envies et leurs limites individuelles.</p>
+          <div class="v4-actions">${p.names.map((name,index)=>`<button class="v4-secondary" onclick="parent.v4Tab('person${index}')">${esc(name)} →</button>`).join('')}</div>
+        </section>
+      </aside></div>`;
+  }
+
+  function personPage(p,index,isOwn){
+    const person=p.people[index],female=p.type==='Couple femmes'||index===0,photos=female?PHOTO.women:PHOTO.men,src=photos[personPhotoIndex%photos.length];
+    if(editing&&isOwn){
+      return `<section class="v4-section"><div class="v4-kicker">Édition personnelle</div><h2>La fiche de ${esc(p.names[index])}</h2>
+        <div class="v4-edit"><label class="wide">Présentation<textarea data-person="bio">${esc(person.bio)}</textarea></label>
+          ${[['height','Taille'],['weight','Poids'],['morph','Morphologie'],['hair','Cheveux'],['eyes','Yeux'],['children','Enfants'],['job','Profession'],['attracted','Attiré(e) par']].map(field=>`<label>${field[1]}<input data-person="${field[0]}" value="${esc(person[field[0]])}"></label>`).join('')}
+          <label class="wide">Envies avec une femme<input data-person="withWomen" value="${esc(person.withWomen.join(', '))}"></label>
+          <label class="wide">Envies avec un homme<input data-person="withMen" value="${esc(person.withMen.join(', '))}"></label>
+        </div><div class="v4-actions" style="margin-top:14px"><button class="v4-primary" onclick="parent.v4SavePerson(${index})">Enregistrer</button><button class="v4-secondary" onclick="parent.v4Edit()">Annuler</button></div>
+      </section>`;
+    }
+    return `<section class="v4-person-hero">
+      <div class="v4-person-photo"><img src="${src}" alt="Photo individuelle"><button class="v4-arrow prev" onclick="parent.v4PersonPhoto(-1)">‹</button><button class="v4-arrow next" onclick="parent.v4PersonPhoto(1)">›</button><span class="v4-photo-count">${personPhotoIndex%photos.length+1} / ${photos.length} · Photos personnelles publiques</span></div>
+      <div class="v4-person-story"><div class="v4-kicker">Une personne, une voix, ses propres limites</div><h1>${esc(p.names[index])}</h1><p class="v4-copy">${esc(person.bio)}</p>
+        <div class="v4-badges"><span class="v4-badge">Attiré(e) par : ${esc(person.attracted)}</span>${person.likes.map(like=>`<span class="v4-badge">${esc(like)}</span>`).join('')}</div>
+        ${isOwn?'<button class="v4-primary" onclick="parent.v4Edit()">Modifier cette fiche</button>':''}
+      </div>
+    </section>
+    <div class="v4-layout" style="margin-top:18px"><main>
+      <section class="v4-section"><div class="v4-kicker">Carte d’identité personnelle</div><h2>En un coup d’œil</h2><div class="v4-facts">${[
+        ['Âge',person.age],['Taille',person.height],['Poids',person.weight],['Morphologie',person.morph],
+        ['Cheveux',person.hair],['Yeux',person.eyes],['Enfants',person.children],['Profession',person.job],['Attiré(e) par',person.attracted]
+      ].map(fact=>`<div class="v4-fact"><small>${esc(fact[0])}</small><strong class="${fact[1]==='Information privée'?'v4-private':''}">${esc(fact[1])}</strong></div>`).join('')}</div></section>
+      <section class="v4-section"><div class="v4-kicker">Ses envies personnelles</div><h2>Avec une femme</h2><div class="v4-pill-grid">${person.withWomen.map(item=>`<span class="v4-pill">${esc(item)}</span>`).join('')}</div>
+        <h2 style="margin-top:24px">Avec un homme</h2><div class="v4-pill-grid">${person.withMen.map(item=>`<span class="v4-pill">${esc(item)}</span>`).join('')}</div>
+      </section>
+      <section class="v4-section"><div class="v4-kicker">Équilibre du couple</div><h2>Ce qui est accepté pour son/sa partenaire</h2><p class="v4-copy">Ces positions appartiennent à ${esc(p.names[index])}. Elles ouvrent une discussion et ne constituent jamais une autorisation définitive.</p>
+        <div class="v4-consent">${person.partnerRules.map(rule=>`<div class="v4-consent-row"><b>${esc(rule[0])}</b><span class="v4-status ${rule[1]==='D’accord'?'yes':rule[1]==='Non'?'no':'talk'}">${esc(rule[1])}</span></div>`).join('')}</div>
+      </section>
+    </main><aside>
+      <section class="v4-side-card"><h3>Ce qui lui plaît</h3><div class="v4-pill-grid">${person.likes.map(item=>`<span class="v4-pill">${esc(item)}</span>`).join('')}</div></section>
+      ${isCouple(p)?`<section class="v4-side-card"><h3>Retour au couple</h3><p class="muted">Les envies personnelles s’inscrivent dans une histoire et des décisions communes.</p><button class="v4-secondary" onclick="parent.v4Tab('couple')">Voir ${esc(p.name)}</button></section>
+      <section class="v4-side-card"><h3>L’autre regard</h3><p class="muted">Découvrir aussi la fiche personnelle de ${esc(p.names[index===0?1:0])}.</p><button class="v4-secondary" onclick="parent.v4Tab('person${index===0?1:0}')">Ouvrir sa fiche</button></section>`:''}
+    </aside></div>`;
+  }
+
+  function albumDefaults(){
+    return [
+      {name:'Après minuit',level:'Privé sur demande',count:12},
+      {name:'Escapade en Belgique',level:'Cercle de confiance',count:18},
+      {name:'Notre jardin secret',level:'Cercle privé',count:9}
+    ].concat(w.S.profileV4Albums);
+  }
+
+  function albumsPage(p,isOwn){
+    const albums=albumDefaults();
+    return `<div class="v4-albums-intro"><div><div class="v4-kicker">Aucun aperçu avant autorisation</div><h1>Albums privés</h1><p class="v4-copy">Chaque album porte un nom et un niveau de confidentialité. Tant qu’il n’est pas déverrouillé, aucune photo, miniature ou couleur issue du contenu n’est visible.</p></div>${isOwn?'<button class="v4-primary" onclick="parent.v4ToggleCreate()">Créer un album</button>':''}</div>
+      ${isOwn&&w.S.v4CreateOpen?`<section class="v4-section"><div class="v4-kicker">Nouvel album privé</div><h2>Nommer et protéger l’album</h2><div class="v4-create">
+        <label>Nom de l’album<input id="v4AlbumName" placeholder="Ex. Notre escapade"></label>
+        <label>Confidentialité<select id="v4AlbumLevel"><option>Privé sur demande</option><option>Cercle de confiance</option><option>Cercle privé</option><option>Favoris uniquement</option><option>Temporaire</option></select></label>
+        <label class="wide">Description interne<input id="v4AlbumDesc" placeholder="Invisible tant que l’album est verrouillé"></label>
+        <button class="v4-primary" onclick="parent.v4CreateAlbum()">Publier l’album verrouillé</button>
+      </div></section>`:''}
+      <div class="v4-albums">${albums.map((album,index)=>`<article class="v4-album"><div><div class="v4-lock">⌑</div><h3>${esc(album.name)}</h3><p>Contenu intégralement masqué jusqu’à l’autorisation explicite du propriétaire.</p><span class="v4-conf">${esc(album.level)}</span></div>
+        <div class="v4-album-foot"><span class="muted">${album.count||0} contenus verrouillés</span>${isOwn?'<button class="v4-secondary" onclick="parent.v4Toast(\'Gestion de l’album ouverte\')">Gérer</button>':`<button class="v4-primary" onclick="parent.v4RequestAlbum(${index})">${w.S.profileV4Requests[`${activeId}-${index}`]?'Demandé ✓':'Demander l’accès'}</button>`}</div>
+      </article>`).join('')}</div>
+      <div class="v4-note">Le nom de l’album reste visible, mais son contenu ne laisse absolument rien paraître. L’accès est personnel, traçable, révocable et peut expirer.</div>`;
+  }
+
+  function render(){
+    const p=currentProfile(),isOwn=activeId==='self';
+    if(isOwn)oldGo('me');else oldGo('member',activeId);
+    if(!isCouple(p)&&activeTab==='couple')activeTab='person0';
+    w.content.innerHTML=`<div class="v4">${isOwn?'':'<button class="v4-secondary v4-back" onclick="parent.v4Back()">← Retour à Découvrir</button>'}
+      ${activeTab==='couple'?hero(p,isOwn):''}${tabs(p)}
+      ${activeTab==='couple'?couplePage(p,isOwn):activeTab==='person0'?personPage(p,0,isOwn):activeTab==='person1'?personPage(p,1,isOwn):albumsPage(p,isOwn)}
+    </div>`;
+  }
+
+  w.go=function(route,param){
+    if(route==='me'){activeId='self';activeTab='couple';photoIndex=0;editing=false;render();w.scrollTo(0,0);return}
+    if(route==='member'){activeId=param;activeTab=(w.P.find(p=>p.id===param)?.type||'').toLowerCase().includes('couple')?'couple':'person0';photoIndex=0;editing=false;render();w.scrollTo(0,0);return}
+    oldGo(route,param);
+  };
+
+  window.v4Tab=tab=>{activeTab=tab;editing=false;personPhotoIndex=0;render();w.scrollTo(0,0)};
+  window.v4Photo=delta=>{const count=currentProfile().publicPhotos.length;photoIndex=(photoIndex+delta+count)%count;render()};
+  window.v4SetPhoto=index=>{photoIndex=index;render()};
+  window.v4PersonPhoto=delta=>{personPhotoIndex=(personPhotoIndex+delta+PHOTO.women.length)%PHOTO.women.length;render()};
+  window.v4Scroll=id=>d.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});
+  window.v4Toast=text=>w.toast(text);
+  window.v4Message=()=>oldGo('conversations',activeId);
+  window.v4Back=()=>oldGo('discover');
+  window.v4Edit=()=>{editing=!editing;render()};
+  window.v4Save=()=>{d.querySelectorAll('[data-v4]').forEach(input=>w.S.profileV4[input.dataset.v4]=input.value);w.save();editing=false;render();w.toast('Profil commun enregistré')};
+  window.v4SavePerson=index=>{
+    const p=currentProfile(),name=p.names[index],saved=w.S.profileV4[`person-${name}`]||{};
+    d.querySelectorAll('[data-person]').forEach(input=>saved[input.dataset.person]=input.dataset.person.startsWith('with')?input.value.split(',').map(x=>x.trim()).filter(Boolean):input.value);
+    w.S.profileV4[`person-${name}`]=saved;w.save();editing=false;render();w.toast('Fiche personnelle enregistrée')
+  };
+  window.v4ToggleCreate=()=>{w.S.v4CreateOpen=!w.S.v4CreateOpen;w.save();render()};
+  window.v4CreateAlbum=()=>{
+    const name=d.getElementById('v4AlbumName')?.value.trim(),level=d.getElementById('v4AlbumLevel')?.value;
+    if(!name){w.toast('Donnez un nom à l’album');return}
+    w.S.profileV4Albums.push({name,level,count:0});w.S.v4CreateOpen=false;w.save();render();w.toast('Album privé créé')
+  };
+  window.v4RequestAlbum=index=>{const key=`${activeId}-${index}`;w.S.profileV4Requests[key]=true;w.save();render();w.toast('Demande d’accès envoyée')};
+});
+</script>
+</body>
+</html>
