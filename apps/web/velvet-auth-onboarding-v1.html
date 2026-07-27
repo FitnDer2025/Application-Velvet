@@ -8,14 +8,31 @@
     :root{--bg:#09090b;--panel:#141417;--panel2:#1b1b1f;--line:#ffffff16;--txt:#f8f4ef;--muted:#aaa5a0;--gold:#d5b477;--wine:#7d294c;--wine2:#4b142d;--green:#79d9ae;--red:#e2879f}
     *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--txt);font-family:Inter,Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}
     body{background:radial-gradient(circle at 86% 6%,#7d294b31,transparent 30rem),radial-gradient(circle at 8% 100%,#d5b47712,transparent 26rem),var(--bg)}
-    .intro{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:#08080a;animation:introAway .7s 3.2s forwards}
-    .intro svg{width:min(700px,88vw);overflow:visible}.ribbon-shadow{fill:none;stroke:#000;stroke-width:38;opacity:.45;filter:blur(12px)}
-    .ribbon{fill:none;stroke:url(#wineGradient);stroke-width:30;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1500;stroke-dashoffset:1500;filter:drop-shadow(0 13px 20px #0009);animation:drawRibbon 2.5s .2s cubic-bezier(.65,0,.2,1) forwards}
-    .ribbon-highlight{fill:none;stroke:#d58aa7;stroke-width:3;stroke-linecap:round;stroke-dasharray:1500;stroke-dashoffset:1500;opacity:.6;animation:drawRibbon 2.5s .25s cubic-bezier(.65,0,.2,1) forwards}
-    .intro-word{font:20px Georgia;letter-spacing:.42em;fill:#d5b477;opacity:0;animation:wordIn .7s 2.25s forwards}
-    @keyframes drawRibbon{to{stroke-dashoffset:0}}@keyframes wordIn{to{opacity:1}}@keyframes introAway{to{opacity:0;visibility:hidden;pointer-events:none}}
-    @media(prefers-reduced-motion:reduce){.ribbon,.ribbon-highlight{animation-duration:.01s}.intro-word{animation-delay:.1s}.intro{animation-delay:.4s}}
-    .auth-shell{min-height:100vh;display:grid;grid-template-columns:minmax(420px,.92fr) minmax(500px,1.08fr);opacity:0;animation:shellIn .7s 3.25s forwards}@keyframes shellIn{to{opacity:1}}
+    .intro{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:radial-gradient(circle at 50% 50%,#201018 0%,#0b090c 42%,#070709 76%);animation:introAway .8s 5.2s forwards}
+    .intro svg{width:min(760px,94vw);height:min(620px,92vh);overflow:visible}
+    .silk-panel{fill:url(#panelGradient);stroke:#a7607b36;stroke-width:1;filter:url(#panelShadow);opacity:0;animation:panelIn .8s .15s forwards,panelAway .65s 2.15s forwards}
+    .silk-seam{fill:none;stroke:#d29ab04a;stroke-width:1.3;stroke-dasharray:4 7;opacity:0;animation:panelIn .6s .35s forwards,panelAway .55s 2.05s forwards}
+    .eyelet{fill:#26131c;stroke:#c596a966;stroke-width:2;opacity:0;animation:eyeletsIn .5s .45s forwards,eyeletsAway .5s 2s forwards}
+    .corset-ribbon-shadow,.corset-ribbon,.corset-highlight{fill:none;stroke-linecap:round;stroke-linejoin:round}
+    .corset-ribbon-shadow{stroke:#000;stroke-width:23;opacity:0;filter:blur(7px);animation:laceIn .45s .6s forwards,unlace 1.2s 1.35s cubic-bezier(.55,0,.25,1) forwards}
+    .corset-ribbon{stroke:url(#silkGradient);stroke-width:18;stroke-dasharray:760;stroke-dashoffset:760;filter:url(#ribbonShadow);animation:laceDraw .85s .55s forwards,unlace 1.2s 1.35s cubic-bezier(.55,0,.25,1) forwards}
+    .corset-highlight{stroke:url(#highlightGradient);stroke-width:2.8;stroke-dasharray:760;stroke-dashoffset:760;opacity:.7;animation:laceDraw .85s .6s forwards,unlace 1.2s 1.35s cubic-bezier(.55,0,.25,1) forwards}
+    .flight-shadow,.flight-ribbon,.flight-highlight{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1150;stroke-dashoffset:1150}
+    .flight-shadow{stroke:#000;stroke-width:30;opacity:.45;filter:blur(8px);animation:flightDraw 1.65s 1.85s cubic-bezier(.2,.55,.25,1) forwards,flightFade .55s 3.35s forwards}
+    .flight-ribbon{stroke:url(#silkGradient);stroke-width:23;filter:url(#ribbonShadow);animation:flightDraw 1.65s 1.8s cubic-bezier(.2,.55,.25,1) forwards,flightFade .55s 3.35s forwards}
+    .flight-highlight{stroke:url(#highlightGradient);stroke-width:3;opacity:.75;animation:flightDraw 1.65s 1.86s cubic-bezier(.2,.55,.25,1) forwards,flightFade .55s 3.35s forwards}
+    .final-shadow,.final-ribbon,.final-highlight{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:760;stroke-dashoffset:760}
+    .final-shadow{stroke:#000;stroke-width:36;opacity:.5;filter:blur(10px);animation:formV 1.15s 3.35s cubic-bezier(.65,0,.2,1) forwards}
+    .final-ribbon{stroke:url(#silkGradient);stroke-width:29;filter:url(#ribbonShadow);animation:formV 1.15s 3.3s cubic-bezier(.65,0,.2,1) forwards,silkBreathe 1.2s 4.35s ease-in-out infinite alternate}
+    .final-highlight{stroke:url(#highlightGradient);stroke-width:3.4;opacity:.8;animation:formV 1.15s 3.36s cubic-bezier(.65,0,.2,1) forwards}
+    .intro-word{font:20px Georgia;letter-spacing:.42em;fill:#d5b477;opacity:0;animation:wordIn .7s 4.25s forwards}
+    .intro-caption{font:10px Arial;letter-spacing:.2em;fill:#9d9397;opacity:0;animation:wordIn .6s 4.48s forwards}
+    @keyframes panelIn{to{opacity:.82}}@keyframes panelAway{to{opacity:0;transform:scale(.94)}}@keyframes eyeletsIn{to{opacity:1}}@keyframes eyeletsAway{to{opacity:0}}
+    @keyframes laceIn{to{opacity:.55}}@keyframes laceDraw{to{stroke-dashoffset:0}}@keyframes unlace{to{stroke-dashoffset:-760;opacity:0;transform:translateY(-42px)}}
+    @keyframes flightDraw{0%{stroke-dashoffset:1150;opacity:0}12%{opacity:1}100%{stroke-dashoffset:0;opacity:1}}@keyframes flightFade{to{opacity:0;transform:translate(18px,-15px)}}
+    @keyframes formV{to{stroke-dashoffset:0}}@keyframes silkBreathe{to{stroke-width:31;filter:url(#ribbonGlow)}}@keyframes wordIn{to{opacity:1}}@keyframes introAway{to{opacity:0;visibility:hidden;pointer-events:none}}
+    @media(prefers-reduced-motion:reduce){.silk-panel,.silk-seam,.eyelet,.corset-ribbon-shadow,.corset-ribbon,.corset-highlight,.flight-shadow,.flight-ribbon,.flight-highlight,.final-shadow,.final-ribbon,.final-highlight{animation-duration:.01s;animation-delay:0s}.intro-word,.intro-caption{animation-delay:.1s}.intro{animation-delay:.6s}}
+    .auth-shell{min-height:100vh;display:grid;grid-template-columns:minmax(420px,.92fr) minmax(500px,1.08fr);opacity:0;animation:shellIn .8s 5.25s forwards}@keyframes shellIn{to{opacity:1}}
     .brand-side{position:relative;min-height:100vh;overflow:hidden;background:#0d0d10}.brand-side>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.52}.brand-side:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#09090bdc 0%,#09090b5d 65%,#09090bfa),linear-gradient(0deg,#09090bfa,transparent 60%)}
     .brand-copy{position:absolute;z-index:2;left:clamp(28px,5vw,72px);right:35px;bottom:clamp(38px,8vh,88px)}.brand{font:25px Georgia;letter-spacing:.3em;color:var(--gold)}.brand-copy h1{font:clamp(45px,6vw,78px)/.98 Georgia;margin:24px 0 18px}.brand-copy p{font-size:17px;line-height:1.65;color:#ded7d0;max-width:650px}
     .value-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:21px}.value{border:1px solid #ffffff24;background:#09090b7d;backdrop-filter:blur(10px);border-radius:99px;padding:8px 11px;font-size:10px;letter-spacing:.05em}
@@ -44,12 +61,40 @@
 </head>
 <body>
 <div id="intro" class="intro" aria-label="Animation du logo Velvet">
-  <svg viewBox="0 0 700 420" role="img" aria-label="Un ruban bordeaux forme la lettre V">
-    <defs><linearGradient id="wineGradient" x1="0" x2="1"><stop offset="0" stop-color="#3f1126"/><stop offset=".42" stop-color="#9b3a63"/><stop offset=".72" stop-color="#6f2043"/><stop offset="1" stop-color="#3f1126"/></linearGradient></defs>
-    <path class="ribbon-shadow" d="M-80 92 C70 5 155 16 225 72 C274 112 304 208 350 315 L473 72 C515 5 597 30 780 5"/>
-    <path class="ribbon" d="M-80 92 C70 5 155 16 225 72 C274 112 304 208 350 315 L473 72 C515 5 597 30 780 5"/>
-    <path class="ribbon-highlight" d="M-80 82 C70 -5 155 6 225 62 C274 102 304 198 350 305 L473 62 C515 -5 597 20 780 -5"/>
-    <text class="intro-word" x="350" y="390" text-anchor="middle">VELVET</text>
+  <svg viewBox="0 0 760 620" role="img" aria-label="Un ruban de soie bordeaux se délace, s’envole et forme le V de Velvet">
+    <defs>
+      <linearGradient id="panelGradient" x1="0" x2="1"><stop offset="0" stop-color="#160d12"/><stop offset=".48" stop-color="#4d1b30"/><stop offset=".82" stop-color="#241018"/><stop offset="1" stop-color="#0d090c"/></linearGradient>
+      <linearGradient id="silkGradient" x1="0" x2="1"><stop offset="0" stop-color="#3b1025"/><stop offset=".18" stop-color="#661b3c"/><stop offset=".43" stop-color="#b5577c"/><stop offset=".57" stop-color="#7b2349"/><stop offset=".78" stop-color="#9d3f66"/><stop offset="1" stop-color="#351020"/></linearGradient>
+      <linearGradient id="highlightGradient" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".48" stop-color="#f2b8cc"/><stop offset=".72" stop-color="#fff" stop-opacity=".15"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+      <filter id="panelShadow"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000" flood-opacity=".8"/></filter>
+      <filter id="ribbonShadow"><feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#000" flood-opacity=".75"/></filter>
+      <filter id="ribbonGlow"><feDropShadow dx="0" dy="4" stdDeviation="11" flood-color="#8f365d" flood-opacity=".72"/></filter>
+    </defs>
+    <g aria-hidden="true">
+      <path class="silk-panel" d="M213 87 Q268 126 314 108 C327 194 325 343 348 492 Q292 523 229 479 C249 360 241 215 213 87Z"/>
+      <path class="silk-panel" d="M547 87 Q492 126 446 108 C433 194 435 343 412 492 Q468 523 531 479 C511 360 519 215 547 87Z"/>
+      <path class="silk-seam" d="M230 113 C270 150 292 146 309 142 M530 113 C490 150 468 146 451 142"/>
+      <path class="silk-seam" d="M247 454 Q292 487 340 461 M513 454 Q468 487 420 461"/>
+      <g>
+        <circle class="eyelet" cx="333" cy="166" r="7"/><circle class="eyelet" cx="427" cy="166" r="7"/>
+        <circle class="eyelet" cx="333" cy="224" r="7"/><circle class="eyelet" cx="427" cy="224" r="7"/>
+        <circle class="eyelet" cx="334" cy="282" r="7"/><circle class="eyelet" cx="426" cy="282" r="7"/>
+        <circle class="eyelet" cx="337" cy="340" r="7"/><circle class="eyelet" cx="423" cy="340" r="7"/>
+        <circle class="eyelet" cx="342" cy="398" r="7"/><circle class="eyelet" cx="418" cy="398" r="7"/>
+        <circle class="eyelet" cx="350" cy="451" r="7"/><circle class="eyelet" cx="410" cy="451" r="7"/>
+      </g>
+      <path class="corset-ribbon-shadow" d="M333 166 L427 224 L333 282 L423 340 L342 398 L410 451 M427 166 L333 224 L426 282 L337 340 L418 398 L350 451"/>
+      <path class="corset-ribbon" d="M333 166 L427 224 L333 282 L423 340 L342 398 L410 451 M427 166 L333 224 L426 282 L337 340 L418 398 L350 451"/>
+      <path class="corset-highlight" d="M333 161 L427 219 L333 277 L423 335 L342 393 L410 446 M427 161 L333 219 L426 277 L337 335 L418 393 L350 446"/>
+      <path class="flight-shadow" d="M382 196 C332 82 228 70 124 133 C20 196 155 283 271 208 C362 149 345 24 484 51 C620 77 742 182 618 250 C558 283 521 254 503 230"/>
+      <path class="flight-ribbon" d="M382 196 C332 82 228 70 124 133 C20 196 155 283 271 208 C362 149 345 24 484 51 C620 77 742 182 618 250 C558 283 521 254 503 230"/>
+      <path class="flight-highlight" d="M378 190 C328 76 224 64 120 127 C16 190 151 277 267 202 C358 143 341 18 480 45 C616 71 738 176 614 244 C554 277 517 248 499 224"/>
+      <path class="final-shadow" d="M245 157 C299 190 318 278 380 466 C434 306 476 202 519 140"/>
+      <path class="final-ribbon" d="M245 157 C299 190 318 278 380 466 C434 306 476 202 519 140"/>
+      <path class="final-highlight" d="M239 151 C293 184 312 272 374 460 C428 300 470 196 513 134"/>
+    </g>
+    <text class="intro-word" x="380" y="543" text-anchor="middle">VELVET</text>
+    <text class="intro-caption" x="380" y="574" text-anchor="middle">LE LIEN SE DÉVOILE</text>
   </svg>
 </div>
 
