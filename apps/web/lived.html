@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Velvet — V1 vécue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./lived.css">
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<a class="brand" href="#"><span class="mark">V</span><strong>VELVET</strong></a>
+<nav id="main-nav">
+<button class="active" data-view="home">Accueil</button>
+<button data-view="discover">Découvrir</button>
+<button data-view="events">Événements</button>
+<button data-view="venues">Établissements</button>
+<button data-view="messages">Conversations</button>
+<button data-view="me">Notre profil</button>
+</nav>
+<div class="account"><span class="avatar">C&C</span><div><strong>Céline & Cyril</strong><small>Couple vérifié · Lille</small></div></div>
+</aside>
+<main>
+<header class="topbar"><input id="global-search" placeholder="Rechercher un profil, une ville, une envie…"><div class="top-actions"><button id="discretion">Mode discret</button><button id="notifications">3</button></div></header>
+<div id="app-content"></div>
+</main>
+</div>
+<div id="modal" class="modal" aria-hidden="true"><div class="modal-card"><button id="modal-close" class="close">×</button><div id="modal-content"></div></div></div>
+<div id="toast" class="toast"></div>
+<script src="./lived-data.js"></script><script src="./lived-app.js"></script>
+</body>
+</html>
