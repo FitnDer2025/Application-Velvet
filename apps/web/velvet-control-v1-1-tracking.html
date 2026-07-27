@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Velvet Control — Suivi de production</title>
+<style>
+:root{--bg:#0b0b0e;--panel:#151519;--panel2:#1d1d22;--line:#ffffff17;--text:#f7f3ee;--muted:#aaa6a1;--gold:#c9aa6b;--wine:#6b1d3b;--green:#6fd2a1;--orange:#e0a35e;--red:#e37b92}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif}button{font:inherit;cursor:pointer}.shell{height:100%;display:grid;grid-template-rows:64px 1fr}.top{display:flex;align-items:center;gap:14px;padding:0 18px;border-bottom:1px solid var(--line);background:#0d0d11f2;backdrop-filter:blur(18px);z-index:20}.brand{font:20px Georgia;letter-spacing:.2em;color:var(--gold);white-space:nowrap}.tag{font-size:9px;letter-spacing:.14em;border:1px solid #c9aa6b55;border-radius:99px;padding:5px 8px}.tabs{display:flex;gap:7px;margin-left:18px}.tab{border:1px solid transparent;background:transparent;color:var(--muted);border-radius:999px;padding:9px 13px}.tab.active{background:#ffffff0c;border-color:var(--line);color:#fff}.spacer{flex:1}.status{font-size:11px;color:var(--green);display:flex;gap:7px;align-items:center}.status:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 15px var(--green)}.view{position:relative;min-height:0}.frame{width:100%;height:100%;border:0;background:#0d0d0d}.roadmap{display:none;height:100%;overflow:auto;padding:24px}.roadmap.active{display:block}.hero{display:flex;justify-content:space-between;gap:20px;align-items:end;max-width:1450px;margin:auto}.ey{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}h1,h2,h3{font-family:Georgia}h1{font-size:clamp(38px,5vw,64px);margin:8px 0 12px}.lead{color:var(--muted);line-height:1.6;max-width:760px}.progress-card{min-width:260px;border:1px solid var(--line);background:linear-gradient(145deg,#ffffff0c,#ffffff04);border-radius:20px;padding:18px}.progress-card b{font-size:38px;color:var(--gold)}.bar{height:9px;border-radius:99px;background:#ffffff10;overflow:hidden;margin-top:12px}.bar i{display:block;height:100%;width:42%;background:linear-gradient(90deg,var(--wine),var(--gold));border-radius:99px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;max-width:1450px;margin:24px auto}.card{border:1px solid var(--line);background:linear-gradient(145deg,#ffffff09,#ffffff03);border-radius:20px;padding:17px}.card h3{margin:5px 0 12px}.meta{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px}.state{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;padding:6px 9px;font-size:10px}.state:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}.done{color:var(--green)}.doing{color:var(--orange)}.planned{color:#9b9ba5}.blocked{color:var(--red)}.task{border-top:1px solid #ffffff0e;padding:11px 0;display:grid;grid-template-columns:18px 1fr auto;gap:9px;align-items:start}.task:first-of-type{border-top:0}.task strong{font-size:13px}.task p{margin:3px 0;color:var(--muted);font-size:11px;line-height:1.45}.tick{width:16px;height:16px;border-radius:50%;border:1px solid var(--line);margin-top:1px}.tick.ok{background:var(--green);border-color:var(--green);box-shadow:inset 0 0 0 4px #151519}.tick.run{border-color:var(--orange);box-shadow:inset 0 0 0 4px #151519;background:var(--orange)}.percent{font-size:11px;color:var(--gold)}.wide{grid-column:span 2}.timeline{max-width:1450px;margin:0 auto 30px;display:grid;grid-template-columns:1fr 1fr;gap:14px}.log{border:1px solid var(--line);background:#121216;border-radius:20px;padding:18px}.log-row{display:grid;grid-template-columns:90px 12px 1fr;gap:10px}.log-row time{font-size:10px;color:var(--muted);padding-top:3px}.log-row i{width:9px;height:9px;border-radius:50%;background:var(--gold);margin-top:4px;position:relative}.log-row i:after{content:"";position:absolute;top:12px;left:4px;width:1px;height:42px;background:var(--line)}.log-row:last-child i:after{display:none}.log-row p{margin:0 0 19px;font-size:12px}.log-row small{display:block;color:var(--muted);margin-top:4px}.next{border:1px solid #c9aa6b3d;background:linear-gradient(145deg,#6b1d3b55,#c9aa6b12);border-radius:20px;padding:18px}.next h2{margin:3px 0 8px}.next p{color:#d5cec6;line-height:1.55}.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}@media(max-width:1050px){.grid{grid-template-columns:repeat(2,1fr)}.wide{grid-column:span 2}}@media(max-width:720px){.top{padding:0 10px}.brand{font-size:15px}.tag,.status{display:none}.tabs{margin-left:0}.tab{padding:8px 10px;font-size:12px}.roadmap{padding:16px 12px}.hero{display:block}.progress-card{margin-top:16px}.grid,.timeline{grid-template-columns:1fr}.wide{grid-column:span 1}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="top">
+  <div class="brand">VELVET</div><span class="tag">CONTROL</span>
+  <nav class="tabs">
+    <button class="tab active" data-view="control" onclick="showView('control',this)">Console</button>
+    <button class="tab" data-view="roadmap" onclick="showView('roadmap',this)">Roadmap & Changelog</button>
+  </nav>
+  <div class="spacer"></div><div class="status">Version test accessible</div>
+</header>
+<main class="view">
+  <iframe id="controlView" class="frame" title="Velvet Control" src="https://raw.githack.com/Velvet-Application/Application-Velvet/68bbabff136bd4fbebcaabe508973140c5de8a6a/apps/web/velvet-control-v1.html"></iframe>
+  <section id="roadmapView" class="roadmap">
+    <div class="hero">
+      <div><div class="ey">Suivi de production — Velvet Control V1.1</div><h1>Roadmap & Changelog</h1><p class="lead">Vue de pilotage des sprints visuels. Chaque livraison publiée dispose d’un aperçu web testable. Les états ci-dessous représentent la version démonstrateur et non une mesure automatique du développement réel.</p></div>
+      <div class="progress-card"><span class="ey">Progression V1.1</span><br><b>42 %</b><div class="bar"><i></i></div><p class="lead" style="font-size:11px;margin-bottom:0">Socle de suivi publié. NOC IA et politique de modération en production.</p></div>
+    </div>
+
+    <div class="grid">
+      <article class="card"><div class="meta"><span>Sprint 0</span><span class="state done">Livré</span></div><h3>Velvet Control V1</h3>
+        <div class="task"><span class="tick ok"></span><div><strong>Centre de commandement</strong><p>KPI, santé plateforme, alertes et activité.</p></div><span class="percent">100 %</span></div>
+        <div class="task"><span class="tick ok"></span><div><strong>Bureaux métiers</strong><p>Direction, modération, support, finance, Pro et technique.</p></div><span class="percent">100 %</span></div>
+        <div class="task"><span class="tick ok"></span><div><strong>Entités et timelines</strong><p>Membres, établissements et organisateurs.</p></div><span class="percent">100 %</span></div>
+      </article>
+
+      <article class="card"><div class="meta"><span>Sprint 1</span><span class="state doing">En cours</span></div><h3>NOC Velvet Intelligence</h3>
+        <div class="task"><span class="tick run"></span><div><strong>Vue des agents IA</strong><p>Guardian, Moderator, Cupid, Host, Support, Analyst et Creator.</p></div><span class="percent">55 %</span></div>
+        <div class="task"><span class="tick run"></span><div><strong>Santé et charge</strong><p>Disponibilité, latence, volume et alertes des modèles.</p></div><span class="percent">40 %</span></div>
+        <div class="task"><span class="tick"></span><div><strong>Flux des décisions</strong><p>Événements IA en temps réel et détail des recommandations.</p></div><span class="percent">25 %</span></div>
+      </article>
+
+      <article class="card"><div class="meta"><span>Sprint 2</span><span class="state doing">En cours</span></div><h3>Modération automatique</h3>
+        <div class="task"><span class="tick run"></span><div><strong>Niveau d’autonomie</strong><p>Observation, assistance, semi-automatique et automatique.</p></div><span class="percent">60 %</span></div>
+        <div class="task"><span class="tick run"></span><div><strong>Sensibilité par risque</strong><p>Faux profils, consentement, fraude, spam, contenu et harcèlement.</p></div><span class="percent">50 %</span></div>
+        <div class="task"><span class="tick"></span><div><strong>Actions autorisées</strong><p>Masquage, vérification, suspension et escalade humaine.</p></div><span class="percent">30 %</span></div>
+      </article>
+
+      <article class="card"><div class="meta"><span>Sprint 3</span><span class="state planned">Planifié</span></div><h3>Simulation & Audit</h3>
+        <div class="task"><span class="tick"></span><div><strong>Simulation des seuils</strong><p>Impact sur faux positifs et charge modérateur.</p></div><span class="percent">0 %</span></div>
+        <div class="task"><span class="tick"></span><div><strong>Journal explicable</strong><p>Règle, score, signaux, action et correction humaine.</p></div><span class="percent">0 %</span></div>
+        <div class="task"><span class="tick"></span><div><strong>Retour de version</strong><p>Historique des politiques et restauration contrôlée.</p></div><span class="percent">0 %</span></div>
+      </article>
+
+      <article class="card wide"><div class="meta"><span>Sprint 4</span><span class="state planned">Planifié</span></div><h3>Connexion aux trois socles</h3>
+        <div class="task"><span class="tick"></span><div><strong>Velvet Membres</strong><p>Recommandations, sécurité, assistance rédactionnelle et consentement.</p></div><span class="percent">0 %</span></div>
+        <div class="task"><span class="tick"></span><div><strong>Velvet Pro</strong><p>Prévision de fréquentation, synthèse des avis, création de contenu et alertes.</p></div><span class="percent">0 %</span></div>
+        <div class="task"><span class="tick"></span><div><strong>Velvet Control</strong><p>Files priorisées, dossiers enrichis et décisions supervisées.</p></div><span class="percent">0 %</span></div>
+      </article>
+
+      <article class="card wide"><div class="meta"><span>Qualité</span><span class="state doing">Continu</span></div><h3>Finitions de la V1.1</h3>
+        <div class="task"><span class="tick run"></span><div><strong>Design premium</strong><p>Cohérence avec le Control existant et hiérarchie visuelle renforcée.</p></div><span class="percent">45 %</span></div>
+        <div class="task"><span class="tick"></span><div><strong>Responsive</strong><p>Desktop, tablette et mobile.</p></div><span class="percent">20 %</span></div>
+        <div class="task"><span class="tick"></span><div><strong>Tests fonctionnels</strong><p>Navigation, réglages, simulation et journal.</p></div><span class="percent">10 %</span></div>
+      </article>
+    </div>
+
+    <div class="timeline">
+      <section class="log"><div class="ey">Changelog</div><h2>Dernières livraisons</h2>
+        <div class="log-row"><time>27/07/2026</time><i></i><p><strong>Suivi de production intégré</strong><small>Ajout de la page Roadmap & Changelog et accès à la console V1.</small></p></div>
+        <div class="log-row"><time>27/07/2026</time><i></i><p><strong>Velvet Control V1 publié</strong><small>Centre de commandement, métiers, files de traitement et vues 360°.</small></p></div>
+        <div class="log-row"><time>Prochaine étape</time><i></i><p><strong>NOC Velvet Intelligence</strong><small>Premier écran visuel des agents IA et de la politique de modération.</small></p></div>
+      </section>
+      <aside class="next"><div class="ey">Livraison suivante</div><h2>Écran IA — Sprint 1</h2><p>La prochaine version testable ajoutera directement dans la console le centre Velvet Intelligence, les cartes des agents, leur santé, leur autonomie et la première matrice de sensibilité de modération.</p><div class="legend"><span class="state done">Livré</span><span class="state doing">En cours</span><span class="state planned">Planifié</span><span class="state blocked">Bloqué</span></div></aside>
+    </div>
+  </section>
+</main>
+</div>
+<script>
+function showView(view,button){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));button.classList.add('active');
+  const frame=document.getElementById('controlView'),roadmap=document.getElementById('roadmapView');
+  if(view==='control'){frame.style.display='block';roadmap.classList.remove('active')}else{frame.style.display='none';roadmap.classList.add('active')}
+}
+</script>
+</body>
+</html>
