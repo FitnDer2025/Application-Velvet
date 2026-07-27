@@ -15,3 +15,7 @@ https://raw.githack.com/Velvet-Application/Application-Velvet/v1-lived-demo/apps
 - visuels de démonstration pour les profils, albums, événements et établissements ;
 - exemples régionaux non affiliés ;
 - responsive desktop et mobile.
+
+## Visuels
+
+Les photographies sont des visuels de démonstration issus de banques d’images distantes. Elles ne représentent ni les faux membres décrits ni les établissements cités. Pour la version de production, elles seront remplacées par des médias fournis et autorisés, ou par des créations originales générées pour Velvet.
