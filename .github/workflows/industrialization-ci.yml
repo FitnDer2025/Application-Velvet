@@ -1,0 +1,32 @@
+name: Velvet industrialization CI
+
+on:
+  push:
+    paths:
+      - "apps/api/**"
+      - "packages/api-client/**"
+      - "infra/**"
+      - "package.json"
+  pull_request:
+    paths:
+      - "apps/api/**"
+      - "packages/api-client/**"
+      - "infra/**"
+      - "package.json"
+
+permissions:
+  contents: read
+
+jobs:
+  security-and-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.18.0"
+          cache: npm
+      - run: npm install --ignore-scripts
+      - run: npm run check
+      - run: npm test
