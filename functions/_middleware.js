@@ -6,7 +6,7 @@ import {
 } from './api/auth/_shared.js';
 
 const ACCESS = {
-  '/membres': ['member'],
+  '/membres': [],
   '/pro': ['organizer', 'pro_owner', 'pro_staff', 'direction', 'admin'],
   '/control': ['moderator', 'support', 'auditor', 'direction', 'admin']
 };
@@ -43,7 +43,7 @@ export async function onRequest(context) {
       }
     });
   }
-  if (!roles.some((role) => account.roles.includes(role))) {
+  if (roles.length && !roles.some((role) => account.roles.includes(role))) {
     return new Response('Accès non autorisé pour ce rôle Velvet.', {
       status: 403,
       headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' }

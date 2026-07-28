@@ -29,6 +29,7 @@
     first_names_required: 'Le prénom de chaque personne est obligatoire.',
     profile_identity_required: 'Ajoute un nom de profil et une description d’au moins 20 caractères.',
     profile_payload_too_large: 'Le contenu du profil est trop volumineux.',
+    gender_identity_required: 'Indique ton identité de genre pour compléter ta fiche personnelle.',
     profile_required: 'Crée d’abord ton profil Velvet.',
     organizer_request_already_pending: 'Une demande Organisateur est déjà en cours.',
     album_name_required: 'Donne un nom à cet album.',
@@ -36,6 +37,15 @@
   };
 
   const REFERENCES = {
+    genderIdentities: [
+      'Homme',
+      'Femme',
+      'Homme trans',
+      'Femme trans',
+      'Personne non binaire',
+      'Autre identité',
+      'Information privée'
+    ],
     availability: [
       'En semaine — journée',
       'En semaine — soirée',
@@ -323,11 +333,17 @@
   }
 
   function personForm(index, person = {}, couple = true) {
-    const title = couple ? (index === 0 ? 'Première personne' : 'Deuxième personne') : 'Votre fiche personnelle';
+    const title = couple ? 'Ta fiche personnelle' : 'Votre fiche personnelle';
     return `<section class="person-form">
       <h3>${title}</h3>
       <div class="form-grid">
         <label>Prénom<input name="p${index}_first_name" maxlength="80" value="${e(person.first_name)}" required></label>
+        <label>Identité de genre
+          <select name="p${index}_gender_identity" required>
+            <option value="">Choisir…</option>
+            ${REFERENCES.genderIdentities.map((option) => `<option value="${e(option)}"${option === person.gender_identity ? ' selected' : ''}>${e(option)}</option>`).join('')}
+          </select>
+        </label>
         <label>Année de naissance<input name="p${index}_birth_year" type="number" min="1900" max="${new Date().getFullYear() - 18}" value="${e(person.birth_year)}"></label>
         <label>Taille en cm<input name="p${index}_height_cm" type="number" min="100" max="250" value="${e(person.height_cm)}"></label>
         <label>Poids en kg<input name="p${index}_weight_kg" type="number" min="30" max="350" value="${e(person.weight_kg)}"></label>
@@ -490,6 +506,7 @@
     const profileType = data.get('profile_type');
     const person = {
       first_name: data.get('p0_first_name'),
+      gender_identity: data.get('p0_gender_identity'),
       birth_year: data.get('p0_birth_year'),
       height_cm: data.get('p0_height_cm'),
       weight_kg: data.get('p0_weight_kg'),
@@ -526,12 +543,17 @@
     status.hidden = false;
     status.textContent = 'Enregistrement sécurisé dans Supabase…';
     try {
+      const firstPublication = !state.profile;
       const result = await api('/api/members/profile', { method: 'POST', body: JSON.stringify(payload) });
       state.profile = result.profile;
       await refreshData();
       state.editing = false;
       toast('Profil enregistré dans la mémoire Velvet.');
-      route('me');
+      if (firstPublication && profileType === 'couple') {
+        prepareCoupleInvitation(true);
+      } else {
+        route('me');
+      }
     } catch (error) {
       status.textContent = errorMessages[error.message] || `Enregistrement impossible : ${error.message}`;
       toast(error.message, true);
@@ -627,6 +649,7 @@
     const profession = person.profession_private ? 'Information privée' : (person.profession || 'Non renseigné');
     return `<div class="facts">
       <div class="fact"><small>Âge</small><strong>${e(age(person.birth_year))}</strong></div>
+      <div class="fact"><small>Identité</small><strong>${e(person.gender_identity || 'Non renseignée')}</strong></div>
       <div class="fact"><small>Taille</small><strong>${person.height_cm ? `${e(person.height_cm)} cm` : 'Non renseignée'}</strong></div>
       <div class="fact"><small>Poids</small><strong>${person.weight_kg ? `${e(person.weight_kg)} kg` : 'Non renseigné'}</strong></div>
       <div class="fact"><small>Morphologie</small><strong>${e(person.morphology || 'Non renseignée')}</strong></div>
@@ -900,14 +923,14 @@
     });
   }
 
-  function prepareCoupleInvitation() {
+  function prepareCoupleInvitation(requiredStep = false) {
     content.innerHTML = `<div class="page">
-      ${pageHead('Fiche couple partagée', 'Inviter mon/ma partenaire', 'Le code sera lié à son adresse e-mail. Après inscription et validation des consentements, son compte rejoindra automatiquement votre fiche couple.', '<button class="secondary" data-route="me">Retour au profil</button>')}
+      ${pageHead(requiredStep ? 'Étape 2 sur 2 · Profil couple' : 'Fiche couple partagée', 'Inviter mon/ma partenaire', 'Le lien sera lié à son adresse e-mail. Après inscription et validation des consentements, son compte rejoindra automatiquement votre fiche couple.', requiredStep ? '' : '<button class="secondary" data-route="me">Retour au profil</button>')}
       <form id="coupleInviteForm" class="card">
         <h2>Adresse du partenaire</h2>
-        <p>Cette opération prépare une invitation valable sept jours. Elle ne sera pas envoyée automatiquement pendant notre phase de validation.</p>
+        <p>Cette invitation est valable sept jours et ne peut être utilisée que par l’adresse renseignée. Ton ou ta partenaire complétera uniquement sa propre fiche ; vous pourrez tous les deux enrichir la partie commune du couple.</p>
         <label>Adresse e-mail<input type="email" name="email" autocomplete="email" required></label>
-        <button class="primary" type="submit" style="margin-top:14px">Créer le code partenaire</button>
+        <button class="primary" type="submit" style="margin-top:14px">Créer le lien partenaire</button>
       </form>
     </div>`;
     document.querySelector('#coupleInviteForm').addEventListener('submit', async (event) => {
@@ -918,10 +941,33 @@
       try {
         const result = await api('/api/members/couple-invite', { method: 'POST', body: JSON.stringify({ email }) });
         const invitation = result.invitation;
+        const subject = 'Ton invitation privée Velvet';
+        const body = `Je t’invite à compléter notre profil couple sur Velvet : ${result.registrationUrl}`;
+        const mailto = `mailto:${result.invitedEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         content.innerHTML = `<div class="page">
-          ${pageHead('Invitation partenaire', 'Code préparé', 'Le code n’a pas été envoyé automatiquement. Il doit être transmis uniquement à la personne dont l’adresse a été renseignée.')}
-          <section class="card"><p class="eyebrow">Code à usage unique</p><h2 style="letter-spacing:.12em">${e(invitation?.invite_code || '')}</h2><p>Inscription : ${e(result.registrationUrl)}</p><button class="primary" data-route="me">Retour au profil</button></section>
+          ${pageHead('Invitation partenaire', 'Lien sécurisé créé', 'Le lien est prérempli pour l’adresse indiquée et ne peut être utilisé qu’une seule fois.')}
+          <section class="card">
+            <p class="eyebrow">Destinataire</p><h2>${e(result.invitedEmail)}</h2>
+            <p>À son arrivée, cette personne sera rattachée à votre couple et complétera sa propre fiche après validation des consentements.</p>
+            <div class="actions">
+              <button class="primary" type="button" id="copyPartnerLink">Copier le lien sécurisé</button>
+              <a class="secondary" href="${e(mailto)}">Envoyer par e-mail</a>
+              <button class="secondary" data-route="me">Terminer</button>
+            </div>
+            <p class="status-box" id="partnerLinkStatus" hidden></p>
+            <details style="margin-top:14px"><summary>Afficher le code de secours</summary><p style="letter-spacing:.12em">${e(invitation?.invite_code || '')}</p></details>
+          </section>
         </div>`;
+        document.querySelector('#copyPartnerLink').addEventListener('click', async () => {
+          const status = document.querySelector('#partnerLinkStatus');
+          try {
+            await navigator.clipboard.writeText(result.registrationUrl);
+            status.textContent = 'Lien copié. Transmets-le uniquement à ton ou ta partenaire.';
+          } catch {
+            status.textContent = result.registrationUrl;
+          }
+          status.hidden = false;
+        });
       } catch (error) {
         toast(error.message, true);
         button.disabled = false;
