@@ -121,7 +121,7 @@
   }
 
   function destinations(account) {
-    const links = [{ href: '/membres/', label: 'Velvet Membres', roles: ['member'] }];
+    const links = [{ href: '/membres/', label: 'Velvet Membres', roles: ['member', 'admin'] }];
     links.push({ href: '/pro/', label: 'Velvet Pro', roles: ['organizer', 'pro_owner', 'pro_staff', 'direction', 'admin'] });
     links.push({ href: '/control/', label: 'Velvet Control', roles: ['moderator', 'support', 'auditor', 'direction', 'admin'] });
     const allowed = links.filter((link) => link.roles.some((role) => account.roles.includes(role)));
