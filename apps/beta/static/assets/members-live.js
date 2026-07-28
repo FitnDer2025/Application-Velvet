@@ -10,6 +10,8 @@
       recommendations: []
     },
     organizerRequest: null,
+    membership: null,
+    personalProfileComplete: false,
     route: 'home',
     selectedProfileId: null,
     profileTab: 'couple',
@@ -112,8 +114,10 @@
       const profileResult = await api('/api/members/profile');
       state.profile = profileResult.profile;
       state.account = profileResult.account;
-      if (!state.profile) {
-        renderOnboarding();
+      state.membership = profileResult.membership;
+      state.personalProfileComplete = profileResult.personalProfileComplete;
+      if (!state.profile || !state.personalProfileComplete) {
+        renderOnboarding(state.profile);
         return;
       }
       const [directoryResult, organizerResult] = await Promise.all([
@@ -144,6 +148,8 @@
     ]);
     state.profile = profileResult.profile;
     state.account = profileResult.account;
+    state.membership = profileResult.membership;
+    state.personalProfileComplete = profileResult.personalProfileComplete;
     state.directory = directoryResult;
     state.organizerRequest = organizerResult.request;
   }
@@ -186,19 +192,22 @@
 
   function profileForm(profile = null) {
     const people = profilePeople(profile);
+    const ownPerson = people.find((person) => person.linked_user_id === state.account?.userId) || {};
     const type = profile?.profile_type || 'couple';
+    const joiningPartner = Boolean(profile && !state.personalProfileComplete);
     return `<form id="profileForm" class="form-shell">
       <section class="onboarding">
-        <p class="eyebrow">${profile ? 'Modifier mon univers' : 'Première connexion'}</p>
-        <h1>${profile ? 'Votre histoire évolue.' : 'Créons votre page Velvet.'}</h1>
-        <p>Cette fiche est enregistrée dans Supabase et visible uniquement par les membres admis à la BETA. Aucun contenu fictif ne sera ajouté.</p>
+        <p class="eyebrow">${joiningPartner ? 'Rattachement au couple' : profile ? 'Modifier notre univers' : 'Première connexion'}</p>
+        <h1>${joiningPartner ? 'Complète ta partie du profil.' : profile ? 'Votre histoire évolue.' : 'Créons votre page Velvet.'}</h1>
+        <p>${joiningPartner ? `Tu as rejoint ${e(profile.display_name)}. Les informations communes pourront être enrichies par vous deux, mais cette fiche personnelle restera uniquement modifiable depuis ton compte.` : 'Cette fiche est enregistrée dans Supabase et visible uniquement par les membres admis à la BETA. Aucun contenu fictif ne sera ajouté.'}</p>
 
         <section class="form-step">
           <h2>Votre identité Velvet</h2>
           <p>Commence par ce que les autres membres doivent comprendre au premier regard.</p>
           <div class="form-grid">
             <label>Type de profil
-              <select name="profile_type" id="profileType">
+              ${profile ? `<input type="hidden" name="profile_type" value="${e(type)}">` : ''}
+              <select ${profile ? 'disabled' : 'name="profile_type"'} id="profileType">
                 <option value="couple"${type === 'couple' ? ' selected' : ''}>Couple</option>
                 <option value="individual"${type === 'individual' ? ' selected' : ''}>Profil individuel</option>
               </select>
@@ -218,11 +227,10 @@
           </div>
         </section>
         <section class="form-step">
-          <h2>Les personnes derrière le profil</h2>
-          <p>Chaque personne possède sa fiche détaillée et garde le contrôle des informations privées.</p>
+          <h2>${joiningPartner ? 'Ta fiche personnelle' : 'Ta partie personnelle'}</h2>
+          <p>${type === 'couple' ? 'Tu complètes uniquement ta propre fiche. Ton ou ta partenaire remplira la sienne depuis son propre compte.' : 'Cette fiche personnelle reste rattachée uniquement à ton compte.'}</p>
           <div id="peopleForms">
-            ${personForm(0, people[0], type === 'couple')}
-            ${type === 'couple' ? personForm(1, people[1], true) : ''}
+            ${personForm(0, ownPerson, type === 'couple')}
           </div>
         </section>
         <div class="actions">
@@ -234,9 +242,9 @@
     </form>`;
   }
 
-  function renderOnboarding() {
+  function renderOnboarding(profile = null) {
     state.editing = true;
-    content.innerHTML = `<div class="page">${profileForm(null)}</div>`;
+    content.innerHTML = `<div class="page">${profileForm(profile)}</div>`;
     bindProfileForm();
     content.focus();
   }
@@ -247,9 +255,8 @@
     if (!form || !type) return;
     type.addEventListener('change', () => {
       const people = profilePeople(state.profile);
-      document.querySelector('#peopleForms').innerHTML = type.value === 'couple'
-        ? personForm(0, people[0], true) + personForm(1, people[1], true)
-        : personForm(0, people[0], false);
+      const ownPerson = people.find((person) => person.linked_user_id === state.account?.userId) || {};
+      document.querySelector('#peopleForms').innerHTML = personForm(0, ownPerson, type.value === 'couple');
     });
     form.addEventListener('submit', saveProfile);
   }
@@ -261,25 +268,24 @@
     const status = document.querySelector('#profileFormStatus');
     const data = new FormData(form);
     const profileType = data.get('profile_type');
-    const peopleCount = profileType === 'couple' ? 2 : 1;
-    const people = Array.from({ length: peopleCount }, (_, index) => ({
-      first_name: data.get(`p${index}_first_name`),
-      birth_year: data.get(`p${index}_birth_year`),
-      height_cm: data.get(`p${index}_height_cm`),
-      weight_kg: data.get(`p${index}_weight_kg`),
-      morphology: data.get(`p${index}_morphology`),
-      hair_color: data.get(`p${index}_hair_color`),
-      eye_color: data.get(`p${index}_eye_color`),
-      children_status: data.get(`p${index}_children_status`),
-      profession: data.get(`p${index}_profession`),
-      profession_private: data.has(`p${index}_profession_private`),
-      orientation: data.get(`p${index}_orientation`),
-      frequency: data.get(`p${index}_frequency`),
-      biography: data.get(`p${index}_biography`),
-      attracted_to: splitList(data.get(`p${index}_attracted_to`)),
-      desired_practices: splitList(data.get(`p${index}_desired_practices`)),
-      partner_permissions: splitList(data.get(`p${index}_partner_permissions`))
-    }));
+    const person = {
+      first_name: data.get('p0_first_name'),
+      birth_year: data.get('p0_birth_year'),
+      height_cm: data.get('p0_height_cm'),
+      weight_kg: data.get('p0_weight_kg'),
+      morphology: data.get('p0_morphology'),
+      hair_color: data.get('p0_hair_color'),
+      eye_color: data.get('p0_eye_color'),
+      children_status: data.get('p0_children_status'),
+      profession: data.get('p0_profession'),
+      profession_private: data.has('p0_profession_private'),
+      orientation: data.get('p0_orientation'),
+      frequency: data.get('p0_frequency'),
+      biography: data.get('p0_biography'),
+      attracted_to: splitList(data.get('p0_attracted_to')),
+      desired_practices: splitList(data.get('p0_desired_practices')),
+      partner_permissions: splitList(data.get('p0_partner_permissions'))
+    };
     const payload = {
       profile_type: profileType,
       display_name: data.get('display_name'),
@@ -294,7 +300,7 @@
       practices: splitList(data.get('practices')),
       values_list: splitList(data.get('values_list')),
       favorite_places: splitList(data.get('favorite_places')),
-      people
+      person
     };
     button.disabled = true;
     status.hidden = false;
@@ -479,9 +485,18 @@
         <article class="card" style="margin-top:14px"><p class="eyebrow">Localisation</p><h3>${e(profile.location_zone || profile.city || 'Privée')}</h3><p>Seule la zone choisie par le membre est affichée.</p></article>
         <article class="card" style="margin-top:14px"><p class="eyebrow">Lieux préférés</p>${chips(profile.favorite_places, 'Aucun lieu renseigné')}</article>
         <article class="card" style="margin-top:14px"><p class="eyebrow">Disponibilités</p><p>${e(profile.availability_text || 'Non renseignées')}</p></article>
+        ${own ? partnerInviteBox(profile, people) : ''}
         ${own ? organizerBox() : ''}
       </aside>
     </section>`;
+  }
+
+  function partnerInviteBox(profile, people) {
+    if (profile.profile_type !== 'couple' || state.membership?.member_slot !== 'partner_a') return '';
+    if (people.some((person) => person.member_slot === 'partner_b' && person.linked_user_id)) {
+      return `<article class="card" style="margin-top:14px"><p class="eyebrow">Profil partagé</p><h3>Partenaire rattaché(e)</h3><p>Chaque personne contrôle désormais sa propre fiche. Les informations du couple sont communes.</p></article>`;
+    }
+    return `<article class="card" style="margin-top:14px"><p class="eyebrow">Profil partagé</p><h3>Inviter mon/ma partenaire</h3><p>L’invitation rattache son compte à cette fiche couple. Cette personne remplira elle-même sa partie personnelle.</p><button class="secondary" data-couple-invite>Préparer l’invitation</button></article>`;
   }
 
   function organizerBox() {
@@ -665,6 +680,35 @@
     });
   }
 
+  function prepareCoupleInvitation() {
+    content.innerHTML = `<div class="page">
+      ${pageHead('Fiche couple partagée', 'Inviter mon/ma partenaire', 'Le code sera lié à son adresse e-mail. Après inscription et validation des consentements, son compte rejoindra automatiquement votre fiche couple.', '<button class="secondary" data-route="me">Retour au profil</button>')}
+      <form id="coupleInviteForm" class="card">
+        <h2>Adresse du partenaire</h2>
+        <p>Cette opération prépare une invitation valable sept jours. Elle ne sera pas envoyée automatiquement pendant notre phase de validation.</p>
+        <label>Adresse e-mail<input type="email" name="email" autocomplete="email" required></label>
+        <button class="primary" type="submit" style="margin-top:14px">Créer le code partenaire</button>
+      </form>
+    </div>`;
+    document.querySelector('#coupleInviteForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const button = event.currentTarget.querySelector('button');
+      const email = new FormData(event.currentTarget).get('email');
+      button.disabled = true;
+      try {
+        const result = await api('/api/members/couple-invite', { method: 'POST', body: JSON.stringify({ email }) });
+        const invitation = result.invitation;
+        content.innerHTML = `<div class="page">
+          ${pageHead('Invitation partenaire', 'Code préparé', 'Le code n’a pas été envoyé automatiquement. Il doit être transmis uniquement à la personne dont l’adresse a été renseignée.')}
+          <section class="card"><p class="eyebrow">Code à usage unique</p><h2 style="letter-spacing:.12em">${e(invitation?.invite_code || '')}</h2><p>Inscription : ${e(result.registrationUrl)}</p><button class="primary" data-route="me">Retour au profil</button></section>
+        </div>`;
+      } catch (error) {
+        toast(error.message, true);
+        button.disabled = false;
+      }
+    });
+  }
+
   document.addEventListener('click', (event) => {
     const routeButton = event.target.closest('[data-route]');
     if (routeButton) {
@@ -702,6 +746,10 @@
     }
     if (event.target.closest('[data-organizer-request]')) {
       requestOrganizer();
+      return;
+    }
+    if (event.target.closest('[data-couple-invite]')) {
+      prepareCoupleInvitation();
       return;
     }
     const conversationButton = event.target.closest('[data-open-conversation]');
