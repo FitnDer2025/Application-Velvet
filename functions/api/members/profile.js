@@ -6,6 +6,7 @@ import {
   restJson,
   withSession
 } from './_shared.js';
+import { enrichProfileMedia } from './media.js';
 
 const PROFILE_SELECT = [
   'id',
@@ -19,6 +20,7 @@ const PROFILE_SELECT = [
   'practices',
   'values_list',
   'visibility',
+  'admission_status',
   'relationship_since',
   'journey',
   'favorite_places',
@@ -26,7 +28,8 @@ const PROFILE_SELECT = [
   'created_at',
   'updated_at',
   'individual_profiles(*)',
-  'albums(id,name,confidentiality,expires_at,created_at)',
+  'media_assets(id,individual_profile_id,owner_user_id,media_role,is_primary,storage_path,moderation_status,created_at)',
+  'albums(id,name,confidentiality,expires_at,created_at,media_assets(id,owner_user_id,storage_path,moderation_status,created_at),album_access_grants(grantee_user_id,grantee_profile_id,granted_at,expires_at,revoked_at))',
   'profile_members!inner(user_id,member_slot,status)'
 ].join(',');
 
@@ -120,7 +123,7 @@ export async function onRequestGet({ request, env }) {
   try {
     const access = await memberSession(request, env);
     if (access.response) return access.response;
-    const profile = await myProfile(env, access.session);
+    const profile = await enrichProfileMedia(env, access.session, await myProfile(env, access.session));
     const membership = profile?.profile_members?.[0] || null;
     const personalProfileComplete = Boolean(
       profile?.individual_profiles?.some((person) => person.linked_user_id === access.account.userId)
@@ -156,7 +159,7 @@ export async function onRequestPost({ request, env }) {
     );
     return withSession({
       ok: true,
-      profile: await myProfile(env, access.session)
+      profile: await enrichProfileMedia(env, access.session, await myProfile(env, access.session))
     }, access.session);
   } catch (error) {
     return json({ error: error.message || 'profile_write_failed' }, 400);
