@@ -29,10 +29,14 @@ export async function onRequestPost({ request, env }) {
         })
       }
     );
+    const registrationUrl = new URL('/', request.url);
+    registrationUrl.searchParams.set('invite', result?.[0]?.invite_code || '');
+    registrationUrl.searchParams.set('email', email);
     return withSession({
       ok: true,
       invitation: result?.[0] || null,
-      registrationUrl: new URL('/', request.url).toString()
+      invitedEmail: email,
+      registrationUrl: registrationUrl.toString()
     }, access.session, 201);
   } catch (error) {
     return json({ error: error.message || 'couple_invitation_failed' }, 400);
