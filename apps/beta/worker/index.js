@@ -20,6 +20,7 @@ import {
 import { onRequestPost as albumsPost } from '../../../functions/api/members/albums.js';
 import { onRequestPost as coupleInvitePost } from '../../../functions/api/members/couple-invite.js';
 import { onRequestPost as adminInvitePost } from '../../../functions/api/admin/invites.js';
+import { onRequestGet as communeReferenceGet } from '../../../functions/api/reference/communes.js';
 
 const API_ROUTES = new Map([
   ['POST /api/auth/signup', signup],
@@ -36,7 +37,8 @@ const API_ROUTES = new Map([
   ['POST /api/members/messages', messagesPost],
   ['POST /api/members/albums', albumsPost],
   ['POST /api/members/couple-invite', coupleInvitePost],
-  ['POST /api/admin/invites', adminInvitePost]
+  ['POST /api/admin/invites', adminInvitePost],
+  ['GET /api/reference/communes', communeReferenceGet]
 ]);
 
 const PROTECTED_PREFIXES = ['/membres', '/pro', '/control'];
