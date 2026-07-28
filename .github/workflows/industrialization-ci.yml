@@ -4,14 +4,20 @@ on:
   push:
     paths:
       - "apps/api/**"
+      - "apps/beta/**"
       - "packages/api-client/**"
+      - "docs/beta/**"
       - "infra/**"
+      - "scripts/check-supabase-migrations.mjs"
       - "package.json"
   pull_request:
     paths:
       - "apps/api/**"
+      - "apps/beta/**"
       - "packages/api-client/**"
+      - "docs/beta/**"
       - "infra/**"
+      - "scripts/check-supabase-migrations.mjs"
       - "package.json"
 
 permissions:
@@ -26,7 +32,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24.18.0"
-          cache: npm
       - run: npm install --ignore-scripts
       - run: npm run check
       - run: npm test
+      - run: npm run build:beta
