@@ -6,6 +6,7 @@ import {
   withSession
 } from './_shared.js';
 import {
+  analyzePrivateAlbumPhoto,
   analyzePublicAlbumPhoto,
   signDecision
 } from './photos.js';
@@ -86,9 +87,10 @@ export async function onRequestPost({ request, env }) {
     );
     const photo = created?.[0];
 
-    if (album.confidentiality === 'public') {
-      try {
-        const analyzed = await analyzePublicAlbumPhoto(env, bytes);
+    try {
+        const analyzed = album.confidentiality === 'public'
+          ? await analyzePublicAlbumPhoto(env, bytes)
+          : await analyzePrivateAlbumPhoto(env, bytes);
         const signedAt = Math.floor(Date.now() / 1000);
         const signature = await signDecision(
           String(env.PHOTO_MODERATION_HMAC_KEY || ''),
@@ -111,9 +113,8 @@ export async function onRequestPost({ request, env }) {
             })
           }
         );
-      } catch {
-        // Le média reste privé et en attente si l'analyse n'aboutit pas.
-      }
+    } catch {
+      // Le média reste privé et en attente si l'analyse n'aboutit pas.
     }
 
     return withSession({ ok: true, photo }, access.session, 201);
