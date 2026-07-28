@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises';
 const core = await readFile('infra/supabase/migrations/0001_velvet_beta_core.sql', 'utf8');
 const rls = await readFile('infra/supabase/migrations/0002_velvet_beta_rls.sql', 'utf8');
 const storage = await readFile('infra/supabase/migrations/0003_velvet_beta_storage.sql', 'utf8');
+const inviteFix = await readFile('infra/supabase/migrations/0004_fix_invite_crypto_schema.sql', 'utf8');
+const grants = await readFile('infra/supabase/migrations/0005_authenticated_api_grants.sql', 'utf8');
 
 const tables = [...core.matchAll(/create table public\.([a-z_]+)/gi)].map((match) => match[1]);
 const missingRls = tables.filter((table) => !rls.includes(`alter table public.${table} enable row level security;`));
@@ -19,7 +21,12 @@ const requirements = [
   [rls.includes('is_conversation_member'), 'Les conversations doivent être isolées'],
   [rls.includes('album_access_grants'), 'Les accès aux albums doivent être contrôlés'],
   [storage.includes("'velvet-media'") && storage.includes('public=false'), 'Le bucket média doit rester privé'],
-  [!`${core}${rls}${storage}`.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
+  [inviteFix.includes('extensions.crypt'), 'Le déclencheur doit utiliser le schéma Supabase des extensions'],
+  [grants.includes('revoke all on all tables in schema public from anon'), 'Le rôle anonyme ne doit lire aucune table métier'],
+  [grants.includes('grant select on public.accounts to authenticated'), 'Le compte authentifié doit pouvoir lire sa fiche sous RLS'],
+  [grants.includes('grant select, insert on public.consent_records to authenticated'), 'Les consentements doivent être enregistrables après connexion'],
+  [grants.includes('revoke all on public.beta_invites from anon, authenticated'), 'La liste des invitations doit rester côté serveur'],
+  [!`${core}${rls}${storage}${inviteFix}${grants}`.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 
 for (const [valid, message] of requirements) {
@@ -27,4 +34,3 @@ for (const [valid, message] of requirements) {
 }
 
 console.log(`Supabase security checks passed: ${tables.length} tables protégées par RLS`);
-
