@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Velvet — V4 Profil central</title>
+  <title>Velvet — V5 Profils & Établissements</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#09090b}
     iframe{border:0;width:100%;height:100%;display:block}
@@ -13,8 +13,15 @@
 <iframe id="app" src="./velvet-v1-locked-dense-demo-v3.html" title="Velvet V1"></iframe>
 <script>
 const frame=document.getElementById('app');
-frame.addEventListener('load',()=>{
-  const w=frame.contentWindow,d=w.document,oldGo=w.go;
+function installVelvetProfileV4(){
+  if(frame.__profileV4Installed)return;
+  frame.__profileV4Installed=true;
+  const w=frame.contentWindow,d=w.document;
+  const bridge=typeof w.eval==='function'
+    ?w.eval('({I,P,E,S,content,go,save,toast,menu})')
+    :w;
+  Object.assign(w,bridge);
+  const oldGo=bridge.go.bind(w);
   const style=d.createElement('style');
   style.textContent=`
     :root{--cream:#f1e8dc;--ink:#09090b;--wine:#7c2749;--wine2:#4e182f;--gold2:#d7b77a}
@@ -104,6 +111,42 @@ frame.addEventListener('load',()=>{
     .v4-create .wide,.v4-edit .wide{grid-column:1/-1}
     .v4-edit{display:grid;grid-template-columns:1fr 1fr;gap:10px}.v4-edit textarea{min-height:120px}
     .v4-note{padding:14px;border-radius:16px;border:1px solid #d7b77a35;background:#d7b77a0d;color:#d9d2c8;line-height:1.55;margin-top:14px}
+    .v5{max-width:1280px;margin:auto}.v5 button{font:inherit}
+    .v5-hero{min-height:500px;border-radius:30px;overflow:hidden;position:relative;background:#151518}
+    .v5-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .v5-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#09090bea,transparent 72%),linear-gradient(0deg,#09090bf2,transparent 60%)}
+    .v5-hero-copy{position:absolute;z-index:2;left:38px;right:38px;bottom:34px;max-width:690px}
+    .v5-hero-copy h1{font-family:Georgia;font-size:clamp(46px,6vw,76px);margin:9px 0 12px;line-height:1}
+    .v5-badges,.v5-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .v5-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff26;background:#09090b9e;backdrop-filter:blur(12px);border-radius:999px;padding:8px 11px;font-size:11px}
+    .v5-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:18px}
+    .v5-place{border:1px solid var(--line);border-radius:25px;background:#ffffff06;overflow:hidden;cursor:pointer;transition:.22s}
+    .v5-place:hover{transform:translateY(-4px);border-color:#d7b77a55}
+    .v5-place-photo{height:255px;position:relative}.v5-place-photo img{width:100%;height:100%;object-fit:cover}
+    .v5-place-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 48%,#09090be8)}
+    .v5-place-type{position:absolute;z-index:2;left:15px;bottom:13px;color:var(--gold);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+    .v5-place-body{padding:18px}.v5-place-body h2{font-family:Georgia;font-size:28px;margin:0 0 7px}
+    .v5-place-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:15px 0}
+    .v5-place-meta div{padding:10px;border-radius:13px;background:#ffffff07}.v5-place-meta small{display:block;color:var(--muted);margin-bottom:4px}
+    .v5-layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.7fr);gap:18px;margin-top:18px}
+    .v5-section,.v5-side{border:1px solid var(--line);border-radius:23px;background:linear-gradient(145deg,#ffffff0a,#ffffff04);padding:22px;margin-bottom:15px}
+    .v5-section h2,.v5-side h3{font-family:Georgia;margin:5px 0 15px}.v5-section h2{font-size:31px}
+    .v5-gallery{display:grid;grid-template-columns:2fr 1fr 1fr;grid-auto-rows:180px;gap:8px}
+    .v5-gallery img{width:100%;height:100%;object-fit:cover;border-radius:15px}.v5-gallery img:first-child{grid-row:span 2}
+    .v5-agenda{display:grid;gap:10px}.v5-event{display:grid;grid-template-columns:76px 1fr auto;gap:14px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:17px;background:#ffffff05}
+    .v5-date{width:76px;height:76px;border-radius:16px;display:grid;place-items:center;text-align:center;background:#7c274928;color:var(--gold);font-weight:bold}
+    .v5-date b{display:block;font-size:27px;line-height:1}.v5-event h3{margin:0 0 5px}.v5-event p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+    .v5-capacity{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:12px}.v5-capacity i{height:5px;flex:1;max-width:120px;border-radius:99px;background:#ffffff14;overflow:hidden}.v5-capacity i:after{content:"";display:block;width:var(--fill);height:100%;background:linear-gradient(90deg,var(--gold),#7c2749)}
+    .v5-hours{display:grid;gap:0}.v5-hours div{display:flex;justify-content:space-between;gap:15px;padding:11px 0;border-bottom:1px solid #ffffff0e}.v5-hours span{color:var(--muted)}
+    .v5-organizer-card{display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:center}.v5-organizer-card img{width:62px;height:62px;border-radius:18px;object-fit:cover}
+    .v5-map{height:240px;border-radius:18px;display:grid;place-items:center;background:radial-gradient(circle at 52% 50%,#d7b77a55 0 6px,transparent 7px),linear-gradient(35deg,#242832,#11151a);color:var(--gold)}
+    .v5-dashboard-head{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:18px}.v5-dashboard-head h1{font-family:Georgia;font-size:52px;margin:5px 0}
+    .v5-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}.v5-kpi{padding:17px;border:1px solid var(--line);border-radius:18px;background:#ffffff06}.v5-kpi b{display:block;color:var(--gold);font-size:29px}.v5-kpi span{color:var(--muted);font-size:12px}
+    .v5-admin-strip{display:flex;gap:10px;align-items:center;padding:13px 16px;border:1px solid #78d8aa44;border-radius:16px;background:#78d8aa0c;margin-bottom:17px;color:#a5e7c5}
+    .v5-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.v5-form label{display:grid;gap:6px;color:var(--muted);font-size:12px}.v5-form .wide{grid-column:1/-1}
+    .v5-form input,.v5-form select,.v5-form textarea{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:13px;background:#17171b;color:#fff;padding:11px}.v5-form textarea{min-height:90px}
+    .v5-public-organizer{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:center}.v5-public-organizer img{width:220px;height:260px;object-fit:cover;border-radius:25px}
+    .v5-gate{max-width:650px;margin:70px auto;text-align:center;border:1px solid var(--line);border-radius:28px;padding:36px;background:radial-gradient(circle at 50% 0,#7c27492b,transparent 50%),#111114}
     @media(max-width:1000px){.v4-snapshot{grid-template-columns:repeat(3,1fr)}.v4-layout{grid-template-columns:1fr}.v4-tabs{grid-template-columns:repeat(2,1fr)}.v4-albums{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:760px){
       .v4-hero{min-height:650px;border-radius:0;margin:-14px -14px 0}.v4-hero:after{background:linear-gradient(0deg,#050506fa 0%,#07070a91 62%,transparent)}
@@ -114,6 +157,11 @@ frame.addEventListener('load',()=>{
       .v4-person-hero{grid-template-columns:1fr}.v4-person-photo{min-height:520px}.v4-person-story{padding:21px}.v4-person-story h1{font-size:43px}
       .v4-facts{grid-template-columns:repeat(2,1fr)}.v4-albums{grid-template-columns:1fr}.v4-albums-intro{display:block}.v4-albums-intro h1{font-size:43px}
       .v4-create,.v4-edit{grid-template-columns:1fr}.v4-create .wide,.v4-edit .wide{grid-column:auto}
+      .v5-grid,.v5-layout,.v5-public-organizer{grid-template-columns:1fr}.v5-hero{min-height:560px;border-radius:0;margin:-14px -14px 0}.v5-hero-copy{left:19px;right:19px;bottom:22px}.v5-hero-copy h1{font-size:47px}
+      .v5-gallery{grid-template-columns:1fr 1fr;grid-auto-rows:150px}.v5-gallery img:first-child{grid-column:1/-1;grid-row:auto}
+      .v5-event{grid-template-columns:62px 1fr}.v5-date{width:62px;height:62px}.v5-event .v5-actions{grid-column:1/-1}
+      .v5-dashboard-head{display:block}.v5-dashboard-head h1{font-size:42px}.v5-kpis{grid-template-columns:repeat(2,1fr)}.v5-form{grid-template-columns:1fr}.v5-form .wide{grid-column:auto}
+      .v5-public-organizer img{width:100%;height:340px}
     }
   `;
   d.head.appendChild(style);
@@ -132,6 +180,13 @@ frame.addEventListener('load',()=>{
   w.S.profileV4=w.S.profileV4||{};
   w.S.profileV4Albums=w.S.profileV4Albums||[];
   w.S.profileV4Requests=w.S.profileV4Requests||{};
+  w.S.v5VenueRegistrations=w.S.v5VenueRegistrations||{};
+  w.S.v5OrganizerEvents=w.S.v5OrganizerEvents||[];
+  w.S.organizerAccess=w.S.organizerAccess||{status:'approved',profileId:'self',accountType:'Couple',grantedBy:'Modération Velvet',grantedAt:'27 juillet 2026'};
+  w.menu=w.menu||[];
+  if(w.S.organizerAccess.status==='approved'&&!w.menu.some(item=>item[0]==='organizer')){
+    w.menu.splice(w.menu.length-1,0,['organizer','Organiser']);
+  }
   w.save();
   let activeId='self',activeTab='couple',photoIndex=0,personPhotoIndex=0,editing=false;
 
@@ -143,6 +198,63 @@ frame.addEventListener('load',()=>{
     orient:'Elle bi-curieuse · Lui hétéro',smoke:'Non-fumeurs',morph:'Féminine / Sportif',height:'168 / 181 cm',
     search:'Couples et femmes',tags:['Rencontres suivies','Spa','Soirées privées'],img:w.I.c1
   };
+
+  const VENUES_V5=[
+    {
+      id:'opulsions',name:'O’Pulsions',type:'Club privé',city:'Lille',distance:'18 km',rating:'4,8',reviews:128,
+      hero:w.I.club,tagline:'Une maison de nuit élégante, libre et profondément humaine.',
+      description:'O’Pulsions accueille les couples et profils sélectionnés dans un univers chaleureux où la qualité de l’accueil, la discrétion et le consentement passent avant tout. Plusieurs ambiances permettent de dîner, danser, discuter ou prolonger la soirée à son rythme.',
+      address:'Métropole lilloise · Adresse exacte après réservation',phone:'03 20 •• •• ••',
+      hours:[['Vendredi','22h00 — 04h00'],['Samedi','21h30 — 05h00'],['Dimanche','Événements privés']],
+      prices:[['Couple','45 € avec 2 consommations'],['Femme seule','Invitation selon soirée'],['Homme seul','70 € · soirées sélectionnées']],
+      equipment:['Bar premium','Dancefloor','Vestiaires sécurisés','Espace lounge','Terrasse privée','Parking discret'],
+      gallery:[w.I.club,w.I.party,'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=1000&q=82','https://images.unsplash.com/photo-1496024840928-4c417adf211d?auto=format&fit=crop&w=1000&q=82'],
+      organizer:{profileId:'af',name:'Emma & Nicolas',verified:true,img:w.I.c1,bio:'Couple membre · Organisateurs privés validés par Velvet'},
+      events:[
+        {id:'op1',day:'31',month:'JUIL',name:'Nuit Velours',date:'Vendredi 31 juillet · 22h',audience:'Couples et femmes',booked:43,total:60,participants:['af','cl','nt']},
+        {id:'op2',day:'08',month:'AOÛT',name:'Rouge Intense',date:'Samedi 8 août · 21h30',audience:'Couples · Dress code rouge',booked:51,total:70,participants:['em','jm','sa']},
+        {id:'op3',day:'15',month:'AOÛT',name:'Premiers frissons',date:'Samedi 15 août · 21h',audience:'Nouveaux membres bienvenus',booked:29,total:50,participants:['af','em','cl','jm']}
+      ]
+    },
+    {
+      id:'orelax',name:'O’Relax',type:'Spa privé',city:'Hauts-de-France',distance:'26 km',rating:'4,7',reviews:94,
+      hero:w.I.spa,tagline:'Prendre le temps de se découvrir, loin du bruit.',
+      description:'Un spa intimiste imaginé pour les rencontres douces : bassin chauffé, sauna, hammam et salons calmes. La capacité volontairement limitée préserve le confort et la qualité des échanges.',
+      address:'Hauts-de-France · Localisation transmise aux inscrits',phone:'03 21 •• •• ••',
+      hours:[['Mercredi','19h00 — 01h00'],['Vendredi','20h00 — 02h00'],['Samedi','18h00 — 02h00']],
+      prices:[['Couple','55 €'],['Femme seule','Entrée offerte sur sélection'],['Privatisation','Sur devis']],
+      equipment:['Bassin chauffé','Sauna','Hammam','Espace massage','Douches privées','Parking'],
+      gallery:[w.I.spa,'https://images.unsplash.com/photo-1531853121101-cb94c8ed218d?auto=format&fit=crop&w=1000&q=82','https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1000&q=82',w.I.room],
+      organizer:{profileId:'cl',name:'Chloé',verified:true,img:w.I.w1,bio:'Membre individuelle · Organisatrice privée validée par Velvet'},
+      events:[
+        {id:'or1',day:'08',month:'AOÛT',name:'Évasion Spa',date:'Samedi 8 août · 20h',audience:'Couples et femmes',booked:22,total:28,participants:['em','jm','sa']},
+        {id:'or2',day:'22',month:'AOÛT',name:'Bulles & confidences',date:'Samedi 22 août · 19h',audience:'Couples',booked:16,total:24,participants:['af','nt']}
+      ]
+    },
+    {
+      id:'suite-velours',name:'Suite Velours',type:'Love room',city:'Arras',distance:'31 km',rating:'4,9',reviews:76,
+      hero:w.I.room,tagline:'Une parenthèse confidentielle pensée pour deux… ou davantage.',
+      description:'Une adresse élégante et totalement privatisable avec spa, ambiance lumineuse sur mesure et arrivée autonome. Les événements accueillis restent limités à de petits groupes invités.',
+      address:'Arras centre · Adresse après confirmation',phone:'Réservation exclusivement via Velvet',
+      hours:[['Arrivée journée','14h00'],['Arrivée nuit','18h00'],['Départ','11h00']],
+      prices:[['Journée','149 €'],['Nuit','249 €'],['Événement privé','À partir de 390 €']],
+      equipment:['Spa privatif','Lit king size','Bar discret','Parking privé','Arrivée autonome','Sonorisation'],
+      gallery:[w.I.room,'https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1000&q=82','https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=1000&q=82',w.I.spa],
+      organizer:{profileId:'em',name:'Léa & Hugo',verified:true,img:w.I.c2,bio:'Couple membre · Organisateurs privés validés par Velvet'},
+      events:[
+        {id:'sv1',day:'15',month:'AOÛT',name:'Dîner confidentiel',date:'Samedi 15 août · 19h30',audience:'Sur invitation',booked:8,total:10,participants:['af','em','cl','jm']}
+      ]
+    }
+  ];
+
+  const SELF_ORGANIZER={
+    profileId:'self',name:SELF.name,verified:true,img:SELF.img,
+    bio:'Couple membre Velvet autorisé par la modération à proposer des soirées privées. Il ne s’agit ni d’un établissement ni d’un compte professionnel.'
+  };
+  const SELF_PRIVATE_EVENTS=[
+    {id:'priv1',day:'05',month:'SEPT',name:'Dîner, musique & confidences',date:'Samedi 5 septembre · 19h30',place:'À notre domicile · Métropole lilloise',audience:'5 couples · Sur sélection',booked:8,total:10,participants:['af','em','nt']},
+    {id:'priv2',day:'26',month:'SEPT',name:'Maison secrète',date:'Samedi 26 septembre · 20h',place:'Villa louée · Adresse privée',audience:'Couples et femmes invitées',booked:15,total:20,participants:['af','cl','jm','sa']}
+  ];
 
   const PERSON_BANK={
     Camille:{age:'34 ans',height:'168 cm',weight:'61 kg',hair:'Bruns',eyes:'Bleus',morph:'Féminine et naturelle',children:'Oui',job:'Information privée',attracted:'Femmes et hommes',bio:'Spontanée, sensible et très attentive au feeling. Camille aime la séduction progressive, les personnalités féminines naturelles et les ambiances où personne ne joue un rôle.',likes:['Douceur','Féminité','Humour','Confiance'],withWomen:['Séduction','Massage','Découverte bi','Moments à trois'],withMen:['Échanges complices','Mélangisme','Moments à quatre'],partnerRules:[['Rencontrer une femme seul','À discuter'],['Partager un moment avec une femme','D’accord'],['Échanger avec un autre couple','D’accord'],['Rencontrer sans elle','Non']]},
@@ -357,6 +469,100 @@ frame.addEventListener('load',()=>{
       <div class="v4-note">Le nom de l’album reste visible, mais son contenu ne laisse absolument rien paraître. L’accès est personnel, traçable, révocable et peut expirer.</div>`;
   }
 
+  function venueDirectory(){
+    return `<div class="v5">
+      <div class="v5-dashboard-head"><div><div class="v4-kicker">Adresses sélectionnées · Données fictives</div><h1>Établissements</h1><p class="v4-copy">Des lieux vivants avec leur univers, leur agenda, leurs disponibilités et les membres qui prévoient de s’y retrouver.</p></div>
+        ${w.S.organizerAccess.status==='approved'?'<button class="v4-primary" onclick="parent.v5Organizer()">Mes soirées privées</button>':''}
+      </div>
+      <div class="v5-grid">${VENUES_V5.map(venue=>`<article class="v5-place" onclick="parent.v5OpenVenue('${venue.id}')">
+        <div class="v5-place-photo"><img src="${venue.hero}" alt="${esc(venue.name)}"><span class="v5-place-type">${esc(venue.type)} · Établissement vérifié</span></div>
+        <div class="v5-place-body"><div class="v4-kicker">${esc(venue.city)} · ${esc(venue.distance)}</div><h2>${esc(venue.name)}</h2><p class="muted">${esc(venue.tagline)}</p>
+          <div class="v5-place-meta"><div><small>Prochaine soirée</small><strong>${esc(venue.events[0].date)}</strong></div><div><small>Places disponibles</small><strong>${venue.events[0].total-venue.events[0].booked} / ${venue.events[0].total}</strong></div></div>
+          <div class="v5-actions"><span class="v5-badge">★ ${venue.rating} · ${venue.reviews} avis</span><span class="v5-badge">${venue.events.length} événements à venir</span></div>
+        </div>
+      </article>`).join('')}</div>
+    </div>`;
+  }
+
+  function venueAgenda(venue){
+    return `<div class="v5-agenda">${venue.events.map(event=>{
+      const key=`${venue.id}-${event.id}`,registered=!!w.S.v5VenueRegistrations[key],remaining=Math.max(0,event.total-event.booked-(registered?1:0));
+      return `<article class="v5-event"><div class="v5-date"><div><b>${event.day}</b>${event.month}</div></div><div><h3>${esc(event.name)}</h3><p>${esc(event.date)}<br>${esc(event.audience)}</p>
+        <div class="v5-capacity"><span>${remaining} places disponibles</span><i style="--fill:${Math.min(100,Math.round((event.booked+(registered?1:0))/event.total*100))}%"></i><span>${event.booked+(registered?1:0)}/${event.total}</span></div></div>
+        <div class="v5-actions"><button class="v4-secondary" onclick="parent.v5Participants('${venue.id}','${event.id}')">Participants</button><button class="v4-primary" onclick="parent.v5Register('${venue.id}','${event.id}')">${registered?'Inscrit ✓':'S’inscrire'}</button></div></article>`;
+    }).join('')}</div>`;
+  }
+
+  function venueDetail(venue){
+    return `<div class="v5"><button class="v4-secondary v4-back" onclick="parent.v5Venues()">← Tous les établissements</button>
+      <section class="v5-hero"><img src="${venue.hero}" alt="${esc(venue.name)}"><div class="v5-hero-copy"><div class="v4-kicker">${esc(venue.type)} · ${esc(venue.city)} · Vérifié Velvet</div><h1>${esc(venue.name)}</h1><p class="v4-lead">${esc(venue.tagline)}</p>
+        <div class="v5-badges"><span class="v5-badge">★ ${venue.rating} · ${venue.reviews} avis</span><span class="v5-badge">⌖ ${venue.distance}</span><span class="v5-badge">${venue.events.length} événements à venir</span></div>
+        <div class="v5-actions"><button class="v4-primary" onclick="parent.v5Scroll('v5agenda')">Voir l’agenda</button><button class="v4-secondary" onclick="parent.v5Toast('Établissement ajouté aux favoris')">♡ Favori</button><button class="v4-secondary" onclick="parent.v5Toast('Itinéraire sécurisé ouvert')">Itinéraire</button></div>
+      </div></section>
+      <div class="v5-layout"><main>
+        <section class="v5-section"><div class="v4-kicker">Le lieu</div><h2>Une expérience, pas une simple adresse</h2><p class="v4-copy">${esc(venue.description)}</p><div class="v4-pill-grid">${venue.equipment.map(item=>`<span class="v4-pill">${esc(item)}</span>`).join('')}</div></section>
+        <section class="v5-section"><div class="v4-kicker">Galerie publique</div><h2>Découvrir l’ambiance</h2><div class="v5-gallery">${venue.gallery.map(photo=>`<img src="${photo}" alt="Ambiance de ${esc(venue.name)}">`).join('')}</div></section>
+        <section id="v5agenda" class="v5-section"><div class="v4-kicker">Agenda & réservations</div><h2>Les prochaines expériences</h2>${venueAgenda(venue)}</section>
+        <section class="v5-section"><div class="v4-kicker">Avis de la communauté</div><h2>Recommandé par les membres</h2>
+          <div class="v4-reco"><div class="v4-reco-head"><img src="${w.I.c1}" alt=""><div><b>Emma & Nicolas</b><div class="muted">Visite certifiée · ★★★★★</div></div></div><p>« Une équipe attentive, une ambiance élégante et surtout beaucoup de respect. On y revient avec plaisir. »</p></div>
+          <div class="v4-reco"><div class="v4-reco-head"><img src="${w.I.c2}" alt=""><div><b>Léa & Hugo</b><div class="muted">Visite certifiée · ★★★★★</div></div></div><p>« Le lieu est beau, mais c’est surtout la qualité de l’accueil qui fait la différence. »</p></div>
+        </section>
+      </main><aside>
+        <section class="v5-side"><h3>Informations pratiques</h3><div class="v5-hours"><div><span>Adresse</span><strong>${esc(venue.address)}</strong></div><div><span>Contact</span><strong>${esc(venue.phone)}</strong></div><div><span>Dress code</span><strong>Élégant · Soigné</strong></div><div><span>Réservation</span><strong>Recommandée</strong></div></div></section>
+        <section class="v5-side"><h3>Horaires</h3><div class="v5-hours">${venue.hours.map(x=>`<div><span>${esc(x[0])}</span><strong>${esc(x[1])}</strong></div>`).join('')}</div></section>
+        <section class="v5-side"><h3>Tarifs</h3><div class="v5-hours">${venue.prices.map(x=>`<div><span>${esc(x[0])}</span><strong>${esc(x[1])}</strong></div>`).join('')}</div></section>
+        <section class="v5-side"><h3>Des membres organisent ici</h3><div class="v5-organizer-card"><img src="${venue.organizer.img}" alt=""><div><b>${esc(venue.organizer.name)} ${venue.organizer.verified?'✓':''}</b><p class="muted">${esc(venue.organizer.bio)}</p></div></div><button class="v4-secondary" style="margin-top:14px" onclick="parent.v5OrganizerPublic('${venue.id}')">Voir leur page organisateur</button></section>
+        <section class="v5-side"><h3>Localisation protégée</h3><div class="v5-map">⌖ ${esc(venue.city)}</div><p class="muted">L’adresse précise peut être réservée aux membres inscrits à l’événement.</p></section>
+      </aside></div>
+    </div>`;
+  }
+
+  function venueParticipants(venue,event){
+    const people=event.participants.map(id=>w.P.find(p=>p.id===id)).filter(Boolean);
+    return `<div class="v5"><button class="v4-secondary v4-back" onclick="${venue.id==='private-self'?"parent.v5OrganizerPublic('self')":`parent.v5OpenVenue('${venue.id}')`}">← Retour à ${esc(venue.name)}</button>
+      <div class="v4-kicker">${esc(event.date)} · ${esc(venue.name)}</div><h1 class="hero">Participants — ${esc(event.name)}</h1>
+      <p class="v4-copy">${event.booked} inscriptions au total. Seuls les membres ayant accepté d’être visibles apparaissent ici.</p>
+      <div class="v5-grid">${people.map(p=>`<article class="v5-place" onclick="parent.v5OpenMember('${p.id}')"><div class="v5-place-photo"><img src="${p.img}" alt=""><span class="v5-place-type">${esc(p.type)} · ${esc(p.city)}</span></div><div class="v5-place-body"><h2>${esc(p.name)}</h2><p class="muted">${p.compat}% compatible · ${esc(p.search)}</p><div class="v4-pill-grid">${p.tags.map(tag=>`<span class="v4-pill">${esc(tag)}</span>`).join('')}</div></div></article>`).join('')}</div>
+    </div>`;
+  }
+
+  function organizerPublic(context){
+    const isSelf=context==='self',venue=isSelf?null:context,organizer=isSelf?SELF_ORGANIZER:venue.organizer;
+    const agenda={id:isSelf?'private-self':venue.id,events:isSelf?SELF_PRIVATE_EVENTS.concat(w.S.v5OrganizerEvents):venue.events};
+    return `<div class="v5"><button class="v4-secondary v4-back" onclick="${isSelf?'parent.v5Organizer()':`parent.v5OpenVenue('${venue.id}')`}">← ${isSelf?'Retour à mon espace':`Retour à ${esc(venue.name)}`}</button>
+      <section class="v5-section"><div class="v5-public-organizer"><img src="${organizer.img}" alt=""><div><div class="v4-kicker">Profil membre · Organisateur privé validé · Données fictives</div><h1 class="hero">${esc(organizer.name)}</h1><p class="v4-copy">${esc(organizer.bio)} Leur rôle d’organisateur est une extension de leur profil Velvet : il ne crée aucun statut professionnel et ne les transforme pas en établissement.</p>
+        <div class="v5-badges"><span class="v5-badge">Profil vérifié</span><span class="v5-badge">Accès accordé par la modération</span><span class="v5-badge">Charte des soirées privées signée</span><span class="v5-badge">4,9 / 5 · 12 soirées</span></div>
+        <div class="v5-actions"><button class="v4-primary" onclick="parent.v5OpenMember('${organizer.profileId}')">Voir le profil complet</button><button class="v4-secondary" onclick="parent.v5Toast('Conversation privée ouverte')">Contacter</button><button class="v4-secondary" onclick="parent.v5Toast('Organisateur suivi')">Suivre</button></div>
+      </div></div></section>
+      <section class="v5-section"><div class="v4-kicker">Agenda public du membre</div><h2>Ses prochaines soirées privées</h2>${venueAgenda(agenda)}</section>
+      <section class="v5-section"><div class="v4-kicker">Sa manière de recevoir</div><h2>Ce que les invités peuvent attendre</h2><div class="v4-pill-grid">${['Accueil personnel','Petit comité','Sélection assumée','Consentement actif','Adresse protégée','Respect du domicile','Suivi après la soirée'].map(x=>`<span class="v4-pill">${x}</span>`).join('')}</div></section>
+    </div>`;
+  }
+
+  function organizerDashboard(){
+    const access=w.S.organizerAccess;
+    if(access.status!=='approved')return `<div class="v5"><div class="v5-gate"><div class="v4-kicker">Extension réservée aux membres validés</div><h1>Organiser des soirées privées</h1><p class="v4-copy">Cette fonction est rattachée à un profil couple ou individuel. Elle n’accorde aucun statut professionnel. Un administrateur ou un modérateur vérifie le profil, l’identité, les recommandations et l’adhésion à la charte avant de l’activer.</p><button class="v4-primary" onclick="parent.v5RequestOrganizer()">Demander l’accès</button></div></div>`;
+    const events=SELF_PRIVATE_EVENTS.concat(w.S.v5OrganizerEvents);
+    return `<div class="v5"><div class="v5-admin-strip"><b>✓ Extension Organisateur privé activée sur ${esc(SELF.name)}</b><span>Accordée par ${esc(access.grantedBy)} le ${esc(access.grantedAt)} · Aucun statut professionnel</span></div>
+      <div class="v5-dashboard-head"><div><div class="v4-kicker">Extension du profil ${esc(access.accountType||'membre')} · ${esc(SELF.name)}</div><h1>Organiser une soirée privée</h1><p class="v4-copy">Proposez une soirée chez vous ou dans un lieu choisi, maîtrisez le nombre d’invités et protégez l’adresse jusqu’à la validation des participants.</p></div><div class="v5-actions"><button class="v4-secondary" onclick="parent.v5OrganizerPublic('self')">Voir ma page organisateur</button><button class="v4-primary" onclick="parent.v5Scroll('v5create')">Créer une soirée</button></div></div>
+      <div class="v5-kpis"><div class="v5-kpi"><b>${events.length}</b><span>soirées à venir</span></div><div class="v5-kpi"><b>${events.reduce((n,e)=>n+e.booked,0)}</b><span>inscriptions confirmées</span></div><div class="v5-kpi"><b>4,9</b><span>note organisateur</span></div><div class="v5-kpi"><b>92%</b><span>taux de remplissage</span></div></div>
+      <div class="v5-layout"><main>
+        <section class="v5-section"><div class="v4-kicker">Agenda administrable</div><h2>Vos prochaines soirées privées</h2><div class="v5-agenda">${events.map(event=>`<article class="v5-event"><div class="v5-date"><div><b>${esc(event.day)}</b>${esc(event.month)}</div></div><div><h3>${esc(event.name)}</h3><p>${esc(event.date)}<br>${esc(event.place||'Lieu privé à confirmer')} · ${esc(event.audience)}</p><div class="v5-capacity"><span>${Math.max(0,event.total-event.booked)} places disponibles</span><i style="--fill:${Math.round(event.booked/event.total*100)}%"></i><span>${event.booked}/${event.total}</span></div></div><div class="v5-actions"><button class="v4-secondary" onclick="parent.v5Toast('Liste des invités ouverte')">Invités</button><button class="v4-secondary" onclick="parent.v5Toast('Édition de la soirée ouverte')">Modifier</button></div></article>`).join('')}</div></section>
+        <section id="v5create" class="v5-section"><div class="v4-kicker">Nouvelle publication</div><h2>Créer une soirée</h2><div class="v5-form">
+          <label>Nom de la soirée<input id="v5EventName" placeholder="Ex. Dîner & confidences"></label><label>Date et heure<input id="v5EventDate" type="datetime-local"></label>
+          <label>Type de lieu<select id="v5EventVenue"><option>À notre domicile</option><option>Au domicile d’un co-organisateur</option><option>Maison ou villa louée</option><option>Love room privatisée</option><option>Lieu privé à confirmer</option></select></label><label>Nombre total d’invités<input id="v5EventCapacity" type="number" min="4" max="100" value="20"></label>
+          <label>Public attendu<select id="v5EventAudience"><option>Couples et femmes</option><option>Couples uniquement</option><option>Sur invitation</option><option>Tous profils validés</option></select></label><label>Confidentialité<select id="v5EventPrivacy"><option>Visible par tous les membres</option><option>Cercles sélectionnés</option><option>Sur invitation uniquement</option></select></label>
+          <label class="wide">Description<textarea id="v5EventDescription" placeholder="Ambiance, programme, dress code, règles du lieu, participation éventuelle aux frais…"></textarea></label>
+          <div class="wide v5-actions"><button class="v4-secondary" onclick="parent.v5Toast('Brouillon enregistré')">Enregistrer en brouillon</button><button class="v4-primary" onclick="parent.v5CreateEvent()">Publier la soirée</button></div>
+        </div></section>
+      </main><aside>
+        <section class="v5-side"><h3>Votre profil reste central</h3><div class="v5-organizer-card"><img src="${SELF_ORGANIZER.img}" alt=""><div><b>${esc(SELF_ORGANIZER.name)} ✓</b><p class="muted">Profil couple · Organisateur privé autorisé</p></div></div><div class="v5-actions"><button class="v4-secondary" onclick="parent.v5OpenMember('self')">Ouvrir notre profil</button></div></section>
+        <section class="v5-side"><h3>Photos de vos soirées</h3><p class="muted">Les albums de soirées sont distincts de vos albums intimes et respectent le droit à l’image de chaque invité.</p><button class="v4-secondary" onclick="parent.v5Toast('Gestionnaire des photos de soirée ouvert')">Gérer les photos</button></section>
+        <section class="v5-side"><h3>Outils inclus</h3><div class="v5-hours"><div><span>Invitations privées</span><strong>Actives</strong></div><div><span>Liste d’attente</span><strong>Automatique</strong></div><div><span>Validation des invités</span><strong>Manuelle</strong></div><div><span>Adresse confidentielle</span><strong>Protégée</strong></div><div><span>Signalement incident</span><strong>Disponible</strong></div></div></section>
+      </aside></div>
+    </div>`;
+  }
+
   function render(){
     const p=currentProfile(),isOwn=activeId==='self';
     if(isOwn)oldGo('me');else oldGo('member',activeId);
@@ -370,6 +576,8 @@ frame.addEventListener('load',()=>{
   w.go=function(route,param){
     if(route==='me'){activeId='self';activeTab='couple';photoIndex=0;editing=false;render();w.scrollTo(0,0);return}
     if(route==='member'){activeId=param;activeTab=(w.P.find(p=>p.id===param)?.type||'').toLowerCase().includes('couple')?'couple':'person0';photoIndex=0;editing=false;render();w.scrollTo(0,0);return}
+    if(route==='venues'){oldGo('venues');w.content.innerHTML=venueDirectory();w.scrollTo(0,0);return}
+    if(route==='organizer'){oldGo('organizer');w.content.innerHTML=organizerDashboard();w.scrollTo(0,0);return}
     oldGo(route,param);
   };
 
@@ -395,7 +603,52 @@ frame.addEventListener('load',()=>{
     w.S.profileV4Albums.push({name,level,count:0});w.S.v4CreateOpen=false;w.save();render();w.toast('Album privé créé')
   };
   window.v4RequestAlbum=index=>{const key=`${activeId}-${index}`;w.S.profileV4Requests[key]=true;w.save();render();w.toast('Demande d’accès envoyée')};
-});
+  window.v5Venues=()=>w.go('venues');
+  window.v5OpenVenue=id=>{
+    const venue=VENUES_V5.find(item=>item.id===id)||VENUES_V5[0];
+    oldGo('venues');w.content.innerHTML=venueDetail(venue);w.scrollTo(0,0)
+  };
+  window.v5Participants=(venueId,eventId)=>{
+    const venue=venueId==='private-self'
+      ?{id:'private-self',name:'la soirée privée de Camille & Julien',events:SELF_PRIVATE_EVENTS.concat(w.S.v5OrganizerEvents)}
+      :VENUES_V5.find(item=>item.id===venueId)||VENUES_V5[0];
+    const event=venue.events.find(item=>item.id===eventId)||venue.events[0];
+    oldGo('venues');w.content.innerHTML=venueParticipants(venue,event);w.scrollTo(0,0)
+  };
+  window.v5Register=(venueId,eventId)=>{
+    const key=`${venueId}-${eventId}`;
+    w.S.v5VenueRegistrations[key]=!w.S.v5VenueRegistrations[key];w.save();
+    if(venueId==='private-self')window.v5OrganizerPublic('self');else window.v5OpenVenue(venueId);
+    w.toast(w.S.v5VenueRegistrations[key]?'Inscription enregistrée':'Inscription annulée')
+  };
+  window.v5OpenMember=id=>w.go(id==='self'?'me':'member',id==='self'?undefined:id);
+  window.v5Organizer=()=>w.go('organizer');
+  window.v5OrganizerPublic=venueId=>{
+    const context=venueId==='self'?'self':VENUES_V5.find(item=>item.id===venueId)||VENUES_V5[0];
+    oldGo(venueId==='self'?'organizer':'venues');w.content.innerHTML=organizerPublic(context);w.scrollTo(0,0)
+  };
+  window.v5RequestOrganizer=()=>{
+    w.S.organizerAccess={status:'pending',profileId:'self',accountType:'Couple',requestedAt:'Aujourd’hui'};w.save();w.content.innerHTML=organizerDashboard();w.toast('Demande transmise à la modération')
+  };
+  window.v5CreateEvent=()=>{
+    const name=d.getElementById('v5EventName')?.value.trim(),rawDate=d.getElementById('v5EventDate')?.value,capacity=Number(d.getElementById('v5EventCapacity')?.value)||0;
+    if(!name||!rawDate||capacity<2){w.toast('Complétez le nom, la date et la capacité');return}
+    const date=new Date(rawDate),months=['JANV','FÉVR','MARS','AVR','MAI','JUIN','JUIL','AOÛT','SEPT','OCT','NOV','DÉC'];
+    w.S.v5OrganizerEvents.push({
+      id:`custom-${Date.now()}`,day:String(date.getDate()).padStart(2,'0'),month:months[date.getMonth()],name,
+      date:date.toLocaleString('fr-FR',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}),
+      place:d.getElementById('v5EventVenue')?.value||'Lieu privé à confirmer',
+      audience:d.getElementById('v5EventAudience')?.value||'Membres validés',booked:0,total:capacity,participants:[]
+    });
+    w.save();w.content.innerHTML=organizerDashboard();w.scrollTo(0,0);w.toast('Soirée publiée')
+  };
+  window.v5Scroll=id=>d.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});
+  window.v5Toast=text=>w.toast(text);
+}
+frame.addEventListener('load',installVelvetProfileV4);
+if(frame.contentDocument?.readyState==='complete'){
+  queueMicrotask(installVelvetProfileV4);
+}
 </script>
 </body>
 </html>
