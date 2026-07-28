@@ -26,13 +26,14 @@ const PROFILE_SELECT = [
   'created_at',
   'updated_at',
   'individual_profiles(*)',
-  'albums(id,name,confidentiality,expires_at,created_at)'
+  'albums(id,name,confidentiality,expires_at,created_at)',
+  'profile_members!inner(user_id,member_slot,status)'
 ].join(',');
 
 async function myProfile(env, session) {
   const rows = await restJson(
     env,
-    `/rest/v1/member_profiles?select=${encodeURIComponent(PROFILE_SELECT)}&created_by=eq.${encodeURIComponent(session.user.id)}&limit=1`,
+    `/rest/v1/member_profiles?select=${encodeURIComponent(PROFILE_SELECT)}&profile_members.user_id=eq.${encodeURIComponent(session.user.id)}&profile_members.status=in.(active,pending)&limit=1`,
     session
   );
   return rows?.[0] || null;
@@ -74,15 +75,8 @@ function normalizePerson(person = {}) {
 
 function normalizeProfile(body) {
   const profileType = body.profile_type === 'individual' ? 'individual' : 'couple';
-  const expectedPeople = profileType === 'couple' ? 2 : 1;
-  const people = Array.isArray(body.people)
-    ? body.people.slice(0, expectedPeople).map(normalizePerson)
-    : [];
-
-  if (people.length !== expectedPeople) throw new Error('incomplete_people');
-  if (people.some((person) => person.first_name.length < 2)) {
-    throw new Error('first_names_required');
-  }
+  const person = normalizePerson(body.person || body.people?.[0] || {});
+  if (person.first_name.length < 2) throw new Error('first_names_required');
 
   const payload = {
     profile_type: profileType,
@@ -98,7 +92,7 @@ function normalizeProfile(body) {
     practices: cleanList(body.practices),
     values_list: cleanList(body.values_list),
     favorite_places: cleanList(body.favorite_places),
-    people
+    person
   };
 
   if (payload.display_name.length < 2 || payload.description.length < 20) {
@@ -111,8 +105,15 @@ export async function onRequestGet({ request, env }) {
   try {
     const access = await memberSession(request, env);
     if (access.response) return access.response;
+    const profile = await myProfile(env, access.session);
+    const membership = profile?.profile_members?.[0] || null;
+    const personalProfileComplete = Boolean(
+      profile?.individual_profiles?.some((person) => person.linked_user_id === access.account.userId)
+    );
     return withSession({
-      profile: await myProfile(env, access.session),
+      profile,
+      membership,
+      personalProfileComplete,
       account: access.account
     }, access.session);
   } catch (error) {
@@ -146,4 +147,3 @@ export async function onRequestPost({ request, env }) {
     return json({ error: error.message || 'profile_write_failed' }, 400);
   }
 }
-
