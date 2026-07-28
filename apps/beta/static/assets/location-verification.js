@@ -10,6 +10,7 @@
     visibleProfileId: null,
     loadingBadges: null
   };
+  let scanQueued = false;
 
   function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, (character) => ({
@@ -55,7 +56,7 @@
     if (error?.code === 1) return 'L’autorisation de localisation a été refusée dans les réglages du téléphone.';
     if (error?.code === 2) return 'Le téléphone ne parvient pas à déterminer la position.';
     if (error?.code === 3) return 'La localisation a pris trop de temps. Réessaie dans un endroit mieux couvert.';
-    return 'La localisation est momentanément indisponible.';
+    return error?.message || 'La localisation est momentanément indisponible.';
   }
 
   function requestPosition() {
@@ -133,9 +134,9 @@
 
   async function injectSettingsCards(form) {
     if (!form || form.dataset.velvetFoundation === '1') return;
-    form.dataset.velvetFoundation = '1';
     const footer = form.querySelector('.settings-save');
     if (!footer) return;
+    form.dataset.velvetFoundation = '1';
 
     const holder = document.createElement('div');
     holder.className = 'velvet-foundation-holder';
@@ -165,9 +166,9 @@
       });
       toast('Ta zone approximative est active. Les coordonnées exactes n’ont pas été conservées.');
       refreshLocationCard();
-      refreshNearbyVenues();
+      refreshNearbyVenues(true);
     } catch (error) {
-      toast(error instanceof GeolocationPositionError ? geolocationError(error) : error.message, true);
+      toast(error?.code ? geolocationError(error) : (error.message || geolocationError(error)), true);
       button.disabled = false;
       button.textContent = 'Utiliser ma position';
     }
@@ -226,22 +227,24 @@
     </section>`;
   }
 
-  async function refreshNearbyVenues() {
+  async function refreshNearbyVenues(force = false) {
     const page = document.querySelector('#content .page');
     const title = page?.querySelector('.page-head h1')?.textContent?.trim();
     if (!page || !['Établissements', 'Maps'].includes(title)) return;
+    if (!force && page.querySelector('[data-velvet-nearby]')) return;
     page.querySelector('[data-velvet-nearby]')?.remove();
+
     const placeholder = document.createElement('div');
     placeholder.innerHTML = '<section class="card velvet-nearby-card" data-velvet-nearby><p>Recherche des lieux autour de toi…</p></section>';
     const pageHead = page.querySelector('.page-head');
     pageHead?.after(placeholder.firstElementChild);
     try {
-      const payload = cache.location || await loadLocation();
+      const payload = force ? await loadLocation() : (cache.location || await loadLocation());
       const current = page.querySelector('[data-velvet-nearby]');
       const replacement = document.createElement('div');
       replacement.innerHTML = nearbySection(payload);
       current?.replaceWith(replacement.firstElementChild);
-    } catch (error) {
+    } catch {
       page.querySelector('[data-velvet-nearby]')?.remove();
     }
   }
@@ -326,7 +329,16 @@
     decorateVerificationBadges();
   }
 
+  function scheduleScan() {
+    if (scanQueued) return;
+    scanQueued = true;
+    window.requestAnimationFrame(() => {
+      scanQueued = false;
+      scan();
+    });
+  }
+
   injectStyles();
-  new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true });
-  scan();
+  new MutationObserver(scheduleScan).observe(document.documentElement, { childList: true, subtree: true });
+  scheduleScan();
 })();
