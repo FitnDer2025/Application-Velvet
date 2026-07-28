@@ -530,11 +530,14 @@
     return list(values).map((value) => `<input type="hidden" name="${e(name)}" value="${e(value)}">`).join('');
   }
 
-  function discoveryStep(number, kicker, title, text, body) {
-    return `<section class="discovery-step" data-discovery-step="${number}"${number ? ' hidden' : ''}>
+  function discoveryStep(number, kicker, title, text, body, attributes = '') {
+    return `<section class="discovery-step" data-discovery-step="${number}" ${attributes}${number ? ' hidden' : ''}>
+      <div class="velvet-guide">
+        <span class="guide-avatar">V</span>
+        <p><strong>Velvet</strong><span>${e(text)}</span></p>
+      </div>
       <p class="eyebrow">${e(kicker)}</p>
       <h1>${e(title)}</h1>
-      <p class="discovery-lead">${e(text)}</p>
       <div class="discovery-question">${body}</div>
     </section>`;
   }
@@ -565,16 +568,15 @@
       ${hiddenValues('values_list', profile.values_list)}
       ${hiddenValues('favorite_places', profile.favorite_places)}
     ` : '';
-    const start = joiningPartner ? 0 : 0;
     const steps = joiningPartner ? [
-      discoveryStep(start, `Invitation de ${profile.display_name}`, 'À ton tour de te présenter.', 'La partie commune existe déjà. Tu vas maintenant créer la fiche qui t’appartient et que toi seul(e) pourras modifier.', `
-        <input type="hidden" name="profile_type" id="profileType" value="${e(currentType)}">
+      discoveryStep(0, `Invitation de ${profile.display_name}`, 'Commençons par toi.', 'La page commune est déjà créée. Je vais maintenant t’aider à construire ta fiche personnelle, celle que toi seul(e) pourras modifier.', `
+        <input type="hidden" name="profile_type" value="${e(currentType)}">
         ${commonHidden}
-        <label>Comment veux-tu qu’on t’appelle ?
+        <label>Ton prénom ou ton pseudonyme
           <input name="p0_first_name" maxlength="80" value="${e(ownPerson.first_name)}" autocomplete="given-name" required autofocus>
         </label>
       `),
-      discoveryStep(1, 'Ton identité', 'Comment te définis-tu ?', 'Cette information aide Velvet à présenter correctement ta fiche et à appliquer les préférences des autres membres.', `
+      discoveryStep(1, 'Ton identité', 'Comment souhaites-tu être présenté(e) ?', 'Choisis simplement l’identité qui te correspond. Elle permettra aussi à Velvet de respecter les préférences de visibilité de chacun.', `
         <label>Identité de genre
           <select name="p0_gender_identity" required>
             <option value="">Choisir…</option>
@@ -583,45 +585,46 @@
         </label>
       `)
     ] : [
-      discoveryStep(0, 'Bienvenue dans Velvet', 'Tu arrives seul(e) ou à deux ?', 'Il n’y a pas de mauvais choix : la suite s’adaptera automatiquement à ton profil.', `
+      discoveryStep(0, 'Bienvenue dans Velvet', 'Pour qui allons-nous créer ce profil ?', 'Commençons simplement. Dis-moi si cette page doit raconter ton univers personnel ou celui de votre couple.', `
         <div class="discovery-choices">
-          ${discoveryChoice('profile_type', 'individual', 'Je crée un profil individuel', 'Une page centrée sur toi, tes envies et ton univers.', currentType === 'individual')}
-          ${discoveryChoice('profile_type', 'couple', 'Nous créons un profil couple', 'Une page commune et deux fiches personnelles distinctes.', currentType === 'couple')}
+          ${discoveryChoice('profile_type', 'individual', 'Ce profil est pour moi', 'Une page personnelle centrée sur mon univers.', currentType === 'individual')}
+          ${discoveryChoice('profile_type', 'couple', 'Ce profil est pour notre couple', 'Une page commune complétée par nos deux fiches.', currentType === 'couple')}
         </div>
-        <select id="profileType" aria-hidden="true" tabindex="-1"><option value=""></option></select>
       `),
-      discoveryStep(1, 'Votre identité Velvet', 'Comment veux-tu qu’on t’appelle ?', 'Pour un couple, indiquez le nom sous lequel vous souhaitez être connus ensemble.', `
+      discoveryStep(1, 'Votre identité Velvet', 'Quel nom apparaîtra sur votre profil ?', 'Choisis le prénom, le pseudonyme ou le nom de couple avec lequel les autres membres devront vous reconnaître.', `
         <label><span data-name-label>Nom affiché</span>
           <input name="display_name" maxlength="120" value="${e(profile?.display_name)}" autocomplete="nickname" required autofocus>
         </label>
       `),
-      discoveryStep(2, 'Votre région', 'Où peut-on vous situer ?', 'La commune de résidence reste distincte de la zone que vous choisissez de rendre publique.', `
-        <div class="form-grid">
-          ${communeField('city', 'Ville de résidence', profile?.city, 'Référentiel officiel avec code postal.')}
-          ${communeField('location_zone', 'Localisation publique', profile?.location_zone, 'Exemple : Lens et 30 km autour.')}
-          <label data-couple-only>Ensemble depuis — année
-            <input name="relationship_since" type="number" min="1900" max="${new Date().getFullYear()}" value="${e(profile?.relationship_since)}">
-          </label>
-        </div>
+      discoveryStep(2, 'Votre histoire', 'Depuis quelle année partagez-vous votre vie ?', 'Cette date donnera immédiatement un peu de profondeur à votre page de couple.', `
+        <label>Ensemble depuis
+          <input name="relationship_since" type="number" min="1900" max="${new Date().getFullYear()}" value="${e(profile?.relationship_since)}" placeholder="Exemple : 2012">
+        </label>
+      `, 'data-couple-step '),
+      discoveryStep(3, 'Votre localisation privée', 'Dans quelle commune vivez-vous ?', 'Cette commune sert à calculer les distances. Elle n’est pas forcément celle qui sera affichée publiquement.', `
+        ${communeField('city', 'Commune de résidence', profile?.city, 'Saisis une ville ou un code postal, puis choisis la commune proposée.')}
       `),
-      discoveryStep(3, 'Ta fiche personnelle', 'Et toi, comment veux-tu qu’on t’appelle ?', 'Dans un couple, cette partie est la tienne : ton ou ta partenaire remplira sa propre fiche depuis son invitation.', `
-        <div class="form-grid">
-          <label>Prénom ou pseudonyme
-            <input name="p0_first_name" maxlength="80" value="${e(ownPerson.first_name)}" required>
-          </label>
-          <label>Identité de genre
-            <select name="p0_gender_identity" required>
-              <option value="">Choisir…</option>
-              ${REFERENCES.genderIdentities.map((option) => `<option value="${e(option)}"${option === ownPerson.gender_identity ? ' selected' : ''}>${e(option)}</option>`).join('')}
-            </select>
-          </label>
-        </div>
+      discoveryStep(4, 'Votre localisation publique', 'Que souhaites-tu montrer aux autres membres ?', 'Tu peux rester précis ou choisir une zone plus large. C’est cette information, et uniquement celle-ci, qui apparaîtra sur le profil.', `
+        ${communeField('location_zone', 'Zone affichée sur le profil', profile?.location_zone, 'Exemple : Lens · Béthune et alentours · Pas-de-Calais.')}
+      `),
+      discoveryStep(5, 'Ta place dans ce profil', 'Comment veux-tu qu’on t’appelle personnellement ?', 'Si vous êtes en couple, cette fiche sera la tienne. Ta moitié complétera la sienne depuis son propre lien.', `
+        <label>Ton prénom ou ton pseudonyme
+          <input name="p0_first_name" maxlength="80" value="${e(ownPerson.first_name)}" required>
+        </label>
+      `),
+      discoveryStep(6, 'Ton identité', 'Comment souhaites-tu être présenté(e) ?', 'Cette réponse permet à Velvet de personnaliser ta fiche et de respecter les filtres de confidentialité.', `
+        <label>Identité de genre
+          <select name="p0_gender_identity" required>
+            <option value="">Choisir…</option>
+            ${REFERENCES.genderIdentities.map((option) => `<option value="${e(option)}"${option === ownPerson.gender_identity ? ' selected' : ''}>${e(option)}</option>`).join('')}
+          </select>
+        </label>
       `)
     ];
 
     const nextIndex = steps.length;
     steps.push(
-      discoveryStep(nextIndex, 'Quelques repères', 'Comment te décrirais-tu physiquement ?', 'Ces données rendent la fiche utile au premier regard. Tu restes libre de laisser les champs facultatifs vides.', `
+      discoveryStep(nextIndex, 'Quelques repères', 'Comment te décrirais-tu physiquement ?', 'Je te propose quelques repères utiles. Tu peux laisser les informations facultatives vides si tu préfères les garder pour plus tard.', `
         <div class="form-grid">
           <label>Année de naissance<input name="p0_birth_year" type="number" min="1900" max="${new Date().getFullYear() - 18}" value="${e(ownPerson.birth_year)}"></label>
           <label>Taille en cm<input name="p0_height_cm" type="number" min="100" max="250" value="${e(ownPerson.height_cm)}"></label>
@@ -629,10 +632,14 @@
           ${selectField('p0_morphology', 'Morphologie', REFERENCES.morphologies, ownPerson.morphology)}
         </div>
       `),
-      discoveryStep(nextIndex + 1, 'Ton allure', 'Quels détails te ressemblent ?', 'Les fiches Velvet racontent une personne, pas une série de cases.', `
+      discoveryStep(nextIndex + 1, 'Ton allure', 'Quels détails complètent ton portrait ?', 'Deux derniers détails visuels, puis nous passerons à ce qui te caractérise vraiment.', `
         <div class="form-grid">
           ${selectField('p0_hair_color', 'Couleur des cheveux', REFERENCES.hairColors, ownPerson.hair_color)}
           ${selectField('p0_eye_color', 'Couleur des yeux', REFERENCES.eyeColors, ownPerson.eye_color)}
+        </div>
+      `),
+      discoveryStep(nextIndex + 2, 'Ce que tu souhaites partager', 'Parlons de ta vie personnelle.', 'Ces informations sont facultatives. Pour ta profession, tu peux la renseigner tout en choisissant de la garder privée.', `
+        <div class="form-grid">
           <label>Enfants
             <select name="p0_children_status">
               <option value="private"${ownPerson.children_status === 'private' || !ownPerson.children_status ? ' selected' : ''}>Information privée</option>
@@ -644,20 +651,24 @@
           <label class="check"><input name="p0_profession_private" type="checkbox"${ownPerson.profession_private !== false ? ' checked' : ''}><span>Garder ma profession privée</span></label>
         </div>
       `),
-      discoveryStep(nextIndex + 2, 'Tes affinités', 'Qu’est-ce qui t’attire ?', 'Ces réponses peuvent évoluer. Elles servent à améliorer les rencontres, jamais à présumer d’un consentement.', `
+      discoveryStep(nextIndex + 3, 'Tes affinités', 'Comment définis-tu ton orientation ?', 'Il ne s’agit pas de t’enfermer dans une case : choisis simplement la réponse qui te ressemble aujourd’hui.', `
+        ${selectField('p0_orientation', 'Orientation', REFERENCES.orientations, ownPerson.orientation)}
+      `),
+      discoveryStep(nextIndex + 4, 'Tes affinités', 'Vers qui va naturellement ton attirance ?', 'Plusieurs réponses sont possibles. Elles amélioreront les propositions sans jamais présumer de tes envies du moment.', `
+        ${multiField('p0_attracted_to', 'Je peux être attiré(e) par', REFERENCES.attractions, ownPerson.attracted_to)}
+      `),
+      discoveryStep(nextIndex + 5, 'Ton expérience', 'À quel rythme pratiques-tu aujourd’hui ?', 'Une découverte, une pause ou une pratique régulière ne racontent pas la même histoire. Choisis ce qui correspond à ta réalité actuelle.', `
+        ${selectField('p0_frequency', 'Fréquence actuelle', REFERENCES.frequencies, ownPerson.frequency)}
+      `),
+      discoveryStep(nextIndex + 6, 'Tes envies', 'Qu’aimerais-tu vivre pour toi ?', 'Choisis ce qui te ressemble aujourd’hui. Chaque rencontre restera évidemment soumise au dialogue et au consentement du moment.', `
         <div class="form-grid">
-          ${selectField('p0_orientation', 'Orientation', REFERENCES.orientations, ownPerson.orientation)}
-          ${selectField('p0_frequency', 'Fréquence de pratique', REFERENCES.frequencies, ownPerson.frequency)}
-          ${multiField('p0_attracted_to', 'Attiré(e) par', REFERENCES.attractions, ownPerson.attracted_to)}
+          ${multiField('p0_desired_practices', 'Ce que je souhaite vivre', REFERENCES.experiences, ownPerson.desired_practices)}
         </div>
       `),
-      discoveryStep(nextIndex + 3, 'Tes envies', 'Qu’aimerais-tu vivre ?', 'Choisis ce qui te ressemble aujourd’hui. Tout reste soumis au dialogue et au consentement du moment.', `
-        <div class="form-grid">
-          ${multiField('p0_desired_practices', 'Ce que je préfère vivre pour moi-même', REFERENCES.experiences, ownPerson.desired_practices)}
-          <div data-couple-only>${multiField('p0_partner_permissions', 'Ce que je suis à l’aise de laisser vivre à mon/ma partenaire', REFERENCES.experiences, ownPerson.partner_permissions)}</div>
-        </div>
-      `),
-      discoveryStep(nextIndex + 4, 'Derrière le profil', 'Que faut-il comprendre de toi ?', 'Quelques phrases sincères valent mieux qu’une fiche impersonnelle.', `
+      discoveryStep(nextIndex + 7, 'Votre équilibre', 'Qu’es-tu à l’aise de laisser vivre à ta moitié ?', 'Cette réponse exprime ton niveau de confort actuel. Elle ne remplace jamais une discussion ni un consentement explicite entre vous.', `
+        ${multiField('p0_partner_permissions', 'Ce qui me met à l’aise pour mon/ma partenaire', REFERENCES.experiences, ownPerson.partner_permissions)}
+      `, 'data-couple-step '),
+      discoveryStep(nextIndex + 8, 'Derrière le profil', 'Si tu devais te présenter librement…', 'Oublions les cases. Raconte-moi ton caractère, ta façon d’aborder les rencontres et ce que les autres devraient comprendre de toi.', `
         <label>Ta description personnelle
           <textarea name="p0_biography" class="long" maxlength="4000" placeholder="Ton caractère, ta façon d’aborder les rencontres, ce qui compte pour toi…">${e(ownPerson.biography)}</textarea>
         </label>
@@ -665,35 +676,35 @@
     );
 
     if (!joiningPartner) {
-      const commonIndex = nextIndex + 5;
+      const commonIndex = nextIndex + 9;
       steps.push(
-        discoveryStep(commonIndex, 'Votre univers', 'Comment vous présenter en quelques mots ?', 'C’est le texte qui donnera envie d’ouvrir votre page Wikipédia intime.', `
+        discoveryStep(commonIndex, 'L’essentiel', 'Quelle première impression doit donner votre profil ?', 'Imagine les premières lignes de votre page. Elles doivent être sincères, vivantes et donner envie de découvrir la suite.', `
           <label><span data-description-label>Description principale</span>
             <textarea name="description" class="long" minlength="20" maxlength="4000" required placeholder="Décrivez votre énergie, votre complicité et votre façon de rencontrer…">${e(profile?.description)}</textarea>
           </label>
         `),
-        discoveryStep(commonIndex + 1, 'Votre histoire', 'Quel parcours vous a menés jusqu’ici ?', 'Racontez ce qui vous unit, vos découvertes et la manière dont votre univers s’est construit.', `
-          <div class="form-grid">
-            <label class="wide">Votre histoire<textarea name="story" class="long" maxlength="8000">${e(profile?.story)}</textarea></label>
-            <label class="wide">Votre parcours<textarea name="journey" maxlength="4000">${e(profile?.journey)}</textarea></label>
-          </div>
+        discoveryStep(commonIndex + 1, 'Votre histoire', 'Raconte-moi votre histoire.', 'C’est ici que le profil prend une âme : ce qui vous unit, votre complicité et les moments qui ont construit votre univers.', `
+          <label>Votre histoire<textarea name="story" class="long" maxlength="8000">${e(profile?.story)}</textarea></label>
         `),
-        discoveryStep(commonIndex + 2, 'Vos rencontres', 'Que recherchez-vous vraiment ?', 'Parlez du type de personnes, du rythme et du feeling que vous souhaitez.', `
+        discoveryStep(commonIndex + 2, 'Votre parcours', 'Comment avez-vous découvert cet univers ?', 'Racontez votre cheminement, vos premières découvertes et la manière dont vos envies ont évolué.', `
+          <label>Votre parcours<textarea name="journey" class="long" maxlength="4000">${e(profile?.journey)}</textarea></label>
+        `),
+        discoveryStep(commonIndex + 3, 'Vos rencontres', 'Qu’aimeriez-vous trouver sur Velvet ?', 'Parlez-moi des personnes, du type de relation et du feeling que vous espérez rencontrer.', `
           <label>Ce que vous recherchez
             <textarea name="search_text" class="long" maxlength="4000">${e(profile?.search_text)}</textarea>
           </label>
         `),
-        discoveryStep(commonIndex + 3, 'Votre philosophie', 'Qu’aimez-vous partager ?', 'Choisissez vos pratiques et les valeurs qui structurent vos rencontres.', `
-          <div class="form-grid">
-            ${multiField('practices', 'Pratiques', REFERENCES.practices, profile?.practices)}
-            ${multiField('values_list', 'Valeurs', REFERENCES.values, profile?.values_list)}
-          </div>
+        discoveryStep(commonIndex + 4, 'Votre univers', 'Quelles pratiques font partie de vos envies ?', 'Sélectionnez ce que vous appréciez déjà ou souhaitez réellement explorer ensemble.', `
+          ${multiField('practices', 'Nos pratiques et envies communes', REFERENCES.practices, profile?.practices)}
         `),
-        discoveryStep(commonIndex + 4, 'Votre rythme', 'Quand et où aimez-vous sortir ?', 'Velvet utilisera ces repères pour proposer des profils, lieux et événements cohérents.', `
-          <div class="form-grid">
-            ${multiField('availability', 'Disponibilités habituelles', REFERENCES.availability, selectedFromText(profile?.availability_text))}
-            ${venueField(profile?.favorite_places)}
-          </div>
+        discoveryStep(commonIndex + 5, 'Votre philosophie', 'Quelles valeurs doivent guider vos rencontres ?', 'Ces valeurs aideront les autres membres à comprendre immédiatement votre manière de vivre Velvet.', `
+          ${multiField('values_list', 'Les valeurs qui comptent pour nous', REFERENCES.values, profile?.values_list)}
+        `),
+        discoveryStep(commonIndex + 6, 'Votre rythme', 'Quand êtes-vous généralement disponibles ?', 'Ces repères permettront à Velvet de vous proposer des sorties et des profils compatibles avec votre quotidien.', `
+          ${multiField('availability', 'Nos disponibilités habituelles', REFERENCES.availability, selectedFromText(profile?.availability_text))}
+        `),
+        discoveryStep(commonIndex + 7, 'Vos habitudes', 'Quels lieux aimez-vous fréquenter ?', 'Commencez à saisir le nom d’un club ou d’un spa. Vous pourrez compléter cette liste plus tard depuis votre profil.', `
+          ${venueField(profile?.favorite_places)}
         `)
       );
     }
@@ -702,9 +713,9 @@
     return `<form id="profileForm" class="form-shell discovery-form" data-discovery data-total-steps="${total}">
       <section class="onboarding discovery-shell">
         <header class="discovery-progress" aria-label="Progression">
-          <span><strong data-progress-current>1</strong> / ${total}</span>
+          <span class="progress-count"><strong data-progress-current>1</strong><small> sur <span data-progress-total>${total}</span></small></span>
           <div><i data-progress-bar style="width:${Math.max(5, 100 / total)}%"></i></div>
-          <button class="text-button" type="button" data-discovery-save>Enregistré à la fin</button>
+          <span class="progress-label">Création guidée du profil</span>
         </header>
         ${steps.join('')}
         <footer class="discovery-actions">
@@ -735,10 +746,15 @@
     const next = form.querySelector('[data-discovery-next]');
     const submit = form.querySelector('[data-discovery-submit]');
     const progress = form.querySelector('[data-progress-current]');
+    const progressTotal = form.querySelector('[data-progress-total]');
     const bar = form.querySelector('[data-progress-bar]');
     let current = 0;
 
     const profileType = () => new FormData(form).get('profile_type') || state.profile?.profile_type || '';
+    const activeSteps = () => {
+      const couple = profileType() === 'couple';
+      return steps.filter((step) => !step.hasAttribute('data-couple-step') || couple);
+    };
     const refreshCopy = () => {
       const couple = profileType() === 'couple';
       form.querySelectorAll('[data-couple-only]').forEach((node) => {
@@ -749,8 +765,8 @@
       });
       const nameLabel = form.querySelector('[data-name-label]');
       if (nameLabel) nameLabel.textContent = couple
-        ? 'Comment voulez-vous qu’on vous appelle ?'
-        : 'Comment veux-tu qu’on t’appelle ?';
+        ? 'Nom ou pseudonyme du couple'
+        : 'Ton prénom ou ton pseudonyme';
       const descriptionLabel = form.querySelector('[data-description-label]');
       if (descriptionLabel) descriptionLabel.textContent = couple
         ? 'Description du couple'
@@ -759,20 +775,25 @@
     };
 
     const display = () => {
-      steps.forEach((step, index) => { step.hidden = index !== current; });
+      const visibleSteps = activeSteps();
+      current = Math.min(current, visibleSteps.length - 1);
+      steps.forEach((step) => { step.hidden = true; });
+      visibleSteps[current].hidden = false;
       back.hidden = current === 0;
-      next.hidden = current === steps.length - 1;
-      submit.hidden = current !== steps.length - 1;
+      next.hidden = current === visibleSteps.length - 1;
+      submit.hidden = current !== visibleSteps.length - 1;
       progress.textContent = String(current + 1);
-      bar.style.width = `${((current + 1) / steps.length) * 100}%`;
+      progressTotal.textContent = String(visibleSteps.length);
+      bar.style.width = `${((current + 1) / visibleSteps.length) * 100}%`;
       refreshCopy();
-      const focusable = steps[current].querySelector('input:not([type=hidden]),select,textarea');
+      const focusable = visibleSteps[current].querySelector('input:not([type=hidden]),select,textarea');
       window.setTimeout(() => focusable?.focus({ preventScroll: true }), 80);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const validateCurrent = () => {
-      const fields = [...steps[current].querySelectorAll('input,select,textarea')].filter((field) => !field.disabled);
+      const step = activeSteps()[current];
+      const fields = [...step.querySelectorAll('input,select,textarea')].filter((field) => !field.disabled);
       const radioGroups = new Set(fields.filter((field) => field.type === 'radio').map((field) => field.name));
       for (const group of radioGroups) {
         if (!form.querySelector(`input[name="${group}"]:checked`)) {
@@ -789,10 +810,13 @@
       return true;
     };
 
-    form.addEventListener('change', refreshCopy);
+    form.addEventListener('change', (event) => {
+      refreshCopy();
+      if (event.target.name === 'profile_type') display();
+    });
     next.addEventListener('click', () => {
       if (!validateCurrent()) return;
-      current = Math.min(steps.length - 1, current + 1);
+      current = Math.min(activeSteps().length - 1, current + 1);
       display();
     });
     back.addEventListener('click', () => {
