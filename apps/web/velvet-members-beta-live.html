@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b080a">
+  <title>Velvet Membres — BETA privée</title>
+  <link rel="stylesheet" href="/assets/members-live.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navigation Velvet">
+      <a class="brand" href="/membres/" aria-label="Accueil Velvet">
+        <span class="brand-mark">V</span>
+        <span><strong>Velvet</strong><small>BETA privée</small></span>
+      </a>
+      <nav id="mainNav">
+        <button data-route="home"><span>⌂</span>Accueil</button>
+        <button data-route="discover"><span>◇</span>Découvrir</button>
+        <button data-route="maps"><span>⌖</span>Maps</button>
+        <button data-route="conversations"><span>◌</span>Conversations</button>
+        <button data-route="events"><span>✦</span>Sorties</button>
+        <button data-route="venues"><span>⌑</span>Établissements</button>
+        <button data-route="notifications"><span>○</span>Notifications</button>
+        <button data-route="me"><span>♡</span>Mon profil</button>
+      </nav>
+      <div class="sidebar-foot">
+        <p><span class="live-dot"></span>Données réelles Supabase</p>
+        <button id="logoutButton">Se déconnecter</button>
+      </div>
+    </aside>
+
+    <header class="mobile-head">
+      <a class="brand compact" href="/membres/"><span class="brand-mark">V</span><strong>Velvet</strong></a>
+      <button id="mobileMenuButton" aria-expanded="false" aria-controls="mainNav">Menu</button>
+    </header>
+
+    <main id="content" tabindex="-1">
+      <section class="loading-state" aria-live="polite">
+        <span class="loader"></span>
+        <p>Connexion à la mémoire Velvet…</p>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navigation mobile">
+      <button data-route="home"><span>⌂</span><small>Accueil</small></button>
+      <button data-route="discover"><span>◇</span><small>Découvrir</small></button>
+      <button data-route="events"><span>✦</span><small>Sorties</small></button>
+      <button data-route="conversations"><span>◌</span><small>Messages</small></button>
+      <button data-route="me"><span>♡</span><small>Profil</small></button>
+    </nav>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/members-live.js" defer></script>
+</body>
+</html>
