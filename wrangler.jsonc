@@ -3,6 +3,7 @@
   "name": "velvet-beta",
   "main": "apps/beta/worker/index.js",
   "compatibility_date": "2026-07-28",
+  "keep_vars": true,
   "assets": {
     "directory": "apps/beta/dist",
     "binding": "ASSETS",
