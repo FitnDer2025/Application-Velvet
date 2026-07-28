@@ -8,6 +8,7 @@ import {
   onRequestGet as memberProfileGet,
   onRequestPost as memberProfilePost
 } from '../../../functions/api/members/profile.js';
+import { onRequestPost as coupleProfilePost } from '../../../functions/api/members/couple-profile.js';
 import { onRequestGet as memberDirectory } from '../../../functions/api/members/directory.js';
 import {
   onRequestGet as organizerRequestGet,
@@ -26,7 +27,10 @@ import {
   onRequestDelete as albumAccessDelete,
   onRequestPost as albumAccessPost
 } from '../../../functions/api/members/album-access.js';
-import { onRequestPost as coupleInvitePost } from '../../../functions/api/members/couple-invite.js';
+import {
+  onRequestGet as coupleInviteGet,
+  onRequestPost as coupleInvitePost
+} from '../../../functions/api/members/couple-invite.js';
 import {
   onRequestDelete as memberPhotosDelete,
   onRequestGet as memberPhotosGet,
@@ -42,8 +46,10 @@ import {
 } from '../../../functions/api/members/settings.js';
 import {
   onRequestDelete as pushSubscriptionsDelete,
+  onRequestGet as pushSubscriptionsGet,
   onRequestPost as pushSubscriptionsPost
 } from '../../../functions/api/members/push-subscriptions.js';
+import { velvetIconResponse } from './velvet-icons.js';
 
 const API_ROUTES = new Map([
   ['POST /api/auth/signup', signup],
@@ -53,6 +59,7 @@ const API_ROUTES = new Map([
   ['POST /api/auth/logout', logout],
   ['GET /api/members/profile', memberProfileGet],
   ['POST /api/members/profile', memberProfilePost],
+  ['POST /api/members/couple-profile', coupleProfilePost],
   ['GET /api/members/directory', memberDirectory],
   ['GET /api/members/organizer-request', organizerRequestGet],
   ['POST /api/members/organizer-request', organizerRequestPost],
@@ -63,6 +70,7 @@ const API_ROUTES = new Map([
   ['DELETE /api/members/album-media', albumMediaDelete],
   ['POST /api/members/album-access', albumAccessPost],
   ['DELETE /api/members/album-access', albumAccessDelete],
+  ['GET /api/members/couple-invite', coupleInviteGet],
   ['POST /api/members/couple-invite', coupleInvitePost],
   ['GET /api/members/photos', memberPhotosGet],
   ['POST /api/members/photos', memberPhotosPost],
@@ -73,6 +81,7 @@ const API_ROUTES = new Map([
   ['GET /api/reference/venues', venueReferenceGet],
   ['GET /api/members/settings', memberSettingsGet],
   ['POST /api/members/settings', memberSettingsPost],
+  ['GET /api/members/push-subscriptions', pushSubscriptionsGet],
   ['POST /api/members/push-subscriptions', pushSubscriptionsPost],
   ['DELETE /api/members/push-subscriptions', pushSubscriptionsDelete]
 ]);
@@ -92,8 +101,10 @@ function securityHeaders(response) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    const apiHandler = API_ROUTES.get(`${request.method} ${url.pathname}`);
+    const iconResponse = velvetIconResponse(url.pathname);
+    if (iconResponse) return securityHeaders(iconResponse);
 
+    const apiHandler = API_ROUTES.get(`${request.method} ${url.pathname}`);
     if (apiHandler) {
       return securityHeaders(await apiHandler({ request, env }));
     }

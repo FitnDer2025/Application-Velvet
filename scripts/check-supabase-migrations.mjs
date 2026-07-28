@@ -10,9 +10,10 @@ const sharedCouple = await readFile('infra/supabase/migrations/0007_shared_coupl
 const memberOnboarding = await readFile('infra/supabase/migrations/0008_member_onboarding_identity.sql', 'utf8');
 const photoAdmission = await readFile('infra/supabase/migrations/0009_photo_admission_and_venue_directory.sql', 'utf8');
 const memberPreferences = await readFile('infra/supabase/migrations/0010_member_privacy_notifications_pwa.sql', 'utf8');
+const stagedCouple = await readFile('infra/supabase/migrations/0011_couple_first_parallel_onboarding.sql', 'utf8');
 
-const tables = [...`${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}`.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}`;
+const tables = [...`${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}`.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -58,7 +59,11 @@ const requirements = [
   [memberPreferences.includes('can_contact_user') && memberPreferences.includes('conversation_members_create'), 'Les préférences de contact doivent protéger les nouvelles conversations'],
   [memberPreferences.includes('member_notification_settings'), 'Les préférences de notification doivent être persistantes'],
   [memberPreferences.includes('browser_push_subscriptions') && memberPreferences.includes('browser_push_self_read'), 'Les abonnements navigateur doivent être isolés par utilisateur'],
-  [!`${core}${rls}${storage}${inviteFix}${grants}${neutralBeta}${sharedCouple}${memberOnboarding}${photoAdmission}${memberPreferences}`.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
+  [stagedCouple.includes('create_my_couple_profile'), 'La fiche commune doit pouvoir être créée avant les fiches personnelles'],
+  [stagedCouple.includes("'partner_required'"), 'Le couple incomplet doit rester dans le sas partenaire'],
+  [stagedCouple.includes('record_couple_invitation_delivery'), 'La livraison de l’invitation doit être auditée côté serveur'],
+  [stagedCouple.includes("member_slot_value<>'partner_a'"), 'Seul le créateur du couple peut initialiser la fiche commune'],
+  [!`${core}${rls}${storage}${inviteFix}${grants}${neutralBeta}${sharedCouple}${memberOnboarding}${photoAdmission}${memberPreferences}${stagedCouple}`.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 
 for (const [valid, message] of requirements) {

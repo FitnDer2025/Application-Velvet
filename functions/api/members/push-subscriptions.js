@@ -1,6 +1,21 @@
 import { json, readJson } from '../auth/_shared.js';
 import { cleanText, memberSession, restJson, withSession } from './_shared.js';
 
+export async function onRequestGet({ request, env }) {
+  try {
+    const access = await memberSession(request, env);
+    if (access.response) return access.response;
+    return withSession({
+      publicKey: cleanText(env.VAPID_PUBLIC_KEY, 500) || null,
+      installationOrigin: new URL(request.url).origin,
+      reenrollOnDomainMigration: true,
+      note: 'Lors du passage au domaine privé, chaque appareil devra autoriser de nouveau les notifications.'
+    }, access.session);
+  } catch (error) {
+    return json({ error: error.message || 'push_configuration_failed' }, 400);
+  }
+}
+
 export async function onRequestPost({ request, env }) {
   try {
     const access = await memberSession(request, env);
@@ -28,7 +43,11 @@ export async function onRequestPost({ request, env }) {
         })
       }
     );
-    return withSession({ ok: true }, access.session);
+    return withSession({
+      ok: true,
+      installationOrigin: cleanText(body.installationOrigin, 500) || new URL(request.url).origin,
+      reenrollOnDomainMigration: true
+    }, access.session);
   } catch (error) {
     return json({ error: error.message || 'push_subscription_failed' }, 400);
   }
