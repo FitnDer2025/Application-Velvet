@@ -50,6 +50,11 @@ values
 
 Le formulaire d’inscription transmettra ce code dans `options.data.invite_code`. Le trigger refusera automatiquement une adresse absente de la liste, un code incorrect, expiré, révoqué ou déjà consommé.
 
+Après confirmation de l’e-mail, l’activation exige quatre validations séparées et
+versionnées : conditions BETA, information de confidentialité, déclaration de
+majorité et consentement explicite au traitement des données sensibles choisies
+par le membre.
+
 ## Variables Cloudflare
 
 Variables publiables :
@@ -80,4 +85,3 @@ Les opérations administratives passent par une Edge Function ou un serveur séc
 - rôle Membre incapable de lire l’audit Control ;
 - retrait d’un accès album immédiatement effectif ;
 - export et suppression d’un compte test validés.
-
