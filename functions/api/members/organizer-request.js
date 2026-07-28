@@ -2,6 +2,7 @@ import { json, readJson } from '../auth/_shared.js';
 import {
   cleanText,
   memberSession,
+  requireAdmittedMember,
   restJson,
   withSession
 } from './_shared.js';
@@ -10,6 +11,8 @@ export async function onRequestGet({ request, env }) {
   try {
     const access = await memberSession(request, env);
     if (access.response) return access.response;
+    const admission = await requireAdmittedMember(env, access);
+    if (admission.response) return admission.response;
     const rows = await restJson(
       env,
       `/rest/v1/organizer_requests?select=id,status,message,created_at,reviewed_at&user_id=eq.${encodeURIComponent(access.account.userId)}&order=created_at.desc&limit=1`,
@@ -25,6 +28,8 @@ export async function onRequestPost({ request, env }) {
   try {
     const access = await memberSession(request, env);
     if (access.response) return access.response;
+    const admission = await requireAdmittedMember(env, access);
+    if (admission.response) return admission.response;
     const body = await readJson(request);
     const profiles = await restJson(
       env,
@@ -60,4 +65,3 @@ export async function onRequestPost({ request, env }) {
     return json({ error: error.message || 'organizer_request_failed' }, 400);
   }
 }
-
