@@ -10,7 +10,7 @@ export async function memberSession(request, env) {
   const session = await refreshSession(request, env);
   if (!session) return { response: json({ error: 'authentication_required' }, 401) };
   const account = await accountContext(env, session);
-  if (!account || account.status !== 'active' || !account.roles.includes('member')) {
+  if (!account || account.status !== 'active') {
     return { response: json({ error: 'member_access_required' }, 403) };
   }
   return { session, account };
@@ -42,4 +42,3 @@ export function cleanList(value, maxItems = 30, maxLength = 80) {
     .filter(Boolean))]
     .slice(0, maxItems);
 }
-
