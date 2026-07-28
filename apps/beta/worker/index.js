@@ -36,6 +36,14 @@ import { onRequestPost as adminInvitePost } from '../../../functions/api/admin/i
 import { onRequestPost as adminVenueImportPost } from '../../../functions/api/admin/venue-import.js';
 import { onRequestGet as communeReferenceGet } from '../../../functions/api/reference/communes.js';
 import { onRequestGet as venueReferenceGet } from '../../../functions/api/reference/venues.js';
+import {
+  onRequestGet as memberSettingsGet,
+  onRequestPost as memberSettingsPost
+} from '../../../functions/api/members/settings.js';
+import {
+  onRequestDelete as pushSubscriptionsDelete,
+  onRequestPost as pushSubscriptionsPost
+} from '../../../functions/api/members/push-subscriptions.js';
 
 const API_ROUTES = new Map([
   ['POST /api/auth/signup', signup],
@@ -62,7 +70,11 @@ const API_ROUTES = new Map([
   ['POST /api/admin/invites', adminInvitePost],
   ['POST /api/admin/venue-import', adminVenueImportPost],
   ['GET /api/reference/communes', communeReferenceGet],
-  ['GET /api/reference/venues', venueReferenceGet]
+  ['GET /api/reference/venues', venueReferenceGet],
+  ['GET /api/members/settings', memberSettingsGet],
+  ['POST /api/members/settings', memberSettingsPost],
+  ['POST /api/members/push-subscriptions', pushSubscriptionsPost],
+  ['DELETE /api/members/push-subscriptions', pushSubscriptionsDelete]
 ]);
 
 const PROTECTED_PREFIXES = ['/membres', '/pro', '/control'];
