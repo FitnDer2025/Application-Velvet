@@ -128,6 +128,16 @@
     document.body.appendChild(sheet);
   }
 
+  function addMigrationNotice() {
+    const card = document.querySelector('.mobile-app-card');
+    if (!card || card.querySelector('[data-domain-migration-note]')) return;
+    const note = document.createElement('p');
+    note.dataset.domainMigrationNote = 'true';
+    note.className = 'status-box';
+    note.textContent = 'Lors de la migration vers le domaine privé Velvet, cet appareil devra réautoriser une fois les notifications. Cette étape est déjà prévue dans le plan de bascule.';
+    card.appendChild(note);
+  }
+
   function injectStyles() {
     if (document.querySelector('#velvetPwaStyles')) return;
     const style = document.createElement('style');
@@ -165,5 +175,7 @@
 
   injectStyles();
   serviceWorkerRegistration();
+  new MutationObserver(addMigrationNotice).observe(document.documentElement, { childList: true, subtree: true });
+  addMigrationNotice();
   window.VelvetPWA = { enableNotifications, disableNotifications, isStandalone, showIosInstallGuide };
 })();
