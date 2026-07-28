@@ -50,7 +50,7 @@
       <p class="vg-message" role="status"></p>
       <button class="vg-link" id="vg-register" type="button">J’ai reçu une invitation</button>
     `);
-    document.querySelector('#vg-register').onclick = registerView;
+    document.querySelector('#vg-register').onclick = () => registerView();
     document.querySelector('#vg-login').onsubmit = async (event) => {
       event.preventDefault();
       const data = Object.fromEntries(new FormData(event.currentTarget));
@@ -64,12 +64,12 @@
     };
   }
 
-  function registerView() {
+  function registerView(prefill = {}) {
     gate.innerHTML = shell(`
       <p class="vg-intro">Ton code est lié à l’adresse invitée. Il ne peut pas être partagé.</p>
       <form id="vg-signup">
-        <label>E-mail invité<input name="email" type="email" autocomplete="email" required></label>
-        <label>Code d’invitation<input name="inviteCode" autocomplete="one-time-code" required></label>
+        <label>E-mail invité<input name="email" type="email" autocomplete="email" value="${escape(prefill.email || '')}" required></label>
+        <label>Code d’invitation<input name="inviteCode" autocomplete="one-time-code" value="${escape(prefill.inviteCode || '')}" required></label>
         <label>Mot de passe<input name="password" type="password" minlength="12" autocomplete="new-password" required></label>
         <button type="submit">Créer mon accès</button>
       </form>
@@ -83,6 +83,7 @@
       showMessage('Vérification de l’invitation…');
       try {
         const result = await api('signup', { method: 'POST', body: JSON.stringify(data) });
+        window.history.replaceState({}, '', '/');
         showMessage(result.message);
       } catch (error) {
         showMessage(error.message, true);
@@ -121,10 +122,10 @@
   }
 
   function destinations(account) {
-    const links = [{ href: '/membres/', label: 'Velvet Membres', roles: ['member'] }];
+    const links = [{ href: '/membres/', label: 'Velvet Membres', roles: [] }];
     links.push({ href: '/pro/', label: 'Velvet Pro', roles: ['organizer', 'pro_owner', 'pro_staff', 'direction', 'admin'] });
     links.push({ href: '/control/', label: 'Velvet Control', roles: ['moderator', 'support', 'auditor', 'direction', 'admin'] });
-    const allowed = links.filter((link) => link.roles.some((role) => account.roles.includes(role)));
+    const allowed = links.filter((link) => !link.roles.length || link.roles.some((role) => account.roles.includes(role)));
     gate.innerHTML = shell(`
       <p class="vg-intro">Bienvenue ${escape(account.email)}. Choisis ton espace autorisé.</p>
       <div class="vg-destinations">${allowed.map((link) => `<a href="${link.href}">${link.label}<span>Ouvrir →</span></a>`).join('')}</div>
@@ -153,7 +154,12 @@
   gate.id = 'velvet-real-gate';
   document.body.appendChild(gate);
 
+  const query = new URLSearchParams(window.location.search);
+  const invitationPrefill = query.get('invite') && query.get('email')
+    ? { inviteCode: query.get('invite'), email: query.get('email') }
+    : null;
+
   api('status')
     .then((result) => result.account.status === 'pending_consent' ? consentView() : destinations(result.account))
-    .catch(loginView);
+    .catch(() => invitationPrefill ? registerView(invitationPrefill) : loginView());
 })();
