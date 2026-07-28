@@ -6,7 +6,7 @@ import {
 } from './api/auth/_shared.js';
 
 const ACCESS = {
-  '/membres': ['member'],
+  '/membres': ['member', 'admin'],
   '/pro': ['organizer', 'pro_owner', 'pro_staff', 'direction', 'admin'],
   '/control': ['moderator', 'support', 'auditor', 'direction', 'admin']
 };
