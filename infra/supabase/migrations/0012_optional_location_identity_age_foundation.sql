@@ -66,10 +66,12 @@ create table if not exists public.external_verification_sessions (
 create index if not exists external_verification_sessions_user_idx
   on public.external_verification_sessions (user_id,created_at desc);
 
+drop trigger if exists member_location_settings_updated_at on public.member_location_settings;
 create trigger member_location_settings_updated_at
 before update on public.member_location_settings
 for each row execute function public.set_updated_at();
 
+drop trigger if exists account_identity_age_verifications_updated_at on public.account_identity_age_verifications;
 create trigger account_identity_age_verifications_updated_at
 before update on public.account_identity_age_verifications
 for each row execute function public.set_updated_at();
@@ -181,7 +183,12 @@ declare
   affected_user uuid;
   target record;
 begin
-  affected_user := case when tg_op='DELETE' then old.user_id else new.user_id end;
+  if tg_op='DELETE' then
+    affected_user := old.user_id;
+  else
+    affected_user := new.user_id;
+  end if;
+
   for target in
     select distinct pm.profile_id
       from public.profile_members pm
@@ -189,7 +196,11 @@ begin
   loop
     perform public.refresh_profile_verification(target.profile_id);
   end loop;
-  return case when tg_op='DELETE' then old else new end;
+
+  if tg_op='DELETE' then
+    return old;
+  end if;
+  return new;
 end;
 $$;
 
