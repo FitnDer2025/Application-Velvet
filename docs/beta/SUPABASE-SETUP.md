@@ -29,6 +29,7 @@ Appliquer dans l’ordre :
 1. `0001_velvet_beta_core.sql`
 2. `0002_velvet_beta_rls.sql`
 3. `0003_velvet_beta_storage.sql`
+4. `0004_fix_invite_crypto_schema.sql`
 
 Puis ouvrir le Security Advisor et corriger toute alerte avant de connecter les interfaces.
 
