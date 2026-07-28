@@ -1,15 +1,22 @@
-# Déploiement Cloudflare Pages — Velvet BETA
+# Déploiement Cloudflare Workers + Static Assets — Velvet BETA
+
+Les nouveaux comptes Cloudflare sont orientés vers Workers avec Static Assets
+plutôt que vers l’ancien formulaire Pages. Cette architecture publie les mêmes
+fichiers statiques sur le réseau Cloudflare et exécute la protection
+d’authentification avant les routes privées.
 
 ## Configuration Git recommandée
 
 - dépôt : `Velvet-Application/Application-Velvet` ;
 - branche de production BETA : une branche dédiée à créer après validation ;
 - commande de build : `npm run build:beta` ;
-- dossier de sortie : `apps/beta/dist` ;
+- commande de déploiement : `npx wrangler deploy` ;
+- dossier d’assets : `apps/beta/dist` ;
 - répertoire racine : racine du dépôt ;
 - nom du projet : `velvet-beta`.
 
-Le dossier `functions/` contient la passerelle d’authentification Cloudflare. Le jeton
+Le dossier `functions/` contient la passerelle d’authentification Cloudflare et
+`apps/beta/worker/index.js` l’expose dans le Worker. Le jeton
 de renouvellement Supabase est conservé dans un cookie `HttpOnly`, `Secure` et
 `SameSite=Strict` ; il n’est jamais écrit dans `localStorage`.
 
@@ -34,7 +41,7 @@ de renouvellement Supabase est conservé dans un cookie `HttpOnly`, `Secure` et
 
 La création du projet Cloudflare demande une connexion au compte de Cyril et l’autorisation d’accéder au dépôt GitHub. Après connexion :
 
-1. Workers & Pages → Create application → Pages → Connect to Git ;
+1. Workers & Pages → Create application → Continue with GitHub ;
 2. sélectionner le dépôt ;
 3. reporter les paramètres ci-dessus ;
 4. ne pas ouvrir publiquement l’URL avant que l’authentification réelle soit active.
