@@ -5,9 +5,11 @@ const rls = await readFile('infra/supabase/migrations/0002_velvet_beta_rls.sql',
 const storage = await readFile('infra/supabase/migrations/0003_velvet_beta_storage.sql', 'utf8');
 const inviteFix = await readFile('infra/supabase/migrations/0004_fix_invite_crypto_schema.sql', 'utf8');
 const grants = await readFile('infra/supabase/migrations/0005_authenticated_api_grants.sql', 'utf8');
+const neutralBeta = await readFile('infra/supabase/migrations/0006_neutral_beta_profiles.sql', 'utf8');
 
-const tables = [...core.matchAll(/create table public\.([a-z_]+)/gi)].map((match) => match[1]);
-const missingRls = tables.filter((table) => !rls.includes(`alter table public.${table} enable row level security;`));
+const tables = [...`${core}\n${neutralBeta}`.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
+const rlsSources = `${rls}\n${neutralBeta}`;
+const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
   throw new Error(`RLS manquante : ${missingRls.join(', ')}`);
@@ -26,7 +28,11 @@ const requirements = [
   [grants.includes('grant select on public.accounts to authenticated'), 'Le compte authentifié doit pouvoir lire sa fiche sous RLS'],
   [grants.includes('grant select, insert on public.consent_records to authenticated'), 'Les consentements doivent être enregistrables après connexion'],
   [grants.includes('revoke all on public.beta_invites from anon, authenticated'), 'La liste des invitations doit rester côté serveur'],
-  [!`${core}${rls}${storage}${inviteFix}${grants}`.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
+  [neutralBeta.includes('upsert_my_beta_profile'), 'La création du premier profil doit être atomique'],
+  [neutralBeta.includes('is_demo = false'), 'Le parcours réel ne doit jamais créer de profil fictif'],
+  [neutralBeta.includes('organizer_requests_self_create'), 'Une demande Organisateur doit être protégée par RLS'],
+  [neutralBeta.includes("not public.has_role('admin')"), 'La création des invitations doit être réservée aux administrateurs'],
+  [!`${core}${rls}${storage}${inviteFix}${grants}${neutralBeta}`.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 
 for (const [valid, message] of requirements) {

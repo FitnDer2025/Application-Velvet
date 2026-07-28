@@ -10,8 +10,7 @@ const staticDir = resolve(root, 'apps/beta/static');
 
 const sources = {
   auth: resolve(web, 'velvet-auth-beta-rc1.html'),
-  members: resolve(web, 'velvet-members-v6-beta-rc2.html'),
-  membersBase: resolve(web, 'velvet-v1-locked-dense-demo-v3.html'),
+  members: resolve(web, 'velvet-members-beta-live.html'),
   pro: resolve(web, 'velvet-pro-beta-rc1.html'),
   control: resolve(web, 'velvet-control-intelligence-beta-final.html'),
   controlD: resolve(web, 'velvet-control-intelligence-d-beta.html'),
@@ -55,13 +54,7 @@ auth = auth
   .replace('</body>', '<script src="/assets/real-auth-gate.js"></script></body>');
 await emit(resolve(output, 'index.html'), addLegalBar(auth));
 
-let members = await required(sources.members);
-members = members.replace(
-  /https:\/\/raw\.githack\.com\/Velvet-Application\/Application-Velvet\/99893644bf786d6e64677d23a99c114ed6be3a97\/apps\/web\/velvet-v1-locked-dense-demo-v3\.html/g,
-  './base.html'
-);
-await emit(resolve(output, 'membres/index.html'), addLegalBar(members));
-await cp(sources.membersBase, resolve(output, 'membres/base.html'));
+await emit(resolve(output, 'membres/index.html'), addLegalBar(await required(sources.members)));
 
 await emit(resolve(output, 'pro/index.html'), addLegalBar(await required(sources.pro)));
 await emit(resolve(output, 'control/index.html'), addLegalBar(await required(sources.control)));
