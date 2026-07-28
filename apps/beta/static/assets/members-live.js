@@ -333,7 +333,7 @@
   }
 
   function personForm(index, person = {}, couple = true) {
-    const title = couple ? (index === 0 ? 'Première personne' : 'Deuxième personne') : 'Votre fiche personnelle';
+    const title = couple ? 'Ta fiche personnelle' : 'Votre fiche personnelle';
     return `<section class="person-form">
       <h3>${title}</h3>
       <div class="form-grid">
