@@ -21,6 +21,7 @@ const PROFILE_SELECT = [
   'values_list',
   'visibility',
   'admission_status',
+  'verification_status',
   'relationship_since',
   'journey',
   'favorite_places',
