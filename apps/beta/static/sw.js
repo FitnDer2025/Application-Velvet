@@ -1,11 +1,15 @@
-const CACHE = 'velvet-beta-shell-v2';
+const CACHE = 'velvet-beta-shell-v3';
 const APP_SHELL = [
   '/membres/',
   '/assets/members-live.css',
   '/assets/members-live.js',
   '/assets/members-onboarding-v2.css',
   '/assets/members-onboarding-v2.js',
+  '/assets/pwa-ios.js',
+  '/assets/photo-protection.js',
   '/assets/velvet-icon.svg',
+  '/assets/velvet-icon-180.png',
+  '/assets/velvet-icon-192.png',
   '/manifest.webmanifest'
 ];
 
@@ -43,21 +47,27 @@ self.addEventListener('message', (event) => {
   if (event.data?.type !== 'VELVET_NOTIFICATION') return;
   event.waitUntil(self.registration.showNotification(event.data.title || 'Velvet', {
     body: event.data.body || 'Une nouvelle activité vous attend.',
-    icon: '/assets/velvet-icon.svg',
-    badge: '/assets/velvet-icon.svg',
+    icon: '/assets/velvet-icon-192.png',
+    badge: '/assets/velvet-icon-192.png',
     tag: event.data.tag || 'velvet-update',
     data: { url: event.data.url || '/membres/' }
   }));
 });
 
 self.addEventListener('push', (event) => {
-  const payload = event.data?.json?.() || {};
-  event.waitUntil(self.registration.showNotification(payload.title || 'Velvet', {
-    body: payload.body || 'Une nouvelle activité vous attend.',
-    icon: '/assets/velvet-icon.svg',
-    badge: '/assets/velvet-icon.svg',
-    tag: payload.tag || 'velvet-push',
-    data: { url: payload.url || '/membres/' }
+  let payload = {};
+  try {
+    payload = event.data?.json?.() || {};
+  } catch {
+    payload = { body: event.data?.text?.() || '' };
+  }
+  const declarative = payload.notification || payload;
+  event.waitUntil(self.registration.showNotification(declarative.title || 'Velvet', {
+    body: declarative.body || 'Une nouvelle activité vous attend.',
+    icon: declarative.icon || '/assets/velvet-icon-192.png',
+    badge: declarative.badge || '/assets/velvet-icon-192.png',
+    tag: declarative.tag || 'velvet-push',
+    data: { url: declarative.navigate || payload.url || '/membres/' }
   }));
 });
 
