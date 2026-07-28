@@ -3,6 +3,7 @@ import { memberSession, restJson, withSession } from './_shared.js';
 
 const EARTH_RADIUS_KM = 6371;
 const MAX_NEARBY_DISTANCE_KM = 150;
+const LOCATION_CONSENT_VERSION = 'velvet-location-v1';
 
 function radians(value) {
   return value * Math.PI / 180;
@@ -25,6 +26,33 @@ function finiteCoordinate(value, min, max) {
 
 function coarseCoordinate(value) {
   return Math.round(value * 10) / 10;
+}
+
+async function recordLocationConsent(env, access, granted, occurredAt) {
+  await restJson(
+    env,
+    '/rest/v1/consent_records',
+    access.session,
+    {
+      method: 'POST',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        user_id: access.account.userId,
+        purpose: 'precise_location',
+        document_version: LOCATION_CONSENT_VERSION,
+        granted,
+        source: 'web_beta',
+        occurred_at: occurredAt,
+        withdrawn_at: granted ? null : occurredAt,
+        evidence: {
+          requested_by_user_action: true,
+          stored_precision_km: 10,
+          exact_coordinates_stored: false,
+          public_profile_location_changed: false
+        }
+      })
+    }
+  );
 }
 
 async function readLocation(env, access) {
@@ -108,24 +136,27 @@ export async function onRequestPost({ request, env }) {
     }
 
     const now = new Date().toISOString();
-    await restJson(
-      env,
-      '/rest/v1/member_location_settings?on_conflict=user_id',
-      access.session,
-      {
-        method: 'POST',
-        headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-        body: JSON.stringify({
-          user_id: access.account.userId,
-          enabled: true,
-          precision_km: 10,
-          latitude_bucket: coarseCoordinate(latitude),
-          longitude_bucket: coarseCoordinate(longitude),
-          consented_at: now,
-          last_used_at: now
-        })
-      }
-    );
+    await Promise.all([
+      restJson(
+        env,
+        '/rest/v1/member_location_settings?on_conflict=user_id',
+        access.session,
+        {
+          method: 'POST',
+          headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+          body: JSON.stringify({
+            user_id: access.account.userId,
+            enabled: true,
+            precision_km: 10,
+            latitude_bucket: coarseCoordinate(latitude),
+            longitude_bucket: coarseCoordinate(longitude),
+            consented_at: now,
+            last_used_at: now
+          })
+        }
+      ),
+      recordLocationConsent(env, access, true, now)
+    ]);
 
     return withSession({ ok: true, ...(await readLocation(env, access)) }, access.session);
   } catch (error) {
@@ -137,23 +168,27 @@ export async function onRequestDelete({ request, env }) {
   try {
     const access = await memberSession(request, env);
     if (access.response) return access.response;
-    await restJson(
-      env,
-      '/rest/v1/member_location_settings?on_conflict=user_id',
-      access.session,
-      {
-        method: 'POST',
-        headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-        body: JSON.stringify({
-          user_id: access.account.userId,
-          enabled: false,
-          precision_km: 10,
-          latitude_bucket: null,
-          longitude_bucket: null,
-          last_used_at: null
-        })
-      }
-    );
+    const now = new Date().toISOString();
+    await Promise.all([
+      restJson(
+        env,
+        '/rest/v1/member_location_settings?on_conflict=user_id',
+        access.session,
+        {
+          method: 'POST',
+          headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+          body: JSON.stringify({
+            user_id: access.account.userId,
+            enabled: false,
+            precision_km: 10,
+            latitude_bucket: null,
+            longitude_bucket: null,
+            last_used_at: null
+          })
+        }
+      ),
+      recordLocationConsent(env, access, false, now)
+    ]);
     return withSession({ ok: true, ...(await readLocation(env, access)) }, access.session);
   } catch (error) {
     return json({ error: error.message || 'location_delete_failed' }, 400);
