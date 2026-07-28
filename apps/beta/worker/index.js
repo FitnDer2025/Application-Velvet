@@ -4,13 +4,37 @@ import { onRequestPost as login } from '../../../functions/api/auth/login.js';
 import { onRequestGet as status } from '../../../functions/api/auth/status.js';
 import { onRequestPost as consent } from '../../../functions/api/auth/consent.js';
 import { onRequestPost as logout } from '../../../functions/api/auth/logout.js';
+import {
+  onRequestGet as memberProfileGet,
+  onRequestPost as memberProfilePost
+} from '../../../functions/api/members/profile.js';
+import { onRequestGet as memberDirectory } from '../../../functions/api/members/directory.js';
+import {
+  onRequestGet as organizerRequestGet,
+  onRequestPost as organizerRequestPost
+} from '../../../functions/api/members/organizer-request.js';
+import {
+  onRequestGet as messagesGet,
+  onRequestPost as messagesPost
+} from '../../../functions/api/members/messages.js';
+import { onRequestPost as albumsPost } from '../../../functions/api/members/albums.js';
+import { onRequestPost as adminInvitePost } from '../../../functions/api/admin/invites.js';
 
 const API_ROUTES = new Map([
   ['POST /api/auth/signup', signup],
   ['POST /api/auth/login', login],
   ['GET /api/auth/status', status],
   ['POST /api/auth/consent', consent],
-  ['POST /api/auth/logout', logout]
+  ['POST /api/auth/logout', logout],
+  ['GET /api/members/profile', memberProfileGet],
+  ['POST /api/members/profile', memberProfilePost],
+  ['GET /api/members/directory', memberDirectory],
+  ['GET /api/members/organizer-request', organizerRequestGet],
+  ['POST /api/members/organizer-request', organizerRequestPost],
+  ['GET /api/members/messages', messagesGet],
+  ['POST /api/members/messages', messagesPost],
+  ['POST /api/members/albums', albumsPost],
+  ['POST /api/admin/invites', adminInvitePost]
 ]);
 
 const PROTECTED_PREFIXES = ['/membres', '/pro', '/control'];
