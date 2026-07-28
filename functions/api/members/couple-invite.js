@@ -5,16 +5,7 @@ import {
   restJson,
   withSession
 } from './_shared.js';
-
-function escapeHtml(value) {
-  return String(value || '').replace(/[&<>"']/g, (character) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  })[character]);
-}
+import { buildCoupleInvitationEmail } from './couple-invitation-email.js';
 
 async function recordDelivery(env, session, invitationId, status, provider = null, messageId = null) {
   if (!invitationId) return;
@@ -40,7 +31,17 @@ async function sendInvitationEmail(env, { email, registrationUrl, profileName, i
     return { status: 'not_configured', provider: null, messageId: null };
   }
 
-  const subject = `${profileName || 'Votre moitié'} vous invite sur Velvet`;
+  const template = buildCoupleInvitationEmail({ profileName, registrationUrl });
+  const message = {
+    from: env.VELVET_FROM_EMAIL,
+    to: [email],
+    subject: template.subject,
+    text: template.text,
+    html: template.html,
+    tags: [{ name: 'category', value: 'couple_invitation' }]
+  };
+  if (env.VELVET_REPLY_TO_EMAIL) message.reply_to = env.VELVET_REPLY_TO_EMAIL;
+
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -48,20 +49,18 @@ async function sendInvitationEmail(env, { email, registrationUrl, profileName, i
       'content-type': 'application/json',
       'idempotency-key': `velvet-couple-${invitationId}`
     },
-    body: JSON.stringify({
-      from: env.VELVET_FROM_EMAIL,
-      to: [email],
-      subject,
-      text: `Votre moitié a commencé votre profil couple sur Velvet. Rejoignez-la pour compléter votre fiche personnelle : ${registrationUrl}`,
-      html: `<div style="background:#0b080a;color:#f6eee6;padding:36px;font-family:Arial,sans-serif"><div style="max-width:560px;margin:auto;background:#171014;border:1px solid #3b2931;border-radius:24px;padding:32px"><div style="font-family:Georgia,serif;font-size:34px;margin-bottom:18px">Velvet</div><p style="color:#d9b879;text-transform:uppercase;letter-spacing:.14em;font-size:11px">Invitation privée</p><h1 style="font-family:Georgia,serif;font-weight:400">Votre histoire a déjà commencé.</h1><p style="line-height:1.65;color:#d7cdd0">${escapeHtml(profileName || 'Votre moitié')} a créé votre espace couple et vous invite maintenant à compléter la partie qui vous appartient.</p><p style="line-height:1.65;color:#d7cdd0">Le lien est personnel, valable sept jours et ne doit pas être partagé.</p><p style="margin:28px 0"><a href="${escapeHtml(registrationUrl)}" style="display:inline-block;background:#9f2852;color:white;text-decoration:none;padding:14px 22px;border-radius:999px;font-weight:700">Compléter ma fiche</a></p><p style="font-size:12px;color:#9e9297">Si vous n’attendiez pas cette invitation, ignorez simplement cet e-mail.</p></div></div>`,
-      tags: [{ name: 'category', value: 'couple_invitation' }]
-    })
+    body: JSON.stringify(message)
   });
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     await recordDelivery(env, session, invitationId, 'failed', 'resend');
-    return { status: 'failed', provider: 'resend', messageId: null };
+    return {
+      status: 'failed',
+      provider: 'resend',
+      messageId: null,
+      providerError: payload?.message || payload?.name || 'resend_delivery_failed'
+    };
   }
 
   await recordDelivery(env, session, invitationId, 'sent', 'resend', payload.id || null);
