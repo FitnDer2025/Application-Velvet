@@ -103,6 +103,34 @@ export async function analyzePublicAlbumPhoto(env, bytes) {
   return { assessment, decision };
 }
 
+export async function analyzePrivateAlbumPhoto(env, bytes) {
+  if (!env.AI) throw new Error('workers_ai_not_configured');
+  const result = await env.AI.run('@cf/moondream/moondream3.1-9B-A2B', {
+    image: Array.from(bytes),
+    prompt: `Analyse cette image d'album privé Velvet sans reconnaître ni identifier les personnes. La nudité adulte consensuelle n'est pas un motif de refus. Signale comme "prohibited" toute image montrant une personne pouvant être mineure, une violence manifeste, une contrainte apparente ou un contenu manifestement illégal. Si l'âge adulte ou la situation sont incertains, indique "uncertain": true. Réponds uniquement en JSON :
+{"prohibited":false,"uncertain":false,"confidence":0.0,"summary":"raison concise en français"}`,
+    max_tokens: 220,
+    temperature: 0
+  });
+  const raw = parseAiJson(result);
+  const confidence = Math.max(0, Math.min(1, Number(raw.confidence) || 0));
+  const assessment = {
+    prohibited: raw.prohibited === true,
+    uncertain: raw.uncertain === true,
+    confidence,
+    summary: String(raw.summary || '').slice(0, 500),
+    model: '@cf/moondream/moondream3.1-9B-A2B',
+    private_album_safety_review: true,
+    biometric_recognition: false
+  };
+  const decision = assessment.uncertain || confidence < 0.82
+    ? 'review'
+    : assessment.prohibited
+      ? 'rejected'
+      : 'approved';
+  return { assessment, decision };
+}
+
 function hexToBytes(hex) {
   if (!/^[0-9a-f]{64}$/i.test(hex || '')) throw new Error('moderation_hmac_not_configured');
   return Uint8Array.from(hex.match(/.{2}/g), (byte) => Number.parseInt(byte, 16));
