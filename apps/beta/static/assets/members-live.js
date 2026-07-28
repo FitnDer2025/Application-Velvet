@@ -1,4 +1,5 @@
 (() => {
+  document.body.classList.add('admission-locked');
   const state = {
     account: null,
     profile: null,
@@ -12,6 +13,7 @@
     organizerRequest: null,
     membership: null,
     personalProfileComplete: false,
+    photos: [],
     route: 'home',
     selectedProfileId: null,
     profileTab: 'couple',
@@ -33,7 +35,14 @@
     profile_required: 'Crée d’abord ton profil Velvet.',
     organizer_request_already_pending: 'Une demande Organisateur est déjà en cours.',
     album_name_required: 'Donne un nom à cet album.',
-    message_required: 'Écris un message avant de l’envoyer.'
+    photo_and_album_required: 'Choisis une photo et un album.',
+    album_owner_required: 'Seuls les propriétaires du profil peuvent gérer cet album.',
+    invalid_album_access_duration: 'Choisis une durée d’accès proposée.',
+    target_profile_required: 'Choisis le membre qui recevra l’accès.',
+    message_required: 'Écris un message avant de l’envoyer.',
+    photo_admission_required: 'Les photos publiques doivent être validées avant cette action.',
+    invalid_photo_file: 'Choisis une photo JPG, PNG ou WebP de moins de 4 Mo.',
+    personal_photo_owner_required: 'Chaque personne doit publier elle-même son portrait.'
   };
 
   const REFERENCES = {
@@ -174,9 +183,13 @@
   })[character]);
 
   const api = async (path, options = {}) => {
+    const isForm = options.body instanceof FormData;
     const response = await fetch(path, {
       ...options,
-      headers: { 'content-type': 'application/json', ...(options.headers || {}) }
+      headers: {
+        ...(isForm ? {} : { 'content-type': 'application/json' }),
+        ...(options.headers || {})
+      }
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(payload.error || 'request_failed');
@@ -213,12 +226,30 @@
 
   function confidentialityLabel(value) {
     return ({
+      public: 'Album public',
       request: 'Privé sur demande',
       trusted_circle: 'Cercle de confiance',
       private_circle: 'Cercle privé',
       favorites: 'Favoris uniquement',
       temporary: 'Accès temporaire'
     })[value] || value;
+  }
+
+  function approvedProfilePhotos(profile) {
+    const expectedRole = profile?.profile_type === 'couple' ? 'couple_gallery' : 'individual_gallery';
+    return list(profile?.media_assets).filter(
+      (photo) => photo.media_role === expectedRole
+        && photo.moderation_status === 'approved'
+        && photo.previewUrl
+    );
+  }
+
+  function profileCarousel(profile) {
+    const photos = approvedProfilePhotos(profile);
+    if (!photos.length) return '';
+    return `<div class="profile-carousel" aria-label="Photos publiques de ${e(profile.display_name)}">
+      ${photos.map((photo, index) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo publique ${index + 1} de ${e(profile.display_name)}"></figure>`).join('')}
+    </div>`;
   }
 
   function chips(items, emptyText = 'Non renseigné') {
@@ -251,9 +282,17 @@
       state.membership = profileResult.membership;
       state.personalProfileComplete = profileResult.personalProfileComplete;
       if (!state.profile || !state.personalProfileComplete) {
+        lockApplication();
         renderOnboarding(state.profile);
         return;
       }
+      if (state.profile.admission_status !== 'approved') {
+        lockApplication();
+        await loadPhotos();
+        renderAdmission();
+        return;
+      }
+      unlockApplication();
       const [directoryResult, organizerResult] = await Promise.all([
         api('/api/members/directory'),
         api('/api/members/organizer-request').catch(() => ({ request: null }))
@@ -275,17 +314,37 @@
   }
 
   async function refreshData() {
-    const [profileResult, directoryResult, organizerResult] = await Promise.all([
-      api('/api/members/profile'),
-      api('/api/members/directory'),
-      api('/api/members/organizer-request').catch(() => ({ request: null }))
-    ]);
+    const profileResult = await api('/api/members/profile');
     state.profile = profileResult.profile;
     state.account = profileResult.account;
     state.membership = profileResult.membership;
     state.personalProfileComplete = profileResult.personalProfileComplete;
+    if (state.profile?.admission_status !== 'approved') {
+      state.directory = { profiles: [], establishments: [], events: [], conversations: [], recommendations: [] };
+      state.organizerRequest = null;
+      await loadPhotos();
+      return;
+    }
+    const [directoryResult, organizerResult] = await Promise.all([
+      api('/api/members/directory'),
+      api('/api/members/organizer-request').catch(() => ({ request: null }))
+    ]);
     state.directory = directoryResult;
     state.organizerRequest = organizerResult.request;
+  }
+
+  function lockApplication() {
+    document.body.classList.add('admission-locked');
+    document.querySelector('.sidebar')?.classList.remove('open');
+  }
+
+  function unlockApplication() {
+    document.body.classList.remove('admission-locked');
+  }
+
+  async function loadPhotos() {
+    const result = await api('/api/members/photos').catch(() => ({ photos: [] }));
+    state.photos = list(result.photos);
   }
 
   function profilePeople(profile) {
@@ -330,6 +389,20 @@
       </span>
       ${help ? `<small class="field-help">${e(help)}</small>` : ''}
     </label>`;
+  }
+
+  function venueField(selected = []) {
+    return `<fieldset class="field wide venue-field" data-venue-field>
+      <legend>Lieux fréquentés ou préférés</legend>
+      <div class="selected-venues" data-selected-venues>
+        ${list(selected).map((name) => `<span class="selected-venue"><span>${e(name)}</span><button type="button" data-remove-venue="${e(name)}" aria-label="Retirer ${e(name)}">×</button><input type="hidden" name="favorite_places" value="${e(name)}"></span>`).join('')}
+      </div>
+      <span class="commune-input">
+        <input autocomplete="off" data-venue-input placeholder="Commence à saisir le nom d’un club ou d’un spa">
+        <span class="commune-results venue-results" data-venue-results role="listbox" hidden></span>
+      </span>
+      <small class="field-help">Référentiel Velvet enrichi par les établissements vérifiés et OpenStreetMap. Les lieux restent soumis à vérification.</small>
+    </fieldset>`;
   }
 
   function personForm(index, person = {}, couple = true) {
@@ -402,7 +475,7 @@
             <label class="wide">Ce que vous recherchez<textarea name="search_text" maxlength="4000">${e(profile?.search_text)}</textarea></label>
             ${multiField('practices', 'Pratiques du couple', REFERENCES.practices, profile?.practices, 'Sélectionne uniquement les pratiques réellement partagées.')}
             ${multiField('values_list', 'Valeurs du couple', REFERENCES.values, profile?.values_list, 'Ces valeurs structurent les rencontres recherchées.')}
-            <label class="wide">Lieux fréquentés ou préférés — séparer par des virgules<input name="favorite_places" value="${e(list(profile?.favorite_places).join(', '))}"></label>
+            ${venueField(profile?.favorite_places)}
           </div>
         </section>
         <section class="form-step">
@@ -481,6 +554,61 @@
         resultsNode.hidden = true;
       }, 180));
     });
+    bindVenueFields(scope);
+  }
+
+  function bindVenueFields(scope = document) {
+    scope.querySelectorAll('[data-venue-field]').forEach((field) => {
+      if (field.dataset.bound) return;
+      field.dataset.bound = 'true';
+      const input = field.querySelector('[data-venue-input]');
+      const results = field.querySelector('[data-venue-results]');
+      const selectedNode = field.querySelector('[data-selected-venues]');
+      let timer;
+      let venues = [];
+
+      const selectedNames = () => [...field.querySelectorAll('input[name=favorite_places]')].map((node) => node.value);
+      const addVenue = (venue) => {
+        if (selectedNames().some((name) => name.toLocaleLowerCase('fr') === venue.name.toLocaleLowerCase('fr'))) return;
+        const item = document.createElement('span');
+        item.className = 'selected-venue';
+        item.innerHTML = `<span>${e(venue.name)}</span><button type="button" aria-label="Retirer ${e(venue.name)}">×</button><input type="hidden" name="favorite_places" value="${e(venue.name)}">`;
+        item.querySelector('button').addEventListener('click', () => item.remove());
+        selectedNode.appendChild(item);
+        input.value = '';
+        results.hidden = true;
+      };
+      field.querySelectorAll('[data-remove-venue]').forEach((button) => {
+        button.addEventListener('click', () => button.closest('.selected-venue').remove());
+      });
+      input.addEventListener('input', () => {
+        window.clearTimeout(timer);
+        const query = input.value.trim();
+        if (query.length < 2) {
+          results.hidden = true;
+          return;
+        }
+        timer = window.setTimeout(async () => {
+          try {
+            const response = await api(`/api/reference/venues?q=${encodeURIComponent(query)}`);
+            venues = list(response.results);
+            results.innerHTML = venues.length
+              ? `${venues.map((venue, index) => `<button type="button" data-venue-index="${index}"><strong>${e(venue.name)}</strong><span>${e([venue.city,venue.country_code].filter(Boolean).join(' · '))}</span><small>${e(venue.kind)}</small></button>`).join('')}<p>${e(response.attribution || '')}</p>`
+              : '<p>Aucun établissement vérifié ne correspond. Le référencement sera enrichi progressivement.</p>';
+            results.hidden = false;
+            results.querySelectorAll('[data-venue-index]').forEach((button) => {
+              button.addEventListener('click', () => addVenue(venues[Number(button.dataset.venueIndex)]));
+            });
+          } catch {
+            results.innerHTML = '<p>Référentiel momentanément indisponible.</p>';
+            results.hidden = false;
+          }
+        }, 260);
+      });
+      input.addEventListener('blur', () => window.setTimeout(() => {
+        results.hidden = true;
+      }, 180));
+    });
   }
 
   function bindProfileForm() {
@@ -536,7 +664,7 @@
       search_text: data.get('search_text'),
       practices: data.getAll('practices'),
       values_list: data.getAll('values_list'),
-      favorite_places: splitList(data.get('favorite_places')),
+      favorite_places: data.getAll('favorite_places'),
       person
     };
     button.disabled = true;
@@ -551,6 +679,8 @@
       toast('Profil enregistré dans la mémoire Velvet.');
       if (firstPublication && profileType === 'couple') {
         prepareCoupleInvitation(true);
+      } else if (state.profile?.admission_status !== 'approved') {
+        renderAdmission();
       } else {
         route('me');
       }
@@ -560,6 +690,175 @@
     } finally {
       button.disabled = false;
     }
+  }
+
+  function admissionLabel(status) {
+    return ({
+      profile_pending: 'Profil à compléter',
+      partner_required: 'Partenaire attendu',
+      photos_required: 'Photos à compléter',
+      ai_review: 'Analyse en cours',
+      changes_required: 'Photos à remplacer',
+      approved: 'Admission validée',
+      suspended: 'Admission suspendue'
+    })[status] || 'Admission en cours';
+  }
+
+  function photoStatus(photo) {
+    if (photo.moderation_status === 'approved') return '<span class="photo-state approved">Validée par Velvet Intelligence</span>';
+    if (photo.moderation_status === 'rejected') return `<span class="photo-state rejected">À remplacer</span><small>${e(photo.rejection_reason || photo.ai_assessment?.summary || 'Les critères ne sont pas remplis.')}</small>`;
+    return `<span class="photo-state pending">Analyse ou contrôle en cours</span><small>${e(photo.ai_assessment?.summary || 'La photo reste privée pendant le contrôle.')}</small>`;
+  }
+
+  function admissionPhotoCard(photo) {
+    return `<article class="admission-photo">
+      <div class="admission-photo-preview">${photo.previewUrl ? `<img src="${e(photo.previewUrl)}" alt="">` : '<span>Photo privée</span>'}</div>
+      <div>${photoStatus(photo)}</div>
+      ${photo.owner_user_id === state.account?.userId ? `<button class="text-button" type="button" data-delete-photo="${e(photo.id)}">Supprimer</button>` : '<small>Publiée par ton/ta partenaire</small>'}
+    </article>`;
+  }
+
+  function renderAdmission() {
+    lockApplication();
+    const profile = state.profile;
+    if (!profile) return renderOnboarding();
+    const people = profilePeople(profile);
+    const ownPerson = people.find((person) => person.linked_user_id === state.account?.userId);
+    const galleryRole = profile.profile_type === 'couple' ? 'couple_gallery' : 'individual_gallery';
+    const gallery = state.photos.filter((photo) => photo.media_role === galleryRole);
+    const portraits = state.photos.filter((photo) => photo.media_role === 'individual_portrait');
+    const approvedGallery = gallery.filter((photo) => photo.moderation_status === 'approved').length;
+    const approvedPortraits = new Set(
+      portraits.filter((photo) => photo.moderation_status === 'approved').map((photo) => photo.individual_profile_id)
+    ).size;
+    const requiredPeople = profile.profile_type === 'couple' ? 2 : 1;
+    const requiredPortraits = profile.profile_type === 'couple' ? 2 : 0;
+    const partnerMissing = profile.profile_type === 'couple' && people.length < 2;
+    const canInvite = partnerMissing && state.membership?.member_slot === 'partner_a';
+
+    content.innerHTML = `<div class="page admission-page">
+      <header class="admission-brand">
+        <span class="brand-mark">V</span><span><strong>Velvet</strong><small>SAS D’ADMISSION</small></span>
+        <button class="text-button" id="admissionLogout" type="button">Se déconnecter</button>
+      </header>
+      ${pageHead(
+        'Authenticité · confiance · discrétion',
+        'Finalisons votre admission.',
+        'La navigation reste volontairement inaccessible tant que les photos publiques obligatoires ne sont pas validées.'
+      )}
+      <section class="admission-progress">
+        <article class="card"><small>Profil</small><strong>✓</strong><span>Informations enregistrées</span></article>
+        <article class="card"><small>Fiche partagée</small><strong>${profile.profile_type === 'couple' ? `${people.length}/2` : '1/1'}</strong><span>${partnerMissing ? 'Partenaire à rattacher' : 'Personne(s) rattachée(s)'}</span></article>
+        <article class="card"><small>Galerie publique</small><strong>${approvedGallery}/3</strong><span>Photos validées</span></article>
+        <article class="card"><small>${profile.profile_type === 'couple' ? 'Portraits' : 'Netteté'}</small><strong>${profile.profile_type === 'couple' ? `${approvedPortraits}/${requiredPortraits}` : 'IA'}</strong><span>${profile.profile_type === 'couple' ? 'Fiches personnelles' : 'Contrôle des 3 photos'}</span></article>
+      </section>
+      <section class="card admission-status">
+        <div><p class="eyebrow">État actuel</p><h2>${e(admissionLabel(profile.admission_status))}</h2></div>
+        <span class="pill ${profile.admission_status === 'approved' ? 'gold' : ''}">${e(profile.admission_status)}</span>
+      </section>
+      ${canInvite ? `<section class="card admission-partner">
+        <div><p class="eyebrow">Profil couple</p><h2>Ton ou ta partenaire doit compléter sa fiche.</h2><p>Le couple ne sera admis qu’après son inscription et la validation de son portrait individuel.</p></div>
+        <button class="primary" data-couple-invite>Créer ou renouveler son invitation</button>
+      </section>` : ''}
+      <section class="admission-grid ${profile.profile_type === 'couple' ? '' : 'single'}">
+        <article class="card">
+          <p class="eyebrow">${profile.profile_type === 'couple' ? 'Photos du couple' : 'Photos du profil'}</p>
+          <h2>3 photos publiques obligatoires</h2>
+          <p>${profile.profile_type === 'couple' ? 'Vous devez être visibles tous les deux' : 'Tu dois être clairement visible'}, avec le visage et au minimum la moitié du corps, sans brouillage excessif.</p>
+          <form class="photo-upload-form" data-photo-role="${galleryRole}">
+            <label class="photo-drop">${gallery.length < 3 ? `Ajouter au moins ${3 - gallery.length} photo(s)` : 'Ajouter des photos au carrousel'}
+              <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required>
+            </label>
+            <button class="primary" type="submit">Ajouter et analyser</button>
+            <p class="photo-upload-status" role="status"></p>
+          </form>
+          <div class="admission-photos">${gallery.length ? gallery.map(admissionPhotoCard).join('') : '<p class="muted">Aucune photo transmise.</p>'}</div>
+        </article>
+        ${profile.profile_type === 'couple' ? `<article class="card">
+          <p class="eyebrow">Ta fiche personnelle</p>
+          <h2>1 portrait individuel obligatoire</h2>
+          <p>Cette photo doit te montrer seul(e), visage visible et cadrage à mi-corps minimum. Chaque partenaire publie uniquement son propre portrait.</p>
+          ${ownPerson ? `<form class="photo-upload-form" data-photo-role="individual_portrait" data-individual-profile="${e(ownPerson.id)}">
+            <label class="photo-drop">${portraits.some((photo) => photo.individual_profile_id === ownPerson.id) ? 'Ajouter une photo individuelle' : 'Choisir mon premier portrait'}
+              <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" required>
+            </label>
+            <button class="primary" type="submit">Ajouter et analyser</button>
+            <p class="photo-upload-status" role="status"></p>
+          </form>` : '<p class="status-box">Complète d’abord ta fiche personnelle.</p>'}
+          <div class="admission-photos">${portraits.length ? portraits.map(admissionPhotoCard).join('') : '<p class="muted">Aucun portrait transmis.</p>'}</div>
+        </article>` : ''}
+      </section>
+      <section class="card ai-notice">
+        <p class="eyebrow">Velvet Intelligence</p>
+        <h2>Ce qui est analysé — et ce qui ne l’est pas</h2>
+        <p>L’analyse vérifie le nombre de personnes, le cadrage au minimum à mi-corps, la visibilité et la netteté suffisante. Elle n’identifie personne, ne compare aucun visage et ne crée aucun gabarit biométrique. Une décision incertaine est transmise à un contrôle humain.</p>
+        <p>Les photos restent privées et inaccessibles aux autres membres tant qu’elles ne sont pas approuvées.</p>
+      </section>
+      <section class="community-teaser" aria-label="Aperçu verrouillé">
+        <p class="eyebrow">Après validation</p><h2>La communauté Velvet se dévoilera ici.</h2>
+        <div class="blurred-community">${[1,2,3].map(() => '<article><span></span><strong>Profil protégé</strong><small>Contact verrouillé</small></article>').join('')}</div>
+      </section>
+    </div>`;
+    bindAdmission();
+  }
+
+  async function optimizePhoto(file) {
+    if (!file.type.startsWith('image/')) throw new Error('invalid_photo_file');
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.86));
+    if (!blob || blob.size > 4 * 1024 * 1024) throw new Error('invalid_photo_file');
+    return new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.jpg`, { type: 'image/jpeg' });
+  }
+
+  function bindAdmission() {
+    document.querySelector('#admissionLogout')?.addEventListener('click', async () => {
+      await api('/api/auth/logout', { method: 'POST', body: '{}' }).catch(() => {});
+      window.location.href = '/';
+    });
+    document.querySelectorAll('.photo-upload-form').forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = form.querySelector('button');
+        const status = form.querySelector('.photo-upload-status');
+        const files = [...form.querySelector('input[type=file]').files].slice(0, 3);
+        button.disabled = true;
+        try {
+          for (let index = 0; index < files.length; index += 1) {
+            status.textContent = `Préparation et analyse ${index + 1}/${files.length}…`;
+            const photo = await optimizePhoto(files[index]);
+            const body = new FormData();
+            body.set('photo', photo);
+            body.set('mediaRole', form.dataset.photoRole);
+            if (form.dataset.individualProfile) {
+              body.set('individualProfileId', form.dataset.individualProfile);
+            }
+            await api('/api/members/photos', { method: 'POST', body });
+          }
+          await loadAll();
+        } catch (error) {
+          status.textContent = errorMessages[error.message] || error.message;
+          button.disabled = false;
+        }
+      });
+    });
+    document.querySelectorAll('[data-delete-photo]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        button.disabled = true;
+        try {
+          await api(`/api/members/photos?id=${encodeURIComponent(button.dataset.deletePhoto)}`, { method: 'DELETE' });
+          await loadAll();
+        } catch (error) {
+          toast(error.message, true);
+          button.disabled = false;
+        }
+      });
+    });
   }
 
   function renderHome() {
@@ -590,8 +889,9 @@
   }
 
   function memberTile(profile) {
+    const cover = approvedProfilePhotos(profile)[0];
     return `<button class="card member-tile profile-card-button" data-open-profile="${e(profile.id)}">
-      <div class="member-cover">${e(initials(profile.display_name))}</div>
+      <div class="member-cover">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}</div>
       <div class="member-body">
         <div class="member-meta"><span>${e(profile.profile_type === 'couple' ? 'Couple' : 'Individuel')}</span><span>${e(profile.location_zone || profile.city || 'Localisation privée')}</span></div>
         <h3>${e(profile.display_name)}</h3>
@@ -661,8 +961,15 @@
     </div>`;
   }
 
-  function personView(person, couple) {
+  function personView(person, profile, own) {
     if (!person) return emptyState('Fiche incomplète', 'Cette personne n’a pas encore complété sa fiche.', '♡');
+    const personalPhotos = list(profile.media_assets).filter(
+      (photo) => photo.media_role === 'individual_portrait'
+        && photo.individual_profile_id === person.id
+        && photo.moderation_status === 'approved'
+        && photo.previewUrl
+    );
+    const canAddPersonalPhotos = own && person.linked_user_id === state.account?.userId;
     return `<section class="profile-layout">
       <div>
         <article class="card section">
@@ -672,11 +979,17 @@
         </article>
         <article class="card section"><h2>Attirances</h2>${chips(person.attracted_to)}</article>
         <article class="card section"><h2>Ce que ${e(person.first_name || 'cette personne')} souhaite vivre</h2>${chips(person.desired_practices)}</article>
-        ${couple ? `<article class="card section"><h2>Accords au sein du couple</h2><p>Ce que ${e(person.first_name || 'cette personne')} autorise son ou sa partenaire à pratiquer.</p>${chips(person.partner_permissions)}</article>` : ''}
+        ${profile.profile_type === 'couple' ? `<article class="card section"><h2>Accords au sein du couple</h2><p>Ce que ${e(person.first_name || 'cette personne')} autorise son ou sa partenaire à pratiquer.</p>${chips(person.partner_permissions)}</article>` : ''}
       </div>
       <aside>
         <article class="card"><p class="eyebrow">Orientation et attirances</p><h3>${e(person.orientation || 'Non renseignées')}</h3></article>
-        <article class="card" style="margin-top:14px"><p class="eyebrow">Photos individuelles</p><h3>Aucune photo publiée</h3><p>Velvet n’affiche aucune image de substitution.</p></article>
+        <article class="card" style="margin-top:14px"><p class="eyebrow">Photos individuelles</p>
+          ${personalPhotos.length ? `<div class="mini-gallery">${personalPhotos.map((photo) => `<img src="${e(photo.previewUrl)}" alt="Photo individuelle de ${e(person.first_name)}">`).join('')}</div>` : '<h3>Aucune photo publiée</h3><p>Velvet n’affiche aucune image de substitution.</p>'}
+          ${canAddPersonalPhotos ? `<form class="profile-photo-form" data-photo-role="individual_portrait" data-individual-profile="${e(person.id)}">
+            <label>Ajouter des photos individuelles<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required></label>
+            <button class="secondary" type="submit">Ajouter</button><small class="photo-upload-status" role="status"></small>
+          </form>` : ''}
+        </article>
       </aside>
     </section>`;
   }
@@ -692,16 +1005,50 @@
 
   function albumsView(profile, own) {
     const albums = list(profile.albums);
+    const targetProfiles = list(state.directory.profiles).filter((row) => row.id !== state.profile.id);
     return `<section>
-      <div class="page-head"><div><p class="eyebrow">Confidentialité maîtrisée</p><h1>Albums privés</h1><p>Le nom et le niveau d’accès sont visibles. Aucun contenu ne paraît tant que l’album n’est pas déverrouillé.</p></div></div>
-      ${albums.length ? `<div class="grid three">${albums.map((album) => `<article class="card album">
-        <div class="lock">⌑</div><div><p class="eyebrow">${e(confidentialityLabel(album.confidentiality))}</p><h3>${e(album.name)}</h3><p>Contenu entièrement masqué.</p></div>
-      </article>`).join('')}</div>` : emptyState('Aucun album publié', own ? 'Crée ton premier album privé en choisissant son nom et son niveau de confidentialité.' : 'Ce membre n’a encore publié aucun album.', '⌑')}
+      <div class="page-head"><div><p class="eyebrow">Bibliothèque organisée</p><h1>Albums publics & privés</h1><p>Les albums publics sont visibles par tous les membres admis. Les albums privés ne révèlent rien sans une autorisation accordée par leur propriétaire.</p></div></div>
+      ${albums.length ? `<div class="album-library">${albums.map((album) => {
+        const photos = list(album.media_assets).filter((photo) => photo.previewUrl);
+        const pendingPhotos = photos.filter((photo) => photo.moderation_status === 'pending').length;
+        const isPublic = album.confidentiality === 'public';
+        const canSee = own || isPublic || photos.length > 0;
+        const activeGrants = list(album.album_access_grants).filter(
+          (grant) => !grant.revoked_at && (!grant.expires_at || new Date(grant.expires_at) > new Date())
+        );
+        const grantedProfiles = [...new Set(activeGrants.map((grant) => grant.grantee_profile_id).filter(Boolean))];
+        return `<article class="card album-detail ${isPublic ? 'public' : 'private'}">
+          <header><div><p class="eyebrow">${e(confidentialityLabel(album.confidentiality))}</p><h2>${e(album.name)}</h2></div><span class="pill">${photos.length} photo${photos.length > 1 ? 's' : ''}</span></header>
+          ${canSee
+            ? (photos.length ? `<div class="album-gallery">${photos.map((photo) => `<figure><img src="${e(photo.previewUrl)}" alt=""></figure>`).join('')}</div>` : '<p class="muted">Aucune photo visible dans cet album.</p>')
+            : '<div class="private-vault"><span>⌑</span><strong>Album privé verrouillé</strong><p>Aucune miniature ni information sur son contenu n’est révélée.</p></div>'}
+          ${own && pendingPhotos ? `<p class="status-box">${pendingPhotos} photo${pendingPhotos > 1 ? 's' : ''} visible${pendingPhotos > 1 ? 's' : ''} seulement par vous, en attente de modération.</p>` : ''}
+          ${own ? `<form class="album-photo-form" data-album-id="${e(album.id)}">
+            <label>Ajouter des photos<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required></label>
+            <button class="secondary" type="submit">Ajouter à l’album</button><small class="photo-upload-status" role="status"></small>
+          </form>` : ''}
+          ${own && !isPublic ? `<div class="album-access-panel">
+            <p><strong>${grantedProfiles.length}</strong> profil${grantedProfiles.length > 1 ? 's' : ''} actuellement autorisé${grantedProfiles.length > 1 ? 's' : ''}.</p>
+            ${grantedProfiles.length ? `<div class="active-album-grants">${grantedProfiles.map((profileId) => {
+              const target = targetProfiles.find((row) => row.id === profileId);
+              const targetGrants = activeGrants.filter((grant) => grant.grantee_profile_id === profileId);
+              const permanent = targetGrants.some((grant) => !grant.expires_at);
+              const latest = targetGrants.map((grant) => grant.expires_at).filter(Boolean).sort().at(-1);
+              return `<span class="selected-venue"><span>${e(target?.display_name || 'Profil autorisé')} · ${permanent ? 'Permanent' : `jusqu’au ${e(new Date(latest).toLocaleString('fr-FR'))}`}</span><button type="button" data-revoke-album="${e(album.id)}" data-revoke-profile="${e(profileId)}" aria-label="Révoquer l’accès">×</button></span>`;
+            }).join('')}</div>` : ''}
+            <form class="album-access-form" data-album-id="${e(album.id)}">
+              <label>Membre bénéficiaire<select name="profileId" required><option value="">Choisir un profil</option>${targetProfiles.map((target) => `<option value="${e(target.id)}">${e(target.display_name)}</option>`).join('')}</select></label>
+              <label>Durée<select name="duration" required><option value="1">1 heure</option><option value="2">2 heures</option><option value="4">4 heures</option><option value="8">8 heures</option><option value="12">12 heures</option><option value="24">24 heures</option><option value="permanent">Permanent</option></select></label>
+              <button class="primary" type="submit">Donner l’accès</button>
+            </form>
+          </div>` : ''}
+        </article>`;
+      }).join('')}</div>` : emptyState('Aucun album publié', own ? 'Crée un album, donne-lui un nom et choisis s’il est public ou privé.' : 'Ce membre n’a encore publié aucun album.', '⌑')}
       ${own ? `<form id="albumForm" class="card" style="margin-top:16px">
-        <h2>Créer un album privé</h2>
+        <h2>Créer un album</h2>
         <div class="form-grid">
           <label>Nom de l’album<input name="name" maxlength="120" required></label>
-          <label>Niveau de confidentialité<select name="confidentiality"><option value="request">Privé sur demande</option><option value="trusted_circle">Cercle de confiance</option><option value="private_circle">Cercle privé</option><option value="favorites">Favoris uniquement</option><option value="temporary">Accès temporaire</option></select></label>
+          <label>Visibilité<select name="confidentiality"><option value="public">Public — visible par tous les membres</option><option value="request">Privé — uniquement sur autorisation</option></select></label>
         </div><button class="primary" type="submit" style="margin-top:14px">Créer l’album</button>
       </form>` : ''}
     </section>`;
@@ -717,6 +1064,7 @@
         <article class="card section"><p class="eyebrow">Les rencontres souhaitées</p><h2>Ce que nous recherchons</h2><p>${e(profile.search_text || 'Recherche à compléter.')}</p></article>
         <article class="card section"><p class="eyebrow">Nos pratiques</p><h2>Ce que nous aimons vivre</h2>${chips(profile.practices, 'Pratiques à compléter')}</article>
         <article class="card section"><p class="eyebrow">Ils parlent de nous</p><h2>Recommandations</h2>${recommendationsFor(profile)}</article>
+        ${own ? `<article class="card section"><p class="eyebrow">Carrousel public</p><h2>Ajouter des photos de profil</h2><p>Ces photos complètent le carrousel principal après validation.</p><form class="profile-photo-form" data-photo-role="${profile.profile_type === 'couple' ? 'couple_gallery' : 'individual_gallery'}"><label>Choisir des photos<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required></label><button class="secondary" type="submit">Ajouter au carrousel</button><small class="photo-upload-status" role="status"></small></form></article>` : ''}
       </div>
       <aside>
         <article class="card">
@@ -756,10 +1104,10 @@
     const activeContent = state.profileTab === 'albums'
       ? albumsView(profile, own)
       : state.profileTab.startsWith('person')
-        ? personView(people[Number(state.profileTab.replace('person', ''))], profile.profile_type === 'couple')
+        ? personView(people[Number(state.profileTab.replace('person', ''))], profile, own)
         : profileOverview(profile, own);
     return `<div class="page">
-      <section class="hero"><div class="hero-copy">
+      <section class="hero">${profileCarousel(profile)}<div class="hero-copy">
         <p class="eyebrow">${e(profile.profile_type === 'couple' ? 'Profil couple' : 'Profil individuel')} · ${e(profile.city || 'Localisation privée')}</p>
         <h1>${e(profile.display_name)}</h1><p class="lead">${e(profile.description)}</p>
         <div class="badges"><span class="pill gold">Membre BETA réel</span>${profile.relationship_since ? `<span class="pill">Depuis ${e(profile.relationship_since)}</span>` : ''}<span class="pill">${e(profile.location_zone || 'Zone privée')}</span></div>
@@ -768,7 +1116,7 @@
       <nav class="profile-nav" aria-label="Sections du profil">
         <button data-profile-tab="couple" class="${state.profileTab === 'couple' ? 'active' : ''}">${profile.profile_type === 'couple' ? 'Le couple' : 'Présentation'}</button>
         ${people.map((person, index) => `<button data-profile-tab="person${index}" class="${state.profileTab === `person${index}` ? 'active' : ''}">${e(person.first_name || `Personne ${index + 1}`)}</button>`).join('')}
-        <button data-profile-tab="albums" class="${state.profileTab === 'albums' ? 'active' : ''}">Albums privés (${list(profile.albums).length})</button>
+        <button data-profile-tab="albums" class="${state.profileTab === 'albums' ? 'active' : ''}">Albums (${list(profile.albums).length})</button>
       </nav>
       ${activeContent}
     </div>`;
@@ -840,6 +1188,10 @@
   }
 
   function route(name) {
+    if (state.profile?.admission_status !== 'approved') {
+      renderAdmission();
+      return;
+    }
     state.route = name;
     state.editing = false;
     navButtons.forEach((button) => button.classList.toggle('active', button.dataset.route === name));
@@ -888,11 +1240,113 @@
         state.profileTab = 'albums';
         content.innerHTML = renderProfile(state.profile, true);
         bindDynamicForms();
-        toast('Album privé créé.');
+        toast(values.confidentiality === 'public' ? 'Album public créé.' : 'Album privé créé.');
       } catch (error) {
         toast(error.message, true);
         button.disabled = false;
       }
+    });
+
+    document.querySelectorAll('.profile-photo-form').forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = form.querySelector('button');
+        const status = form.querySelector('.photo-upload-status');
+        const files = [...form.querySelector('input[type=file]').files];
+        button.disabled = true;
+        try {
+          for (let index = 0; index < files.length; index += 1) {
+            status.textContent = `Validation ${index + 1}/${files.length}…`;
+            const body = new FormData();
+            body.set('photo', await optimizePhoto(files[index]));
+            body.set('mediaRole', form.dataset.photoRole);
+            if (form.dataset.individualProfile) {
+              body.set('individualProfileId', form.dataset.individualProfile);
+            }
+            await api('/api/members/photos', { method: 'POST', body });
+          }
+          await refreshData();
+          content.innerHTML = renderProfile(state.profile, true);
+          bindDynamicForms();
+          toast('Photos ajoutées. Elles apparaîtront après validation.');
+        } catch (error) {
+          status.textContent = errorMessages[error.message] || error.message;
+          button.disabled = false;
+        }
+      });
+    });
+
+    document.querySelectorAll('.album-photo-form').forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = form.querySelector('button');
+        const status = form.querySelector('.photo-upload-status');
+        const files = [...form.querySelector('input[type=file]').files];
+        button.disabled = true;
+        try {
+          for (let index = 0; index < files.length; index += 1) {
+            status.textContent = `Envoi ${index + 1}/${files.length}…`;
+            const body = new FormData();
+            body.set('photo', await optimizePhoto(files[index]));
+            body.set('albumId', form.dataset.albumId);
+            await api('/api/members/album-media', { method: 'POST', body });
+          }
+          await refreshData();
+          state.profileTab = 'albums';
+          content.innerHTML = renderProfile(state.profile, true);
+          bindDynamicForms();
+          toast('Photos ajoutées à l’album.');
+        } catch (error) {
+          status.textContent = errorMessages[error.message] || error.message;
+          button.disabled = false;
+        }
+      });
+    });
+
+    document.querySelectorAll('.album-access-form').forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = form.querySelector('button');
+        const values = Object.fromEntries(new FormData(form));
+        button.disabled = true;
+        try {
+          await api('/api/members/album-access', {
+            method: 'POST',
+            body: JSON.stringify({
+              albumId: form.dataset.albumId,
+              profileId: values.profileId,
+              duration: values.duration
+            })
+          });
+          await refreshData();
+          state.profileTab = 'albums';
+          content.innerHTML = renderProfile(state.profile, true);
+          bindDynamicForms();
+          toast('Accès privé accordé.');
+        } catch (error) {
+          toast(error.message, true);
+          button.disabled = false;
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-revoke-album]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        button.disabled = true;
+        try {
+          await api(`/api/members/album-access?albumId=${encodeURIComponent(button.dataset.revokeAlbum)}&profileId=${encodeURIComponent(button.dataset.revokeProfile)}`, {
+            method: 'DELETE'
+          });
+          await refreshData();
+          state.profileTab = 'albums';
+          content.innerHTML = renderProfile(state.profile, true);
+          bindDynamicForms();
+          toast('Accès révoqué immédiatement.');
+        } catch (error) {
+          toast(error.message, true);
+          button.disabled = false;
+        }
+      });
     });
   }
 
@@ -952,7 +1406,7 @@
             <div class="actions">
               <button class="primary" type="button" id="copyPartnerLink">Copier le lien sécurisé</button>
               <a class="secondary" href="${e(mailto)}">Envoyer par e-mail</a>
-              <button class="secondary" data-route="me">Terminer</button>
+              <button class="secondary" type="button" data-admission>Continuer vers les photos</button>
             </div>
             <p class="status-box" id="partnerLinkStatus" hidden></p>
             <details style="margin-top:14px"><summary>Afficher le code de secours</summary><p style="letter-spacing:.12em">${e(invitation?.invite_code || '')}</p></details>
@@ -976,6 +1430,10 @@
   }
 
   document.addEventListener('click', (event) => {
+    if (event.target.closest('[data-admission]')) {
+      renderAdmission();
+      return;
+    }
     const routeButton = event.target.closest('[data-route]');
     if (routeButton) {
       event.preventDefault();
