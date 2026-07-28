@@ -35,6 +35,130 @@
     message_required: 'Écris un message avant de l’envoyer.'
   };
 
+  const REFERENCES = {
+    availability: [
+      'En semaine — journée',
+      'En semaine — soirée',
+      'Vendredi soir',
+      'Samedi — journée',
+      'Samedi soir',
+      'Dimanche',
+      'Week-end complet',
+      'Pendant les vacances',
+      'Variable selon les semaines',
+      'Uniquement sur rendez-vous'
+    ],
+    practices: [
+      'Rencontres en couple',
+      'Côte-à-côtisme',
+      'Mélangisme',
+      'Échangisme',
+      'Triolisme',
+      'Sensualité et massages',
+      'Voyeurisme',
+      'Exhibitionnisme',
+      'Jeux de rôle',
+      'BDSM soft',
+      'BDSM',
+      'Soirées privées',
+      'Clubs et spas',
+      'À découvrir ensemble',
+      'À discuter selon le feeling'
+    ],
+    values: [
+      'Consentement',
+      'Respect',
+      'Communication',
+      'Discrétion',
+      'Bienveillance',
+      'Hygiène',
+      'Élégance',
+      'Complicité',
+      'Humour',
+      'Sensualité',
+      'Aucune pression',
+      'Feeling indispensable',
+      'Rencontres suivies'
+    ],
+    morphologies: [
+      'Mince',
+      'Svelte',
+      'Athlétique',
+      'Sportive',
+      'Standard',
+      'Musclée',
+      'Pulpeuse / Curvy',
+      'Ronde',
+      'Généreuse',
+      'Forte',
+      'Information privée'
+    ],
+    hairColors: [
+      'Noirs',
+      'Bruns',
+      'Châtains',
+      'Blonds',
+      'Roux',
+      'Gris / Poivre et sel',
+      'Blancs',
+      'Colorés',
+      'Rasés / Chauve',
+      'Information privée'
+    ],
+    eyeColors: [
+      'Marron',
+      'Noisette',
+      'Verts',
+      'Bleus',
+      'Gris',
+      'Noirs',
+      'Vairons',
+      'Information privée'
+    ],
+    orientations: [
+      'Hétérosexuel(le)',
+      'Bi-curieux / Bi-curieuse',
+      'Bisexuel(le)',
+      'Pansexuel(le)',
+      'Homosexuel(le)',
+      'Orientation fluide',
+      'En questionnement',
+      'Information privée'
+    ],
+    frequencies: [
+      'En découverte',
+      'Quelques fois par an',
+      'Environ une fois par mois',
+      'Deux à trois fois par mois',
+      'Environ une fois par semaine',
+      'Régulièrement, sans fréquence fixe',
+      'En pause actuellement',
+      'Information privée'
+    ],
+    attractions: [
+      'Couples',
+      'Femmes',
+      'Hommes',
+      'Personnes non binaires',
+      'Femmes trans',
+      'Hommes trans',
+      'Uniquement avec mon/ma partenaire',
+      'Selon le feeling',
+      'Information privée'
+    ]
+  };
+  REFERENCES.experiences = [
+    'Avec une femme',
+    'Avec un homme',
+    'Avec un couple',
+    'Avec une personne non binaire',
+    'Avec une femme trans',
+    'Avec un homme trans',
+    'À trois',
+    'À quatre ou plus',
+    ...REFERENCES.practices
+  ];
+
   const e = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[character]);
@@ -159,6 +283,45 @@
     return list(profile?.individual_profiles).sort((a, b) => (order[a.member_slot] ?? 9) - (order[b.member_slot] ?? 9));
   }
 
+  function selectedFromText(value) {
+    return String(value || '').split(/\s*(?:,|·)\s*/).map((item) => item.trim()).filter(Boolean);
+  }
+
+  function selectField(name, label, options, current = '', help = '') {
+    return `<label>${e(label)}
+      <select name="${e(name)}">
+        <option value="">Choisir…</option>
+        ${options.map((option) => `<option value="${e(option)}"${option === current ? ' selected' : ''}>${e(option)}</option>`).join('')}
+      </select>
+      ${help ? `<small class="field-help">${e(help)}</small>` : ''}
+    </label>`;
+  }
+
+  function multiField(name, label, options, selected = [], help = '') {
+    const values = new Set(list(selected));
+    const count = options.filter((option) => values.has(option)).length;
+    return `<fieldset class="field wide">
+      <legend>${e(label)}</legend>
+      <details class="multi-choice" data-multi-choice>
+        <summary>${count ? `${count} choix sélectionné${count > 1 ? 's' : ''}` : 'Ouvrir la liste'}</summary>
+        <div class="choice-menu">
+          ${options.map((option) => `<label class="choice"><input type="checkbox" name="${e(name)}" value="${e(option)}"${values.has(option) ? ' checked' : ''}><span>${e(option)}</span></label>`).join('')}
+        </div>
+      </details>
+      ${help ? `<small class="field-help">${e(help)}</small>` : ''}
+    </fieldset>`;
+  }
+
+  function communeField(name, label, current = '', help = '') {
+    return `<label class="commune-field">${e(label)}
+      <span class="commune-input">
+        <input name="${e(name)}" value="${e(current)}" autocomplete="off" data-commune-input placeholder="Saisir une commune ou un code postal">
+        <span class="commune-results" data-commune-results role="listbox" hidden></span>
+      </span>
+      ${help ? `<small class="field-help">${e(help)}</small>` : ''}
+    </label>`;
+  }
+
   function personForm(index, person = {}, couple = true) {
     const title = couple ? (index === 0 ? 'Première personne' : 'Deuxième personne') : 'Votre fiche personnelle';
     return `<section class="person-form">
@@ -168,9 +331,9 @@
         <label>Année de naissance<input name="p${index}_birth_year" type="number" min="1900" max="${new Date().getFullYear() - 18}" value="${e(person.birth_year)}"></label>
         <label>Taille en cm<input name="p${index}_height_cm" type="number" min="100" max="250" value="${e(person.height_cm)}"></label>
         <label>Poids en kg<input name="p${index}_weight_kg" type="number" min="30" max="350" value="${e(person.weight_kg)}"></label>
-        <label>Morphologie<input name="p${index}_morphology" maxlength="80" value="${e(person.morphology)}"></label>
-        <label>Couleur des cheveux<input name="p${index}_hair_color" maxlength="80" value="${e(person.hair_color)}"></label>
-        <label>Couleur des yeux<input name="p${index}_eye_color" maxlength="80" value="${e(person.eye_color)}"></label>
+        ${selectField(`p${index}_morphology`, 'Morphologie', REFERENCES.morphologies, person.morphology)}
+        ${selectField(`p${index}_hair_color`, 'Couleur des cheveux', REFERENCES.hairColors, person.hair_color)}
+        ${selectField(`p${index}_eye_color`, 'Couleur des yeux', REFERENCES.eyeColors, person.eye_color)}
         <label>Enfants
           <select name="p${index}_children_status">
             <option value="private"${person.children_status === 'private' ? ' selected' : ''}>Information privée</option>
@@ -180,12 +343,12 @@
         </label>
         <label>Profession<input name="p${index}_profession" maxlength="120" value="${e(person.profession)}"></label>
         <label class="check"><input name="p${index}_profession_private" type="checkbox"${person.profession_private !== false ? ' checked' : ''}><span>Garder la profession privée</span></label>
-        <label>Orientation / attirances<input name="p${index}_orientation" maxlength="120" value="${e(person.orientation)}"></label>
-        <label>Fréquence de pratique<input name="p${index}_frequency" maxlength="120" value="${e(person.frequency)}"></label>
+        ${selectField(`p${index}_orientation`, 'Orientation', REFERENCES.orientations, person.orientation)}
+        ${selectField(`p${index}_frequency`, 'Fréquence de pratique', REFERENCES.frequencies, person.frequency)}
         <label class="wide">Description personnelle<textarea name="p${index}_biography" class="long" maxlength="4000">${e(person.biography)}</textarea></label>
-        <label class="wide">Attiré(e) par — séparer par des virgules<input name="p${index}_attracted_to" value="${e(list(person.attracted_to).join(', '))}"></label>
-        <label class="wide">Ce que cette personne souhaite pratiquer — séparer par des virgules<input name="p${index}_desired_practices" value="${e(list(person.desired_practices).join(', '))}"></label>
-        ${couple ? `<label class="wide">Ce que cette personne autorise son/sa partenaire à pratiquer — séparer par des virgules<input name="p${index}_partner_permissions" value="${e(list(person.partner_permissions).join(', '))}"></label>` : ''}
+        ${multiField(`p${index}_attracted_to`, 'Attiré(e) par', REFERENCES.attractions, person.attracted_to, 'Plusieurs réponses sont possibles.')}
+        ${multiField(`p${index}_desired_practices`, 'Ce que cette personne préfère vivre pour elle-même', REFERENCES.experiences, person.desired_practices, 'Ces choix appartiennent uniquement à cette personne.')}
+        ${couple ? multiField(`p${index}_partner_permissions`, 'Ce que cette personne est à l’aise de laisser vivre à son/sa partenaire', REFERENCES.experiences, person.partner_permissions, 'Ce référentiel exprime un niveau de confort, jamais un consentement définitif.') : ''}
       </div>
     </section>`;
   }
@@ -213,16 +376,16 @@
               </select>
             </label>
             <label>Nom affiché<input name="display_name" maxlength="120" value="${e(profile?.display_name)}" required></label>
-            <label>Ville<input name="city" maxlength="120" value="${e(profile?.city)}"></label>
-            <label>Zone de localisation publique<input name="location_zone" maxlength="160" value="${e(profile?.location_zone)}" placeholder="Ville ou secteur, jamais une adresse précise"></label>
+            ${communeField('city', 'Ville de résidence', profile?.city, 'Sélectionne une commune et son code postal dans le référentiel officiel.')}
+            ${communeField('location_zone', 'Localisation rendue publique', profile?.location_zone, 'Cette zone sera visible des autres membres. Elle peut être différente de ta commune de résidence.')}
             <label>Ensemble depuis — année<input name="relationship_since" type="number" min="1900" max="${new Date().getFullYear()}" value="${e(profile?.relationship_since)}"></label>
-            <label>Disponibilités<input name="availability_text" maxlength="1000" value="${e(profile?.availability_text)}"></label>
+            ${multiField('availability', 'Disponibilités habituelles', REFERENCES.availability, selectedFromText(profile?.availability_text), 'Plusieurs créneaux peuvent être sélectionnés.')}
             <label class="wide">Description principale<textarea name="description" class="long" maxlength="4000" required>${e(profile?.description)}</textarea></label>
             <label class="wide">Votre histoire<textarea name="story" class="long" maxlength="8000">${e(profile?.story)}</textarea></label>
             <label class="wide">Votre parcours<textarea name="journey" maxlength="4000">${e(profile?.journey)}</textarea></label>
             <label class="wide">Ce que vous recherchez<textarea name="search_text" maxlength="4000">${e(profile?.search_text)}</textarea></label>
-            <label class="wide">Pratiques — séparer par des virgules<input name="practices" value="${e(list(profile?.practices).join(', '))}"></label>
-            <label class="wide">Valeurs — séparer par des virgules<input name="values_list" value="${e(list(profile?.values_list).join(', '))}"></label>
+            ${multiField('practices', 'Pratiques du couple', REFERENCES.practices, profile?.practices, 'Sélectionne uniquement les pratiques réellement partagées.')}
+            ${multiField('values_list', 'Valeurs du couple', REFERENCES.values, profile?.values_list, 'Ces valeurs structurent les rencontres recherchées.')}
             <label class="wide">Lieux fréquentés ou préférés — séparer par des virgules<input name="favorite_places" value="${e(list(profile?.favorite_places).join(', '))}"></label>
           </div>
         </section>
@@ -249,14 +412,71 @@
     content.focus();
   }
 
+  function bindReferenceFields(scope = document) {
+    scope.querySelectorAll('[data-multi-choice]').forEach((details) => {
+      if (details.dataset.bound) return;
+      details.dataset.bound = 'true';
+      details.addEventListener('change', () => {
+        const count = details.querySelectorAll('input:checked').length;
+        details.querySelector('summary').textContent = count
+          ? `${count} choix sélectionné${count > 1 ? 's' : ''}`
+          : 'Ouvrir la liste';
+      });
+    });
+
+    scope.querySelectorAll('[data-commune-input]').forEach((input) => {
+      if (input.dataset.bound) return;
+      input.dataset.bound = 'true';
+      const resultsNode = input.closest('.commune-input').querySelector('[data-commune-results]');
+      let timer;
+      let requestNumber = 0;
+      input.addEventListener('input', () => {
+        window.clearTimeout(timer);
+        const query = input.value.trim();
+        if (query.length < 2) {
+          resultsNode.hidden = true;
+          resultsNode.innerHTML = '';
+          return;
+        }
+        const currentRequest = ++requestNumber;
+        timer = window.setTimeout(async () => {
+          try {
+            const result = await api(`/api/reference/communes?q=${encodeURIComponent(query)}`);
+            if (currentRequest !== requestNumber) return;
+            resultsNode.innerHTML = list(result.results).length
+              ? result.results.map((commune, index) => `<button type="button" role="option" data-commune-index="${index}"><strong>${e(commune.postalCode)}</strong><span>${e(commune.city)}</span><small>Département ${e(commune.departmentCode)}</small></button>`).join('')
+              : '<p>Aucune commune trouvée.</p>';
+            resultsNode.hidden = false;
+            resultsNode.querySelectorAll('[data-commune-index]').forEach((button) => {
+              button.addEventListener('click', () => {
+                const commune = result.results[Number(button.dataset.communeIndex)];
+                input.value = commune.label;
+                resultsNode.hidden = true;
+                resultsNode.innerHTML = '';
+              });
+            });
+          } catch {
+            resultsNode.innerHTML = '<p>Référentiel momentanément indisponible.</p>';
+            resultsNode.hidden = false;
+          }
+        }, 260);
+      });
+      input.addEventListener('blur', () => window.setTimeout(() => {
+        resultsNode.hidden = true;
+      }, 180));
+    });
+  }
+
   function bindProfileForm() {
     const form = document.querySelector('#profileForm');
     const type = document.querySelector('#profileType');
     if (!form || !type) return;
+    bindReferenceFields(form);
     type.addEventListener('change', () => {
       const people = profilePeople(state.profile);
       const ownPerson = people.find((person) => person.linked_user_id === state.account?.userId) || {};
       document.querySelector('#peopleForms').innerHTML = personForm(0, ownPerson, type.value === 'couple');
+      bindReferenceFields(document.querySelector('#peopleForms'));
     });
     form.addEventListener('submit', saveProfile);
   }
@@ -282,9 +502,9 @@
       orientation: data.get('p0_orientation'),
       frequency: data.get('p0_frequency'),
       biography: data.get('p0_biography'),
-      attracted_to: splitList(data.get('p0_attracted_to')),
-      desired_practices: splitList(data.get('p0_desired_practices')),
-      partner_permissions: splitList(data.get('p0_partner_permissions'))
+      attracted_to: data.getAll('p0_attracted_to'),
+      desired_practices: data.getAll('p0_desired_practices'),
+      partner_permissions: data.getAll('p0_partner_permissions')
     };
     const payload = {
       profile_type: profileType,
@@ -292,13 +512,13 @@
       city: data.get('city'),
       location_zone: data.get('location_zone'),
       relationship_since: data.get('relationship_since'),
-      availability_text: data.get('availability_text'),
+      availability_text: data.getAll('availability').join(' · '),
       description: data.get('description'),
       story: data.get('story'),
       journey: data.get('journey'),
       search_text: data.get('search_text'),
-      practices: splitList(data.get('practices')),
-      values_list: splitList(data.get('values_list')),
+      practices: data.getAll('practices'),
+      values_list: data.getAll('values_list'),
       favorite_places: splitList(data.get('favorite_places')),
       person
     };
