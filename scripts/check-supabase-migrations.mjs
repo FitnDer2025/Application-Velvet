@@ -11,9 +11,11 @@ const memberOnboarding = await readFile('infra/supabase/migrations/0008_member_o
 const photoAdmission = await readFile('infra/supabase/migrations/0009_photo_admission_and_venue_directory.sql', 'utf8');
 const memberPreferences = await readFile('infra/supabase/migrations/0010_member_privacy_notifications_pwa.sql', 'utf8');
 const stagedCouple = await readFile('infra/supabase/migrations/0011_couple_first_parallel_onboarding.sql', 'utf8');
+const locationVerification = await readFile('infra/supabase/migrations/0012_optional_location_identity_age_foundation.sql', 'utf8');
 
-const tables = [...`${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}`.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}`;
+const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}`;
+const tables = [...migrationBundle.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -45,7 +47,7 @@ const requirements = [
   [memberOnboarding.includes("values (auth.uid(),'member')"), 'L’activation doit provisionner le socle Membre'],
   [memberOnboarding.includes("select user_id,'member'"), 'Les comptes BETA existants doivent recevoir le socle Membre'],
   [photoAdmission.includes("required_portraits := case when profile_kind='couple' then 2 else 0 end"), 'Un profil individuel ne doit pas exiger de portrait supplémentaire'],
-  [photoAdmission.includes("approved_gallery >= 3"), 'Trois photos publiques validées doivent être requises'],
+  [photoAdmission.includes('approved_gallery >= 3'), 'Trois photos publiques validées doivent être requises'],
   [!photoAdmission.includes('profile_gallery_limit_reached'), 'Le minimum d’admission ne doit pas devenir un plafond de galerie'],
   [photoAdmission.includes('record_photo_ai_decision'), 'La décision IA doit passer par une fonction serveur signée'],
   [photoAdmission.includes('extensions.hmac'), 'La décision IA doit être protégée par HMAC'],
@@ -63,7 +65,13 @@ const requirements = [
   [stagedCouple.includes("'partner_required'"), 'Le couple incomplet doit rester dans le sas partenaire'],
   [stagedCouple.includes('record_couple_invitation_delivery'), 'La livraison de l’invitation doit être auditée côté serveur'],
   [stagedCouple.includes("member_slot_value<>'partner_a'"), 'Seul le créateur du couple peut initialiser la fiche commune'],
-  [!`${core}${rls}${storage}${inviteFix}${grants}${neutralBeta}${sharedCouple}${memberOnboarding}${photoAdmission}${memberPreferences}${stagedCouple}`.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
+  [locationVerification.includes('member_location_settings') && locationVerification.includes('latitude_bucket'), 'La localisation doit être facultative et approximative'],
+  [locationVerification.includes('exacte') && !locationVerification.includes('precise_location_value'), 'La migration ne doit pas créer de stockage GPS exact'],
+  [locationVerification.includes('account_identity_age_verifications'), 'Le socle identité et majorité doit être distinct des profils publics'],
+  [locationVerification.includes('identity_verified') && locationVerification.includes('majority_verified'), 'Le badge doit exiger identité et majorité'],
+  [locationVerification.includes('external_verification_sessions'), 'Le branchement du prestataire tiers doit être préparé'],
+  [locationVerification.includes("status <> 'verified' or (identity_verified and majority_verified)"), 'Un statut vérifié ne doit jamais être attribué partiellement'],
+  [!migrationBundle.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 
 for (const [valid, message] of requirements) {
