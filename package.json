@@ -1,0 +1,23 @@
+{
+  "name": "velvet-platform",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24.18.0"
+  },
+  "workspaces": [
+    "apps/api",
+    "apps/worker",
+    "packages/api-client"
+  ],
+  "scripts": {
+    "dev:api": "node --watch apps/api/src/server.mjs",
+    "start:api": "node apps/api/src/server.mjs",
+    "start:worker": "node apps/worker/src/worker.mjs",
+    "db:migrate": "node apps/api/src/migrate.mjs",
+    "secrets:dev": "node scripts/generate-dev-secrets.mjs",
+    "check": "node --check apps/api/src/server.mjs && node --check apps/worker/src/worker.mjs && node --check packages/api-client/src/index.mjs",
+    "test": "node --test --test-isolation=none apps/*/test/*.test.mjs"
+  }
+}
