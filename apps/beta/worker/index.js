@@ -18,6 +18,7 @@ import {
   onRequestPost as messagesPost
 } from '../../../functions/api/members/messages.js';
 import { onRequestPost as albumsPost } from '../../../functions/api/members/albums.js';
+import { onRequestPost as coupleInvitePost } from '../../../functions/api/members/couple-invite.js';
 import { onRequestPost as adminInvitePost } from '../../../functions/api/admin/invites.js';
 
 const API_ROUTES = new Map([
@@ -34,6 +35,7 @@ const API_ROUTES = new Map([
   ['GET /api/members/messages', messagesGet],
   ['POST /api/members/messages', messagesPost],
   ['POST /api/members/albums', albumsPost],
+  ['POST /api/members/couple-invite', coupleInvitePost],
   ['POST /api/admin/invites', adminInvitePost]
 ]);
 
