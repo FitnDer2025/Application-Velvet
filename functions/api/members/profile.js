@@ -48,8 +48,22 @@ function nullableNumber(value, min, max) {
 
 function normalizePerson(person = {}) {
   const currentYear = new Date().getUTCFullYear();
+  const genderIdentities = [
+    'Homme',
+    'Femme',
+    'Homme trans',
+    'Femme trans',
+    'Personne non binaire',
+    'Autre identité',
+    'Information privée'
+  ];
+  const genderIdentity = cleanText(person.gender_identity, 80);
+  if (!genderIdentities.includes(genderIdentity)) {
+    throw new Error('gender_identity_required');
+  }
   return {
     first_name: cleanText(person.first_name, 80),
+    gender_identity: genderIdentity,
     birth_year: nullableNumber(person.birth_year, 1900, currentYear - 18),
     height_cm: nullableNumber(person.height_cm, 100, 250),
     weight_kg: nullableNumber(person.weight_kg, 30, 350),
@@ -67,9 +81,10 @@ function normalizePerson(person = {}) {
     attracted_to: cleanList(person.attracted_to),
     desired_practices: cleanList(person.desired_practices),
     partner_permissions: cleanList(person.partner_permissions),
-    visibility: typeof person.visibility === 'object' && person.visibility
-      ? person.visibility
-      : {}
+    visibility: {
+      ...(typeof person.visibility === 'object' && person.visibility ? person.visibility : {}),
+      gender_identity: genderIdentity
+    }
   };
 }
 
