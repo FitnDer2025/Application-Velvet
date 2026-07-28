@@ -46,8 +46,10 @@ import {
 } from '../../../functions/api/members/settings.js';
 import {
   onRequestDelete as pushSubscriptionsDelete,
+  onRequestGet as pushSubscriptionsGet,
   onRequestPost as pushSubscriptionsPost
 } from '../../../functions/api/members/push-subscriptions.js';
+import { velvetIconResponse } from './velvet-icons.js';
 
 const API_ROUTES = new Map([
   ['POST /api/auth/signup', signup],
@@ -79,6 +81,7 @@ const API_ROUTES = new Map([
   ['GET /api/reference/venues', venueReferenceGet],
   ['GET /api/members/settings', memberSettingsGet],
   ['POST /api/members/settings', memberSettingsPost],
+  ['GET /api/members/push-subscriptions', pushSubscriptionsGet],
   ['POST /api/members/push-subscriptions', pushSubscriptionsPost],
   ['DELETE /api/members/push-subscriptions', pushSubscriptionsDelete]
 ]);
@@ -98,8 +101,10 @@ function securityHeaders(response) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    const apiHandler = API_ROUTES.get(`${request.method} ${url.pathname}`);
+    const iconResponse = velvetIconResponse(url.pathname);
+    if (iconResponse) return securityHeaders(iconResponse);
 
+    const apiHandler = API_ROUTES.get(`${request.method} ${url.pathname}`);
     if (apiHandler) {
       return securityHeaders(await apiHandler({ request, env }));
     }
