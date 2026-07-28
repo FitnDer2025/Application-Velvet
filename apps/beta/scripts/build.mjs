@@ -51,7 +51,8 @@ await mkdir(output, { recursive: true });
 let auth = await required(sources.auth);
 auth = auth
   .replaceAll('./velvet-members-v6-beta-rc2.html', '/membres/')
-  .replaceAll('./velvet-members-beta-rc1.html', '/membres/');
+  .replaceAll('./velvet-members-beta-rc1.html', '/membres/')
+  .replace('</body>', '<script src="/assets/real-auth-gate.js"></script></body>');
 await emit(resolve(output, 'index.html'), addLegalBar(auth));
 
 let members = await required(sources.members);
@@ -71,4 +72,3 @@ await cp(sources.controlBase, resolve(output, 'control/velvet-control-v1-beta.ht
 
 await cp(staticDir, output, { recursive: true });
 console.log(`Velvet BETA préparée dans ${output}`);
-
