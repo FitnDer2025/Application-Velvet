@@ -13,6 +13,7 @@ const PROFILE_SELECT = [
   'search_text',
   'practices',
   'values_list',
+  'verification_status',
   'relationship_since',
   'journey',
   'favorite_places',
