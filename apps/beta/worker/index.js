@@ -49,6 +49,16 @@ import {
   onRequestGet as pushSubscriptionsGet,
   onRequestPost as pushSubscriptionsPost
 } from '../../../functions/api/members/push-subscriptions.js';
+import {
+  onRequestDelete as memberLocationDelete,
+  onRequestGet as memberLocationGet,
+  onRequestPost as memberLocationPost
+} from '../../../functions/api/members/location.js';
+import {
+  onRequestCallback as memberVerificationCallback,
+  onRequestGet as memberVerificationGet,
+  onRequestPost as memberVerificationPost
+} from '../../../functions/api/members/verification.js';
 import { velvetIconResponse } from './velvet-icons.js';
 
 const API_ROUTES = new Map([
@@ -83,7 +93,13 @@ const API_ROUTES = new Map([
   ['POST /api/members/settings', memberSettingsPost],
   ['GET /api/members/push-subscriptions', pushSubscriptionsGet],
   ['POST /api/members/push-subscriptions', pushSubscriptionsPost],
-  ['DELETE /api/members/push-subscriptions', pushSubscriptionsDelete]
+  ['DELETE /api/members/push-subscriptions', pushSubscriptionsDelete],
+  ['GET /api/members/location', memberLocationGet],
+  ['POST /api/members/location', memberLocationPost],
+  ['DELETE /api/members/location', memberLocationDelete],
+  ['GET /api/members/verification', memberVerificationGet],
+  ['POST /api/members/verification', memberVerificationPost],
+  ['GET /api/members/verification/callback', memberVerificationCallback]
 ]);
 
 const PROTECTED_PREFIXES = ['/membres', '/pro', '/control'];
