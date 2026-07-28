@@ -10,8 +10,10 @@ Ce registre est un document de travail à compléter avec l’identité juridiqu
 | Profil intime | orientation, pratiques, recherches, préférences | Compatibilité et mise en relation | Membres selon visibilité | Jusqu’au retrait ou à la suppression |
 | Profil individuel | taille, poids, morphologie, goûts | Présentation volontaire | Selon visibilité choisie | Vie du profil |
 | Géolocalisation | zone ou coordonnées temporaires | Proximité et carte | Système ; zone seulement aux membres | Précise : durée très courte ; zone : vie du profil |
-| Médias publics | photos choisies comme publiques | Présentation | Membres BETA | Jusqu’au retrait |
-| Albums privés | fichiers, propriétaire, autorisations | Partage privé contrôlé | Propriétaire et bénéficiaires autorisés | Jusqu’au retrait ; accès selon expiration |
+| Photos de profil | minimum 3 photos individuelles ou 3 photos du couple et 1 portrait par partenaire ; ajouts ultérieurs libres | Admission puis carrousel public du profil | Privées pendant le contrôle, puis membres BETA approuvés | Jusqu’au retrait |
+| Albums publics | nom de bibliothèque, photos approuvées | Organiser une galerie consultable | Membres BETA approuvés | Jusqu’au retrait |
+| Albums privés | nom, photos, bénéficiaires, date d’accord et expiration | Partage ponctuel choisi par le propriétaire | Propriétaires et comptes autorisés pour 1, 2, 4, 8, 12, 24 h ou sans échéance | Jusqu’au retrait ; accès révocable |
+| Contrôle technique des photos | profil public : nombre de personnes, visage visible, cadrage et netteté ; album privé : détection de risque sans refus de la nudité adulte ; résultat et confiance | Vérifier l’admission et empêcher la diffusion de contenus manifestement interdits | Velvet Intelligence et, en cas de doute, modération habilitée | Résultat lié au média ; fichier supprimé au retrait |
 | Conversations | messages, membres, pièces jointes | Communication | Participants uniquement | Durée à valider avec option d’effacement |
 | Événements | agenda, inscriptions, présence | Organisation des sorties | Membres, organisateurs, Pro | Événement + durée d’historique à valider |
 | Établissements | fiche, équipe, statistiques | Velvet Pro | Pro autorisé et membres pour le public | Relation contractuelle |
@@ -29,4 +31,13 @@ Ce registre est un document de travail à compléter avec l’identité juridiqu
 - Les données réelles et les données fictives doivent être identifiables sans ambiguïté.
 - La localisation exacte ne doit jamais apparaître dans une liste, un export ou un journal métier.
 - Les albums privés ne doivent fournir aucune miniature avant autorisation.
+- Un accès permanent à un album privé doit rester révocable à tout moment.
+- Après expiration ou révocation, aucun nouveau lien média ne doit pouvoir être émis ; les liens déjà émis ont une durée technique maximale d’une minute.
+- L’analyse d’admission ne doit ni identifier une personne, ni comparer des visages, ni créer de gabarit biométrique.
+- Une décision incertaine doit rester en attente d’un contrôle humain et ne doit pas ouvrir automatiquement l’accès.
 
+## Sous-traitance et analyse automatisée à confirmer
+
+- Supabase : authentification, base et stockage privé.
+- Cloudflare : hébergement de la BETA et analyse technique des photos via Workers AI.
+- Avant l’ouverture à davantage de testeurs, l’identité juridique de l’éditeur, les régions de traitement, les clauses contractuelles, les durées et l’AIPD doivent être validées.

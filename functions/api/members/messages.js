@@ -2,6 +2,7 @@ import { json, readJson } from '../auth/_shared.js';
 import {
   cleanText,
   memberSession,
+  requireAdmittedMember,
   restJson,
   withSession
 } from './_shared.js';
@@ -14,6 +15,8 @@ export async function onRequestGet({ request, env }) {
   try {
     const access = await memberSession(request, env);
     if (access.response) return access.response;
+    const admission = await requireAdmittedMember(env, access);
+    if (admission.response) return admission.response;
     const conversationId = new URL(request.url).searchParams.get('conversationId');
     if (!validUuid(conversationId)) return json({ error: 'invalid_conversation' }, 400);
     const messages = await restJson(
@@ -31,6 +34,8 @@ export async function onRequestPost({ request, env }) {
   try {
     const access = await memberSession(request, env);
     if (access.response) return access.response;
+    const admission = await requireAdmittedMember(env, access);
+    if (admission.response) return admission.response;
     const body = await readJson(request);
     const conversationId = String(body.conversationId || '');
     const message = cleanText(body.body, 10000);
@@ -56,4 +61,3 @@ export async function onRequestPost({ request, env }) {
     return json({ error: error.message || 'message_send_failed' }, 400);
   }
 }
-

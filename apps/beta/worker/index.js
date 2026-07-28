@@ -18,9 +18,24 @@ import {
   onRequestPost as messagesPost
 } from '../../../functions/api/members/messages.js';
 import { onRequestPost as albumsPost } from '../../../functions/api/members/albums.js';
+import {
+  onRequestDelete as albumMediaDelete,
+  onRequestPost as albumMediaPost
+} from '../../../functions/api/members/album-media.js';
+import {
+  onRequestDelete as albumAccessDelete,
+  onRequestPost as albumAccessPost
+} from '../../../functions/api/members/album-access.js';
 import { onRequestPost as coupleInvitePost } from '../../../functions/api/members/couple-invite.js';
+import {
+  onRequestDelete as memberPhotosDelete,
+  onRequestGet as memberPhotosGet,
+  onRequestPost as memberPhotosPost
+} from '../../../functions/api/members/photos.js';
 import { onRequestPost as adminInvitePost } from '../../../functions/api/admin/invites.js';
+import { onRequestPost as adminVenueImportPost } from '../../../functions/api/admin/venue-import.js';
 import { onRequestGet as communeReferenceGet } from '../../../functions/api/reference/communes.js';
+import { onRequestGet as venueReferenceGet } from '../../../functions/api/reference/venues.js';
 
 const API_ROUTES = new Map([
   ['POST /api/auth/signup', signup],
@@ -36,9 +51,18 @@ const API_ROUTES = new Map([
   ['GET /api/members/messages', messagesGet],
   ['POST /api/members/messages', messagesPost],
   ['POST /api/members/albums', albumsPost],
+  ['POST /api/members/album-media', albumMediaPost],
+  ['DELETE /api/members/album-media', albumMediaDelete],
+  ['POST /api/members/album-access', albumAccessPost],
+  ['DELETE /api/members/album-access', albumAccessDelete],
   ['POST /api/members/couple-invite', coupleInvitePost],
+  ['GET /api/members/photos', memberPhotosGet],
+  ['POST /api/members/photos', memberPhotosPost],
+  ['DELETE /api/members/photos', memberPhotosDelete],
   ['POST /api/admin/invites', adminInvitePost],
-  ['GET /api/reference/communes', communeReferenceGet]
+  ['POST /api/admin/venue-import', adminVenueImportPost],
+  ['GET /api/reference/communes', communeReferenceGet],
+  ['GET /api/reference/venues', venueReferenceGet]
 ]);
 
 const PROTECTED_PREFIXES = ['/membres', '/pro', '/control'];
