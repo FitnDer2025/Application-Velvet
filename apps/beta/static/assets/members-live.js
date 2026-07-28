@@ -14,10 +14,13 @@
     membership: null,
     personalProfileComplete: false,
     photos: [],
+    settings: null,
     route: 'home',
     selectedProfileId: null,
     profileTab: 'couple',
-    editing: false
+    editing: false,
+    installPrompt: null,
+    serviceWorker: null
   };
 
   const content = document.querySelector('#content');
@@ -202,6 +205,35 @@
     toastNode.classList.add('show');
     window.clearTimeout(toast.timer);
     toast.timer = window.setTimeout(() => toastNode.classList.remove('show'), 3200);
+  }
+
+  async function initializeWebExperience() {
+    if ('serviceWorker' in navigator) {
+      state.serviceWorker = await navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => null);
+    }
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault();
+      state.installPrompt = event;
+      document.querySelector('[data-install-velvet]')?.removeAttribute('hidden');
+    });
+    window.addEventListener('appinstalled', () => {
+      state.installPrompt = null;
+      toast('Velvet est installé sur cet appareil.');
+    });
+  }
+
+  async function showBrowserNotification(title, body, url = '/membres/') {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return false;
+    const registration = state.serviceWorker || await navigator.serviceWorker?.ready?.catch(() => null);
+    if (!registration) return false;
+    await registration.showNotification(title, {
+      body,
+      icon: '/assets/velvet-icon.svg',
+      badge: '/assets/velvet-icon.svg',
+      tag: 'velvet-settings-test',
+      data: { url }
+    });
+    return true;
   }
 
   function list(value) {
@@ -494,11 +526,287 @@
     </form>`;
   }
 
+  function hiddenValues(name, values) {
+    return list(values).map((value) => `<input type="hidden" name="${e(name)}" value="${e(value)}">`).join('');
+  }
+
+  function discoveryStep(number, kicker, title, text, body) {
+    return `<section class="discovery-step" data-discovery-step="${number}"${number ? ' hidden' : ''}>
+      <p class="eyebrow">${e(kicker)}</p>
+      <h1>${e(title)}</h1>
+      <p class="discovery-lead">${e(text)}</p>
+      <div class="discovery-question">${body}</div>
+    </section>`;
+  }
+
+  function discoveryChoice(name, value, label, text, selected = false) {
+    return `<label class="discovery-choice">
+      <input type="radio" name="${e(name)}" value="${e(value)}"${selected ? ' checked' : ''} required>
+      <span><strong>${e(label)}</strong><small>${e(text)}</small></span>
+    </label>`;
+  }
+
+  function discoveryProfileForm(profile = null) {
+    const people = profilePeople(profile);
+    const ownPerson = people.find((person) => person.linked_user_id === state.account?.userId) || {};
+    const joiningPartner = Boolean(profile && !state.personalProfileComplete);
+    const currentType = profile?.profile_type || '';
+    const commonHidden = joiningPartner ? `
+      <input type="hidden" name="display_name" value="${e(profile.display_name)}">
+      <input type="hidden" name="city" value="${e(profile.city)}">
+      <input type="hidden" name="location_zone" value="${e(profile.location_zone)}">
+      <input type="hidden" name="relationship_since" value="${e(profile.relationship_since)}">
+      <input type="hidden" name="description" value="${e(profile.description)}">
+      <input type="hidden" name="story" value="${e(profile.story)}">
+      <input type="hidden" name="journey" value="${e(profile.journey)}">
+      <input type="hidden" name="search_text" value="${e(profile.search_text)}">
+      ${hiddenValues('availability', selectedFromText(profile.availability_text))}
+      ${hiddenValues('practices', profile.practices)}
+      ${hiddenValues('values_list', profile.values_list)}
+      ${hiddenValues('favorite_places', profile.favorite_places)}
+    ` : '';
+    const start = joiningPartner ? 0 : 0;
+    const steps = joiningPartner ? [
+      discoveryStep(start, `Invitation de ${profile.display_name}`, 'À ton tour de te présenter.', 'La partie commune existe déjà. Tu vas maintenant créer la fiche qui t’appartient et que toi seul(e) pourras modifier.', `
+        <input type="hidden" name="profile_type" id="profileType" value="${e(currentType)}">
+        ${commonHidden}
+        <label>Comment veux-tu qu’on t’appelle ?
+          <input name="p0_first_name" maxlength="80" value="${e(ownPerson.first_name)}" autocomplete="given-name" required autofocus>
+        </label>
+      `),
+      discoveryStep(1, 'Ton identité', 'Comment te définis-tu ?', 'Cette information aide Velvet à présenter correctement ta fiche et à appliquer les préférences des autres membres.', `
+        <label>Identité de genre
+          <select name="p0_gender_identity" required>
+            <option value="">Choisir…</option>
+            ${REFERENCES.genderIdentities.map((option) => `<option value="${e(option)}"${option === ownPerson.gender_identity ? ' selected' : ''}>${e(option)}</option>`).join('')}
+          </select>
+        </label>
+      `)
+    ] : [
+      discoveryStep(0, 'Bienvenue dans Velvet', 'Tu arrives seul(e) ou à deux ?', 'Il n’y a pas de mauvais choix : la suite s’adaptera automatiquement à ton profil.', `
+        <div class="discovery-choices">
+          ${discoveryChoice('profile_type', 'individual', 'Je crée un profil individuel', 'Une page centrée sur toi, tes envies et ton univers.', currentType === 'individual')}
+          ${discoveryChoice('profile_type', 'couple', 'Nous créons un profil couple', 'Une page commune et deux fiches personnelles distinctes.', currentType === 'couple')}
+        </div>
+        <select id="profileType" aria-hidden="true" tabindex="-1"><option value=""></option></select>
+      `),
+      discoveryStep(1, 'Votre identité Velvet', 'Comment veux-tu qu’on t’appelle ?', 'Pour un couple, indiquez le nom sous lequel vous souhaitez être connus ensemble.', `
+        <label><span data-name-label>Nom affiché</span>
+          <input name="display_name" maxlength="120" value="${e(profile?.display_name)}" autocomplete="nickname" required autofocus>
+        </label>
+      `),
+      discoveryStep(2, 'Votre région', 'Où peut-on vous situer ?', 'La commune de résidence reste distincte de la zone que vous choisissez de rendre publique.', `
+        <div class="form-grid">
+          ${communeField('city', 'Ville de résidence', profile?.city, 'Référentiel officiel avec code postal.')}
+          ${communeField('location_zone', 'Localisation publique', profile?.location_zone, 'Exemple : Lens et 30 km autour.')}
+          <label data-couple-only>Ensemble depuis — année
+            <input name="relationship_since" type="number" min="1900" max="${new Date().getFullYear()}" value="${e(profile?.relationship_since)}">
+          </label>
+        </div>
+      `),
+      discoveryStep(3, 'Ta fiche personnelle', 'Et toi, comment veux-tu qu’on t’appelle ?', 'Dans un couple, cette partie est la tienne : ton ou ta partenaire remplira sa propre fiche depuis son invitation.', `
+        <div class="form-grid">
+          <label>Prénom ou pseudonyme
+            <input name="p0_first_name" maxlength="80" value="${e(ownPerson.first_name)}" required>
+          </label>
+          <label>Identité de genre
+            <select name="p0_gender_identity" required>
+              <option value="">Choisir…</option>
+              ${REFERENCES.genderIdentities.map((option) => `<option value="${e(option)}"${option === ownPerson.gender_identity ? ' selected' : ''}>${e(option)}</option>`).join('')}
+            </select>
+          </label>
+        </div>
+      `)
+    ];
+
+    const nextIndex = steps.length;
+    steps.push(
+      discoveryStep(nextIndex, 'Quelques repères', 'Comment te décrirais-tu physiquement ?', 'Ces données rendent la fiche utile au premier regard. Tu restes libre de laisser les champs facultatifs vides.', `
+        <div class="form-grid">
+          <label>Année de naissance<input name="p0_birth_year" type="number" min="1900" max="${new Date().getFullYear() - 18}" value="${e(ownPerson.birth_year)}"></label>
+          <label>Taille en cm<input name="p0_height_cm" type="number" min="100" max="250" value="${e(ownPerson.height_cm)}"></label>
+          <label>Poids en kg<input name="p0_weight_kg" type="number" min="30" max="350" value="${e(ownPerson.weight_kg)}"></label>
+          ${selectField('p0_morphology', 'Morphologie', REFERENCES.morphologies, ownPerson.morphology)}
+        </div>
+      `),
+      discoveryStep(nextIndex + 1, 'Ton allure', 'Quels détails te ressemblent ?', 'Les fiches Velvet racontent une personne, pas une série de cases.', `
+        <div class="form-grid">
+          ${selectField('p0_hair_color', 'Couleur des cheveux', REFERENCES.hairColors, ownPerson.hair_color)}
+          ${selectField('p0_eye_color', 'Couleur des yeux', REFERENCES.eyeColors, ownPerson.eye_color)}
+          <label>Enfants
+            <select name="p0_children_status">
+              <option value="private"${ownPerson.children_status === 'private' || !ownPerson.children_status ? ' selected' : ''}>Information privée</option>
+              <option value="yes"${ownPerson.children_status === 'yes' ? ' selected' : ''}>Oui</option>
+              <option value="no"${ownPerson.children_status === 'no' ? ' selected' : ''}>Non</option>
+            </select>
+          </label>
+          <label>Profession<input name="p0_profession" maxlength="120" value="${e(ownPerson.profession)}"></label>
+          <label class="check"><input name="p0_profession_private" type="checkbox"${ownPerson.profession_private !== false ? ' checked' : ''}><span>Garder ma profession privée</span></label>
+        </div>
+      `),
+      discoveryStep(nextIndex + 2, 'Tes affinités', 'Qu’est-ce qui t’attire ?', 'Ces réponses peuvent évoluer. Elles servent à améliorer les rencontres, jamais à présumer d’un consentement.', `
+        <div class="form-grid">
+          ${selectField('p0_orientation', 'Orientation', REFERENCES.orientations, ownPerson.orientation)}
+          ${selectField('p0_frequency', 'Fréquence de pratique', REFERENCES.frequencies, ownPerson.frequency)}
+          ${multiField('p0_attracted_to', 'Attiré(e) par', REFERENCES.attractions, ownPerson.attracted_to)}
+        </div>
+      `),
+      discoveryStep(nextIndex + 3, 'Tes envies', 'Qu’aimerais-tu vivre ?', 'Choisis ce qui te ressemble aujourd’hui. Tout reste soumis au dialogue et au consentement du moment.', `
+        <div class="form-grid">
+          ${multiField('p0_desired_practices', 'Ce que je préfère vivre pour moi-même', REFERENCES.experiences, ownPerson.desired_practices)}
+          <div data-couple-only>${multiField('p0_partner_permissions', 'Ce que je suis à l’aise de laisser vivre à mon/ma partenaire', REFERENCES.experiences, ownPerson.partner_permissions)}</div>
+        </div>
+      `),
+      discoveryStep(nextIndex + 4, 'Derrière le profil', 'Que faut-il comprendre de toi ?', 'Quelques phrases sincères valent mieux qu’une fiche impersonnelle.', `
+        <label>Ta description personnelle
+          <textarea name="p0_biography" class="long" maxlength="4000" placeholder="Ton caractère, ta façon d’aborder les rencontres, ce qui compte pour toi…">${e(ownPerson.biography)}</textarea>
+        </label>
+      `)
+    );
+
+    if (!joiningPartner) {
+      const commonIndex = nextIndex + 5;
+      steps.push(
+        discoveryStep(commonIndex, 'Votre univers', 'Comment vous présenter en quelques mots ?', 'C’est le texte qui donnera envie d’ouvrir votre page Wikipédia intime.', `
+          <label><span data-description-label>Description principale</span>
+            <textarea name="description" class="long" minlength="20" maxlength="4000" required placeholder="Décrivez votre énergie, votre complicité et votre façon de rencontrer…">${e(profile?.description)}</textarea>
+          </label>
+        `),
+        discoveryStep(commonIndex + 1, 'Votre histoire', 'Quel parcours vous a menés jusqu’ici ?', 'Racontez ce qui vous unit, vos découvertes et la manière dont votre univers s’est construit.', `
+          <div class="form-grid">
+            <label class="wide">Votre histoire<textarea name="story" class="long" maxlength="8000">${e(profile?.story)}</textarea></label>
+            <label class="wide">Votre parcours<textarea name="journey" maxlength="4000">${e(profile?.journey)}</textarea></label>
+          </div>
+        `),
+        discoveryStep(commonIndex + 2, 'Vos rencontres', 'Que recherchez-vous vraiment ?', 'Parlez du type de personnes, du rythme et du feeling que vous souhaitez.', `
+          <label>Ce que vous recherchez
+            <textarea name="search_text" class="long" maxlength="4000">${e(profile?.search_text)}</textarea>
+          </label>
+        `),
+        discoveryStep(commonIndex + 3, 'Votre philosophie', 'Qu’aimez-vous partager ?', 'Choisissez vos pratiques et les valeurs qui structurent vos rencontres.', `
+          <div class="form-grid">
+            ${multiField('practices', 'Pratiques', REFERENCES.practices, profile?.practices)}
+            ${multiField('values_list', 'Valeurs', REFERENCES.values, profile?.values_list)}
+          </div>
+        `),
+        discoveryStep(commonIndex + 4, 'Votre rythme', 'Quand et où aimez-vous sortir ?', 'Velvet utilisera ces repères pour proposer des profils, lieux et événements cohérents.', `
+          <div class="form-grid">
+            ${multiField('availability', 'Disponibilités habituelles', REFERENCES.availability, selectedFromText(profile?.availability_text))}
+            ${venueField(profile?.favorite_places)}
+          </div>
+        `)
+      );
+    }
+
+    const total = steps.length;
+    return `<form id="profileForm" class="form-shell discovery-form" data-discovery data-total-steps="${total}">
+      <section class="onboarding discovery-shell">
+        <header class="discovery-progress" aria-label="Progression">
+          <span><strong data-progress-current>1</strong> / ${total}</span>
+          <div><i data-progress-bar style="width:${Math.max(5, 100 / total)}%"></i></div>
+          <button class="text-button" type="button" data-discovery-save>Enregistré à la fin</button>
+        </header>
+        ${steps.join('')}
+        <footer class="discovery-actions">
+          <button class="secondary" type="button" data-discovery-back hidden>Retour</button>
+          <button class="primary" type="button" data-discovery-next>Continuer</button>
+          <button class="primary" type="submit" data-discovery-submit hidden>${joiningPartner ? 'Rejoindre notre profil' : 'Découvrir Velvet'}</button>
+        </footer>
+        <p id="profileFormStatus" class="status-box" hidden></p>
+      </section>
+    </form>`;
+  }
+
   function renderOnboarding(profile = null) {
     state.editing = true;
-    content.innerHTML = `<div class="page">${profileForm(profile)}</div>`;
-    bindProfileForm();
+    const joiningPartner = Boolean(profile && !state.personalProfileComplete);
+    content.innerHTML = `<div class="page">${(!profile || joiningPartner) ? discoveryProfileForm(profile) : profileForm(profile)}</div>`;
+    if (!profile || joiningPartner) bindDiscoveryForm();
+    else bindProfileForm();
     content.focus();
+  }
+
+  function bindDiscoveryForm() {
+    const form = document.querySelector('#profileForm[data-discovery]');
+    if (!form) return;
+    bindReferenceFields(form);
+    const steps = [...form.querySelectorAll('[data-discovery-step]')];
+    const back = form.querySelector('[data-discovery-back]');
+    const next = form.querySelector('[data-discovery-next]');
+    const submit = form.querySelector('[data-discovery-submit]');
+    const progress = form.querySelector('[data-progress-current]');
+    const bar = form.querySelector('[data-progress-bar]');
+    let current = 0;
+
+    const profileType = () => new FormData(form).get('profile_type') || state.profile?.profile_type || '';
+    const refreshCopy = () => {
+      const couple = profileType() === 'couple';
+      form.querySelectorAll('[data-couple-only]').forEach((node) => {
+        node.hidden = !couple;
+        node.querySelectorAll('input,select,textarea').forEach((field) => {
+          field.disabled = !couple;
+        });
+      });
+      const nameLabel = form.querySelector('[data-name-label]');
+      if (nameLabel) nameLabel.textContent = couple
+        ? 'Comment voulez-vous qu’on vous appelle ?'
+        : 'Comment veux-tu qu’on t’appelle ?';
+      const descriptionLabel = form.querySelector('[data-description-label]');
+      if (descriptionLabel) descriptionLabel.textContent = couple
+        ? 'Description du couple'
+        : 'Ta description principale';
+      submit.textContent = couple ? 'Inviter ma moitié' : 'Découvrir Velvet';
+    };
+
+    const display = () => {
+      steps.forEach((step, index) => { step.hidden = index !== current; });
+      back.hidden = current === 0;
+      next.hidden = current === steps.length - 1;
+      submit.hidden = current !== steps.length - 1;
+      progress.textContent = String(current + 1);
+      bar.style.width = `${((current + 1) / steps.length) * 100}%`;
+      refreshCopy();
+      const focusable = steps[current].querySelector('input:not([type=hidden]),select,textarea');
+      window.setTimeout(() => focusable?.focus({ preventScroll: true }), 80);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const validateCurrent = () => {
+      const fields = [...steps[current].querySelectorAll('input,select,textarea')].filter((field) => !field.disabled);
+      const radioGroups = new Set(fields.filter((field) => field.type === 'radio').map((field) => field.name));
+      for (const group of radioGroups) {
+        if (!form.querySelector(`input[name="${group}"]:checked`)) {
+          form.querySelector(`input[name="${group}"]`)?.reportValidity();
+          return false;
+        }
+      }
+      for (const field of fields) {
+        if (!field.checkValidity()) {
+          field.reportValidity();
+          return false;
+        }
+      }
+      return true;
+    };
+
+    form.addEventListener('change', refreshCopy);
+    next.addEventListener('click', () => {
+      if (!validateCurrent()) return;
+      current = Math.min(steps.length - 1, current + 1);
+      display();
+    });
+    back.addEventListener('click', () => {
+      current = Math.max(0, current - 1);
+      display();
+    });
+    form.addEventListener('submit', (event) => {
+      if (!validateCurrent()) {
+        event.preventDefault();
+        return;
+      }
+      saveProfile(event);
+    });
+    display();
   }
 
   function bindReferenceFields(scope = document) {
@@ -1149,6 +1457,171 @@
     </div>`;
   }
 
+  const AUDIENCE_OPTIONS = [
+    ['couple', 'Couples', 'Profils créés et partagés à deux'],
+    ['woman', 'Femmes', 'Profils individuels féminins'],
+    ['man', 'Hommes', 'Profils individuels masculins'],
+    ['trans_nonbinary', 'Personnes trans et non binaires', 'Identités transgenres et non binaires'],
+    ['other', 'Autres identités', 'Identité privée, fluide ou non classée']
+  ];
+
+  const NOTIFICATION_EVENTS = [
+    ['messages', 'Nouveaux messages', 'Conversation privée et réponses'],
+    ['likes', 'Coups de cœur', 'Réactions sur votre profil ou vos photos'],
+    ['album_access', 'Albums privés', 'Demandes, accès accordés et expirations'],
+    ['profile_views', 'Visites du profil', 'Membres ayant découvert votre univers'],
+    ['events', 'Sorties', 'Inscriptions, rappels et changements'],
+    ['recommendations', 'Recommandations', 'Nouvelles compatibilités et recommandations'],
+    ['security', 'Sécurité du compte', 'Connexion, validation et alertes Velvet']
+  ];
+
+  function settingsChecks(name, options, selected) {
+    const values = new Set(list(selected));
+    return `<div class="settings-options">${options.map(([value, label, help]) => `
+      <label class="settings-toggle">
+        <span><strong>${e(label)}</strong><small>${e(help)}</small></span>
+        <input type="checkbox" name="${e(name)}" value="${e(value)}"${values.has(value) ? ' checked' : ''}>
+        <i aria-hidden="true"></i>
+      </label>`).join('')}</div>`;
+  }
+
+  function notificationEventChecks(events = {}) {
+    return `<div class="settings-options">${NOTIFICATION_EVENTS.map(([value, label, help]) => `
+      <label class="settings-toggle">
+        <span><strong>${e(label)}</strong><small>${e(help)}</small></span>
+        <input type="checkbox" name="event_type" value="${e(value)}"${events[value] !== false ? ' checked' : ''}>
+        <i aria-hidden="true"></i>
+      </label>`).join('')}</div>`;
+  }
+
+  function renderSettingsView(settings) {
+    const privacy = settings.privacy || {};
+    const notifications = settings.notifications || {};
+    const installed = window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone;
+    const browserPermission = 'Notification' in window ? Notification.permission : 'unsupported';
+    return `<div class="page settings-page">
+      ${pageHead('Confidentialité · tranquillité · contrôle', 'Paramètres', 'Décide précisément qui peut te découvrir, qui peut t’écrire et ce que Velvet est autorisé à te signaler.')}
+      <form id="settingsForm" class="settings-layout">
+        <section class="card settings-card">
+          <p class="eyebrow">Visibilité</p><h2>Qui peut voir votre profil ?</h2>
+          <p>Les catégories décochées ne verront plus votre fiche dans Découvrir et ne pourront pas l’ouvrir directement.</p>
+          ${settingsChecks('discoverable_by', AUDIENCE_OPTIONS, privacy.discoverable_by)}
+        </section>
+        <section class="card settings-card">
+          <p class="eyebrow">Messagerie</p><h2>Qui peut vous contacter ?</h2>
+          <p>Ce réglage est contrôlé côté serveur lors de la création d’une conversation.</p>
+          ${settingsChecks('contactable_by', AUDIENCE_OPTIONS, privacy.contactable_by)}
+        </section>
+        <section class="card settings-card">
+          <p class="eyebrow">Origine des alertes</p><h2>Notifications venant de…</h2>
+          <p>Filtre les alertes sociales selon le type de profil à l’origine de l’action.</p>
+          ${settingsChecks('notify_from', AUDIENCE_OPTIONS, notifications.notify_from)}
+        </section>
+        <section class="card settings-card">
+          <p class="eyebrow">Activité</p><h2>Que souhaitez-vous recevoir ?</h2>
+          ${notificationEventChecks(notifications.event_types)}
+        </section>
+        <section class="card settings-card">
+          <p class="eyebrow">Canaux</p><h2>Où Velvet peut vous prévenir ?</h2>
+          <div class="settings-options">
+            <label class="settings-toggle"><span><strong>Dans Velvet</strong><small>Badges et centre de notifications</small></span><input type="checkbox" name="in_app_enabled"${notifications.in_app_enabled !== false ? ' checked' : ''}><i></i></label>
+            <label class="settings-toggle"><span><strong>Notifications du téléphone</strong><small>Web mobile et PWA · état : ${e(browserPermission)}</small></span><input type="checkbox" name="browser_enabled"${notifications.browser_enabled ? ' checked' : ''}${browserPermission === 'unsupported' ? ' disabled' : ''}><i></i></label>
+            <label class="settings-toggle"><span><strong>Par e-mail</strong><small>Récapitulatif et alertes choisies</small></span><input type="checkbox" name="email_enabled"${notifications.email_enabled !== false ? ' checked' : ''}><i></i></label>
+          </div>
+          <div class="quiet-hours">
+            <label>Mode silencieux à partir de<input type="time" name="quiet_hours_start" value="${e(String(notifications.quiet_hours_start || '').slice(0, 5))}"></label>
+            <label>Reprendre les alertes à<input type="time" name="quiet_hours_end" value="${e(String(notifications.quiet_hours_end || '').slice(0, 5))}"></label>
+          </div>
+          <button class="secondary" type="button" data-test-notification>Autoriser et tester une notification</button>
+        </section>
+        <section class="card settings-card mobile-app-card">
+          <p class="eyebrow">Web mobile</p><h2>Velvet sur votre écran d’accueil</h2>
+          <p>${installed ? 'Velvet est déjà ouvert comme une application sur cet appareil.' : 'Installe Velvet depuis le navigateur pour obtenir un affichage plein écran, un accès rapide et les notifications web.'}</p>
+          <button class="secondary" type="button" data-install-velvet${state.installPrompt || installed ? '' : ' hidden'}>${installed ? 'Velvet est installé' : 'Installer Velvet'}</button>
+          <small>Sur iPhone : Partager → Sur l’écran d’accueil. Sur Android : menu du navigateur → Installer l’application.</small>
+        </section>
+        <footer class="settings-save">
+          <p id="settingsStatus" class="status-box" hidden></p>
+          <button class="primary" type="submit">Enregistrer mes paramètres</button>
+        </footer>
+      </form>
+    </div>`;
+  }
+
+  async function openSettings() {
+    content.innerHTML = `<div class="page"><section class="loading-state"><span class="loader"></span><p>Chargement de tes préférences…</p></section></div>`;
+    try {
+      state.settings = await api('/api/members/settings');
+      content.innerHTML = renderSettingsView(state.settings);
+      bindSettings();
+      content.focus();
+    } catch (error) {
+      content.innerHTML = `<div class="page">${emptyState('Paramètres indisponibles', errorMessages[error.message] || error.message, '!')}</div>`;
+    }
+  }
+
+  function bindSettings() {
+    const form = document.querySelector('#settingsForm');
+    if (!form) return;
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const button = form.querySelector('[type=submit]');
+      const status = form.querySelector('#settingsStatus');
+      const data = new FormData(form);
+      const enabledEvents = new Set(data.getAll('event_type'));
+      const payload = {
+        discoverable_by: data.getAll('discoverable_by'),
+        contactable_by: data.getAll('contactable_by'),
+        notify_from: data.getAll('notify_from'),
+        event_types: Object.fromEntries(NOTIFICATION_EVENTS.map(([name]) => [name, enabledEvents.has(name)])),
+        in_app_enabled: data.has('in_app_enabled'),
+        browser_enabled: data.has('browser_enabled'),
+        email_enabled: data.has('email_enabled'),
+        quiet_hours_start: data.get('quiet_hours_start'),
+        quiet_hours_end: data.get('quiet_hours_end')
+      };
+      button.disabled = true;
+      status.hidden = false;
+      status.textContent = 'Enregistrement sécurisé…';
+      try {
+        state.settings = await api('/api/members/settings', { method: 'POST', body: JSON.stringify(payload) });
+        status.textContent = 'Tes préférences sont enregistrées et appliquées.';
+        toast('Paramètres enregistrés.');
+      } catch (error) {
+        status.textContent = errorMessages[error.message] || error.message;
+        toast(error.message, true);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    form.querySelector('[data-test-notification]')?.addEventListener('click', async () => {
+      if (!('Notification' in window)) {
+        toast('Ce navigateur ne prend pas en charge les notifications web.', true);
+        return;
+      }
+      const permission = await Notification.requestPermission();
+      const browserToggle = form.querySelector('[name=browser_enabled]');
+      browserToggle.checked = permission === 'granted';
+      if (permission === 'granted') {
+        await showBrowserNotification('Velvet est prêt', 'Tes notifications web sont maintenant autorisées.');
+        toast('Notification de test envoyée.');
+      } else {
+        toast('Les notifications restent bloquées dans les réglages du navigateur.', true);
+      }
+    });
+
+    form.querySelector('[data-install-velvet]')?.addEventListener('click', async () => {
+      if (!state.installPrompt) {
+        toast('Utilise le menu du navigateur puis « Sur l’écran d’accueil » ou « Installer ».');
+        return;
+      }
+      await state.installPrompt.prompt();
+      await state.installPrompt.userChoice;
+      state.installPrompt = null;
+    });
+  }
+
   function renderConversations() {
     const rows = list(state.directory.conversations);
     return `<div class="page">${pageHead('Messagerie privée', 'Conversations', 'Seules les conversations auxquelles ton compte participe sont affichées.')}
@@ -1204,6 +1677,11 @@
     if (name === 'events') content.innerHTML = renderEvents();
     if (name === 'venues') content.innerHTML = renderVenues();
     if (name === 'notifications') content.innerHTML = renderNotifications();
+    if (name === 'settings') {
+      openSettings();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     if (name === 'me') {
       state.selectedProfileId = state.profile.id;
       content.innerHTML = renderProfile(state.profile, true);
@@ -1492,5 +1970,6 @@
     event.currentTarget.setAttribute('aria-expanded', String(open));
   });
 
+  initializeWebExperience();
   loadAll();
 })();

@@ -1,0 +1,20 @@
+{
+  "name": "Velvet — BETA privée",
+  "short_name": "Velvet",
+  "description": "L’expérience membre privée de Velvet.",
+  "id": "/membres/",
+  "start_url": "/membres/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b080a",
+  "theme_color": "#7e2045",
+  "icons": [
+    {
+      "src": "/assets/velvet-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

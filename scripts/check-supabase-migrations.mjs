@@ -9,9 +9,10 @@ const neutralBeta = await readFile('infra/supabase/migrations/0006_neutral_beta_
 const sharedCouple = await readFile('infra/supabase/migrations/0007_shared_couple_ownership.sql', 'utf8');
 const memberOnboarding = await readFile('infra/supabase/migrations/0008_member_onboarding_identity.sql', 'utf8');
 const photoAdmission = await readFile('infra/supabase/migrations/0009_photo_admission_and_venue_directory.sql', 'utf8');
+const memberPreferences = await readFile('infra/supabase/migrations/0010_member_privacy_notifications_pwa.sql', 'utf8');
 
-const tables = [...`${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}`.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}`;
+const tables = [...`${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}`.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -53,7 +54,11 @@ const requirements = [
   [photoAdmission.includes('duration_hours not in (1,2,4,8,12,24)'), 'Les durées privées autorisées doivent être bornées'],
   [photoAdmission.includes('revoke_private_album_from_profile'), 'Un accès privé permanent doit rester révocable'],
   [photoAdmission.includes('venue_directory') && photoAdmission.includes('enable row level security'), 'Le référentiel des lieux doit être protégé par RLS'],
-  [!`${core}${rls}${storage}${inviteFix}${grants}${neutralBeta}${sharedCouple}${memberOnboarding}${photoAdmission}`.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
+  [memberPreferences.includes('profile_privacy_settings') && memberPreferences.includes('profile_accepts_audience'), 'Les préférences de visibilité doivent être appliquées côté serveur'],
+  [memberPreferences.includes('can_contact_user') && memberPreferences.includes('conversation_members_create'), 'Les préférences de contact doivent protéger les nouvelles conversations'],
+  [memberPreferences.includes('member_notification_settings'), 'Les préférences de notification doivent être persistantes'],
+  [memberPreferences.includes('browser_push_subscriptions') && memberPreferences.includes('browser_push_self_read'), 'Les abonnements navigateur doivent être isolés par utilisateur'],
+  [!`${core}${rls}${storage}${inviteFix}${grants}${neutralBeta}${sharedCouple}${memberOnboarding}${photoAdmission}${memberPreferences}`.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 
 for (const [valid, message] of requirements) {
