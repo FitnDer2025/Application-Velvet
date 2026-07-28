@@ -77,7 +77,14 @@ export async function onRequestGet({ request, env }) {
       '/rest/v1/couple_partner_invitations?select=id,profile_id,invited_email,status,accepted_user_id,accepted_at,created_at,delivery_status,delivery_provider,delivery_attempted_at&order=created_at.desc&limit=1',
       access.session
     );
-    return withSession({ invitation: rows?.[0] || null }, access.session);
+    const invitation = rows?.[0] || null;
+    return withSession({
+      invitation: invitation ? {
+        ...invitation,
+        partnerAccepted: invitation.status === 'accepted',
+        status: invitation.status === 'accepted' ? 'pending' : invitation.status
+      } : null
+    }, access.session);
   } catch (error) {
     return json({ error: error.message || 'couple_invitation_read_failed' }, 400);
   }
