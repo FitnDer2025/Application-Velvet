@@ -16,6 +16,29 @@ export async function memberSession(request, env) {
   return { session, account };
 }
 
+export async function memberAdmission(env, access) {
+  const rows = await restJson(
+    env,
+    `/rest/v1/member_profiles?select=id,profile_type,admission_status&profile_members!inner(user_id,status)&profile_members.user_id=eq.${encodeURIComponent(access.account.userId)}&profile_members.status=eq.active&limit=1`,
+    access.session
+  );
+  return rows?.[0] || null;
+}
+
+export async function requireAdmittedMember(env, access) {
+  const admission = await memberAdmission(env, access);
+  if (!admission || admission.admission_status !== 'approved') {
+    return {
+      admission,
+      response: withSession({
+        error: 'photo_admission_required',
+        admission
+      }, access.session, 403)
+    };
+  }
+  return { admission };
+}
+
 export async function restJson(env, path, session, init = {}) {
   const response = await supabase(env, path, init, session.access_token);
   const payload = await response.json().catch(() => null);
