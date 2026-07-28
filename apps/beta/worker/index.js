@@ -18,7 +18,7 @@ const PROTECTED_PREFIXES = ['/membres', '/pro', '/control'];
 function securityHeaders(response) {
   const secured = new Response(response.body, response);
   secured.headers.set('x-content-type-options', 'nosniff');
-  secured.headers.set('x-frame-options', 'DENY');
+  secured.headers.set('x-frame-options', 'SAMEORIGIN');
   secured.headers.set('referrer-policy', 'no-referrer');
   secured.headers.set('permissions-policy', 'camera=(), microphone=(), geolocation=(self), payment=(), usb=()');
   secured.headers.set('x-robots-tag', 'noindex, nofollow, noarchive');
