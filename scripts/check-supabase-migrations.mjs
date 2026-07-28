@@ -6,9 +6,10 @@ const storage = await readFile('infra/supabase/migrations/0003_velvet_beta_stora
 const inviteFix = await readFile('infra/supabase/migrations/0004_fix_invite_crypto_schema.sql', 'utf8');
 const grants = await readFile('infra/supabase/migrations/0005_authenticated_api_grants.sql', 'utf8');
 const neutralBeta = await readFile('infra/supabase/migrations/0006_neutral_beta_profiles.sql', 'utf8');
+const sharedCouple = await readFile('infra/supabase/migrations/0007_shared_couple_ownership.sql', 'utf8');
 
-const tables = [...`${core}\n${neutralBeta}`.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}`;
+const tables = [...`${core}\n${neutralBeta}\n${sharedCouple}`.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -32,7 +33,11 @@ const requirements = [
   [neutralBeta.includes('is_demo = false'), 'Le parcours réel ne doit jamais créer de profil fictif'],
   [neutralBeta.includes('organizer_requests_self_create'), 'Une demande Organisateur doit être protégée par RLS'],
   [neutralBeta.includes("not public.has_role('admin')"), 'La création des invitations doit être réservée aux administrateurs'],
-  [!`${core}${rls}${storage}${inviteFix}${grants}${neutralBeta}`.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
+  [sharedCouple.includes('invite_my_couple_partner'), 'Le rattachement du second partenaire doit utiliser une invitation dédiée'],
+  [sharedCouple.includes("member_slot = 'partner_b'"), 'L’invitation partenaire doit cibler la seconde place du couple'],
+  [sharedCouple.includes('linked_user_id = auth.uid()'), 'Chaque fiche personnelle doit rester liée à son propriétaire'],
+  [sharedCouple.includes('revoke update on public.profile_members from authenticated'), 'Un partenaire ne doit pas modifier les appartenances du couple'],
+  [!`${core}${rls}${storage}${inviteFix}${grants}${neutralBeta}${sharedCouple}`.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 
 for (const [valid, message] of requirements) {
