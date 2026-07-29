@@ -10,6 +10,13 @@
       conversations: [],
       recommendations: []
     },
+    engagement: {
+      views: [],
+      reactions: [],
+      streaks: [],
+      currentUserId: null,
+      currentProfileId: null
+    },
     organizerRequest: null,
     membership: null,
     personalProfileComplete: false,
@@ -325,12 +332,14 @@
         return;
       }
       unlockApplication();
-      const [directoryResult, organizerResult] = await Promise.all([
+      const [directoryResult, organizerResult, engagementResult] = await Promise.all([
         api('/api/members/directory'),
-        api('/api/members/organizer-request').catch(() => ({ request: null }))
+        api('/api/members/organizer-request').catch(() => ({ request: null })),
+        api('/api/members/engagement')
       ]);
       state.directory = directoryResult;
       state.organizerRequest = organizerResult.request;
+      state.engagement = engagementResult;
       route('home');
     } catch (error) {
       if (error.message === 'authentication_required') {
@@ -353,16 +362,19 @@
     state.personalProfileComplete = profileResult.personalProfileComplete;
     if (state.profile?.admission_status !== 'approved') {
       state.directory = { profiles: [], establishments: [], events: [], conversations: [], recommendations: [] };
+      state.engagement = { views: [], reactions: [], streaks: [], currentUserId: null, currentProfileId: null };
       state.organizerRequest = null;
       await loadPhotos();
       return;
     }
-    const [directoryResult, organizerResult] = await Promise.all([
+    const [directoryResult, organizerResult, engagementResult] = await Promise.all([
       api('/api/members/directory'),
-      api('/api/members/organizer-request').catch(() => ({ request: null }))
+      api('/api/members/organizer-request').catch(() => ({ request: null })),
+      api('/api/members/engagement')
     ]);
     state.directory = directoryResult;
     state.organizerRequest = organizerResult.request;
+    state.engagement = engagementResult;
   }
 
   function lockApplication() {
@@ -1220,10 +1232,43 @@
     </div>`;
   }
 
+  function profileViewMemory(profileId) {
+    return list(state.engagement?.views).find((row) => row.viewed_profile_id === profileId) || null;
+  }
+
+  function profileReactions(profileId) {
+    return list(state.engagement?.reactions).filter((row) => row.target_profile_id === profileId);
+  }
+
+  function reactionDetails(value) {
+    return ({
+      '-1': { icon: '🧊', label: 'Pas pour moi', tone: 'cold' },
+      1: { icon: '🔥', label: 'J’aime bien', tone: 'warm' },
+      2: { icon: '🔥🔥', label: 'J’adore', tone: 'hot' },
+      3: { icon: '🔥🔥🔥', label: 'C’est canon', tone: 'blazing' }
+    })[String(value)] || { icon: '◇', label: 'Pas encore d’avis', tone: 'neutral' };
+  }
+
+  function viewedAtLabel(value) {
+    if (!value) return '';
+    return new Intl.DateTimeFormat('fr-FR', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(new Date(value));
+  }
+
+  function seenBadge(profileId) {
+    const memory = profileViewMemory(profileId);
+    if (!memory) return '';
+    return `<span class="seen-badge" role="button" tabindex="0" data-view-info="${e(profileId)}" aria-label="Voir la dernière consultation">
+      <span>✓</span> Déjà vu
+    </span>`;
+  }
+
   function memberTile(profile) {
     const cover = approvedProfilePhotos(profile)[0];
     return `<button class="card member-tile profile-card-button" data-open-profile="${e(profile.id)}">
-      <div class="member-cover">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}</div>
+      <div class="member-cover">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}${seenBadge(profile.id)}</div>
       <div class="member-body">
         <div class="member-meta"><span>${e(profile.profile_type === 'couple' ? 'Couple' : 'Individuel')}</span><span>${e(profile.location_zone || profile.city || 'Localisation privée')}</span></div>
         <h3>${e(profile.display_name)}</h3>
@@ -1231,6 +1276,49 @@
         ${chips(list(profile.practices).slice(0, 4))}
       </div>
     </button>`;
+  }
+
+  function profileEngagementPanel(profile, own) {
+    if (own) return '';
+    const memory = profileViewMemory(profile.id);
+    const reactions = profileReactions(profile.id);
+    const mine = reactions.find((row) => row.reactor_user_id === state.engagement?.currentUserId);
+    const others = reactions.filter((row) => row.reactor_user_id !== state.engagement?.currentUserId);
+    const myReaction = reactionDetails(mine?.reaction);
+    const positive = reactions.filter((row) => row.reaction > 0);
+    const consensus = reactions.length < 2
+      ? 'Ta moitié n’a pas encore donné son ressenti.'
+      : positive.length === reactions.length
+        ? `Vous êtes tous les deux séduits par ce profil.`
+        : positive.length === 0
+          ? 'Vos ressentis vont dans la même direction.'
+          : 'Vos premières impressions sont différentes — à vous d’en parler.';
+    return `<section class="profile-engagement-panel">
+      <article class="memory-card">
+        <span class="memory-icon">✓</span>
+        <div><small>Votre mémoire Velvet</small><strong>${memory ? `Consulté ${memory.view_count} fois` : 'Première découverte'}</strong>
+        <p>${memory ? `Dernière visite : ${e(viewedAtLabel(memory.last_viewed_at))}` : 'Cette visite sera ajoutée à votre historique privé.'}</p></div>
+      </article>
+      <article class="reaction-card">
+        <header><div><small>Ton ressenti privé</small><strong>${e(myReaction.label)}</strong></div><span class="reaction-current ${e(myReaction.tone)}">${myReaction.icon}</span></header>
+        <div class="reaction-picker" role="group" aria-label="Donner mon ressenti">
+          ${[-1,1,2,3].map((value) => {
+            const detail = reactionDetails(value);
+            return `<button type="button" class="${mine?.reaction === value ? 'active' : ''}" data-reaction-profile="${e(profile.id)}" data-profile-reaction="${value}" title="${e(detail.label)}"><span>${detail.icon}</span><small>${e(detail.label)}</small></button>`;
+          }).join('')}
+        </div>
+        ${mine ? `<button class="text-button clear-reaction" type="button" data-reaction-profile="${e(profile.id)}" data-profile-reaction="clear">Effacer mon ressenti</button>` : ''}
+        ${state.profile?.profile_type === 'couple' ? `<div class="couple-reaction">
+          <p class="eyebrow">Le regard du couple</p>
+          <div>${reactions.map((row) => {
+            const detail = reactionDetails(row.reaction);
+            return `<span><strong>${e(row.reactor_name || 'Partenaire')}</strong><b>${detail.icon}</b><small>${e(detail.label)}</small></span>`;
+          }).join('') || '<small>Donne ton premier ressenti.</small>'}</div>
+          <p>${e(consensus)}</p>
+        </div>` : ''}
+        <p class="privacy-note">Ce ressenti reste invisible pour le profil consulté. Il sert à votre comparaison et, plus tard, aux recommandations privées de Velvet Intelligence.</p>
+      </article>
+    </section>`;
   }
 
   function renderDiscover() {
@@ -1445,6 +1533,7 @@
         <div class="badges"><span class="pill gold">Membre BETA réel</span>${profile.relationship_since ? `<span class="pill">Depuis ${e(profile.relationship_since)}</span>` : ''}<span class="pill">${e(profile.location_zone || 'Zone privée')}</span></div>
         <div class="actions">${own ? '<button class="primary" data-edit-profile>Modifier mon profil</button>' : ''}${!own ? '<button class="secondary" data-route="conversations">Conversations</button>' : ''}</div>
       </div></section>
+      ${profileEngagementPanel(profile, own)}
       <nav class="profile-nav" aria-label="Sections du profil">
         <button data-profile-tab="couple" class="${state.profileTab === 'couple' ? 'active' : ''}">${profile.profile_type === 'couple' ? 'Le couple' : 'Présentation'}</button>
         ${people.map((person, index) => `<button data-profile-tab="person${index}" class="${state.profileTab === `person${index}` ? 'active' : ''}">${e(person.first_name || `Personne ${index + 1}`)}</button>`).join('')}
@@ -1649,8 +1738,36 @@
   function renderConversations() {
     const rows = list(state.directory.conversations);
     return `<div class="page">${pageHead('Messagerie privée', 'Conversations', 'Seules les conversations auxquelles ton compte participe sont affichées.')}
-      ${rows.length ? `<section class="grid two">${rows.map((conversation) => `<button class="card conversation" data-open-conversation="${e(conversation.id)}"><p class="eyebrow">${e(conversation.kind)}</p><h2>${e(conversation.subject || 'Conversation privée')}</h2><p>${list(conversation.conversation_members).length} participant(s)</p></button>`).join('')}</section>` : emptyState('Aucune conversation', 'Tes échanges réels apparaîtront ici. Aucun historique fictif n’a été conservé.', '◌')}
+      ${rows.length ? `<section class="grid two">${rows.map((conversation) => {
+        const streak = list(state.engagement?.streaks).find((row) => row.conversation_id === conversation.id);
+        return `<button class="card conversation" data-open-conversation="${e(conversation.id)}">
+          <div class="conversation-heading"><p class="eyebrow">${e(conversation.kind)}</p>${streak?.current_streak ? `<span class="streak-badge" title="Série de discussion active">🔥 ${e(streak.current_streak)} j</span>` : ''}</div>
+          <h2>${e(conversation.subject || 'Conversation privée')}</h2>
+          <p>${list(conversation.conversation_members).length} participant(s)</p>
+          ${streak?.longest_streak ? `<small>Meilleure série : ${e(streak.longest_streak)} jour${streak.longest_streak > 1 ? 's' : ''}</small>` : ''}
+        </button>`;
+      }).join('')}</section>` : emptyState('Aucune conversation', 'Tes échanges réels apparaîtront ici. Aucun historique fictif n’a été conservé.', '◌')}
     </div>`;
+  }
+
+  function conversationStreakCard(streak) {
+    const current = Number(streak?.current_streak || 0);
+    const longest = Number(streak?.longest_streak || 0);
+    const qualified = Number(streak?.qualified_days || 0);
+    if (!current && !longest) {
+      return `<aside class="conversation-streak-card dormant">
+        <span class="streak-flame">◇</span>
+        <div><small>Complicité Velvet</small><strong>Commencez votre série</strong><p>Une journée compte lorsque les deux profils échangent au moins un message.</p></div>
+      </aside>`;
+    }
+    const nextMilestone = [3, 7, 14, 30, 60, 100].find((value) => value > current);
+    return `<aside class="conversation-streak-card">
+      <span class="streak-flame">🔥</span>
+      <div><small>Série de discussion</small><strong>${e(current)} jour${current > 1 ? 's' : ''} de complicité</strong>
+        <p>${current ? `Échangez aujourd’hui pour entretenir la flamme.${nextMilestone ? ` Prochain palier : ${nextMilestone} jours.` : ''}` : `Votre meilleure série reste de ${longest} jours.`}</p>
+        <div class="streak-stats"><span><b>${e(longest)}</b> record</span><span><b>${e(qualified)}</b> jours partagés</span></div>
+      </div>
+    </aside>`;
   }
 
   async function openConversation(conversationId) {
@@ -1658,8 +1775,13 @@
     try {
       const result = await api(`/api/members/messages?conversationId=${encodeURIComponent(conversationId)}`);
       const conversation = list(state.directory.conversations).find((row) => row.id === conversationId);
+      if (result.streak) {
+        const otherStreaks = list(state.engagement?.streaks).filter((row) => row.conversation_id !== conversationId);
+        state.engagement.streaks = [result.streak, ...otherStreaks];
+      }
       content.innerHTML = `<div class="page">
         ${pageHead('Conversation privée', conversation?.subject || 'Conversation', 'Les messages sont enregistrés dans Supabase et protégés par les règles d’accès de la conversation.', '<button class="secondary" data-route="conversations">Retour</button>')}
+        ${conversationStreakCard(result.streak)}
         <section class="card">
           <div class="messages">${list(result.messages).length ? result.messages.map((message) => `<article class="message ${message.sender_user_id === result.currentUserId ? 'mine' : ''}"><small>${e(message.sender_identity || (message.sender_user_id === result.currentUserId ? 'Vous' : 'Membre'))}</small>${e(message.body)}</article>`).join('') : '<p>Aucun message dans cette conversation.</p>'}</div>
           <form id="messageForm" class="composer"><input name="body" maxlength="10000" placeholder="Écrire un message…" required><button class="primary" type="submit">Envoyer</button></form>
@@ -1716,7 +1838,7 @@
     content.focus();
   }
 
-  function openProfile(id) {
+  async function openProfile(id) {
     const profile = list(state.directory.profiles).find((row) => row.id === id);
     if (!profile) {
       toast('Profil introuvable.', true);
@@ -1724,6 +1846,23 @@
     }
     state.selectedProfileId = id;
     state.profileTab = 'couple';
+    if (id !== state.profile.id) {
+      try {
+        const result = await api('/api/members/engagement', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'view', profileId: id })
+        });
+        state.engagement = {
+          views: result.views || [],
+          reactions: result.reactions || [],
+          streaks: result.streaks || [],
+          currentUserId: result.currentUserId,
+          currentProfileId: result.currentProfileId
+        };
+      } catch (error) {
+        toast('La consultation n’a pas pu être ajoutée à ta mémoire Velvet.', true);
+      }
+    }
     content.innerHTML = renderProfile(profile, id === state.profile.id);
     bindDynamicForms();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1936,6 +2075,16 @@
       renderAdmission();
       return;
     }
+    const viewInfo = event.target.closest('[data-view-info]');
+    if (viewInfo) {
+      event.preventDefault();
+      event.stopPropagation();
+      const memory = profileViewMemory(viewInfo.dataset.viewInfo);
+      if (memory) {
+        toast(`Dernière consultation : ${viewedAtLabel(memory.last_viewed_at)} · ${memory.view_count} visite${memory.view_count > 1 ? 's' : ''}.`);
+      }
+      return;
+    }
     const routeButton = event.target.closest('[data-route]');
     if (routeButton) {
       event.preventDefault();
@@ -1945,6 +2094,35 @@
     const profileButton = event.target.closest('[data-open-profile]');
     if (profileButton) {
       openProfile(profileButton.dataset.openProfile);
+      return;
+    }
+    const reactionButton = event.target.closest('[data-reaction-profile]');
+    if (reactionButton) {
+      event.preventDefault();
+      const profileId = reactionButton.dataset.reactionProfile;
+      const value = reactionButton.dataset.profileReaction === 'clear'
+        ? null
+        : Number(reactionButton.dataset.profileReaction);
+      reactionButton.disabled = true;
+      api('/api/members/engagement', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'reaction', profileId, reaction: value })
+      }).then((result) => {
+        state.engagement = {
+          views: result.views || [],
+          reactions: result.reactions || [],
+          streaks: result.streaks || [],
+          currentUserId: result.currentUserId,
+          currentProfileId: result.currentProfileId
+        };
+        const profile = list(state.directory.profiles).find((row) => row.id === profileId);
+        content.innerHTML = renderProfile(profile, false);
+        bindDynamicForms();
+        toast(value === null ? 'Ton ressenti a été effacé.' : 'Ton ressenti privé est enregistré.');
+      }).catch((error) => {
+        toast(errorMessages[error.message] || error.message, true);
+        reactionButton.disabled = false;
+      });
       return;
     }
     const tabButton = event.target.closest('[data-profile-tab]');
