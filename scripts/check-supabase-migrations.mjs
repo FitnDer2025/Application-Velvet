@@ -15,10 +15,11 @@ const locationVerification = await readFile('infra/supabase/migrations/0012_opti
 const memberEngagement = await readFile('infra/supabase/migrations/0013_profile_memory_reactions_conversation_streaks.sql', 'utf8');
 const photoInteractions = await readFile('infra/supabase/migrations/0014_photo_reactions_control_invites_persistence.sql', 'utf8');
 const memberActions = await readFile('infra/supabase/migrations/0015_member_actions_conversations_events.sql', 'utf8');
+const memberNotifications = await readFile('infra/supabase/migrations/0016_member_notifications.sql', 'utf8');
 
-const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}`;
+const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}`;
 const tables = [...migrationBundle.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}`;
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -92,6 +93,10 @@ const requirements = [
   [memberActions.includes('public.blocks'), 'La création d’une conversation doit respecter les blocages'],
   [memberActions.includes('register_for_event') && memberActions.includes('for update'), 'Les places d’une sortie doivent être attribuées sous verrou transactionnel'],
   [memberActions.includes('is_registered_for_event') && memberActions.includes('registrations_participant_read'), 'Les participants visibles doivent être protégés sans récursion RLS'],
+  [memberNotifications.includes('member_notifications') && memberNotifications.includes('member_notifications_self_read'), 'Le centre de notifications doit être isolé par utilisateur'],
+  [memberNotifications.includes('member_notification_allowed') && memberNotifications.includes('member_notification_settings'), 'Les événements doivent respecter les préférences de notification'],
+  [memberNotifications.includes('messages_create_notification') && memberNotifications.includes('photo_reactions_create_notification'), 'Messages et réactions photo doivent produire des notifications réelles'],
+  [memberNotifications.includes('album_access_create_notification') && memberNotifications.includes('event_registrations_create_notification'), 'Albums privés et sorties doivent produire des notifications réelles'],
   [!migrationBundle.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 
