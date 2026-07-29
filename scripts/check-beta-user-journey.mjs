@@ -5,6 +5,7 @@ const paths = [
   'apps/beta/static/assets/members-live.js',
   'apps/beta/static/assets/members-live.css',
   'apps/beta/static/assets/real-auth-gate.js',
+  'apps/beta/static/assets/location-verification.js',
   'apps/beta/static/assets/pro-live.js',
   'apps/beta/static/assets/control-live.js',
   'apps/beta/worker/index.js',
@@ -114,6 +115,9 @@ const journeys = [
   {
     name: 'Maps pilotable et privée',
     valid: has('apps/beta/static/assets/members-live.js', 'mapZoom: 10', 'data-map-zoom', 'data-map-layer', 'Rayon d’environ', 'Hôtels')
+      && has('apps/beta/static/assets/members-live.js', 'mapVisibleVenues', 'data-dynamic-map', 'pointermove', 'panMapByPixels', 'defaultMapZoom', 'mapWorkspace')
+      && has('apps/beta/static/assets/members-live.css', '.map-visible-results', '.map-workspace', 'cursor:grab', 'touch-action:none')
+      && has('apps/beta/static/assets/location-verification.js', "title !== 'Établissements'")
       && has('functions/api/members/map.js', 'radiusKm: 50', 'private_approximate_location', 'category_primary', 'categoryTags')
       && has('apps/beta/static/assets/members-live.js', '/api/members/location', 'exacte n’est jamais enregistrée')
   },
