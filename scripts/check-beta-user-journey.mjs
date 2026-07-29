@@ -75,7 +75,7 @@ const journeys = [
   {
     name: 'Réactions aux photos',
     valid: has('functions/api/members/photo-reactions.js', 'set_photo_reaction', 'result?.[0]')
-      && has('apps/beta/static/assets/members-live.js', '/api/members/photo-reactions', 'photo_reaction_persistence_failed')
+      && has('apps/beta/static/assets/members-live.js', '/api/members/photo-reactions', 'photo_reaction_persistence_failed', 'data-profile-carousel', 'data-carousel-next', 'data-carousel-to')
   },
   {
     name: 'Conversation et messages',
