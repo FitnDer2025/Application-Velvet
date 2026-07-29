@@ -48,7 +48,7 @@ const requirements = [
   [includes('apps/beta/static/assets/members-live.js', '/api/members/photo-reactions', 'photo_reaction_persistence_failed'), 'L’interface membre doit refuser une réaction non confirmée'],
   [includes('apps/beta/static/assets/members-live.js', '/api/members/notifications', '/api/members/map', 'data-open-venue'), 'L’interface doit exploiter notifications, Maps et mini-sites établissements'],
   [includes('apps/beta/static/assets/pro-live.js', '/api/pro/workspace', 'S.threads = []', "localStorage.removeItem('velvetProCrmV1')", 'Cette vue ne contient plus aucune donnée de démonstration'), 'Velvet Pro doit neutraliser les données fictives et charger son workspace serveur'],
-  [includes('apps/beta/static/assets/control-live.js', '/api/control/workspace', 'Opérations Velvet', 'data-organizer-decision', 'Préparation BETA', 'showOperations(tab)'), 'Velvet Control doit ouvrir et contrôler les opérations réelles par défaut'],
+  [includes('apps/beta/static/assets/control-live.js', '/api/control/workspace', 'Opérations Velvet', 'data-organizer-decision', 'Préparation BETA', 'originalShowView', "document.querySelectorAll('.page')", 'showOperations(tab)'), 'Velvet Control doit ouvrir les opérations réelles et permettre le retour depuis Invitations'],
   [includes('apps/web/velvet-control-intelligence-beta-final.html', '/api/admin/invites', 'Générer le code sécurisé'), 'Velvet Control doit utiliser l’API réelle des invitations']
 ];
 
