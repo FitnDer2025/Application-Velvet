@@ -24,6 +24,9 @@
     photos: [],
     settings: null,
     socialActions: {},
+    notifications: [],
+    unreadCount: 0,
+    mapData: null,
     route: 'home',
     selectedProfileId: null,
     profileTab: 'couple',
@@ -374,16 +377,20 @@
         return;
       }
       unlockApplication();
-      const [directoryResult, organizerResult, engagementResult, photoReactionResult] = await Promise.all([
+      const [directoryResult, organizerResult, engagementResult, photoReactionResult, notificationResult] = await Promise.all([
         api('/api/members/directory'),
         api('/api/members/organizer-request').catch(() => ({ request: null })),
         api('/api/members/engagement'),
-        api('/api/members/photo-reactions')
+        api('/api/members/photo-reactions'),
+        api('/api/members/notifications')
       ]);
       state.directory = directoryResult;
       state.organizerRequest = organizerResult.request;
       state.engagement = engagementResult;
       state.photoReactions = photoReactionResult.reactions || [];
+      state.notifications = notificationResult.notifications || [];
+      state.unreadCount = Number(notificationResult.unreadCount || 0);
+      updateNotificationBadges();
       route('home');
     } catch (error) {
       if (error.message === 'authentication_required') {
@@ -409,19 +416,43 @@
       state.engagement = { views: [], reactions: [], streaks: [], currentUserId: null, currentProfileId: null };
       state.photoReactions = [];
       state.organizerRequest = null;
+      state.notifications = [];
+      state.unreadCount = 0;
+      state.mapData = null;
       await loadPhotos();
       return;
     }
-    const [directoryResult, organizerResult, engagementResult, photoReactionResult] = await Promise.all([
+    const [directoryResult, organizerResult, engagementResult, photoReactionResult, notificationResult] = await Promise.all([
       api('/api/members/directory'),
       api('/api/members/organizer-request').catch(() => ({ request: null })),
       api('/api/members/engagement'),
-      api('/api/members/photo-reactions')
+      api('/api/members/photo-reactions'),
+      api('/api/members/notifications')
     ]);
     state.directory = directoryResult;
     state.organizerRequest = organizerResult.request;
     state.engagement = engagementResult;
     state.photoReactions = photoReactionResult.reactions || [];
+    state.notifications = notificationResult.notifications || [];
+    state.unreadCount = Number(notificationResult.unreadCount || 0);
+    updateNotificationBadges();
+  }
+
+  function updateNotificationBadges() {
+    document.querySelectorAll('[data-route="notifications"]').forEach((button) => {
+      let badge = button.querySelector('.nav-notification-count');
+      if (!state.unreadCount) {
+        badge?.remove();
+        return;
+      }
+      if (!badge) {
+        badge = document.createElement('b');
+        badge.className = 'nav-notification-count';
+        button.append(badge);
+      }
+      badge.textContent = state.unreadCount > 99 ? '99+' : String(state.unreadCount);
+      badge.setAttribute('aria-label', `${state.unreadCount} notification${state.unreadCount > 1 ? 's' : ''} non lue${state.unreadCount > 1 ? 's' : ''}`);
+    });
   }
 
   function lockApplication() {
@@ -1255,14 +1286,18 @@
   function renderHome() {
     const own = state.profile;
     const others = list(state.directory.profiles).filter((profile) => profile.id !== own.id);
-    const upcoming = list(state.directory.events).filter((event) => new Date(event.starts_at) >= new Date());
+    const upcoming = list(state.directory.events)
+      .filter((event) => new Date(event.starts_at) >= new Date())
+      .slice(0, 4);
+    const venues = list(state.directory.establishments).slice(0, 4);
+    const notifications = list(state.notifications).slice(0, 4);
     return `<div class="page">
-      ${pageHead('Votre espace privé', `Bonjour ${own.display_name}`, 'La BETA affiche désormais exclusivement les contenus réellement enregistrés par les membres invités.')}
+      ${pageHead('Votre espace privé', `Bonjour ${own.display_name}`, 'Toute l’activité affichée provient des membres, des sorties et des établissements réellement enregistrés dans Velvet.')}
       <section class="grid four">
         <article class="card kpi"><strong>${others.length}</strong><span>autre profil réel</span></article>
         <article class="card kpi"><strong>${upcoming.length}</strong><span>sortie publiée</span></article>
-        <article class="card kpi"><strong>${list(state.directory.establishments).length}</strong><span>établissement publié</span></article>
-        <article class="card kpi"><strong>${list(state.directory.conversations).length}</strong><span>conversation active</span></article>
+        <article class="card kpi"><strong>${venues.length}</strong><span>établissement publié</span></article>
+        <article class="card kpi"><strong>${state.unreadCount}</strong><span>notification non lue</span></article>
       </section>
       <section class="grid two" style="margin-top:16px">
         <article class="card">
@@ -1275,6 +1310,24 @@
           <p>${others.length ? 'Découvre uniquement les profils authentiques admis à cette BETA.' : 'Aucun profil de démonstration n’est affiché. Les nouveaux membres apparaîtront après leur inscription et la publication de leur fiche.'}</p>
           <button class="secondary" data-route="discover">Accéder à Découvrir</button>
         </article>
+      </section>
+      <section class="home-section">
+        <header class="section-heading"><div><p class="eyebrow">Découvrir maintenant</p><h2>Nouveaux univers</h2></div>${others.length ? '<button class="text-button" data-route="discover">Tout voir →</button>' : ''}</header>
+        ${others.length ? `<div class="grid three">${others.slice(0, 3).map(memberTile).join('')}</div>` : emptyState('Aucun nouveau profil', 'Les profils apparaîtront ici dès que les testeurs auront terminé et publié leur fiche.', '◇')}
+      </section>
+      <section class="home-section">
+        <header class="section-heading"><div><p class="eyebrow">Prochainement</p><h2>Sorties à venir</h2></div>${upcoming.length ? '<button class="text-button" data-route="events">Agenda complet →</button>' : ''}</header>
+        ${upcoming.length ? `<div class="grid two">${upcoming.map(eventTile).join('')}</div>` : emptyState('Aucune sortie programmée', 'Les événements publiés par les organisateurs et établissements apparaîtront ici.', '✦')}
+      </section>
+      <section class="grid two home-section">
+        <div>
+          <header class="section-heading"><div><p class="eyebrow">Lieux Velvet</p><h2>Établissements</h2></div></header>
+          ${venues.length ? `<div class="compact-stack">${venues.slice(0, 3).map(venueTile).join('')}</div>` : emptyState('Aucun lieu publié', 'La sélection se remplira depuis Velvet Pro.', '⌑')}
+        </div>
+        <div>
+          <header class="section-heading"><div><p class="eyebrow">Depuis votre dernière visite</p><h2>Activité</h2></div>${notifications.length ? '<button class="text-button" data-route="notifications">Tout voir →</button>' : ''}</header>
+          ${notifications.length ? `<div class="compact-stack">${notifications.map(notificationTile).join('')}</div>` : emptyState('Aucune activité', 'Velvet affichera ici uniquement les actions réellement destinées à votre profil.', '○')}
+        </div>
       </section>
     </div>`;
   }
@@ -1317,7 +1370,7 @@
     return `<button class="card member-tile profile-card-button" data-open-profile="${e(profile.id)}">
       <div class="member-cover">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}${seenBadge(profile.id)}</div>
       <div class="member-body">
-        <div class="member-meta"><span>${e(profile.profile_type === 'couple' ? 'Couple' : 'Individuel')}</span><span>${e(profile.location_zone || profile.city || 'Localisation privée')}</span></div>
+        <div class="member-meta"><span>${e(profile.profile_type === 'couple' ? 'Couple' : 'Individuel')}</span><span>${e(profile.location_zone || 'Zone privée')}</span></div>
         <h3>${e(profile.display_name)}</h3>
         <p>${e(profile.description || 'Profil en cours de rédaction.')}</p>
         ${chips(list(profile.practices).slice(0, 4))}
@@ -1373,9 +1426,9 @@
     return `<div class="page">
       ${pageHead('Profils authentiques', 'Découvrir', 'Chaque résultat provient directement de Supabase. Aucun profil fictif, aucun chiffre artificiel.')}
       <form id="discoverFilters" class="filters">
-        <input name="query" placeholder="Nom, ville, recherche ou pratique" aria-label="Rechercher">
+        <input name="query" placeholder="Nom, zone, recherche ou pratique" aria-label="Rechercher">
         <select name="type"><option value="">Tous les profils</option><option value="couple">Couples</option><option value="individual">Individuels</option></select>
-        <input name="city" placeholder="Ville ou secteur" aria-label="Ville">
+        <input name="city" placeholder="Zone publique ou secteur" aria-label="Zone publique">
         <input name="practice" placeholder="Pratique" aria-label="Pratique">
       </form>
       <div id="discoverResults">
@@ -1400,10 +1453,10 @@
       const rows = list(state.directory.profiles)
         .filter((profile) => profile.id !== state.profile.id)
         .filter((profile) => !type || profile.profile_type === type)
-        .filter((profile) => !city || `${profile.city || ''} ${profile.location_zone || ''}`.toLowerCase().includes(city))
+        .filter((profile) => !city || String(profile.location_zone || '').toLowerCase().includes(city))
         .filter((profile) => !practice || list(profile.practices).join(' ').toLowerCase().includes(practice))
         .filter((profile) => !query || [
-          profile.display_name, profile.city, profile.location_zone, profile.description,
+          profile.display_name, profile.location_zone, profile.description,
           profile.search_text, ...list(profile.practices), ...list(profile.values_list)
         ].join(' ').toLowerCase().includes(query));
       document.querySelector('#discoverResults').innerHTML = rows.length
@@ -1540,7 +1593,7 @@
             <span class="avatar">${e(initials(person.first_name))}</span><span><strong>${e(person.first_name || 'Fiche personnelle')}</strong><p>${e(person.biography || 'Découvrir cette personne')}</p></span><span>→</span>
           </button>`).join('')}
         </article>
-        <article class="card" style="margin-top:14px"><p class="eyebrow">Localisation</p><h3>${e(profile.location_zone || profile.city || 'Privée')}</h3><p>Seule la zone choisie par le membre est affichée.</p></article>
+        <article class="card" style="margin-top:14px"><p class="eyebrow">Localisation publique</p><h3>${e(profile.location_zone || 'Privée')}</h3><p>Seule la zone choisie par le membre est affichée.</p></article>
         <article class="card" style="margin-top:14px"><p class="eyebrow">Lieux préférés</p>${chips(profile.favorite_places, 'Aucun lieu renseigné')}</article>
         <article class="card" style="margin-top:14px"><p class="eyebrow">Disponibilités</p><p>${e(profile.availability_text || 'Non renseignées')}</p></article>
         ${own ? partnerInviteBox(profile, people) : ''}
@@ -1575,7 +1628,7 @@
         : profileOverview(profile, own);
     return `<div class="page">
       <section class="hero">${profileCarousel(profile)}<div class="hero-copy">
-        <p class="eyebrow">${e(profile.profile_type === 'couple' ? 'Profil couple' : 'Profil individuel')} · ${e(profile.city || 'Localisation privée')}</p>
+        <p class="eyebrow">${e(profile.profile_type === 'couple' ? 'Profil couple' : 'Profil individuel')} · ${e(profile.location_zone || 'Localisation privée')}</p>
         <h1>${e(profile.display_name)}</h1><p class="lead">${e(profile.description)}</p>
         <div class="badges"><span class="pill gold">Membre BETA réel</span>${profile.relationship_since ? `<span class="pill">Depuis ${e(profile.relationship_since)}</span>` : ''}<span class="pill">${e(profile.location_zone || 'Zone privée')}</span></div>
         <div class="actions">${own ? '<button class="primary" data-edit-profile>Modifier mon profil</button>' : ''}${!own ? `<button class="primary" data-message-profile="${e(profile.id)}">Écrire</button><button class="secondary" data-favorite-profile="${e(profile.id)}">${state.socialActions[profile.id]?.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}</button>` : ''}</div>
@@ -1607,30 +1660,158 @@
     </details>`;
   }
 
+  function mapPoint(latitude, longitude, zoom) {
+    const scale = 256 * (2 ** zoom);
+    const sine = Math.min(Math.max(Math.sin(latitude * Math.PI / 180), -0.9999), 0.9999);
+    return {
+      x: scale * (0.5 + longitude / 360),
+      y: scale * (0.5 - Math.log((1 + sine) / (1 - sine)) / (4 * Math.PI))
+    };
+  }
+
+  function mapViewport(markers, preferredCenter) {
+    const width = 900;
+    const height = 520;
+    const center = {
+      latitude: Number(preferredCenter?.latitude ?? 46.603354),
+      longitude: Number(preferredCenter?.longitude ?? 1.888334)
+    };
+    let zoom = Number(preferredCenter?.zoom || 6);
+    if (markers.length > 1 && preferredCenter?.source !== 'private_approximate_location') {
+      for (zoom = 8; zoom >= 4; zoom -= 1) {
+        const origin = mapPoint(center.latitude, center.longitude, zoom);
+        const fits = markers.every((marker) => {
+          const point = mapPoint(marker.latitude, marker.longitude, zoom);
+          return Math.abs(point.x - origin.x) < width * 0.42
+            && Math.abs(point.y - origin.y) < height * 0.38;
+        });
+        if (fits) break;
+      }
+    }
+    return { width, height, center, zoom: Math.max(4, Math.min(11, zoom)) };
+  }
+
+  function mapCanvas(mapData) {
+    const markers = [...list(mapData.members), ...list(mapData.venues)];
+    const view = mapViewport(markers, mapData.center);
+    const origin = mapPoint(view.center.latitude, view.center.longitude, view.zoom);
+    const tileCount = 2 ** view.zoom;
+    const startX = Math.floor((origin.x - view.width / 2) / 256);
+    const endX = Math.floor((origin.x + view.width / 2) / 256);
+    const startY = Math.max(0, Math.floor((origin.y - view.height / 2) / 256));
+    const endY = Math.min(tileCount - 1, Math.floor((origin.y + view.height / 2) / 256));
+    const tiles = [];
+    for (let tileX = startX; tileX <= endX; tileX += 1) {
+      for (let tileY = startY; tileY <= endY; tileY += 1) {
+        const wrappedX = ((tileX % tileCount) + tileCount) % tileCount;
+        tiles.push(`<img class="map-tile" alt="" aria-hidden="true" src="https://tile.openstreetmap.org/${view.zoom}/${wrappedX}/${tileY}.png" style="left:${tileX * 256 - origin.x + view.width / 2}px;top:${tileY * 256 - origin.y + view.height / 2}px">`);
+      }
+    }
+    const markerHtml = markers.map((marker) => {
+      const point = mapPoint(marker.latitude, marker.longitude, view.zoom);
+      const left = point.x - origin.x + view.width / 2;
+      const top = point.y - origin.y + view.height / 2;
+      if (left < -30 || left > view.width + 30 || top < -30 || top > view.height + 30) return '';
+      if (marker.type === 'member') {
+        return `<button class="map-marker member-map-marker" style="left:${left}px;top:${top}px" data-open-profile="${e(marker.id)}" title="${e(marker.name)} · ${e(marker.zone)}">
+          ${marker.photoUrl ? `<img src="${e(marker.photoUrl)}" alt="">` : `<span>${e(initials(marker.name))}</span>`}<small>${e(marker.name)}</small>
+        </button>`;
+      }
+      return `<button class="map-marker venue-map-marker" style="left:${left}px;top:${top}px" data-open-venue="${e(marker.id)}" data-map-venue="true" title="${e(marker.name)} · ${e(marker.city || '')}">
+        <span>⌑</span><small>${e(marker.name)}</small>
+      </button>`;
+    }).join('');
+    return `<section class="velvet-map" style="--map-width:${view.width}px;--map-height:${view.height}px" aria-label="Carte des zones publiques et établissements">
+      <div class="map-stage" style="width:${view.width}px;height:${view.height}px">${tiles.join('')}${markerHtml}</div>
+      <div class="map-legend"><span><i class="member-dot"></i>Membres · zone approximative</span><span><i class="venue-dot"></i>Établissements · adresse publique</span></div>
+      <small class="map-credit">© contributeurs OpenStreetMap</small>
+    </section>`;
+  }
+
   function renderMaps() {
-    const located = list(state.directory.profiles).filter((profile) => profile.id !== state.profile.id && (profile.location_zone || profile.city));
-    return `<div class="page">${pageHead('Localisation choisie', 'Maps', 'Velvet n’affiche que les zones volontairement partagées par les membres et jamais leur adresse privée.')}
-      ${located.length ? `<section class="grid three">${located.map(memberTile).join('')}</section>` : emptyState('Aucune position partagée', 'La carte se remplira uniquement avec les zones déclarées par les véritables membres.', '⌖')}
+    if (!state.mapData) {
+      return `<div class="page">${pageHead('Localisation choisie', 'Maps', 'Velvet prépare la carte sans jamais exposer l’adresse ni la position exacte d’un membre.')}
+        <section class="loading-state"><span class="loader"></span><p>Chargement des zones publiques…</p></section>
+      </div>`;
+    }
+    const total = list(state.mapData.members).length + list(state.mapData.venues).length;
+    return `<div class="page">${pageHead('Zones publiques et lieux vérifiés', 'Maps', 'Les membres sont placés au centre approximatif de la zone qu’ils ont choisi d’afficher. Les établissements utilisent leurs coordonnées publiques.')}
+      ${total ? mapCanvas(state.mapData) : emptyState('La carte est encore calme', 'Les premiers marqueurs apparaîtront quand des membres partageront une zone publique ou qu’un établissement sera référencé.', '⌖')}
     </div>`;
+  }
+
+  async function openMaps() {
+    content.innerHTML = renderMaps();
+    try {
+      state.mapData = await api('/api/members/map');
+      if (state.route === 'maps') {
+        content.innerHTML = renderMaps();
+        bindDynamicForms();
+      }
+    } catch (error) {
+      content.innerHTML = `<div class="page">${emptyState('Carte indisponible', `Velvet n’a pas pu charger Maps : ${errorMessages[error.message] || error.message}`, '!')}</div>`;
+    }
+  }
+
+  function eventTile(event) {
+    const date = new Date(event.starts_at);
+    return `<button class="card event-tile" data-open-event="${e(event.id)}">
+      <time datetime="${e(event.starts_at)}"><strong>${e(date.toLocaleDateString('fr-FR', { day: '2-digit' }))}</strong><span>${e(date.toLocaleDateString('fr-FR', { month: 'short' }))}</span></time>
+      <span><small>${e(date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }))} · ${e(event.location_public || 'Lieu confidentiel')}</small><b>${e(event.title)}</b><em>${e(event.capacity)} places · ${e(event.audience || 'Membres Velvet')}</em></span>
+      <i>→</i>
+    </button>`;
+  }
+
+  function venueTile(venue) {
+    return `<button class="card venue-tile" data-open-venue="${e(venue.id)}">
+      <span class="venue-symbol">⌑</span><span><small>${e(venue.kind || 'lieu Velvet')} · ${e(venue.city || 'Localisation à venir')}</small><b>${e(venue.name)}</b><em>${e(venue.description || 'Découvrir cet établissement')}</em></span><i>→</i>
+    </button>`;
   }
 
   function renderEvents() {
     const events = list(state.directory.events);
     return `<div class="page">${pageHead('Agenda réel', 'Sorties', 'Seules les sorties effectivement publiées dans Supabase apparaissent ici.')}
-      ${events.length ? `<section class="grid two">${events.map((event) => `<article class="card"><p class="eyebrow">${e(new Date(event.starts_at).toLocaleString('fr-FR'))}</p><h2>${e(event.title)}</h2><p>${e(event.description || '')}</p><div class="facts"><div class="fact"><small>Lieu public</small><strong>${e(event.location_public || 'Confidentiel')}</strong></div><div class="fact"><small>Capacité</small><strong>${e(event.capacity)} places</strong></div><div class="fact"><small>Public</small><strong>${e(event.audience || 'Membres BETA')}</strong></div></div><button class="primary" data-open-event="${e(event.id)}">Voir la sortie et les participants</button></article>`).join('')}</section>` : emptyState('Aucune sortie publiée', 'Aucune soirée fictive n’est conservée. Les prochaines sorties apparaîtront après leur publication par un organisateur ou un établissement validé.', '✦')}
+      ${events.length ? `<section class="grid two">${events.map(eventTile).join('')}</section>` : emptyState('Aucune sortie publiée', 'Aucune soirée fictive n’est conservée. Les prochaines sorties apparaîtront après leur publication par un organisateur ou un établissement validé.', '✦')}
     </div>`;
   }
 
   function renderVenues() {
     const venues = list(state.directory.establishments);
     return `<div class="page">${pageHead('Partenaires validés', 'Établissements', 'Chaque fiche visible provient du CRM Velvet Pro et de la même base Supabase.')}
-      ${venues.length ? `<section class="grid three">${venues.map((venue) => `<article class="card"><p class="eyebrow">${e(venue.kind)}</p><h2>${e(venue.name)}</h2><p>${e(venue.description || '')}</p><div class="facts"><div class="fact"><small>Ville</small><strong>${e(venue.city || 'Non renseignée')}</strong></div><div class="fact"><small>Adresse publique</small><strong>${e(venue.address_public || 'Sur demande')}</strong></div></div>${chips(venue.amenities)}</article>`).join('')}</section>` : emptyState('Aucun établissement publié', 'La rubrique restera neutre jusqu’à la validation d’un véritable établissement dans Velvet Pro.', '⌑')}
+      ${venues.length ? `<section class="grid three">${venues.map(venueTile).join('')}</section>` : emptyState('Aucun établissement publié', 'La rubrique restera neutre jusqu’à la validation d’un véritable établissement dans Velvet Pro.', '⌑')}
     </div>`;
   }
 
+  function notificationIcon(type) {
+    return ({
+      messages: '✉',
+      likes: '♡',
+      album_access: '◇',
+      events: '✦',
+      recommendations: '★',
+      security: '⌾'
+    })[type] || '○';
+  }
+
+  function notificationTile(notification) {
+    const actor = list(state.directory.profiles).find((profile) => profile.id === notification.actor_profile_id);
+    const cover = actor ? approvedProfilePhotos(actor)[0] : null;
+    return `<button class="notification-tile ${notification.read_at ? '' : 'unread'}" data-open-notification="${e(notification.id)}">
+      <span class="notification-avatar">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : notificationIcon(notification.event_type)}</span>
+      <span><small>${e(actor?.display_name || 'Velvet')} · ${e(viewedAtLabel(notification.created_at))}</small><b>${e(notification.title)}</b><em>${e(notification.body || '')}</em></span>
+      ${notification.read_at ? '<i>→</i>' : '<i class="unread-dot" aria-label="Non lue"></i>'}
+    </button>`;
+  }
+
   function renderNotifications() {
-    return `<div class="page">${pageHead('Activité authentique', 'Notifications', 'Aucune notification simulée n’est générée dans cette BETA.')}
-      ${emptyState('Aucune notification', 'Les messages, demandes d’album, inscriptions et validations futures apparaîtront ici lorsqu’une action réelle aura lieu.', '○')}
+    const notifications = list(state.notifications);
+    return `<div class="page">${pageHead(
+      'Activité authentique',
+      'Notifications',
+      'Chaque élément correspond à une action réellement enregistrée dans Velvet.',
+      state.unreadCount ? `<button class="secondary" data-read-all-notifications>Tout marquer comme lu · ${state.unreadCount}</button>` : ''
+    )}
+      ${notifications.length ? `<section class="notification-feed">${notifications.map(notificationTile).join('')}</section>` : emptyState('Aucune notification', 'Les messages, réactions, accès aux albums et inscriptions apparaîtront ici lorsqu’une action réelle aura lieu.', '○')}
     </div>`;
   }
 
@@ -1883,6 +2064,133 @@
     }
   }
 
+  function safeExternalUrl(value) {
+    try {
+      const url = new URL(String(value || ''));
+      return ['http:', 'https:'].includes(url.protocol) ? url.toString() : '';
+    } catch {
+      return '';
+    }
+  }
+
+  function openingHoursView(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value) || !Object.keys(value).length) {
+      return '<p class="muted">Les horaires seront publiés depuis Velvet Pro.</p>';
+    }
+    return `<div class="hours-list">${Object.entries(value).map(([day, hours]) => `<div><span>${e(day)}</span><strong>${e(Array.isArray(hours) ? hours.join(' · ') : hours)}</strong></div>`).join('')}</div>`;
+  }
+
+  function venueById(id, fromMap = false) {
+    const published = list(state.directory.establishments).find((venue) => venue.id === id);
+    if (published) return { ...published, source: 'establishment' };
+    if (!fromMap) return null;
+    const reference = list(state.mapData?.venues).find((venue) => venue.id === id);
+    if (!reference) return null;
+    const linked = list(state.directory.establishments).find((venue) =>
+      String(venue.name).trim().toLowerCase() === String(reference.name).trim().toLowerCase()
+    );
+    return linked
+      ? { ...reference, ...linked, latitude: reference.latitude, longitude: reference.longitude, source: 'establishment' }
+      : { ...reference, source: 'directory' };
+  }
+
+  function openVenue(id, fromMap = false) {
+    const venue = venueById(id, fromMap);
+    if (!venue) {
+      toast('Établissement introuvable.', true);
+      return;
+    }
+    const events = list(state.directory.events)
+      .filter((event) => event.establishment_id === venue.id)
+      .sort((left, right) => new Date(left.starts_at) - new Date(right.starts_at));
+    const recommendations = list(state.directory.recommendations)
+      .filter((item) => item.target_type === 'establishment' && item.target_id === venue.id);
+    const website = safeExternalUrl(venue.website);
+    const routeQuery = [venue.address_public || venue.address, venue.city, venue.countryCode].filter(Boolean).join(', ');
+    const routeUrl = routeQuery
+      ? `https://www.openstreetmap.org/search?query=${encodeURIComponent(routeQuery)}`
+      : venue.latitude && venue.longitude
+        ? `https://www.openstreetmap.org/?mlat=${encodeURIComponent(venue.latitude)}&mlon=${encodeURIComponent(venue.longitude)}#map=16/${encodeURIComponent(venue.latitude)}/${encodeURIComponent(venue.longitude)}`
+        : '';
+    content.innerHTML = `<div class="page venue-site">
+      <section class="venue-hero">
+        <div><p class="eyebrow">${e(venue.kind || 'Établissement Velvet')}</p><h1>${e(venue.name)}</h1><p>${e(venue.description || 'Cet établissement complète actuellement sa présentation dans Velvet Pro.')}</p>
+          <div class="badges"><span class="pill gold">${venue.verified_at || venue.verificationStatus === 'professional_verified' ? 'Établissement vérifié' : 'Référencé Velvet'}</span>${venue.city ? `<span class="pill">${e(venue.city)}</span>` : ''}</div>
+          <div class="actions">${routeUrl ? `<a class="primary" href="${e(routeUrl)}" target="_blank" rel="noopener noreferrer">Itinéraire</a>` : ''}${website ? `<a class="secondary" href="${e(website)}" target="_blank" rel="noopener noreferrer">Site officiel</a>` : ''}<button class="secondary" data-route="venues">Retour</button></div>
+        </div><span class="venue-hero-mark">V</span>
+      </section>
+      <nav class="venue-summary" aria-label="Résumé de l’établissement">
+        <span><small>Type</small><b>${e(venue.kind || 'Lieu')}</b></span>
+        <span><small>Ville</small><b>${e(venue.city || 'À venir')}</b></span>
+        <span><small>Adresse</small><b>${e(venue.address_public || venue.address || 'À venir')}</b></span>
+      </nav>
+      <section class="grid two venue-content">
+        <article class="card section"><p class="eyebrow">L’essentiel</p><h2>Présentation</h2><p>${e(venue.description || 'La présentation détaillée sera publiée par l’équipe de l’établissement depuis Velvet Pro.')}</p><h3>Équipements</h3>${chips(venue.amenities, 'Équipements à renseigner')}</article>
+        <article class="card section"><p class="eyebrow">Préparer sa venue</p><h2>Horaires</h2>${openingHoursView(venue.opening_hours)}<h3>Contact public</h3>
+          <div class="contact-list">${venue.phone_public ? `<a href="tel:${e(String(venue.phone_public).replace(/[^+0-9]/g, ''))}">${e(venue.phone_public)}</a>` : ''}${venue.email_public ? `<a href="mailto:${e(venue.email_public)}">${e(venue.email_public)}</a>` : ''}${!venue.phone_public && !venue.email_public ? '<span>Coordonnées à venir</span>' : ''}</div>
+        </article>
+      </section>
+      <section class="home-section"><header class="section-heading"><div><p class="eyebrow">Agenda</p><h2>Prochaines soirées</h2></div></header>
+        ${events.length ? `<div class="grid two">${events.map(eventTile).join('')}</div>` : emptyState('Aucune soirée publiée', 'L’agenda apparaîtra ici dès sa publication depuis Velvet Pro.', '✦')}
+      </section>
+      <section class="grid two home-section">
+        <article><header class="section-heading"><div><p class="eyebrow">Galerie</p><h2>L’univers du lieu</h2></div></header>${emptyState('Galerie à venir', 'Les photos seront ajoutées par l’établissement depuis son espace professionnel.', '◇')}</article>
+        <article><header class="section-heading"><div><p class="eyebrow">La communauté en parle</p><h2>Recommandations</h2></div></header>${recommendations.length ? recommendations.map((item) => `<blockquote class="card"><p>« ${e(item.body)} »</p><small>${item.rating ? `${e(item.rating)}/5` : 'Recommandation membre'}</small></blockquote>`).join('') : emptyState('Aucune recommandation', 'Les avis authentiques apparaîtront après les premières visites.', '♡')}</article>
+      </section>
+    </div>`;
+    bindDynamicForms();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function markNotification(notificationId) {
+    const result = await api('/api/members/notifications', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'read', notificationId })
+    });
+    state.notifications = result.notifications || [];
+    state.unreadCount = Number(result.unreadCount || 0);
+    updateNotificationBadges();
+  }
+
+  async function openNotification(notificationId) {
+    const notification = list(state.notifications).find((row) => row.id === notificationId);
+    if (!notification) return;
+    try {
+      if (!notification.read_at) await markNotification(notificationId);
+      if (notification.entity_type === 'conversation') {
+        await openConversation(notification.entity_id);
+        return;
+      }
+      if (notification.entity_type === 'event') {
+        await openEvent(notification.entity_id);
+        return;
+      }
+      if (notification.entity_type === 'album' && notification.actor_profile_id) {
+        state.profileTab = 'albums';
+        await openProfile(notification.actor_profile_id);
+        state.profileTab = 'albums';
+        const profile = list(state.directory.profiles).find((row) => row.id === notification.actor_profile_id);
+        content.innerHTML = renderProfile(profile, false);
+        bindDynamicForms();
+        return;
+      }
+      if (notification.entity_type === 'media') {
+        state.profileTab = 'albums';
+        state.selectedProfileId = state.profile.id;
+        content.innerHTML = renderProfile(state.profile, true);
+        bindDynamicForms();
+        return;
+      }
+      if (notification.actor_profile_id || notification.entity_type === 'profile') {
+        await openProfile(notification.actor_profile_id || notification.entity_id);
+        return;
+      }
+      route('notifications');
+    } catch (error) {
+      toast(errorMessages[error.message] || error.message, true);
+    }
+  }
+
   async function updateSocialAction(profileId, action, enabled) {
     try {
       const result = await api('/api/members/social-actions', {
@@ -1953,7 +2261,11 @@
     document.querySelector('#mobileMenuButton')?.setAttribute('aria-expanded', 'false');
     if (name === 'home') content.innerHTML = renderHome();
     if (name === 'discover') content.innerHTML = renderDiscover();
-    if (name === 'maps') content.innerHTML = renderMaps();
+    if (name === 'maps') {
+      openMaps();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     if (name === 'conversations') content.innerHTML = renderConversations();
     if (name === 'events') content.innerHTML = renderEvents();
     if (name === 'venues') content.innerHTML = renderVenues();
@@ -2403,6 +2715,34 @@
     const eventButton = event.target.closest('[data-open-event]');
     if (eventButton) {
       openEvent(eventButton.dataset.openEvent);
+      return;
+    }
+    const venueButton = event.target.closest('[data-open-venue]');
+    if (venueButton) {
+      openVenue(venueButton.dataset.openVenue, venueButton.dataset.mapVenue === 'true');
+      return;
+    }
+    const notificationButton = event.target.closest('[data-open-notification]');
+    if (notificationButton) {
+      openNotification(notificationButton.dataset.openNotification);
+      return;
+    }
+    if (event.target.closest('[data-read-all-notifications]')) {
+      const button = event.target.closest('[data-read-all-notifications]');
+      button.disabled = true;
+      api('/api/members/notifications', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'read_all' })
+      }).then((result) => {
+        state.notifications = result.notifications || [];
+        state.unreadCount = Number(result.unreadCount || 0);
+        updateNotificationBadges();
+        content.innerHTML = renderNotifications();
+        toast('Toutes les notifications sont marquées comme lues.');
+      }).catch((error) => {
+        toast(errorMessages[error.message] || error.message, true);
+        button.disabled = false;
+      });
       return;
     }
     const cancelEventButton = event.target.closest('[data-cancel-event]');
