@@ -138,8 +138,8 @@ begin
   if not public.can_view_profile(target_id) then raise exception 'profile_access_denied'; end if;
 
   if reaction_value is null then
-    delete from public.profile_reactions
-    where reactor_user_id=auth.uid() and target_profile_id=target_id;
+    delete from public.profile_reactions pr
+    where pr.reactor_user_id=auth.uid() and pr.target_profile_id=target_id;
     return null;
   end if;
   if reaction_value not in (-1,1,2,3) then raise exception 'invalid_profile_reaction'; end if;
@@ -149,7 +149,7 @@ begin
   ) values (
     auth.uid(),reactor_profile,target_id,reaction_value,now(),now()
   )
-  on conflict (reactor_user_id,target_profile_id) do update set
+  on conflict on constraint profile_reactions_pkey do update set
     reactor_profile_id=excluded.reactor_profile_id,
     reaction=excluded.reaction,
     updated_at=now()
@@ -162,7 +162,6 @@ $$;
 revoke all on function public.current_member_profile_id() from public;
 revoke all on function public.record_profile_view(uuid) from public;
 revoke all on function public.set_profile_reaction(uuid,smallint) from public;
-grant execute on function public.current_member_profile_id() to authenticated;
 grant execute on function public.record_profile_view(uuid) to authenticated;
 grant execute on function public.set_profile_reaction(uuid,smallint) to authenticated;
 
@@ -250,7 +249,7 @@ $$;
 
 drop trigger if exists messages_refresh_conversation_engagement on public.messages;
 create trigger messages_refresh_conversation_engagement
-after insert or update of deleted_at or delete on public.messages
+after insert or update or delete on public.messages
 for each row execute function public.refresh_conversation_engagement_trigger();
 
 revoke all on function public.refresh_conversation_engagement(uuid) from public;
