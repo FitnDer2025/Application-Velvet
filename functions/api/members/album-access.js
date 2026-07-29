@@ -6,7 +6,8 @@ import {
   withSession
 } from './_shared.js';
 
-const DURATIONS = new Set([1,2,4,8,12,24]);
+const DURATIONS = new Set([1,4,12,24]);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export async function onRequestPost({ request, env }) {
   try {
@@ -19,20 +20,30 @@ export async function onRequestPost({ request, env }) {
     if (duration !== null && !DURATIONS.has(duration)) {
       return json({ error: 'invalid_album_access_duration' }, 400);
     }
-    const result = await restJson(
+    const albumIds = [...new Set(
+      (Array.isArray(body.albumIds) ? body.albumIds : [body.albumId]).filter((id) => UUID.test(id))
+    )].slice(0, 30);
+    if (!UUID.test(body.profileId) || !albumIds.length) {
+      return json({ error: 'target_profile_and_albums_required' }, 400);
+    }
+    const results = await Promise.all(albumIds.map((albumId) => restJson(
       env,
       '/rest/v1/rpc/grant_private_album_to_profile',
       access.session,
       {
         method: 'POST',
         body: JSON.stringify({
-          target_album_id: body.albumId,
+          target_album_id: albumId,
           target_profile_id: body.profileId,
           duration_hours: duration
         })
       }
-    );
-    return withSession({ ok: true, grantedAccounts: result }, access.session);
+    )));
+    return withSession({
+      ok: true,
+      albumIds,
+      grantedAccounts: [...new Set(results.flat())]
+    }, access.session);
   } catch (error) {
     return json({ error: error.message || 'album_access_failed' }, 400);
   }

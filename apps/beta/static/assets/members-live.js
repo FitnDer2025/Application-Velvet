@@ -1,6 +1,7 @@
 (() => {
   const THEME_STORAGE_KEY = 'velvet-member-theme-v1';
   const SAVED_SEARCH_STORAGE_KEY = 'velvet-saved-searches-v1';
+  const DISCOVER_VIEW_STORAGE_KEY = 'velvet-discover-view-v1';
 
   function preferredTheme() {
     try {
@@ -61,7 +62,17 @@
     presenceAvailable: false,
     savedSearches: [],
     savedSearchPersistenceAvailable: false,
+    following: [],
+    plans: { venueVisits: [], travelPlans: [], eventPlans: [] },
+    lifecycle: { profile: null, action: null },
     selectedSavedSearchId: '',
+    discoverView: (() => {
+      try {
+        return localStorage.getItem(DISCOVER_VIEW_STORAGE_KEY) === 'horizontal' ? 'horizontal' : 'grid';
+      } catch {
+        return 'grid';
+      }
+    })(),
     discoverFilters: {
       query: '',
       types: [],
@@ -141,6 +152,10 @@
     event_unavailable: 'Cette sortie n’est plus disponible.',
     saved_search_name_required: 'Donne un nom à cette recherche.',
     saved_search_write_failed: 'La recherche n’a pas pu être enregistrée dans Velvet.'
+    ,
+    lifecycle_email_not_configured: 'L’envoi d’e-mails de confirmation n’est pas configuré.',
+    lifecycle_action_already_pending: 'Une action sensible attend déjà des confirmations.',
+    lifecycle_email_failed: 'L’e-mail de confirmation n’a pas pu être envoyé.'
   };
 
   const REFERENCES = {
@@ -625,6 +640,7 @@
     state.savedSearches = state.savedSearchPersistenceAvailable
       ? list(result.savedSearches)
       : localSavedSearches();
+    state.following = list(result.following);
   }
 
   async function loadAll() {
@@ -646,7 +662,7 @@
         return;
       }
       unlockApplication();
-      const [directoryResult, organizerResult, engagementResult, photoReactionResult, notificationResult, locationResult, mapResult, discoveryResult] = await Promise.all([
+      const [directoryResult, organizerResult, engagementResult, photoReactionResult, notificationResult, locationResult, mapResult, discoveryResult, plansResult, lifecycleResult] = await Promise.all([
         api('/api/members/directory'),
         api('/api/members/organizer-request').catch(() => ({ request: null })),
         api('/api/members/engagement'),
@@ -659,7 +675,9 @@
           savedSearches: localSavedSearches(),
           persistenceAvailable: false,
           presenceAvailable: false
-        }))
+        })),
+        api('/api/members/plans').catch(() => ({ venueVisits: [], travelPlans: [], eventPlans: [], migrationPending: true })),
+        api('/api/members/account-actions').catch(() => ({ profile: null, action: null }))
       ]);
       state.directory = directoryResult;
       state.organizerRequest = organizerResult.request;
@@ -670,6 +688,8 @@
       state.locationData = locationResult;
       state.mapData = mapResult;
       applyDiscoveryState(discoveryResult);
+      state.plans = plansResult;
+      state.lifecycle = lifecycleResult;
       updateNotificationBadges();
       route('home');
     } catch (error) {
@@ -703,7 +723,7 @@
       await loadPhotos();
       return;
     }
-    const [directoryResult, organizerResult, engagementResult, photoReactionResult, notificationResult, locationResult, mapResult, discoveryResult] = await Promise.all([
+    const [directoryResult, organizerResult, engagementResult, photoReactionResult, notificationResult, locationResult, mapResult, discoveryResult, plansResult, lifecycleResult] = await Promise.all([
       api('/api/members/directory'),
       api('/api/members/organizer-request').catch(() => ({ request: null })),
       api('/api/members/engagement'),
@@ -716,7 +736,9 @@
         savedSearches: localSavedSearches(),
         persistenceAvailable: false,
         presenceAvailable: false
-      }))
+      })),
+      api('/api/members/plans').catch(() => ({ venueVisits: [], travelPlans: [], eventPlans: [], migrationPending: true })),
+      api('/api/members/account-actions').catch(() => ({ profile: null, action: null }))
     ]);
     state.directory = directoryResult;
     state.organizerRequest = organizerResult.request;
@@ -727,6 +749,8 @@
     state.locationData = locationResult;
     state.mapData = mapResult;
     applyDiscoveryState(discoveryResult);
+    state.plans = plansResult;
+    state.lifecycle = lifecycleResult;
     updateNotificationBadges();
   }
 
@@ -1616,8 +1640,8 @@
     const locationEnabled = state.mapData?.center?.source === 'private_approximate_location';
     const profiles = list(state.directory.profiles)
       .filter((profile) => profile.id !== state.profile.id)
-      .filter(profileMatchesOwnPreferences)
-      .filter((profile) => !locationEnabled || (profileDistance(profile) ?? Infinity) <= 50);
+      .filter((profile) => state.following.includes(profile.id) || profileMatchesOwnPreferences(profile))
+      .filter((profile) => state.following.includes(profile.id) || !locationEnabled || (profileDistance(profile) ?? Infinity) <= 50);
     const profileItems = profiles.map((profile) => ({
       id: `profile-${profile.id}`,
       type: 'profile',
@@ -1637,13 +1661,48 @@
       date: event.created_at || event.updated_at || event.starts_at,
       event
     }));
-    return [...profileItems, ...photoItems, ...eventItems]
+    const followedPlans = [
+      ...list(state.plans.travelPlans).filter((plan) => state.following.includes(plan.profile_id)).map((plan) => ({
+        id: `travel-${plan.id}`,
+        type: 'plan',
+        date: plan.created_at,
+        profile: profiles.find((profile) => profile.id === plan.profile_id),
+        title: plan.title,
+        detail: `${plan.location_label} · du ${dateLabel(plan.starts_on)} au ${dateLabel(plan.ends_on)}`
+      })),
+      ...list(state.plans.venueVisits).filter((plan) => state.following.includes(plan.profile_id)).map((plan) => ({
+        id: `visit-${plan.id}`,
+        type: 'plan',
+        date: plan.created_at,
+        profile: profiles.find((profile) => profile.id === plan.profile_id),
+        title: plan.venue_directory?.name || 'Sortie annoncée',
+        detail: dateLabel(plan.visit_date)
+      })),
+      ...list(state.plans.eventPlans).filter((plan) => state.following.includes(plan.profile_id)).map((plan) => {
+        const event = list(state.directory.events).find((row) => row.id === plan.event_id);
+        return {
+          id: `event-plan-${plan.profile_id}-${plan.event_id}`,
+          type: 'plan',
+          date: plan.created_at,
+          profile: profiles.find((profile) => profile.id === plan.profile_id),
+          title: event?.title || 'Événement Velvet',
+          detail: event ? new Date(event.starts_at).toLocaleString('fr-FR') : plan.registration_status
+        };
+      })
+    ].filter((item) => item.profile);
+    return [...profileItems, ...photoItems, ...eventItems, ...followedPlans]
       .filter((item) => item.date)
       .sort((left, right) => new Date(right.date) - new Date(left.date))
       .slice(0, 30);
   }
 
   function homeFeedItem(item) {
+    if (item.type === 'plan') {
+      return `<article class="card home-feed-card event-feed-card">
+        <header><span class="feed-icon event">⌖</span><div><strong>${e(item.profile.display_name)} a annoncé une sortie</strong><small>${e(viewedAtLabel(item.date))}</small></div></header>
+        <button type="button" class="feed-event" data-open-profile="${e(item.profile.id)}"><span><b>${e(item.title)}</b><small>${e(item.detail)}</small></span><i>→</i></button>
+      </article>`;
+    }
     if (item.type === 'event') {
       const event = item.event;
       return `<article class="card home-feed-card event-feed-card">
@@ -1763,6 +1822,31 @@
         <div class="member-status-row">${presenceBadge(profile.id)}</div>
         ${chips(list(profile.practices).slice(0, 4))}
       </div>
+    </button>`;
+  }
+
+  function discoverGridTile(profile) {
+    const cover = approvedProfilePhotos(profile)[0];
+    const type = discoverProfileType(profile);
+    const label = ({ couple: 'Couple', woman: 'Femme', man: 'Homme', other: 'Profil individuel' })[type];
+    return `<button class="discover-grid-tile" type="button" data-open-profile="${e(profile.id)}">
+      <span class="discover-grid-cover">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : `<b>${e(initials(profile.display_name))}</b>`}${seenBadge(profile.id)}</span>
+      <span class="discover-grid-copy"><strong>${e(profile.display_name)}</strong><small>${e(label)} · ${e(profileAges(profile))}</small><em>⌖ ${e(profile.location_zone || 'Zone non renseignée')}</em></span>
+    </button>`;
+  }
+
+  function discoverHorizontalTile(profile) {
+    const cover = approvedProfilePhotos(profile)[0];
+    const followed = state.following.includes(profile.id);
+    return `<button class="card discover-horizontal-tile" type="button" data-open-profile="${e(profile.id)}">
+      <span class="discover-horizontal-cover">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : `<b>${e(initials(profile.display_name))}</b>`}${seenBadge(profile.id)}</span>
+      <span class="discover-horizontal-copy">
+        <span class="member-meta"><i>${e(profile.profile_type === 'couple' ? 'Couple' : 'Individuel')}</i><i>${e(profileAges(profile))}</i>${followed ? '<i>Suivi</i>' : ''}</span>
+        <strong>${e(profile.display_name)}</strong>
+        <em>⌖ ${e(profile.location_zone || 'Zone publique non renseignée')}</em>
+        <p>${e(profile.description || profile.search_text || 'Résumé à compléter.')}</p>
+        <span>${presenceBadge(profile.id)}${seenBadge(profile.id)}</span>
+      </span>
     </button>`;
   }
 
@@ -1898,10 +1982,14 @@
     const rows = filteredDiscoverProfiles();
     return `<div class="discover-results-heading">
       <div><strong>${rows.length}</strong><span>profil${rows.length > 1 ? 's' : ''} correspondant${rows.length > 1 ? 's' : ''}${state.discoverFilters.createdToday ? ' · créé aujourd’hui' : ''}</span></div>
-      <button class="text-button" type="button" data-reset-discover>Effacer les filtres</button>
+      <div class="discover-view-actions" role="group" aria-label="Affichage des profils">
+        <button class="${state.discoverView === 'grid' ? 'active' : ''}" type="button" data-discover-view="grid" aria-pressed="${state.discoverView === 'grid'}">▦ Damier</button>
+        <button class="${state.discoverView === 'horizontal' ? 'active' : ''}" type="button" data-discover-view="horizontal" aria-pressed="${state.discoverView === 'horizontal'}">☰ Résumé</button>
+        <button class="text-button" type="button" data-reset-discover>Effacer les filtres</button>
+      </div>
     </div>
     ${rows.length
-      ? `<section class="grid three">${rows.map(memberTile).join('')}</section>`
+      ? `<section class="discover-profile-results ${e(state.discoverView)}">${rows.map((profile) => state.discoverView === 'horizontal' ? discoverHorizontalTile(profile) : discoverGridTile(profile)).join('')}</section>`
       : emptyState('Aucun résultat', 'Modifie les critères ou efface les filtres pour élargir la recherche.', '◇')}`;
   }
 
@@ -2070,6 +2158,18 @@
         content.innerHTML = renderDiscover();
         bindDiscover();
       });
+      document.querySelectorAll('[data-discover-view]').forEach((button) => {
+        button.addEventListener('click', () => {
+          state.discoverView = button.dataset.discoverView === 'horizontal' ? 'horizontal' : 'grid';
+          try {
+            localStorage.setItem(DISCOVER_VIEW_STORAGE_KEY, state.discoverView);
+          } catch {
+            // L’affichage reste actif pour la session.
+          }
+          document.querySelector('#discoverResults').innerHTML = renderDiscoverResults();
+          bindResultControls();
+        });
+      });
     };
     const refreshResults = () => {
       readDiscoverFilters(form);
@@ -2176,6 +2276,58 @@
     }).join('');
   }
 
+  function dateLabel(value) {
+    return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' }).format(new Date(`${value}T12:00:00`));
+  }
+
+  function travelMapPreview(plan) {
+    const latitude = Number(plan.latitude ?? (plan.destination_type === 'cap_dagde_village' ? 43.294 : NaN));
+    const longitude = Number(plan.longitude ?? (plan.destination_type === 'cap_dagde_village' ? 3.529 : NaN));
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return '';
+    const zoom = plan.precise_location_consent ? 14 : 12;
+    const point = mapPoint(latitude, longitude, zoom);
+    const tileX = Math.floor(point.x / 256);
+    const tileY = Math.floor(point.y / 256);
+    return `<div class="travel-map-preview" style="background-image:url('https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png')" aria-label="Aperçu cartographique ${e(plan.precise_location_consent ? 'précis et consenti' : 'approximatif')}"><i></i><small>${plan.precise_location_consent ? 'Localisation précise partagée' : 'Zone approximative'}</small></div>`;
+  }
+
+  function profilePlansView(profile, own) {
+    const today = parisDayKey();
+    const visits = list(state.plans.venueVisits).filter((row) => row.profile_id === profile.id);
+    const travels = list(state.plans.travelPlans).filter((row) => row.profile_id === profile.id);
+    const eventPlans = list(state.plans.eventPlans).filter((row) => row.profile_id === profile.id);
+    const eventRows = eventPlans.map((plan) => ({
+      plan,
+      event: list(state.directory.events).find((event) => event.id === plan.event_id)
+    })).filter((row) => row.event);
+    const capZones = ['Ensemble du village','Entrée · Natureva · René Oltra','Port Soleil','Port Ambonne','Port Nature','Héliopolis','Plage naturiste','Marina'];
+    const capVenues = ['CHM René Oltra','Natureva Spa','Oz’Inn Hôtel & Spa','Glamour','Glamour Beach','Waiki Beach','Tantra','Kamasutra','Plug & Play','Histoire d’O'];
+    return `<article class="card section profile-plans">
+      <p class="eyebrow">Agenda public</p><h2>Sorties et séjours</h2>
+      ${visits.length || travels.length || eventRows.length ? `<div class="profile-plan-list">
+        ${visits.map((visit) => `<div><span>⌖</span><p><strong>${visit.visit_date < today ? 'On y est allé' : 'Nous y serons'} · ${e(visit.venue_directory?.name || 'Établissement')}</strong><small>${e(dateLabel(visit.visit_date))} · ${e(visit.venue_directory?.city || '')}</small></p>${own ? `<button type="button" data-delete-plan="${e(visit.id)}" data-plan-type="venue_visit" aria-label="Supprimer">×</button>` : ''}</div>`).join('')}
+        ${eventRows.map(({ plan, event }) => `<button type="button" data-open-event="${e(event.id)}"><span>✦</span><p><strong>${new Date(event.starts_at) < new Date() ? 'On y est allé' : 'Nous participerons'} · ${e(event.title)}</strong><small>${e(new Date(event.starts_at).toLocaleString('fr-FR'))} · ${e(plan.registration_status)}</small></p><i>→</i></button>`).join('')}
+        ${travels.map((plan) => `<div class="travel-plan-card">${travelMapPreview(plan)}<p><strong>${plan.ends_on < today ? 'Nous étions' : 'Nous serons'} · ${e(plan.title)}</strong><small>Du ${e(dateLabel(plan.starts_on))} au ${e(dateLabel(plan.ends_on))} · ${e(plan.location_label)}</small>${plan.cap_zone ? `<em>Village naturiste · ${e(plan.cap_zone)}${plan.cap_venue ? ` · ${e(plan.cap_venue)}` : ''}</em>` : ''}${plan.notes ? `<span>${e(plan.notes)}</span>` : ''}</p>${own ? `<button type="button" data-delete-plan="${e(plan.id)}" data-plan-type="travel_plan" aria-label="Supprimer">×</button>` : ''}</div>`).join('')}
+      </div>` : '<p class="muted">Aucune sortie ou localisation annoncée.</p>'}
+      ${own && !state.plans.migrationPending ? `<details class="travel-plan-editor"><summary>Ajouter un séjour ou une localisation</summary>
+        <form class="travel-plan-form">
+          <div class="form-grid">
+            <label>Titre<input name="title" maxlength="160" placeholder="Ex. Week-end au Cap" required></label>
+            <label>Destination<input name="locationLabel" maxlength="240" placeholder="Ville, quartier ou adresse publique" required></label>
+            <label>Du<input type="date" name="startsOn" required></label>
+            <label>Au<input type="date" name="endsOn" required></label>
+            <label>Type de destination<select name="destinationType"><option value="general">Destination libre</option><option value="cap_dagde_village">Village naturiste du Cap d’Agde</option></select></label>
+            <label>Zone du village<select name="capZone"><option value="">Non concerné</option>${capZones.map((zone) => `<option>${e(zone)}</option>`).join('')}</select></label>
+            <label>Établissement ou résidence du village<select name="capVenue"><option value="">Non précisé</option>${capVenues.map((venue) => `<option>${e(venue)}</option>`).join('')}</select></label>
+            <label class="wide">Note publique<textarea name="notes" maxlength="2000" placeholder="Informations utiles pour les autres membres"></textarea></label>
+          </div>
+          <details class="precise-location-consent"><summary>Partager volontairement une position précise</summary><p>Facultatif. Velvet ne l’enregistre que si tu coches le consentement ci-dessous. Au Village naturiste, l’accès est réglementé : privilégie une zone, ne publie jamais un numéro d’hébergement et respecte l’interdiction de photographier ou filmer sans autorisation.</p><div class="form-grid"><label>Latitude<input type="number" step="0.000001" name="latitude"></label><label>Longitude<input type="number" step="0.000001" name="longitude"></label></div><label class="toggle"><input type="checkbox" name="preciseLocationConsent"><span>Je consens à rendre cette position précise visible aux membres autorisés.</span></label></details>
+          <button class="primary" type="submit">Publier sur mon profil</button>
+        </form>
+      </details>` : own ? '<p class="status-box">Les séjours seront activés après la migration Supabase 0024.</p>' : ''}
+    </article>`;
+  }
+
   function albumsView(profile, own) {
     const albums = list(profile.albums);
     const profilePhotos = approvedProfilePhotos(profile);
@@ -2260,15 +2412,17 @@
                 const latest = targetGrants.map((grant) => grant.expires_at).filter(Boolean).sort().at(-1);
                 return `<span class="selected-venue"><span>${e(target?.display_name || 'Profil autorisé')} · ${permanent ? 'Permanent' : `jusqu’au ${e(new Date(latest).toLocaleString('fr-FR'))}`}</span><button type="button" data-revoke-album="${e(album.id)}" data-revoke-profile="${e(profileId)}" aria-label="Révoquer l’accès">×</button></span>`;
               }).join('')}</div>` : ''}
-              <form class="album-access-form" data-album-id="${e(album.id)}">
-                <label>Membre bénéficiaire<select name="profileId" required><option value="">Choisir un profil</option>${targetProfiles.map((target) => `<option value="${e(target.id)}">${e(target.display_name)}</option>`).join('')}</select></label>
-                <label>Durée<select name="duration" required><option value="1">1 heure</option><option value="2">2 heures</option><option value="4">4 heures</option><option value="8">8 heures</option><option value="12">12 heures</option><option value="24">24 heures</option><option value="permanent">Permanent</option></select></label>
-                <button class="primary" type="submit">Donner l’accès</button>
-              </form>
+              <p class="muted">Les nouveaux accès se donnent depuis la fiche du membre concerné. Les accès actifs restent révocables ici.</p>
             </div>` : ''}
           </article>
         </details>`;
       }).join('')}</div>` : emptyState('Aucun album publié', own ? 'Crée un album, donne-lui un nom et choisis s’il est public ou privé.' : 'Ce membre n’a encore publié aucun album.', '⌑')}
+      ${!own && list(state.profile?.albums).some((album) => album.confidentiality !== 'public') ? `<form class="card profile-album-access-form" data-profile-id="${e(profile.id)}" style="margin-top:16px">
+        <p class="eyebrow">Partage privé</p><h2>Ouvrir mes albums à ${e(profile.display_name)}</h2>
+        <p>Choisis un ou plusieurs de tes albums privés. Pour un profil couple, l’autorisation couvre les deux comptes actifs.</p>
+        <div class="album-access-choices">${list(state.profile.albums).filter((album) => album.confidentiality !== 'public').map((album) => `<label><input type="checkbox" name="albumIds" value="${e(album.id)}"><span>${e(album.name)}</span></label>`).join('')}</div>
+        <div class="form-grid"><label>Durée<select name="duration" required><option value="1">1 heure</option><option value="4">4 heures</option><option value="12">12 heures</option><option value="24">24 heures</option><option value="permanent">Permanent</option></select></label><button class="primary" type="submit">Donner l’accès</button></div>
+      </form>` : ''}
       ${own ? `<form id="albumForm" class="card" style="margin-top:16px">
         <h2>Créer un album</h2>
         <div class="form-grid">
@@ -2289,6 +2443,7 @@
         <article class="card section"><p class="eyebrow">Le chemin parcouru</p><h2>${voice.journeyTitle}</h2><p>${e(profile.journey || voice.journeyFallback)}</p></article>
         <article class="card section"><p class="eyebrow">Les rencontres souhaitées</p><h2>${voice.searchTitle}</h2><p>${e(profile.search_text || voice.searchFallback)}</p></article>
         <article class="card section"><p class="eyebrow">${voice.practicesEyebrow}</p><h2>${voice.practicesTitle}</h2>${chips(profile.practices, 'Pratiques à compléter')}</article>
+        ${profilePlansView(profile, own)}
         <article class="card section"><p class="eyebrow">${voice.recommendationsEyebrow}</p><h2>Recommandations</h2>${recommendationsFor(profile)}</article>
         ${own ? `<article class="card section"><p class="eyebrow">Carrousel public</p><h2>Ajouter des photos de profil</h2><p>Ces photos complètent le carrousel principal après validation.</p><form class="profile-photo-form" data-photo-role="${profile.profile_type === 'couple' ? 'couple_gallery' : 'individual_gallery'}"><label>Choisir des photos<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required></label><button class="secondary" type="submit">Ajouter au carrousel</button><small class="photo-upload-status" role="status"></small></form></article>` : ''}
       </div>
@@ -2338,7 +2493,7 @@
         <p class="eyebrow">${e(voice.profileLabel)} · ${e(profile.location_zone || 'Localisation privée')}</p>
         <h1>${e(profile.display_name)}</h1><p class="lead">${e(profile.description)}</p>
         <div class="badges"><span class="pill gold">${e(voice.betaLabel)}</span>${profile.profile_type === 'couple' && profile.relationship_since ? `<span class="pill">Depuis ${e(profile.relationship_since)}</span>` : ''}<span class="pill">${e(profile.location_zone || 'Zone privée')}</span></div>
-        <div class="actions">${own ? '<button class="primary" data-edit-profile>Modifier mon profil</button>' : ''}${!own ? `<button class="primary" data-message-profile="${e(profile.id)}">Écrire</button><button class="secondary" data-favorite-profile="${e(profile.id)}">${state.socialActions[profile.id]?.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}</button>` : ''}</div>
+        <div class="actions">${own ? '<button class="primary" data-edit-profile>Modifier mon profil</button>' : ''}${!own ? `<button class="primary" data-message-profile="${e(profile.id)}">Écrire</button><button class="secondary" data-favorite-profile="${e(profile.id)}">${state.socialActions[profile.id]?.favorite ? 'Ne plus suivre' : 'Suivre ce membre'}</button>` : ''}</div>
       </div></section>
       ${profileEngagementPanel(profile, own)}
       ${own ? '' : profileSafetyPanel(profile)}
@@ -2831,6 +2986,8 @@
     const notifications = settings.notifications || {};
     const installed = window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone;
     const browserPermission = 'Notification' in window ? Notification.permission : 'unsupported';
+    const lifecycleProfile = state.lifecycle?.profile || {};
+    const lifecycleAction = state.lifecycle?.action;
     return `<div class="page settings-page">
       ${pageHead('Confidentialité · tranquillité · contrôle', 'Paramètres', 'Décide précisément qui peut te découvrir, qui peut t’écrire et ce que Velvet est autorisé à te signaler.')}
       <form id="settingsForm" class="settings-layout">
@@ -2884,6 +3041,15 @@
           <button class="secondary" type="button" data-install-velvet${state.installPrompt || installed ? '' : ' hidden'}>${installed ? 'Velvet est installé' : 'Installer Velvet'}</button>
           <small>Sur iPhone : Partager → Sur l’écran d’accueil. Sur Android : menu du navigateur → Installer l’application.</small>
         </section>
+        <section class="card settings-card account-lifecycle-card">
+          <p class="eyebrow">Cycle de vie du profil</p><h2>Pause et suppression</h2>
+          ${state.lifecycle?.migrationPending ? '<p class="status-box">Cette fonction sera disponible dès l’application de la migration Supabase 0024.</p>'
+            : lifecycleAction ? `<p class="status-box">Une demande de ${lifecycleAction.action_type === 'delete' ? 'suppression' : 'mise en pause'} attend les confirmations par e-mail.${lifecycleAction.execute_after ? ` Suppression définitive prévue le ${e(new Date(lifecycleAction.execute_after).toLocaleDateString('fr-FR'))}.` : ''}</p><button class="secondary" type="button" data-lifecycle-action="cancel">Annuler la demande</button>`
+            : lifecycleProfile.lifecycle_state === 'paused' ? '<p>Le profil est conservé mais invisible pour les autres membres.</p><button class="primary" type="button" data-lifecycle-action="resume">Réactiver mon profil</button>'
+              : lifecycleProfile.lifecycle_state === 'deletion_pending' ? '<p>Le profil est invisible et conservé pendant 30 jours avant effacement définitif.</p><button class="primary" type="button" data-lifecycle-action="cancel">Annuler la suppression</button>'
+                : `<p>La pause conserve la fiche. La suppression la rend invisible après validation, puis efface définitivement les données 30 jours plus tard.</p><div class="lifecycle-actions"><button class="secondary" type="button" data-lifecycle-action="pause">Mettre le profil en pause</button><button class="danger" type="button" data-lifecycle-action="delete">Supprimer le compte</button></div>`}
+          <small>Pour une fiche couple, Velvet adresse un lien personnel à chaque membre actif et n’applique l’action qu’après toutes les validations.</small>
+        </section>
         <footer class="settings-save">
           <p id="settingsStatus" class="status-box" hidden></p>
           <button class="primary" type="submit">Enregistrer mes paramètres</button>
@@ -2895,7 +3061,14 @@
   async function openSettings() {
     content.innerHTML = `<div class="page"><section class="loading-state"><span class="loader"></span><p>Chargement de tes préférences…</p></section></div>`;
     try {
-      state.settings = await api('/api/members/settings');
+      [state.settings, state.lifecycle] = await Promise.all([
+        api('/api/members/settings'),
+        api('/api/members/account-actions').catch(() => ({
+          profile: { lifecycle_state: 'active' },
+          action: null,
+          migrationPending: true
+        }))
+      ]);
       content.innerHTML = renderSettingsView(state.settings);
       bindSettings();
       content.focus();
@@ -2961,6 +3134,27 @@
       }
     });
 
+    form.querySelectorAll('[data-lifecycle-action]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        button.disabled = true;
+        const action = button.dataset.lifecycleAction;
+        try {
+          state.lifecycle = await api('/api/members/account-actions', {
+            method: 'POST',
+            body: JSON.stringify({ action })
+          });
+          content.innerHTML = renderSettingsView(state.settings);
+          bindSettings();
+          toast(['pause','delete'].includes(action)
+            ? 'Les e-mails de confirmation ont été envoyés.'
+            : 'Le profil est de nouveau actif.');
+        } catch (error) {
+          toast(errorMessages[error.message] || error.message, true);
+          button.disabled = false;
+        }
+      });
+    });
+
     form.querySelector('[data-install-velvet]')?.addEventListener('click', async () => {
       if (!state.installPrompt) {
         toast('Utilise le menu du navigateur puis « Sur l’écran d’accueil » ou « Installer ».');
@@ -3007,6 +3201,21 @@
     </aside>`;
   }
 
+  function messageAttachments(message) {
+    const rows = list(message.attachments);
+    if (!rows.length) return '';
+    return `<div class="message-attachments">${rows.map((attachment) => {
+      if (!attachment.previewUrl) return '';
+      if (attachment.media_type === 'image') {
+        return `<a href="${e(attachment.previewUrl)}" target="_blank" rel="noopener noreferrer"><img src="${e(attachment.previewUrl)}" alt="${e(attachment.original_name)}"></a>`;
+      }
+      if (attachment.media_type === 'video') {
+        return `<video controls preload="metadata" src="${e(attachment.previewUrl)}"><a href="${e(attachment.previewUrl)}">Télécharger la vidéo</a></video>`;
+      }
+      return `<a class="message-document" href="${e(attachment.previewUrl)}" target="_blank" rel="noopener noreferrer">▤ ${e(attachment.original_name)} · ${e(Math.max(1, Math.round(Number(attachment.size_bytes || 0) / 1024)))} Ko</a>`;
+    }).join('')}</div>`;
+  }
+
   async function openConversation(conversationId) {
     content.innerHTML = `<div class="page"><section class="loading-state"><span class="loader"></span><p>Chargement de la conversation…</p></section></div>`;
     try {
@@ -3020,17 +3229,34 @@
         ${pageHead('Conversation privée', conversation?.subject || 'Conversation', 'Les messages sont enregistrés dans Supabase et protégés par les règles d’accès de la conversation.', '<button class="secondary" data-route="conversations">Retour</button>')}
         ${conversationStreakCard(result.streak)}
         <section class="card">
-          <div class="messages">${list(result.messages).length ? result.messages.map((message) => `<article class="message ${message.sender_user_id === result.currentUserId ? 'mine' : ''}"><small>${e(message.sender_identity || (message.sender_user_id === result.currentUserId ? 'Vous' : 'Membre'))}</small>${e(message.body)}</article>`).join('') : '<p>Aucun message dans cette conversation.</p>'}</div>
-          <form id="messageForm" class="composer"><input name="body" maxlength="10000" placeholder="Écrire un message…" required><button class="primary" type="submit">Envoyer</button></form>
+          <div class="messages">${list(result.messages).length ? result.messages.map((message) => `<article class="message ${message.sender_user_id === result.currentUserId ? 'mine' : ''}"><small>${e(message.sender_identity || (message.sender_user_id === result.currentUserId ? 'Vous' : 'Membre'))}</small>${message.body ? `<p>${e(message.body)}</p>` : ''}${messageAttachments(message)}</article>`).join('') : '<p>Aucun message dans cette conversation.</p>'}</div>
+          <form id="messageForm" class="composer">
+            <input type="hidden" name="conversationId" value="${e(conversationId)}">
+            <input name="body" maxlength="10000" placeholder="Écrire un message…">
+            <label class="attachment-picker" title="Ajouter des pièces jointes"><input type="file" name="attachments" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime,application/pdf" multiple><span>＋ Photo, vidéo ou PDF</span></label>
+            <small class="attachment-selection" role="status"></small>
+            <button class="primary" type="submit">Envoyer</button>
+          </form>
         </section>
       </div>`;
+      const fileInput = document.querySelector('#messageForm [name=attachments]');
+      fileInput?.addEventListener('change', () => {
+        const files = [...fileInput.files].slice(0, 4);
+        document.querySelector('.attachment-selection').textContent = files.length
+          ? files.map((file) => file.name).join(' · ')
+          : '';
+      });
       document.querySelector('#messageForm').addEventListener('submit', async (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const button = event.currentTarget.querySelector('button');
+        if (!String(data.get('body') || '').trim() && !data.getAll('attachments').some((file) => file instanceof File && file.size)) {
+          toast('Écris un message ou ajoute une pièce jointe.', true);
+          return;
+        }
         button.disabled = true;
         try {
-          await api('/api/members/messages', { method: 'POST', body: JSON.stringify({ conversationId, body: data.get('body') }) });
+          await api('/api/members/messages', { method: 'POST', body: data });
           await openConversation(conversationId);
         } catch (error) {
           toast(error.message, true);
@@ -3114,6 +3340,10 @@
       .sort((left, right) => new Date(left.starts_at) - new Date(right.starts_at));
     const recommendations = list(state.directory.recommendations)
       .filter((item) => item.target_type === 'establishment' && item.target_id === establishmentId);
+    const venueVisits = list(state.plans.venueVisits)
+      .filter((visit) => visit.venue_id === venue.id)
+      .sort((left, right) => left.visit_date.localeCompare(right.visit_date));
+    const visitDates = [...new Set(venueVisits.map((visit) => visit.visit_date))];
     const website = safeExternalUrl(venue.website);
     const routeQuery = [venue.address_public || venue.address, venue.city, venue.country_code || venue.countryCode].filter(Boolean).join(', ');
     const routeUrl = routeQuery
@@ -3140,6 +3370,19 @@
         </article>
       </section>
       ${venue.manual_review_required ? '<p class="card muted">Fiche issue d’un recensement documentaire. Adresse, horaires, tarifs et statut commercial doivent être confirmés avant déplacement.</p>' : ''}
+      <section class="home-section venue-community-calendar">
+        <header class="section-heading"><div><p class="eyebrow">Calendrier des membres</p><h2>Qui compte s’y rendre ?</h2><p>Ce calendrier existe même si l’établissement n’a publié aucune soirée. Une seule présence est créée par profil, lieu et date.</p></div></header>
+        ${state.plans.migrationPending ? '<p class="card status-box">Le calendrier des membres sera activé après la migration Supabase 0024.</p>' : `<form class="card venue-visit-form" data-venue-id="${e(venue.id)}"><label>Date de votre venue<input type="date" name="visitDate" min="${e(parisDayKey())}" required></label><button class="primary" type="submit">Nous y serons</button></form>`}
+        ${visitDates.length ? `<div class="venue-visit-dates">${visitDates.map((date) => {
+          const visitors = venueVisits.filter((visit) => visit.visit_date === date);
+          return `<article class="card"><p class="eyebrow">${e(date < parisDayKey() ? 'Ils y sont allés' : 'Ils y seront')}</p><h3>${e(dateLabel(date))}</h3><div class="venue-visitors">${visitors.map((visit) => {
+            const member = visit.profile_id === state.profile.id
+              ? state.profile
+              : list(state.directory.profiles).find((profile) => profile.id === visit.profile_id);
+            return member ? `<button type="button" data-open-profile="${e(member.id)}"><span>${e(initials(member.display_name))}</span><strong>${e(member.display_name)}</strong></button>` : '';
+          }).join('')}</div></article>`;
+        }).join('')}</div>` : '<p class="muted">Aucun membre n’a encore annoncé sa venue.</p>'}
+      </section>
       ${supportsAgenda ? `<section class="home-section"><header class="section-heading"><div><p class="eyebrow">Agenda</p><h2>Prochaines soirées</h2></div></header>
         ${professionalActive ? (events.length ? `<div class="grid two">${events.map(eventTile).join('')}</div>` : emptyState('Aucune soirée publiée', 'Ce professionnel peut publier son agenda depuis Velvet Pro.', '✦')) : emptyState('Agenda non disponible', 'L’établissement pourra ouvrir son agenda après revendication de la fiche, validation par Velvet et activation de son abonnement Pro.', '✦')}
       </section>` : ''}
@@ -3214,8 +3457,11 @@
       const profile = list(state.directory.profiles).find((row) => row.id === profileId);
       content.innerHTML = renderProfile(profile, false);
       bindDynamicForms();
+      state.following = result.favorite
+        ? [...new Set([...state.following, profileId])]
+        : state.following.filter((id) => id !== profileId);
       toast(action === 'favorite'
-        ? (result.favorite ? 'Profil ajouté aux favoris.' : 'Profil retiré des favoris.')
+        ? (result.favorite ? 'Vous suivez maintenant ce membre.' : 'Vous ne suivez plus ce membre.')
         : (result.blocked ? 'Profil bloqué.' : 'Profil débloqué.'));
     } catch (error) {
       toast(errorMessages[error.message] || error.message, true);
@@ -3434,7 +3680,7 @@
       const data = new FormData(reportForm);
       button.disabled = true;
       try {
-        await api('/api/members/social-actions', {
+        const result = await api('/api/members/social-actions', {
           method: 'POST',
           body: JSON.stringify({
             action: 'report',
@@ -3443,13 +3689,95 @@
             description: data.get('description')
           })
         });
+        state.socialActions[reportForm.dataset.profileId] = {
+          favorite: Boolean(result.favorite),
+          blocked: true
+        };
+        state.following = state.following.filter((id) => id !== reportForm.dataset.profileId);
+        state.directory.profiles = state.directory.profiles.filter((profile) => profile.id !== reportForm.dataset.profileId);
         reportForm.reset();
-        toast('Signalement transmis à la modération.');
+        toast('Signalement transmis à Velvet Control. Le membre est bloqué.');
+        route('discover');
       } catch (error) {
         toast(errorMessages[error.message] || error.message, true);
       } finally {
         button.disabled = false;
       }
+    });
+
+    const venueVisitForm = document.querySelector('.venue-visit-form');
+    if (venueVisitForm) venueVisitForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const data = new FormData(venueVisitForm);
+      const button = venueVisitForm.querySelector('button');
+      button.disabled = true;
+      try {
+        const result = await api('/api/members/plans', {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'venue_visit',
+            venueId: venueVisitForm.dataset.venueId,
+            visitDate: data.get('visitDate')
+          })
+        });
+        state.plans = result;
+        openVenue(venueVisitForm.dataset.venueId);
+        toast('Votre présence est visible sur le lieu et sur votre profil.');
+      } catch (error) {
+        toast(errorMessages[error.message] || error.message, true);
+        button.disabled = false;
+      }
+    });
+
+    document.querySelectorAll('.travel-plan-form').forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const data = new FormData(form);
+        const button = form.querySelector('button');
+        button.disabled = true;
+        try {
+          const result = await api('/api/members/plans', {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'travel_plan',
+              title: data.get('title'),
+              locationLabel: data.get('locationLabel'),
+              startsOn: data.get('startsOn'),
+              endsOn: data.get('endsOn'),
+              destinationType: data.get('destinationType'),
+              capZone: data.get('capZone'),
+              capVenue: data.get('capVenue'),
+              notes: data.get('notes'),
+              latitude: data.get('latitude'),
+              longitude: data.get('longitude'),
+              preciseLocationConsent: data.has('preciseLocationConsent')
+            })
+          });
+          state.plans = result;
+          content.innerHTML = renderProfile(state.profile, true);
+          bindDynamicForms();
+          toast('Le séjour est publié sur votre profil.');
+        } catch (error) {
+          toast(errorMessages[error.message] || error.message, true);
+          button.disabled = false;
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-delete-plan]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        button.disabled = true;
+        try {
+          const result = await api(`/api/members/plans?type=${encodeURIComponent(button.dataset.planType)}&id=${encodeURIComponent(button.dataset.deletePlan)}`, { method: 'DELETE' });
+          state.plans = result;
+          content.innerHTML = renderProfile(state.profile, true);
+          bindDynamicForms();
+          toast('Cette information a été retirée du profil.');
+        } catch (error) {
+          toast(errorMessages[error.message] || error.message, true);
+          button.disabled = false;
+        }
+      });
     });
 
     const eventRegistrationForm = document.querySelector('#eventRegistrationForm');
@@ -3470,6 +3798,7 @@
         toast(result.registration?.registration_status === 'waitlisted'
           ? 'La sortie est complète : tu es sur liste d’attente.'
           : 'Ton inscription est confirmée.');
+        await refreshData();
         await openEvent(eventRegistrationForm.dataset.eventId);
       } catch (error) {
         toast(errorMessages[error.message] || error.message, true);
@@ -3552,26 +3881,32 @@
       });
     });
 
-    document.querySelectorAll('.album-access-form').forEach((form) => {
+    document.querySelectorAll('.profile-album-access-form').forEach((form) => {
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const button = form.querySelector('button');
-        const values = Object.fromEntries(new FormData(form));
+        const formData = new FormData(form);
+        const albumIds = formData.getAll('albumIds');
+        if (!albumIds.length) {
+          toast('Choisis au moins un album privé.', true);
+          return;
+        }
         button.disabled = true;
         try {
           await api('/api/members/album-access', {
             method: 'POST',
             body: JSON.stringify({
-              albumId: form.dataset.albumId,
-              profileId: values.profileId,
-              duration: values.duration
+              albumIds,
+              profileId: form.dataset.profileId,
+              duration: formData.get('duration')
             })
           });
           await refreshData();
           state.profileTab = 'albums';
-          content.innerHTML = renderProfile(state.profile, true);
+          const target = list(state.directory.profiles).find((row) => row.id === form.dataset.profileId);
+          content.innerHTML = renderProfile(target, false);
           bindDynamicForms();
-          toast('Accès privé accordé.');
+          toast(`${albumIds.length} album${albumIds.length > 1 ? 's' : ''} ouvert${albumIds.length > 1 ? 's' : ''}.`);
         } catch (error) {
           toast(error.message, true);
           button.disabled = false;
@@ -3912,8 +4247,9 @@
       api('/api/members/event-registrations', {
         method: 'POST',
         body: JSON.stringify({ action: 'cancel', eventId: cancelEventButton.dataset.cancelEvent })
-      }).then(() => {
+      }).then(async () => {
         toast('Ton inscription est annulée.');
+        await refreshData();
         return openEvent(cancelEventButton.dataset.cancelEvent);
       }).catch((error) => toast(errorMessages[error.message] || error.message, true));
       return;
@@ -3938,7 +4274,14 @@
     if (!state.profile || state.profile.admission_status !== 'approved' || document.hidden) return;
     try {
       const result = await api('/api/members/discovery');
+      const previousPresence = { ...state.presence };
       applyDiscoveryState(result);
+      list(state.following).forEach((profileId) => {
+        if (previousPresence[profileId] && previousPresence[profileId] !== 'online' && state.presence[profileId] === 'online') {
+          const profile = list(state.directory.profiles).find((row) => row.id === profileId);
+          if (profile) toast(`${profile.display_name} vient de se connecter.`);
+        }
+      });
       document.querySelectorAll('[data-profile-presence]').forEach((badge) => {
         const template = document.createElement('template');
         template.innerHTML = presenceBadge(badge.dataset.profilePresence);

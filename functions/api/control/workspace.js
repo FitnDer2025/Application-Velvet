@@ -24,7 +24,7 @@ async function workspace(env, access) {
     restJson(env, '/rest/v1/events?select=id,establishment_id,organizer_profile_id,owner_type,title,starts_at,capacity,visibility,created_at&order=starts_at.desc&limit=1000', access.session),
     restJson(env, '/rest/v1/event_registrations?select=id,event_id,user_id,places,status,created_at&order=created_at.desc&limit=2000', access.session),
     restJson(env, '/rest/v1/organizer_requests?select=id,user_id,member_profile_id,message,status,reviewed_by,reviewed_at,created_at&order=created_at.desc&limit=500', access.session),
-    restJson(env, '/rest/v1/reports?select=id,reporter_user_id,subject_type,subject_id,category,status,created_at&order=created_at.desc&limit=500', access.session),
+    restJson(env, '/rest/v1/reports?select=id,reporter_user_id,subject_type,subject_id,category,description,status,created_at&order=created_at.desc&limit=500', access.session),
     restJson(env, '/rest/v1/audit_events?select=sequence_number,actor_user_id,action,entity_type,entity_id,occurred_at&order=sequence_number.desc&limit=100', access.session),
     restJson(env, '/rest/v1/rpc/control_beta_release_checks', access.session, { method: 'POST', body: '{}' }),
     restJson(env, '/rest/v1/media_assets?select=id,profile_id,individual_profile_id,owner_user_id,media_role,storage_path,moderation_status,ai_assessment,rejection_reason,ai_reviewed_at,created_at,member_profiles(display_name,profile_type)&album_id=is.null&moderation_status=eq.pending&order=created_at.asc&limit=250', access.session)

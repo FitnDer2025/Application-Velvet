@@ -23,10 +23,11 @@ const venueCatalog = await readFile('infra/supabase/migrations/0020_velvet_venue
 const profilePhotoModeration = await readFile('infra/supabase/migrations/0021_profile_photo_human_moderation.sql', 'utf8');
 const controlAuditActor = await readFile('infra/supabase/migrations/0022_control_audit_actor.sql', 'utf8');
 const memberDiscoveryPreferences = await readFile('infra/supabase/migrations/0023_member_discovery_preferences.sql', 'utf8');
+const memberSocialPlansLifecycle = await readFile('infra/supabase/migrations/0024_member_social_plans_lifecycle.sql', 'utf8');
 
-const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}`;
+const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}\n${memberSocialPlansLifecycle}`;
 const tables = [...migrationBundle.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}`;
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}\n${memberSocialPlansLifecycle}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -126,6 +127,11 @@ const requirements = [
   [memberDiscoveryPreferences.includes('member_saved_searches_self_read') && memberDiscoveryPreferences.includes('user_id=auth.uid()'), 'Les recherches sauvegardées doivent rester strictement privées'],
   [memberDiscoveryPreferences.includes('member_presence_snapshot') && memberDiscoveryPreferences.includes("then 'online'") && memberDiscoveryPreferences.includes("then 'today'"), 'La présence publique doit rester limitée à trois états approximatifs'],
   [!memberDiscoveryPreferences.includes('returns table (\n  profile_id uuid,\n  last_seen_at'), 'La fonction publique de présence ne doit jamais retourner l’horodatage exact'],
+  [memberSocialPlansLifecycle.includes('message_attachments_conversation_read') && memberSocialPlansLifecycle.includes('public.is_conversation_member(conversation_id)'), 'Les pièces jointes doivent rester isolées dans leur conversation'],
+  [memberSocialPlansLifecycle.includes('unique(profile_id,venue_id,visit_date)') && memberSocialPlansLifecycle.includes('profile_venue_visits_visible'), 'Les présences dans un lieu doivent être regroupables sans doublon'],
+  [memberSocialPlansLifecycle.includes('precise_location_consent') && memberSocialPlansLifecycle.includes('destination_type') && memberSocialPlansLifecycle.includes('cap_dagde_village'), 'Les séjours doivent distinguer le consentement précis et le Village naturiste'],
+  [memberSocialPlansLifecycle.includes('profile_lifecycle_confirmations') && memberSocialPlansLifecycle.includes('remaining=0'), 'Une fiche couple doit attendre toutes les confirmations de cycle de vie'],
+  [memberSocialPlansLifecycle.includes("now()+interval '30 days'") && memberSocialPlansLifecycle.includes('purge_expired_profile_deletions'), 'La suppression définitive doit respecter le délai de récupération de 30 jours'],
   [!migrationBundle.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 

@@ -120,6 +120,17 @@ export async function onRequestPost({ request, env }) {
           description: description || null
         })
       });
+      const users = await targetUsers(env, access, profileId);
+      if (users.length) {
+        await restJson(env, '/rest/v1/blocks?on_conflict=blocker_user_id,blocked_user_id', access.session, {
+          method: 'POST',
+          headers: { prefer: 'resolution=merge-duplicates,return=minimal' },
+          body: JSON.stringify(users.map((userId) => ({
+            blocker_user_id: access.account.userId,
+            blocked_user_id: userId
+          })))
+        });
+      }
     } else {
       return withSession({ error: 'invalid_social_action' }, access.session, 400);
     }
@@ -132,4 +143,3 @@ export async function onRequestPost({ request, env }) {
     return json({ error: error.message || 'social_action_failed' }, 400);
   }
 }
-
