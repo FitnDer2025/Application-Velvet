@@ -87,6 +87,10 @@ import {
   onRequestPost as memberNotificationsPost
 } from '../../../functions/api/members/notifications.js';
 import { onRequestGet as memberMapGet } from '../../../functions/api/members/map.js';
+import {
+  onRequestGet as proWorkspaceGet,
+  onRequestPost as proWorkspacePost
+} from '../../../functions/api/pro/workspace.js';
 import { velvetIconResponse } from './velvet-icons.js';
 
 const API_ROUTES = new Map([
@@ -143,7 +147,9 @@ const API_ROUTES = new Map([
   ['POST /api/members/photo-reactions', photoReactionsPost],
   ['GET /api/members/notifications', memberNotificationsGet],
   ['POST /api/members/notifications', memberNotificationsPost],
-  ['GET /api/members/map', memberMapGet]
+  ['GET /api/members/map', memberMapGet],
+  ['GET /api/pro/workspace', proWorkspaceGet],
+  ['POST /api/pro/workspace', proWorkspacePost]
 ]);
 
 const PROTECTED_PREFIXES = ['/membres', '/pro', '/control'];

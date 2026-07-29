@@ -56,7 +56,11 @@ await emit(resolve(output, 'index.html'), addLegalBar(auth));
 
 await emit(resolve(output, 'membres/index.html'), addLegalBar(await required(sources.members)));
 
-await emit(resolve(output, 'pro/index.html'), addLegalBar(await required(sources.pro)));
+let pro = await required(sources.pro);
+pro = pro
+  .replace('<body>', '<body class="pro-live-pending"><style>.pro-live-pending .shell,.pro-live-pending .mobile-nav{visibility:hidden}.pro-live-pending:after{content:"VELVET PRO · Connexion au CRM…";position:fixed;inset:0;display:grid;place-items:center;background:#09090b;color:#d5b477;font:500 16px Georgia;letter-spacing:.14em}</style>')
+  .replace('</body>', '<script src="/assets/pro-live.js"></script></body>');
+await emit(resolve(output, 'pro/index.html'), addLegalBar(pro));
 await emit(resolve(output, 'control/index.html'), addLegalBar(await required(sources.control)));
 await cp(sources.controlD, resolve(output, 'control/velvet-control-intelligence-d-beta.html'));
 await cp(sources.controlC, resolve(output, 'control/velvet-control-intelligence-c-beta.html'));
