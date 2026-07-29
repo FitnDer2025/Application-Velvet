@@ -32,9 +32,11 @@ Ce document facilite le travail de CODEX. Il ne remplace pas les ADR.
 
 ## 3. Découverte
 
-- Accueil intelligent déjà validé.
-- Suggestions personnalisées de profils, événements, clubs et voyages.
-- Recherche de profils par couple, homme ou femme, et filtre des pratiques par liste contrôlée.
+- Accueil intelligent limité aux nouveaux profils, nouvelles photos publiques et événements proches compatibles avec les préférences.
+- Indicateurs actionnables pour les profils créés depuis minuit, les événements à moins de 50 km et les lieux référencés.
+- Recherche de profils par catégories multiples, catégories recherchées, ville ou proximité, âges homme/femme, pratiques, morphologies, présence, photos et recommandations.
+- Recherches nommées, sauvegardées, rappelables et supprimables par leur propriétaire.
+- Vignettes avec type, âges, zone publique, présence approximative et mémoire « Déjà vu », sans dernière connexion exacte.
 - Établissements filtrables par nature et par rayon de 5, 10, 15 ou 20 km.
 - Carte zoomable centrée par défaut sur un rayon d'environ 50 km, avec couches membres et catégories de lieux activables séparément.
 - Proximité et géolocalisation uniquement avec consentement.
@@ -106,6 +108,7 @@ Cycle : Découverte → Invitation Velvet → Salon Velvet → Confiance → Exp
 ## 11. Paramètres
 
 - Compte et informations personnelles.
+- Thème sombre ou clair avec palette Velvet ivoire, beige, pastel, or et bordeaux.
 - Abonnement.
 - Confidentialité et visibilité.
 - Sécurité, médias privés, blocages et notifications.

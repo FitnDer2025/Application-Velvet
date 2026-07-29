@@ -12,6 +12,13 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/assets/velvet-icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/velvet-icon-180.png">
+  <script>
+    try {
+      const theme = localStorage.getItem('velvet-member-theme-v1') === 'light' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+    } catch {}
+  </script>
   <link rel="stylesheet" href="/assets/members-live.css">
   <link rel="stylesheet" href="/assets/members-onboarding-v2.css">
 </head>

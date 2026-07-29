@@ -22,6 +22,7 @@ const paths = [
   'functions/api/members/conversations.js',
   'functions/api/members/messages.js',
   'functions/api/members/event-registrations.js',
+  'functions/api/members/discovery.js',
   'functions/api/members/map.js',
   'functions/api/members/venue-address-coordinates.js',
   'functions/api/members/venue-geocoding.js',
@@ -111,8 +112,14 @@ const journeys = [
   },
   {
     name: 'Accueil et découverte filtrés',
-    valid: has('apps/beta/static/assets/members-live.js', 'Découvrir d’autres membres', 'homeVenueKind', 'homeVenueRadius', 'data-enable-location')
-      && has('apps/beta/static/assets/members-live.js', '<option value="couple">Couples</option>', '<option value="man">Homme</option>', '<option value="woman">Femme</option>', 'Toutes les pratiques', 'discoverProfileType')
+    valid: has('apps/beta/static/assets/members-live.js', 'profil${profilesToday.length', 'événement${nearbyEvents.length', 'lieux référencés', 'Votre actualité Velvet')
+      && has('apps/beta/static/assets/members-live.js', 'maleAgeMin', 'femaleAgeMin', 'discoverChoices', 'filteredDiscoverProfiles', 'data-save-search', 'presenceBadge')
+      && has('functions/api/members/discovery.js', 'member_saved_searches', 'member_presence_snapshot')
+  },
+  {
+    name: 'Thème clair Velvet',
+    valid: has('apps/beta/static/assets/members-live.js', 'velvet-member-theme-v1', 'Mode clair', 'applyTheme')
+      && has('apps/beta/static/assets/members-live.css', 'html[data-theme="light"]', '#f4f4f2', '#641b36', '#c6a96a')
   },
   {
     name: 'Maps pilotable et privée',

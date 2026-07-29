@@ -130,6 +130,55 @@ async function venueMarkers(env, token) {
   return markers.filter(Boolean);
 }
 
+function eventCountryCode(value) {
+  const text = String(value || '').toLocaleLowerCase('fr');
+  return /\bbelg(?:ique|ium)\b/.test(text) ? 'BE' : 'FR';
+}
+
+async function eventMarkers(env, token, venues) {
+  const [events, establishments] = await Promise.all([
+    restJson(
+      env,
+      '/rest/v1/events?select=id,owner_type,establishment_id,organizer_profile_id,title,starts_at,location_public,audience,created_at,updated_at&visibility=eq.published&order=starts_at.asc&limit=100',
+      token
+    ),
+    restJson(
+      env,
+      '/rest/v1/establishments?select=id,directory_venue_id,address_public,city&visibility=eq.published&limit=500',
+      token
+    )
+  ]);
+  const venuesById = new Map(venues.map((venue) => [venue.id, venue]));
+  const establishmentsById = new Map((establishments || []).map((row) => [row.id, row]));
+  const markers = await Promise.all((events || []).map(async (event) => {
+    if (new Date(event.starts_at) < new Date()) return null;
+    const establishment = establishmentsById.get(event.establishment_id);
+    const venue = venuesById.get(establishment?.directory_venue_id);
+    const coordinates = venue || await geocodeVenueAddress({
+      address_public: event.location_public || establishment?.address_public,
+      city: establishment?.city,
+      country_code: eventCountryCode(event.location_public || establishment?.address_public)
+    });
+    if (!coordinates) return null;
+    return {
+      id: event.id,
+      type: 'event',
+      ownerType: event.owner_type,
+      title: event.title,
+      startsAt: event.starts_at,
+      locationPublic: event.location_public,
+      audience: event.audience,
+      createdAt: event.created_at,
+      updatedAt: event.updated_at,
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
+      locationPrecision: coordinates.locationPrecision || coordinates.precision || 'address',
+      positionSource: 'public_address_geocoding'
+    };
+  }));
+  return markers.filter(Boolean);
+}
+
 async function mapCenter(env, access, markers) {
   const rows = await restJson(
     env,
@@ -165,11 +214,13 @@ export async function onRequestGet({ request, env }) {
       memberMarkers(env, access.session, admission.admission.id),
       venueMarkers(env, access.session)
     ]);
+    const events = await eventMarkers(env, access.session, venues);
     const markers = [...members, ...venues];
     return withSession({
       center: await mapCenter(env, access, markers),
       members,
       venues,
+      events,
       privacy: {
         exactMemberCoordinatesExposed: false,
         memberMarkerMeaning: 'Centre approximatif de la zone publique déclarée',

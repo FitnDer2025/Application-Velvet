@@ -13,6 +13,11 @@
     "ivory": { "$value": "#F4F4F2", "$type": "color" },
     "velvetBurgundy": { "$value": "#641B36", "$type": "color" },
     "champagneGold": { "$value": "#C6A96A", "$type": "color" },
+    "warmBeige": { "$value": "#E8DDD3", "$type": "color" },
+    "softBlush": { "$value": "#E4CAD3", "$type": "color" },
+    "warmWhite": { "$value": "#FFFAF5", "$type": "color" },
+    "inkBurgundy": { "$value": "#341923", "$type": "color" },
+    "mutedTaupe": { "$value": "#756970", "$type": "color" },
     "success": { "$value": "#54A86B", "$type": "color" },
     "warning": { "$value": "#D6A75D", "$type": "color" },
     "danger": { "$value": "#C64157", "$type": "color" }
@@ -27,6 +32,17 @@
     "brandPrimary": { "$value": "{color.velvetBurgundy}", "$type": "color" },
     "brandAccent": { "$value": "{color.champagneGold}", "$type": "color" },
     "borderSubtle": { "$value": "#3A3637", "$type": "color" }
+  },
+  "themeLight": {
+    "backgroundPrimary": { "$value": "{color.ivory}", "$type": "color" },
+    "backgroundRaised": { "$value": "{color.warmWhite}", "$type": "color" },
+    "surfaceCard": { "$value": "{color.warmWhite}", "$type": "color" },
+    "surfaceSubtle": { "$value": "{color.warmBeige}", "$type": "color" },
+    "textPrimary": { "$value": "{color.inkBurgundy}", "$type": "color" },
+    "textSecondary": { "$value": "{color.mutedTaupe}", "$type": "color" },
+    "brandPrimary": { "$value": "{color.velvetBurgundy}", "$type": "color" },
+    "brandAccent": { "$value": "{color.champagneGold}", "$type": "color" },
+    "borderSubtle": { "$value": "{color.softBlush}", "$type": "color" }
   },
   "typography": {
     "uiFamily": { "$value": "Poppins, Montserrat, system-ui, sans-serif", "$type": "fontFamily" },

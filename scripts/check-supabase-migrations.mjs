@@ -22,10 +22,11 @@ const releaseReadiness = await readFile('infra/supabase/migrations/0019_beta_rel
 const venueCatalog = await readFile('infra/supabase/migrations/0020_velvet_venue_catalog.sql', 'utf8');
 const profilePhotoModeration = await readFile('infra/supabase/migrations/0021_profile_photo_human_moderation.sql', 'utf8');
 const controlAuditActor = await readFile('infra/supabase/migrations/0022_control_audit_actor.sql', 'utf8');
+const memberDiscoveryPreferences = await readFile('infra/supabase/migrations/0023_member_discovery_preferences.sql', 'utf8');
 
-const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}`;
+const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}`;
 const tables = [...migrationBundle.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}`;
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -122,6 +123,9 @@ const requirements = [
   [profilePhotoModeration.includes('control_decide_profile_photo') && profilePhotoModeration.includes("public.has_role('moderator')"), 'Les photos ambiguës doivent disposer d’une décision humaine réservée à la modération'],
   [profilePhotoModeration.includes('refresh_profile_admission') && profilePhotoModeration.includes('profile_photo_'), 'Une décision humaine doit recalculer l’admission et rester auditée'],
   [controlAuditActor.includes("'control'") && controlAuditActor.includes('audit_events_actor_type_check'), 'Les décisions Velvet Control doivent posséder un type d’audit autorisé'],
+  [memberDiscoveryPreferences.includes('member_saved_searches_self_read') && memberDiscoveryPreferences.includes('user_id=auth.uid()'), 'Les recherches sauvegardées doivent rester strictement privées'],
+  [memberDiscoveryPreferences.includes('member_presence_snapshot') && memberDiscoveryPreferences.includes("then 'online'") && memberDiscoveryPreferences.includes("then 'today'"), 'La présence publique doit rester limitée à trois états approximatifs'],
+  [!memberDiscoveryPreferences.includes('returns table (\n  profile_id uuid,\n  last_seen_at'), 'La fonction publique de présence ne doit jamais retourner l’horodatage exact'],
   [!migrationBundle.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 

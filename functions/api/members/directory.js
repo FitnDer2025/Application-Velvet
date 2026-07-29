@@ -49,7 +49,7 @@ export async function onRequestGet({ request, env }) {
       restJson(env, '/rest/v1/establishments?select=id,directory_venue_id,slug,name,kind,description,city,address_public,phone_public,email_public,opening_hours,amenities,verified_at,subscription_status&visibility=eq.published&order=name.asc&limit=500', token),
       restJson(env, '/rest/v1/rpc/member_venue_catalog', token, { method: 'POST', body: '{}' }),
       restJson(env, `/rest/v1/profile_venue_relationships?select=profile_id,venue_id,relation_type,occurred_on,updated_at&profile_id=eq.${encodeURIComponent(admission.id)}`, token),
-      restJson(env, '/rest/v1/events?select=id,owner_type,establishment_id,organizer_profile_id,title,description,starts_at,ends_at,capacity,location_public,audience,price_cents,currency,registration_open,dress_code&visibility=eq.published&order=starts_at.asc&limit=100', token),
+      restJson(env, '/rest/v1/events?select=id,owner_type,establishment_id,organizer_profile_id,title,description,starts_at,ends_at,capacity,location_public,audience,price_cents,currency,registration_open,dress_code,created_at,updated_at&visibility=eq.published&order=starts_at.asc&limit=100', token),
       restJson(env, '/rest/v1/conversations?select=id,kind,event_id,subject,created_at,updated_at,conversation_members(display_identity,user_id,last_read_at)&order=updated_at.desc&limit=100', token),
       restJson(env, '/rest/v1/recommendations?select=id,author_profile_id,target_type,target_id,body,rating,created_at&status=eq.published&order=created_at.desc&limit=200', token)
     ]);

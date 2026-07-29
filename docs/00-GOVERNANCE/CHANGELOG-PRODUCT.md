@@ -4,6 +4,15 @@ Ce document retrace les décisions produit validées. Il ne remplace ni les ADR 
 
 ## 29 juillet 2026
 
+### Accueil personnalisé, recherche avancée et thème clair
+
+- L'accueil affiche les profils créés depuis minuit, les événements réels à moins de 50 km et un accès direct aux établissements.
+- Le mur d'actualité est limité aux nouveaux profils, nouvelles photos publiques et événements proches correspondant à la zone et aux préférences.
+- Découvrir accepte des critères multiples et cumulables : catégories recherchées, catégories qui recherchent, ville ou proximité, âges homme/femme, pratiques, morphologies et signaux complémentaires.
+- Les recherches peuvent être nommées, sauvegardées et supprimées.
+- Les vignettes affichent type, âges, zone publique, état de présence approximatif et historique « Déjà vu », sans horaire précis de connexion.
+- Un thème clair ivoire, beige, pastel, or et bordeaux est disponible dans les paramètres de l'espace membre.
+
 ### Découverte locale, Maps et accès membre
 
 - L'accueil distingue désormais clairement la découverte d'autres membres.
