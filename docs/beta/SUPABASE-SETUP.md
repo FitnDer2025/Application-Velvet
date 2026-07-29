@@ -49,6 +49,7 @@ Appliquer dans l’ordre :
 21. `0021_profile_photo_human_moderation.sql`
 22. `0022_control_audit_actor.sql`
 23. `0023_member_discovery_preferences.sql`
+24. `0024_member_social_plans_lifecycle.sql`
 
 Puis ouvrir le Security Advisor et corriger toute alerte avant de connecter les interfaces.
 
