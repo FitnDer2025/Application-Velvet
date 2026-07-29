@@ -165,7 +165,13 @@ const journeys = [
     name: 'Sorties et séjours publics',
     valid: has('functions/api/members/plans.js', 'profile_venue_visits', 'profile_travel_plans', 'cap_dagde_village')
       && has('apps/beta/static/assets/members-live.js', 'profilePlansView', 'classic-travel-form', 'cap-travel-form', 'capDagdePlan')
-      && has('apps/beta/static/assets/members-live.js', 'venue-visit-form', 'approvedProfilePhotos(member)[0]', 'profileAges(member)', 'venue-visitor-copy', 'Village naturiste du Cap d’Agde')
+      && has('apps/beta/static/assets/members-live.js', 'venue-visit-form', "profilePreviewCard(member, { variant: 'compact' })", 'Village naturiste du Cap d’Agde')
+  },
+  {
+    name: 'Aperçus profils cohérents',
+    valid: has('apps/beta/static/assets/members-live.js', 'profilePreviewCard', "variant: 'grid'", "variant: 'horizontal'", "variant: 'notification'", "variant: 'compact'")
+      && has('apps/beta/static/assets/members-live.js', 'profileAges(profile)', 'location_zone', 'profilePreviewIdentity')
+      && has('apps/beta/static/assets/members-live.css', 'profile-preview-card', 'profile-preview-media', 'profile-preview-details')
   },
   {
     name: 'Suivi, sécurité et cycle du compte',
