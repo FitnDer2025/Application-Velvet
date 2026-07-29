@@ -59,6 +59,10 @@ import {
   onRequestGet as memberVerificationGet,
   onRequestPost as memberVerificationPost
 } from '../../../functions/api/members/verification.js';
+import {
+  onRequestGet as memberEngagementGet,
+  onRequestPost as memberEngagementPost
+} from '../../../functions/api/members/engagement.js';
 import { velvetIconResponse } from './velvet-icons.js';
 
 const API_ROUTES = new Map([
@@ -99,7 +103,9 @@ const API_ROUTES = new Map([
   ['DELETE /api/members/location', memberLocationDelete],
   ['GET /api/members/verification', memberVerificationGet],
   ['POST /api/members/verification', memberVerificationPost],
-  ['GET /api/members/verification/callback', memberVerificationCallback]
+  ['GET /api/members/verification/callback', memberVerificationCallback],
+  ['GET /api/members/engagement', memberEngagementGet],
+  ['POST /api/members/engagement', memberEngagementPost]
 ]);
 
 const PROTECTED_PREFIXES = ['/membres', '/pro', '/control'];

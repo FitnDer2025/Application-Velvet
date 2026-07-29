@@ -12,10 +12,11 @@ const photoAdmission = await readFile('infra/supabase/migrations/0009_photo_admi
 const memberPreferences = await readFile('infra/supabase/migrations/0010_member_privacy_notifications_pwa.sql', 'utf8');
 const stagedCouple = await readFile('infra/supabase/migrations/0011_couple_first_parallel_onboarding.sql', 'utf8');
 const locationVerification = await readFile('infra/supabase/migrations/0012_optional_location_identity_age_foundation.sql', 'utf8');
+const memberEngagement = await readFile('infra/supabase/migrations/0013_profile_memory_reactions_conversation_streaks.sql', 'utf8');
 
-const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}`;
+const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}`;
 const tables = [...migrationBundle.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}`;
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -71,6 +72,13 @@ const requirements = [
   [locationVerification.includes('identity_verified') && locationVerification.includes('majority_verified'), 'Le badge doit exiger identité et majorité'],
   [locationVerification.includes('external_verification_sessions'), 'Le branchement du prestataire tiers doit être préparé'],
   [locationVerification.includes("status <> 'verified' or (identity_verified and majority_verified)"), 'Un statut vérifié ne doit jamais être attribué partiellement'],
+  [memberEngagement.includes('profile_view_history') && memberEngagement.includes('viewer_user_id=auth.uid()'), 'La mémoire de consultation doit rester propre à son auteur'],
+  [memberEngagement.includes('profile_reactions') && memberEngagement.includes('reactor_user_id=auth.uid()'), 'Un membre doit contrôler uniquement son propre ressenti'],
+  [memberEngagement.includes('public.is_profile_member(reactor_profile_id)'), 'Les ressentis doivent pouvoir être comparés uniquement au sein du couple auteur'],
+  [!memberEngagement.includes('public.is_profile_member(target_profile_id)'), 'Le profil évalué ne doit jamais pouvoir lire le ressenti reçu'],
+  [memberEngagement.includes('reaction in (-1,1,2,3)'), 'Les quatre niveaux de ressenti doivent être bornés en base'],
+  [memberEngagement.includes('count(distinct m.sender_user_id) >= 2') && memberEngagement.includes('count(distinct pm.profile_id) >= 2'), 'Une journée de série doit exiger un échange entre deux personnes et deux profils distincts'],
+  [memberEngagement.includes("time zone 'Europe/Paris'"), 'Les séries de conversation doivent utiliser la journée locale française'],
   [!migrationBundle.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 
