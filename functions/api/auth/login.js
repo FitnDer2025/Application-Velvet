@@ -1,9 +1,18 @@
-import { accountContext, json, readJson, sessionResponse, supabase } from './_shared.js';
+import {
+  accountContext,
+  json,
+  readJson,
+  sessionResponse,
+  supabase,
+  verifyTurnstile
+} from './_shared.js';
 
 export async function onRequestPost({ request, env }) {
   try {
-    const { email, password } = await readJson(request);
+    const { email, password, turnstileToken } = await readJson(request);
     if (!email || !password) return json({ error: 'credentials_required' }, 400);
+    const humanCheck = await verifyTurnstile(request, env, turnstileToken, 'login');
+    if (!humanCheck.ok) return json({ error: humanCheck.error }, 403);
 
     const response = await supabase(env, '/auth/v1/token?grant_type=password', {
       method: 'POST',
