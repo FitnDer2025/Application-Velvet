@@ -17,10 +17,11 @@ const photoInteractions = await readFile('infra/supabase/migrations/0014_photo_r
 const memberActions = await readFile('infra/supabase/migrations/0015_member_actions_conversations_events.sql', 'utf8');
 const memberNotifications = await readFile('infra/supabase/migrations/0016_member_notifications.sql', 'utf8');
 const proWorkspace = await readFile('infra/supabase/migrations/0017_velvet_pro_workspace.sql', 'utf8');
+const controlOperations = await readFile('infra/supabase/migrations/0018_velvet_control_operations.sql', 'utf8');
 
-const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}`;
+const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}`;
 const tables = [...migrationBundle.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}`;
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -101,6 +102,9 @@ const requirements = [
   [proWorkspace.includes('establishment_drafts') && proWorkspace.includes('establishment_drafts_staff'), 'Les brouillons Pro doivent être persistants et isolés par établissement'],
   [proWorkspace.includes('pro_workspace_participants') && proWorkspace.includes('is_venue_staff'), 'Le CRM Pro ne doit exposer que les participants de ses établissements'],
   [proWorkspace.includes('price_cents') && proWorkspace.includes('registration_open'), 'Les soirées Pro doivent posséder leurs données opérationnelles'],
+  [controlOperations.includes('control_create_establishment') && controlOperations.includes('establishment_created'), 'Control doit créer et auditer les établissements'],
+  [controlOperations.includes('control_decide_organizer') && controlOperations.includes("target_decision='approved'"), 'Control doit traiter réellement les demandes Organisateur'],
+  [controlOperations.includes('control_accounts') && controlOperations.includes('is_control_user'), 'L’annuaire des comptes doit rester réservé à Control'],
   [!migrationBundle.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 
