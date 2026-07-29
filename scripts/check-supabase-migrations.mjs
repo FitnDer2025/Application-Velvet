@@ -19,10 +19,11 @@ const memberNotifications = await readFile('infra/supabase/migrations/0016_membe
 const proWorkspace = await readFile('infra/supabase/migrations/0017_velvet_pro_workspace.sql', 'utf8');
 const controlOperations = await readFile('infra/supabase/migrations/0018_velvet_control_operations.sql', 'utf8');
 const releaseReadiness = await readFile('infra/supabase/migrations/0019_beta_release_readiness.sql', 'utf8');
+const venueCatalog = await readFile('infra/supabase/migrations/0020_velvet_venue_catalog.sql', 'utf8');
 
-const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}`;
+const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}`;
 const tables = [...migrationBundle.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}`;
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -109,6 +110,13 @@ const requirements = [
   [releaseReadiness.includes('control_beta_release_checks') && releaseReadiness.includes('is_control_user'), 'Les contrôles de publication doivent rester réservés à Control'],
   [releaseReadiness.includes('overdue_data_requests') && releaseReadiness.includes('events_over_capacity'), 'La recette doit couvrir RGPD et cohérence des capacités'],
   [releaseReadiness.includes('incomplete_couple_profiles') && releaseReadiness.includes('published_venues_incomplete'), 'La recette doit détecter les profils et établissements incomplets'],
+  [(venueCatalog.match(/"source_id":/g) || []).length === 275, 'Le référentiel doit intégrer exactement les 275 entreprises du tableau validé'],
+  [venueCatalog.includes('profile_venue_relationships') && venueCatalog.includes("relation_type in ('favorite','visited','planning')"), 'Les membres doivent pouvoir déclarer leurs lieux favoris, fréquentés et envisagés'],
+  [venueCatalog.includes('member_venue_catalog') && venueCatalog.includes('favorites_count bigint'), 'Le catalogue membre doit exposer les informations et les compteurs agrégés'],
+  [venueCatalog.includes('control_claim_directory_venue') && venueCatalog.includes("'draft','inactive'"), 'L’attribution d’une fiche recensée ne doit pas activer automatiquement Velvet Pro'],
+  [venueCatalog.includes("subscription_status in ('trial','active')") && venueCatalog.includes('establishment_drafts_staff'), 'La publication Pro doit exiger un essai ou un abonnement actif'],
+  [venueCatalog.includes('"photo_reuse_status":"permission_requise"') && !venueCatalog.includes('"photo_reuse_status":"autorisee"'), 'Aucune photo du fichier source ne doit être réutilisée sans autorisation'],
+  [venueCatalog.includes("public_visibility in ('listed','hidden','archived')") && venueCatalog.includes('"public_visibility":"archived"'), 'Les établissements possiblement fermés doivent pouvoir rester archivés'],
   [!migrationBundle.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 

@@ -44,7 +44,9 @@
       status: row.visibility, description: row.description || '', address: row.address_public || '',
       phone: row.phone_public || '', email: row.email_public || '',
       hours: row.opening_hours?.public || Object.values(row.opening_hours || {}).join(' · '),
-      equipment: row.amenities || [], views: 0
+      equipment: row.amenities || [],
+      views: 0,
+      subscription: row.subscription_status || 'inactive'
     }));
     S.events = data.events.map((row) => {
       const registrations = registrationByEvent.get(row.id) || [];
@@ -103,6 +105,10 @@
       venueSelect.innerHTML = '<option>Aucun établissement</option>';
       return;
     }
+    if (!['trial', 'active'].includes(venue().subscription)) {
+      content.innerHTML = neutral('Fiche professionnelle attribuée', 'Votre établissement est bien relié à votre compte, mais les outils de publication, l’agenda, la galerie et le CRM restent verrouillés jusqu’à l’activation de votre abonnement Velvet Pro.');
+      return;
+    }
     render();
   }
 
@@ -116,6 +122,18 @@
   membersPage = () => neutral('CRM membres en construction', 'Seuls les membres réellement inscrits à vos soirées seront visibles ici. Les segments et notes serveur arrivent dans le lot suivant.');
   messagesPage = () => neutral('Messagerie Pro en construction', 'Le raccordement aux conversations réelles sera activé sans conserver les anciens échanges fictifs.');
   financePage = () => neutral('Paiements non raccordés', 'Aucun chiffre financier artificiel n’est présenté. Ce module sera ouvert avec le futur prestataire de paiement.');
+  const prototypeGo = go;
+  go = (next) => {
+    if (venue() && !['trial', 'active'].includes(venue().subscription)) {
+      content.innerHTML = neutral('Abonnement Velvet Pro requis', 'La fiche référencée reste consultable par les membres, mais seules les entreprises abonnées peuvent publier des soirées, des photos ou modifier leur mini-site.');
+      return;
+    }
+    prototypeGo(next);
+  };
+  changeVenue = async (id) => {
+    S.activeVenue = id;
+    await reload();
+  };
 
   saveVenueDraft = async () => {
     await api({ method: 'POST', body: JSON.stringify({ action: 'save_venue_draft', venueId: S.activeVenue, venue: venueInput() }) });

@@ -16,7 +16,7 @@ async function proAccess(request, env) {
 async function workspace(env, access) {
   const venues = await restJson(
     env,
-    '/rest/v1/establishments?select=id,slug,name,kind,description,city,address_public,phone_public,email_public,opening_hours,amenities,visibility,verified_at,updated_at,establishment_staff(user_id,staff_role,status)&order=name.asc',
+    '/rest/v1/establishments?select=id,directory_venue_id,slug,name,kind,description,city,address_public,phone_public,email_public,opening_hours,amenities,visibility,verified_at,subscription_status,updated_at,establishment_staff(user_id,staff_role,status)&order=name.asc',
     access.session
   );
   const ids = venues.map((venue) => venue.id);
@@ -75,8 +75,23 @@ export async function onRequestPost({ request, env }) {
     if (access.response) return access.response;
     const body = await readJson(request);
     const action = cleanText(body.action, 40);
+    const venueId = String(body.venueId || '');
+    if (['save_venue_draft','publish_venue','create_event','registration_status'].includes(action)) {
+      if (!UUID.test(venueId) && action !== 'registration_status') {
+        return withSession({ error: 'invalid_venue' }, access.session, 400);
+      }
+      if (action !== 'registration_status') {
+        const allowed = await restJson(
+          env,
+          `/rest/v1/establishments?select=id,subscription_status&id=eq.${encodeURIComponent(venueId)}&limit=1`,
+          access.session
+        );
+        if (!allowed.length || !['trial','active'].includes(allowed[0].subscription_status)) {
+          return withSession({ error: 'pro_subscription_required' }, access.session, 403);
+        }
+      }
+    }
     if (action === 'save_venue_draft' || action === 'publish_venue') {
-      if (!UUID.test(body.venueId || '')) return withSession({ error: 'invalid_venue' }, access.session, 400);
       const payload = venuePayload(body.venue || {});
       if (!payload.name || !['club', 'spa', 'bar', 'love_room', 'other'].includes(payload.kind)) {
         return withSession({ error: 'invalid_venue_payload' }, access.session, 400);
@@ -99,7 +114,6 @@ export async function onRequestPost({ request, env }) {
         });
       }
     } else if (action === 'create_event') {
-      if (!UUID.test(body.venueId || '')) return withSession({ error: 'invalid_venue' }, access.session, 400);
       const event = body.event || {};
       const title = cleanText(event.title, 180);
       const capacity = Number(event.capacity);

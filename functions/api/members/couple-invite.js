@@ -113,8 +113,11 @@ export async function onRequestPost({ request, env }) {
       }
     );
     const invitation = result?.[0] || null;
+    if (!invitation?.partner_invitation_id || !invitation?.invite_code) {
+      throw new Error('couple_invitation_persistence_failed');
+    }
     const registrationUrl = new URL('/', request.url);
-    registrationUrl.searchParams.set('invite', invitation?.invite_code || '');
+    registrationUrl.searchParams.set('invite', invitation.invite_code);
     registrationUrl.searchParams.set('email', email);
     const profileRows = await restJson(
       env,
@@ -125,7 +128,7 @@ export async function onRequestPost({ request, env }) {
       email,
       registrationUrl: registrationUrl.toString(),
       profileName: profileRows?.[0]?.display_name || 'Votre moitié',
-      invitationId: invitation?.partner_invitation_id
+      invitationId: invitation.partner_invitation_id
     }, access.session);
 
     return withSession({
