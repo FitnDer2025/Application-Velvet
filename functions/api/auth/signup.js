@@ -1,14 +1,22 @@
-import { json, readJson, sessionResponse, supabase } from './_shared.js';
+import {
+  json,
+  readJson,
+  sessionResponse,
+  supabase,
+  validateBetaPassword,
+  verifyTurnstile
+} from './_shared.js';
 
 export async function onRequestPost({ request, env }) {
   try {
-    const { email, password, inviteCode } = await readJson(request);
+    const { email, password, inviteCode, turnstileToken } = await readJson(request);
     if (!email || !password || !inviteCode) {
       return json({ error: 'email_password_invitation_required' }, 400);
     }
-    if (String(password).length < 12) {
-      return json({ error: 'password_too_short' }, 400);
-    }
+    const passwordCheck = validateBetaPassword(password);
+    if (!passwordCheck.valid) return json({ error: passwordCheck.error }, 400);
+    const humanCheck = await verifyTurnstile(request, env, turnstileToken, 'signup');
+    if (!humanCheck.ok) return json({ error: humanCheck.error }, 403);
 
     const response = await supabase(env, '/auth/v1/signup', {
       method: 'POST',
