@@ -9,6 +9,7 @@ const paths = [
   'functions/api/members/profile.js',
   'functions/api/members/couple-profile.js',
   'functions/api/members/couple-invite.js',
+  'functions/api/members/_shared.js',
   'functions/api/members/media.js',
   'functions/api/members/photos.js',
   'functions/api/members/albums.js',
@@ -19,6 +20,8 @@ const paths = [
   'functions/api/members/messages.js',
   'functions/api/members/event-registrations.js',
   'functions/api/members/venue-relationships.js',
+  'functions/api/members/settings.js',
+  'functions/api/members/verification.js',
   'functions/api/admin/invites.js',
   'functions/api/control/workspace.js',
   'functions/api/pro/workspace.js'
@@ -30,6 +33,12 @@ const files = Object.fromEntries(await Promise.all(paths.map(async (path) => [
 ])));
 const has = (path, ...tokens) => tokens.every((token) => files[path].includes(token));
 const worker = files['apps/beta/worker/index.js'];
+const invalidProfileEmbeds = Object.entries(files)
+  .filter(([path, content]) => path.startsWith('functions/api/members/') && content.includes('&profile_members!inner'));
+
+if (invalidProfileEmbeds.length) {
+  throw new Error(`Intégration PostgREST profile_members invalide : ${invalidProfileEmbeds.map(([path]) => path).join(', ')}`);
+}
 
 const journeys = [
   {

@@ -121,7 +121,7 @@ export async function onRequestPost({ request, env }) {
     registrationUrl.searchParams.set('email', email);
     const profileRows = await restJson(
       env,
-      '/rest/v1/member_profiles?select=display_name&profile_members!inner(user_id,status)&profile_members.user_id=eq.' + encodeURIComponent(access.account.userId) + '&profile_members.status=eq.active&limit=1',
+      '/rest/v1/member_profiles?select=display_name,profile_members!inner(user_id,status)&profile_members.user_id=eq.' + encodeURIComponent(access.account.userId) + '&profile_members.status=eq.active&limit=1',
       access.session
     );
     const delivery = await sendInvitationEmail(env, {

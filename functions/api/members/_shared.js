@@ -19,7 +19,7 @@ export async function memberSession(request, env) {
 export async function memberAdmission(env, access) {
   const rows = await restJson(
     env,
-    `/rest/v1/member_profiles?select=id,profile_type,admission_status&profile_members!inner(user_id,status)&profile_members.user_id=eq.${encodeURIComponent(access.account.userId)}&profile_members.status=eq.active&limit=1`,
+    `/rest/v1/member_profiles?select=id,profile_type,admission_status,profile_members!inner(user_id,status)&profile_members.user_id=eq.${encodeURIComponent(access.account.userId)}&profile_members.status=eq.active&limit=1`,
     access.session
   );
   return rows?.[0] || null;

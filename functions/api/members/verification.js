@@ -23,7 +23,7 @@ async function readVerification(env, access) {
     ),
     restJson(
       env,
-      `/rest/v1/member_profiles?select=id,verification_status&profile_members!inner(user_id,status)&profile_members.user_id=eq.${encodeURIComponent(access.account.userId)}&profile_members.status=eq.active&limit=1`,
+      `/rest/v1/member_profiles?select=id,verification_status,profile_members!inner(user_id,status)&profile_members.user_id=eq.${encodeURIComponent(access.account.userId)}&profile_members.status=eq.active&limit=1`,
       access.session
     )
   ]);

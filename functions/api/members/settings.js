@@ -32,7 +32,7 @@ function safeTime(value) {
 async function ownProfile(env, session, userId) {
   const rows = await restJson(
     env,
-    `/rest/v1/member_profiles?select=id,verification_status&profile_members!inner(user_id,status)&profile_members.user_id=eq.${encodeURIComponent(userId)}&profile_members.status=eq.active&limit=1`,
+    `/rest/v1/member_profiles?select=id,verification_status,profile_members!inner(user_id,status)&profile_members.user_id=eq.${encodeURIComponent(userId)}&profile_members.status=eq.active&limit=1`,
     session
   );
   return rows?.[0] || null;
