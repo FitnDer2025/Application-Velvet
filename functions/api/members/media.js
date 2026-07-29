@@ -7,13 +7,14 @@ export async function signedMediaUrl(env, session, path) {
     `/storage/v1/object/sign/velvet-media/${path}`,
     {
       method: 'POST',
-      body: JSON.stringify({ expiresIn: 60 })
+      body: JSON.stringify({ expiresIn: 600 })
     },
     session.access_token
   );
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || !payload.signedURL) return null;
-  return new URL(payload.signedURL, String(env.SUPABASE_URL).replace(/\/$/, '')).toString();
+  const storageBase = `${String(env.SUPABASE_URL).replace(/\/$/, '')}/storage/v1/`;
+  return new URL(String(payload.signedURL).replace(/^\/+/, ''), storageBase).toString();
 }
 
 async function enrichRows(env, session, rows = []) {
