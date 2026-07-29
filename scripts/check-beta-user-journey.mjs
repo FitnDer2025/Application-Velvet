@@ -62,6 +62,7 @@ const journeys = [
       && has('functions/api/members/photos.js', 'onRequestPatch', 'photo_ai_retry_failed', '/storage/v1/object/authenticated/')
       && has('functions/api/members/media.js', '/storage/v1/', "replace(/^\\/+/, '')", 'expiresIn: 600')
       && has('apps/beta/static/assets/members-live.js', '/api/members/photos', 'photo-upload-status')
+      && has('apps/beta/static/assets/members-live.js', 'Album système public', 'Photos de profil', 'profilePhotos.length || albums.length')
       && has('apps/beta/static/assets/members-onboarding-v2.js', "profile.profile_type === 'individual' && galleryCount < 3", 'data-add-gallery')
       && has('functions/api/control/workspace.js', 'decide_profile_photo', 'control_decide_profile_photo')
       && has('apps/beta/static/assets/control-live.js', 'data-photo-decision', 'Photos de profil à contrôler')

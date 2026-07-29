@@ -1542,10 +1542,17 @@
 
   function albumsView(profile, own) {
     const albums = list(profile.albums);
+    const profilePhotos = approvedProfilePhotos(profile);
     const targetProfiles = list(state.directory.profiles).filter((row) => row.id !== state.profile.id);
     return `<section>
       <div class="page-head"><div><p class="eyebrow">Bibliothèque organisée</p><h1>Albums publics & privés</h1><p>Les albums publics sont visibles par tous les membres admis. Les albums privés ne révèlent rien sans une autorisation accordée par leur propriétaire.</p></div></div>
-      ${albums.length ? `<div class="album-library">${albums.map((album) => {
+      ${profilePhotos.length || albums.length ? `<div class="album-library">
+        ${profilePhotos.length ? `<article class="card album-detail public system-album">
+          <header><div><p class="eyebrow">Album système public</p><h2>Photos de profil</h2></div><span class="pill gold">${profilePhotos.length} photo${profilePhotos.length > 1 ? 's' : ''}</span></header>
+          <div class="album-gallery">${profilePhotos.map((photo, index) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo de profil ${index + 1} de ${e(profile.display_name)}">${photoReactionBar(photo, own)}</figure>`).join('')}</div>
+          <p class="muted">Cet album est alimenté automatiquement par le carrousel public. Il reste synchronisé sans dupliquer les photos.</p>
+        </article>` : ''}
+        ${albums.map((album) => {
         const photos = list(album.media_assets).filter((photo) => photo.previewUrl);
         const pendingPhotos = photos.filter((photo) => photo.moderation_status === 'pending').length;
         const isPublic = album.confidentiality === 'public';
@@ -1655,7 +1662,7 @@
       <nav class="profile-nav" aria-label="Sections du profil">
         <button data-profile-tab="couple" class="${state.profileTab === 'couple' ? 'active' : ''}">${profile.profile_type === 'couple' ? 'Le couple' : 'Présentation'}</button>
         ${people.map((person, index) => `<button data-profile-tab="person${index}" class="${state.profileTab === `person${index}` ? 'active' : ''}">${e(person.first_name || `Personne ${index + 1}`)}</button>`).join('')}
-        <button data-profile-tab="albums" class="${state.profileTab === 'albums' ? 'active' : ''}">Albums (${list(profile.albums).length})</button>
+        <button data-profile-tab="albums" class="${state.profileTab === 'albums' ? 'active' : ''}">Albums (${list(profile.albums).length + (approvedProfilePhotos(profile).length ? 1 : 0)})</button>
       </nav>
       ${activeContent}
     </div>`;
