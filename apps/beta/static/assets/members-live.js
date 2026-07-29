@@ -2291,40 +2291,118 @@
     return `<div class="travel-map-preview" style="background-image:url('https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png')" aria-label="Aperçu cartographique ${e(plan.precise_location_consent ? 'précis et consenti' : 'approximatif')}"><i></i><small>${plan.precise_location_consent ? 'Localisation précise partagée' : 'Zone approximative'}</small></div>`;
   }
 
+  const CAP_DAGDE_ZONES = [
+    { label: 'Ensemble du village', short: 'Village', x: 48, y: 48 },
+    { label: 'Entrée · Natureva · René Oltra', short: 'Entrée', x: 22, y: 63 },
+    { label: 'Port Soleil', short: 'Port Soleil', x: 38, y: 67 },
+    { label: 'Port Ambonne', short: 'Port Ambonne', x: 48, y: 55 },
+    { label: 'Port Nature', short: 'Port Nature', x: 57, y: 43 },
+    { label: 'Héliopolis', short: 'Héliopolis', x: 67, y: 32 },
+    { label: 'Plage naturiste', short: 'Plage', x: 79, y: 20 },
+    { label: 'Marina', short: 'Marina', x: 55, y: 70 }
+  ];
+
+  function capDagdePlan(selectedZone = 'Ensemble du village', interactive = false) {
+    const selected = CAP_DAGDE_ZONES.some((zone) => zone.label === selectedZone)
+      ? selectedZone
+      : 'Ensemble du village';
+    return `<div class="cap-village-plan ${interactive ? 'interactive' : ''}" data-cap-plan>
+      <div class="cap-plan-canvas">
+        <svg viewBox="0 0 720 420" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="cap-land" x1="0" x2="1" y1="1" y2="0"><stop stop-color="#2a171e"/><stop offset="1" stop-color="#473123"/></linearGradient>
+            <linearGradient id="cap-water" x1="0" x2="1"><stop stop-color="#182a32"/><stop offset="1" stop-color="#274754"/></linearGradient>
+          </defs>
+          <path class="cap-water" d="M486-20H760V440H392c40-54 75-106 92-165 23-79 16-173 2-295Z"/>
+          <path class="cap-shore" d="M486-20c14 122 21 216-2 295-17 59-52 111-92 165"/>
+          <path class="cap-land" d="M-20-20h506c14 122 21 216-2 295-17 59-52 111-92 165H-20Z"/>
+          <path class="cap-road" d="M80 350c88-56 151-117 213-183 52-55 99-89 169-120"/>
+          <path class="cap-road thin" d="M158 348c80-35 163-61 259-71M236 261c34 23 64 61 73 117M342 129c8 61 37 106 95 137"/>
+          <path class="cap-marina" d="M330 258c43-49 116-41 137 5-18 52-88 75-142 34Z"/>
+          <path class="cap-beach" d="M503 5c20 91 23 170 9 237"/>
+        </svg>
+        <span class="cap-plan-title"><b>Village naturiste</b><small>Cap d’Agde · repère de zone</small></span>
+        ${CAP_DAGDE_ZONES.map((zone) => {
+          const active = zone.label === selected;
+          const tag = interactive ? 'button' : 'span';
+          return `<${tag}${interactive ? ' type="button"' : ''} class="cap-zone-point ${active ? 'active' : ''}" style="--cap-x:${zone.x}%;--cap-y:${zone.y}%" data-cap-zone="${e(zone.label)}"${interactive ? ` aria-pressed="${active}"` : ''}><i></i><b>${e(zone.short)}</b></${tag}>`;
+        }).join('')}
+        <span class="cap-sea-label">Méditerranée</span>
+      </div>
+      <p class="cap-zone-selection"><span>Zone sélectionnée</span><strong data-cap-zone-label>${e(selected)}</strong></p>
+    </div>`;
+  }
+
   function profilePlansView(profile, own) {
     const today = parisDayKey();
     const visits = list(state.plans.venueVisits).filter((row) => row.profile_id === profile.id);
     const travels = list(state.plans.travelPlans).filter((row) => row.profile_id === profile.id);
+    const classicTravels = travels.filter((row) => row.destination_type !== 'cap_dagde_village');
+    const capTravels = travels.filter((row) => row.destination_type === 'cap_dagde_village');
     const eventPlans = list(state.plans.eventPlans).filter((row) => row.profile_id === profile.id);
     const eventRows = eventPlans.map((plan) => ({
       plan,
       event: list(state.directory.events).find((event) => event.id === plan.event_id)
     })).filter((row) => row.event);
-    const capZones = ['Ensemble du village','Entrée · Natureva · René Oltra','Port Soleil','Port Ambonne','Port Nature','Héliopolis','Plage naturiste','Marina'];
     const capVenues = ['CHM René Oltra','Natureva Spa','Oz’Inn Hôtel & Spa','Glamour','Glamour Beach','Waiki Beach','Tantra','Kamasutra','Plug & Play','Histoire d’O'];
+    const hasClassicAgenda = visits.length || classicTravels.length || eventRows.length;
     return `<article class="card section profile-plans">
       <p class="eyebrow">Agenda public</p><h2>Sorties et séjours</h2>
-      ${visits.length || travels.length || eventRows.length ? `<div class="profile-plan-list">
+      <section class="classic-plans-block">
+        <header><span>01</span><div><p class="eyebrow">Sorties classiques</p><h3>Nos prochaines escapades</h3><small>Ville, établissement, soirée ou séjour libre.</small></div></header>
+      ${hasClassicAgenda ? `<div class="profile-plan-list">
         ${visits.map((visit) => `<div><span>⌖</span><p><strong>${visit.visit_date < today ? 'On y est allé' : 'Nous y serons'} · ${e(visit.venue_directory?.name || 'Établissement')}</strong><small>${e(dateLabel(visit.visit_date))} · ${e(visit.venue_directory?.city || '')}</small></p>${own ? `<button type="button" data-delete-plan="${e(visit.id)}" data-plan-type="venue_visit" aria-label="Supprimer">×</button>` : ''}</div>`).join('')}
         ${eventRows.map(({ plan, event }) => `<button type="button" data-open-event="${e(event.id)}"><span>✦</span><p><strong>${new Date(event.starts_at) < new Date() ? 'On y est allé' : 'Nous participerons'} · ${e(event.title)}</strong><small>${e(new Date(event.starts_at).toLocaleString('fr-FR'))} · ${e(plan.registration_status)}</small></p><i>→</i></button>`).join('')}
-        ${travels.map((plan) => `<div class="travel-plan-card">${travelMapPreview(plan)}<p><strong>${plan.ends_on < today ? 'Nous étions' : 'Nous serons'} · ${e(plan.title)}</strong><small>Du ${e(dateLabel(plan.starts_on))} au ${e(dateLabel(plan.ends_on))} · ${e(plan.location_label)}</small>${plan.cap_zone ? `<em>Village naturiste · ${e(plan.cap_zone)}${plan.cap_venue ? ` · ${e(plan.cap_venue)}` : ''}</em>` : ''}${plan.notes ? `<span>${e(plan.notes)}</span>` : ''}</p>${own ? `<button type="button" data-delete-plan="${e(plan.id)}" data-plan-type="travel_plan" aria-label="Supprimer">×</button>` : ''}</div>`).join('')}
-      </div>` : '<p class="muted">Aucune sortie ou localisation annoncée.</p>'}
-      ${own && !state.plans.migrationPending ? `<details class="travel-plan-editor"><summary>Ajouter un séjour ou une localisation</summary>
-        <form class="travel-plan-form">
+        ${classicTravels.map((plan) => `<div class="travel-plan-card">${travelMapPreview(plan)}<p><strong>${plan.ends_on < today ? 'Nous étions' : 'Nous serons'} · ${e(plan.title)}</strong><small>Du ${e(dateLabel(plan.starts_on))} au ${e(dateLabel(plan.ends_on))} · ${e(plan.location_label)}</small>${plan.notes ? `<span>${e(plan.notes)}</span>` : ''}</p>${own ? `<button type="button" data-delete-plan="${e(plan.id)}" data-plan-type="travel_plan" aria-label="Supprimer">×</button>` : ''}</div>`).join('')}
+      </div>` : '<p class="muted classic-empty">Aucune sortie classique annoncée.</p>'}
+      ${own && !state.plans.migrationPending ? `<details class="travel-plan-editor classic-travel-editor"><summary>Ajouter une sortie classique</summary>
+        <form class="travel-plan-form classic-travel-form">
+          <input type="hidden" name="destinationType" value="general">
           <div class="form-grid">
-            <label>Titre<input name="title" maxlength="160" placeholder="Ex. Week-end au Cap" required></label>
-            <label>Destination<input name="locationLabel" maxlength="240" placeholder="Ville, quartier ou adresse publique" required></label>
+            <label>Nom de la sortie<input name="title" maxlength="160" placeholder="Ex. Une soirée à Béthune" required></label>
+            <label>Destination<input name="locationLabel" maxlength="240" placeholder="Ville, lieu ou adresse publique" required></label>
             <label>Du<input type="date" name="startsOn" required></label>
             <label>Au<input type="date" name="endsOn" required></label>
-            <label>Type de destination<select name="destinationType"><option value="general">Destination libre</option><option value="cap_dagde_village">Village naturiste du Cap d’Agde</option></select></label>
-            <label>Zone du village<select name="capZone"><option value="">Non concerné</option>${capZones.map((zone) => `<option>${e(zone)}</option>`).join('')}</select></label>
-            <label>Établissement ou résidence du village<select name="capVenue"><option value="">Non précisé</option>${capVenues.map((venue) => `<option>${e(venue)}</option>`).join('')}</select></label>
             <label class="wide">Note publique<textarea name="notes" maxlength="2000" placeholder="Informations utiles pour les autres membres"></textarea></label>
           </div>
-          <details class="precise-location-consent"><summary>Partager volontairement une position précise</summary><p>Facultatif. Velvet ne l’enregistre que si tu coches le consentement ci-dessous. Au Village naturiste, l’accès est réglementé : privilégie une zone, ne publie jamais un numéro d’hébergement et respecte l’interdiction de photographier ou filmer sans autorisation.</p><div class="form-grid"><label>Latitude<input type="number" step="0.000001" name="latitude"></label><label>Longitude<input type="number" step="0.000001" name="longitude"></label></div><label class="toggle"><input type="checkbox" name="preciseLocationConsent"><span>Je consens à rendre cette position précise visible aux membres autorisés.</span></label></details>
+          <details class="precise-location-consent"><summary>Ajouter une localisation précise</summary><p>Facultatif. La position n’est enregistrée que si tu donnes ton consentement explicite.</p><div class="form-grid"><label>Latitude<input type="number" step="0.000001" name="latitude"></label><label>Longitude<input type="number" step="0.000001" name="longitude"></label></div><label class="toggle"><input type="checkbox" name="preciseLocationConsent"><span>Je consens à rendre cette position précise visible aux membres autorisés.</span></label></details>
           <button class="primary" type="submit">Publier sur mon profil</button>
         </form>
-      </details>` : own ? '<p class="status-box">Les séjours seront activés après la migration Supabase 0024.</p>' : ''}
+      </details>` : own ? '<p class="status-box">Les sorties seront activées après la migration Supabase 0024.</p>' : ''}
+      </section>
+      ${capTravels.length ? `<section class="cap-dagde-showcase">
+        <header><span>02</span><div><p class="eyebrow">Destination signature</p><h3>Nos séjours au Cap d’Agde</h3><small>Village naturiste · repère de zone partagé</small></div></header>
+        <div class="cap-showcase-layout">
+          ${capDagdePlan(capTravels.find((plan) => plan.ends_on >= today)?.cap_zone || capTravels[0].cap_zone)}
+          <div class="cap-stay-list">${capTravels.map((plan) => `<article>
+            <p class="eyebrow">${plan.ends_on < today ? 'Souvenir du Cap' : 'Prochain séjour'}</p>
+            <h4>${e(plan.title)}</h4>
+            <strong>Du ${e(dateLabel(plan.starts_on))} au ${e(dateLabel(plan.ends_on))}</strong>
+            <small>${e(plan.cap_zone || 'Ensemble du village')}${plan.cap_venue ? ` · ${e(plan.cap_venue)}` : ''}</small>
+            ${plan.notes ? `<p>${e(plan.notes)}</p>` : ''}
+            ${own ? `<button type="button" class="cap-delete-plan" data-delete-plan="${e(plan.id)}" data-plan-type="travel_plan">Retirer ce séjour</button>` : ''}
+          </article>`).join('')}</div>
+        </div>
+      </section>` : ''}
+      ${own && !state.plans.migrationPending ? `<details class="cap-travel-editor"${capTravels.length ? '' : ' data-empty-cap'}>
+        <summary><span class="cap-summary-mark">C</span><span><small>Expérience dédiée</small><strong>Préparer un séjour au Cap d’Agde</strong></span><i>Ouvrir</i></summary>
+        <form class="travel-plan-form cap-travel-form">
+          <input type="hidden" name="destinationType" value="cap_dagde_village">
+          <input type="hidden" name="locationLabel" value="Village naturiste du Cap d’Agde">
+          <input type="hidden" name="capZone" value="Ensemble du village" data-cap-zone-input>
+          <div class="cap-editor-intro"><p class="eyebrow">Choisir son repère</p><h3>Où serez-vous dans le village ?</h3><p>Sélectionne une zone sur le plan. L’emplacement reste volontairement général tant que tu ne partages pas une position précise.</p></div>
+          ${capDagdePlan('Ensemble du village', true)}
+          <div class="form-grid cap-travel-fields">
+            <label>Nom du séjour<input name="title" maxlength="160" value="Séjour au Cap d’Agde" required></label>
+            <label>Établissement ou résidence<select name="capVenue"><option value="">Non précisé</option>${capVenues.map((venue) => `<option>${e(venue)}</option>`).join('')}</select></label>
+            <label>Du<input type="date" name="startsOn" required></label>
+            <label>Au<input type="date" name="endsOn" required></label>
+            <label class="wide">Note publique<textarea name="notes" maxlength="2000" placeholder="Vos envies, les moments où vous serez disponibles…"></textarea></label>
+          </div>
+          <details class="precise-location-consent"><summary>Partager volontairement un point précis</summary><p>Ne publie jamais ton numéro d’hébergement. La photographie et la vidéo restent soumises au consentement des personnes présentes.</p><div class="form-grid"><label>Latitude<input type="number" step="0.000001" name="latitude"></label><label>Longitude<input type="number" step="0.000001" name="longitude"></label></div><label class="toggle"><input type="checkbox" name="preciseLocationConsent"><span>Je consens à rendre cette position précise visible aux membres autorisés.</span></label></details>
+          <button class="primary cap-publish-button" type="submit">Publier mon séjour au Cap</button>
+        </form>
+      </details>` : ''}
     </article>`;
   }
 
@@ -3379,7 +3457,8 @@
             const member = visit.profile_id === state.profile.id
               ? state.profile
               : list(state.directory.profiles).find((profile) => profile.id === visit.profile_id);
-            return member ? `<button type="button" data-open-profile="${e(member.id)}"><span>${e(initials(member.display_name))}</span><strong>${e(member.display_name)}</strong></button>` : '';
+            const portrait = approvedProfilePhotos(member)[0];
+            return member ? `<button type="button" data-open-profile="${e(member.id)}" aria-label="Ouvrir le profil de ${e(member.display_name)}" title="${e(member.display_name)}"><span>${portrait ? `<img src="${e(portrait.previewUrl)}" alt="">` : e(initials(member.display_name))}</span></button>` : '';
           }).join('')}</div></article>`;
         }).join('')}</div>` : '<p class="muted">Aucun membre n’a encore annoncé sa venue.</p>'}
       </section>
@@ -3727,6 +3806,23 @@
         toast(errorMessages[error.message] || error.message, true);
         button.disabled = false;
       }
+    });
+
+    document.querySelectorAll('.cap-travel-form').forEach((form) => {
+      const zoneInput = form.querySelector('[data-cap-zone-input]');
+      const zoneLabel = form.querySelector('[data-cap-zone-label]');
+      form.querySelectorAll('[data-cap-zone]').forEach((point) => {
+        point.addEventListener('click', () => {
+          if (!zoneInput) return;
+          zoneInput.value = point.dataset.capZone;
+          if (zoneLabel) zoneLabel.textContent = point.dataset.capZone;
+          form.querySelectorAll('[data-cap-zone]').forEach((candidate) => {
+            const active = candidate === point;
+            candidate.classList.toggle('active', active);
+            candidate.setAttribute('aria-pressed', String(active));
+          });
+        });
+      });
     });
 
     document.querySelectorAll('.travel-plan-form').forEach((form) => {
