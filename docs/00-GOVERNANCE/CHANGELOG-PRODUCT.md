@@ -2,6 +2,14 @@
 
 Ce document retrace les décisions produit validées. Il ne remplace ni les ADR ni l'historique technique Git.
 
+## 29 juillet 2026
+
+### ADR-GOV-003 — Autonomie de livraison Codex
+
+- Codex peut conduire les évolutions Velvet de la branche jusqu'à la fusion et au déploiement sans validation intermédiaire.
+- Les contrôles pertinents restent obligatoires avant toute livraison.
+- Codex prépare et teste les scripts ou migrations SQL Supabase, mais Cyril conserve exclusivement leur exécution sur l'instance distante.
+
 ## 23 juillet 2026
 
 ### Gouvernance

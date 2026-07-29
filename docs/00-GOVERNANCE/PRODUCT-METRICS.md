@@ -1,12 +1,14 @@
 # Velvet Product Metrics
 
-**Dernière mise à jour :** 23 juillet 2026
+**Dernière mise à jour :** 29 juillet 2026
 
 ## Indicateur global
 
 **Architecture produit : 80 %**
 
 Cet indicateur mesure l'avancement des arbitrages et spécifications structurantes. Il ne mesure pas l'avancement du développement logiciel.
+
+ADR-GOV-003 clarifie l'autonomie de livraison sans modifier les pourcentages d'avancement produit.
 
 ## Avancement par domaine
 

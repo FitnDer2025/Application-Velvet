@@ -2,7 +2,7 @@
 
 **Statut :** source officielle de pilotage du projet Velvet.
 
-**Dernière mise à jour :** 23 juillet 2026
+**Dernière mise à jour :** 29 juillet 2026
 
 ## Règles de gouvernance
 
@@ -10,6 +10,8 @@
 - Une ADR validée est définitive et ne peut être rouverte sans ADR d'amendement.
 - Chaque ADR validée déclenche la documentation, la mise à jour des référentiels et un commit Git.
 - Les sujets clôturés ne doivent pas être reproposés.
+- Codex fusionne et déploie de manière autonome lorsque les contrôles sont verts.
+- Cyril applique exclusivement les scripts et migrations SQL sur l'instance Supabase distante.
 
 ## Légende
 
@@ -55,6 +57,7 @@ Cet indicateur mesure les arbitrages structurants et non le développement logic
 - ADR-024 à ADR-036 : recherche, découverte, confiance, souvenirs et événements intelligents.
 - ADR-038 à ADR-041 : outils professionnels, IA métier et Velvet Trips.
 - ADR-043 à ADR-044 : gamification positive et distinctions évolutives.
+- ADR-GOV-003 : autonomie complète de livraison Codex et frontière SQL Supabase.
 
 ADR-037 et ADR-042 ne sont pas des décisions manquantes : leurs propositions ont été abandonnées car les sujets étaient déjà arbitrés.
 

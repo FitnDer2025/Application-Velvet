@@ -72,3 +72,10 @@ Une modification n'est livrable que si :
 - Messages Conventional Commits.
 - Toute nouvelle décision produit nécessite un ADR dédié.
 - Toute inconnue non bloquante est marquée `TBD` ; toute inconnue bloquante devient une issue.
+
+## Autonomie de livraison
+
+- Codex peut créer les branches, committer, pousser, ouvrir et fusionner les pull requests, puis déployer les environnements Velvet sans demander une validation intermédiaire à Cyril.
+- Cette autonomie s'applique uniquement après réussite des contrôles pertinents et dans le respect des ADR, de la sécurité et du périmètre demandé.
+- Codex peut préparer, versionner et tester les scripts ou migrations SQL Supabase, mais ne doit jamais les exécuter sur l'instance Supabase distante.
+- Toute action SQL Supabase à appliquer est remise clairement à Cyril, qui reste seul responsable de son exécution.

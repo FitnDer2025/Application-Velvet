@@ -80,7 +80,8 @@ Avant tout code, identifier :
 - En cas de conflit, l’ADR le plus récent remplace l’ancien.
 - Codex ne doit pas inventer une règle métier manquante : il crée un point `TBD` ou une issue.
 - Toute action sensible respecte la confidentialité par défaut, le consentement et le moindre privilège.
-- Une pull request ne doit pas être fusionnée automatiquement sans validation humaine explicite.
+- Codex dispose d'une autonomie complète de livraison : branche, commits, pull request, fusion et déploiement après réussite des contrôles.
+- Les scripts et migrations SQL Supabase peuvent être préparés et testés par Codex, mais leur exécution distante reste exclusivement réalisée par Cyril.
 
 ## État actuel
 
