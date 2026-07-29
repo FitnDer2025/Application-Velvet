@@ -67,7 +67,8 @@ Ne jamais rouvrir silencieusement un sujet validé.
 - Les données de démonstration doivent être manifestement fictives.
 - Ne jamais exposer les données Community à un professionnel au-delà du strict besoin opérationnel documenté.
 - Ne jamais mélanger les privilèges Member, Professional, Staff et Admin.
-- Ne jamais fusionner automatiquement une pull request sans validation humaine explicite.
+- Livrer de manière autonome les changements validés par les tests : branche, commits, pull request, fusion et déploiement ne nécessitent pas de validation intermédiaire de Cyril.
+- Ne jamais exécuter de script ou migration SQL sur l'instance Supabase distante ; les préparer, les tester et les remettre à Cyril pour application.
 
 ## Fidélité visuelle
 
@@ -92,6 +93,8 @@ Ne jamais rouvrir silencieusement un sujet validé.
 9. Documenter toute nouvelle variable d'environnement, migration ou limitation.
 10. Mettre à jour la documentation et le registre lorsqu'une décision évolue.
 11. Ouvrir une pull request avec risques, tests exécutés, captures si UI et plan de retour arrière.
+12. Fusionner et déployer de manière autonome lorsque les contrôles sont verts.
+13. Lorsqu'un SQL Supabase est requis, arrêter uniquement son exécution distante et remettre à Cyril le script exact avec son ordre d'application.
 
 ## Qualité minimale
 

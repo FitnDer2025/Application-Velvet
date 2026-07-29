@@ -95,6 +95,8 @@
 - `PRODUCT-METRICS.md` porte les estimations d'avancement.
 - `CHANGELOG-PRODUCT.md` conserve l'historique daté.
 - `ADR-STATUS.md` permet de vérifier rapidement les sujets déjà couverts.
+- Codex livre de manière autonome les changements Velvet jusqu'à leur fusion et leur déploiement.
+- Cyril conserve exclusivement l'exécution distante des scripts et migrations SQL Supabase.
 
 ## ADR récentes
 
@@ -108,6 +110,7 @@
 - `ADR-TECH-045` : application web responsive installable en PWA pour la V1.
 - `ADR-GOV-001` : documentation et commit immédiats après acceptation.
 - `ADR-GOV-002` : pilotage continu par roadmap, métriques et changelog.
+- `ADR-GOV-003` : autonomie complète de livraison Codex, avec exécution SQL Supabase réservée à Cyril.
 
 ## Numéros non créés
 
