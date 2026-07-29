@@ -762,6 +762,7 @@
         ${photo.moderation_status === 'rejected' ? `<button type="button" class="secondary" data-delete-photo="${escapeHtml(photo.id)}">Supprimer</button>` : ''}
       </figure>`).join('')}</div>
       <div class="ov-actions standalone">
+        ${pending.length ? '<button class="secondary" type="button" data-retry-ai>Relancer la validation automatique</button>' : ''}
         <button class="primary" type="button" data-next${approved.length < minimum ? ' disabled' : ''}>${role === 'couple_gallery' ? 'Maintenant, parlons de moi' : 'Continuer'}</button>
       </div>
     </section></div>`;
@@ -819,6 +820,28 @@
         button.disabled = false;
       }
     }));
+    content.querySelector('[data-retry-ai]')?.addEventListener('click', async (event) => {
+      const button = event.currentTarget;
+      const status = form.querySelector('[data-status]');
+      button.disabled = true;
+      button.textContent = 'Velvet Intelligence analyse…';
+      try {
+        const result = await api('/api/members/photos', { method: 'PATCH', body: '{}' });
+        if (!result.attempted) {
+          status.textContent = 'Ces photos ont déjà été analysées et attendent une décision humaine.';
+        } else if (result.failed) {
+          status.textContent = `L’analyse automatique n’a pas pu traiter ${result.failed} photo${result.failed > 1 ? 's' : ''}. Elles restent disponibles dans Velvet Control.`;
+        } else {
+          status.textContent = `${result.approved} validée${result.approved > 1 ? 's' : ''}, ${result.review} transmise${result.review > 1 ? 's' : ''} au contrôle et ${result.rejected} refusée${result.rejected > 1 ? 's' : ''}.`;
+        }
+        await refreshState();
+        window.setTimeout(() => showPhotoStage({ role, minimum, title, guide, individualProfileId }), 900);
+      } catch (error) {
+        status.textContent = errors[error.message] || 'La validation automatique reste indisponible. Les photos sont conservées pour le contrôle humain.';
+        button.disabled = false;
+        button.textContent = 'Relancer la validation automatique';
+      }
+    });
     content.querySelector('[data-next]').addEventListener('click', async () => {
       if (role === 'couple_gallery') {
         startCouplePersonal();
