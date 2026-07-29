@@ -77,7 +77,7 @@ const journeys = [
       && has('apps/beta/static/assets/members-live.js', 'openAlbumLightbox', 'data-album-lightbox', 'touchstart', 'ArrowRight')
       && has('apps/beta/static/assets/members-live.js', 'album-folder-meta')
       && has('apps/beta/static/assets/members-live.css', '.album-folder[open] .album-cover-media{display:none}', '.album-lightbox', '.lightbox-stage', '.album-photo-button')
-      && has('apps/beta/static/assets/members-live.css', '.album-folder[open]:before{display:none}', '.album-folder[open] .album-detail>header{display:none}')
+      && has('apps/beta/static/assets/members-live.css', '.album-folder:before{display:none}', '.album-folder[open]:before{display:none}', '.album-folder[open] .album-detail>header{display:none}')
   },
   {
     name: 'Présentation singulier et genre',
