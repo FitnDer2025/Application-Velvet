@@ -1722,9 +1722,7 @@
     }
     return `<article class="card home-feed-card profile-feed-card">
       <header><span class="feed-avatar">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}</span><div><strong>Nouveau profil : ${e(profile.display_name)}</strong><small>${e(viewedAtLabel(item.date))}</small></div></header>
-      <button type="button" class="feed-profile" data-open-profile="${e(profile.id)}">
-        <span><b>${e(profile.profile_type === 'couple' ? 'Couple' : 'Profil individuel')} · ${e(profileAges(profile))}</b><small>${e(profile.location_zone || 'Zone publique non renseignée')}</small></span><i>Découvrir →</i>
-      </button>
+      <div class="home-profile-preview">${profilePreviewCard(profile, { variant: 'feed' })}</div>
     </article>`;
   }
 
@@ -1811,43 +1809,88 @@
     return `<span class="presence-badge ${details[1]}" data-profile-presence="${e(profileId)}"><i aria-hidden="true"></i>${details[0]}</span>`;
   }
 
-  function memberTile(profile) {
+  function profilePreviewIdentity(profile) {
+    const type = discoverProfileType(profile);
+    return {
+      label: ({
+        couple: 'Couple',
+        woman: 'Femme seule',
+        man: 'Homme seul',
+        other: 'Profil individuel'
+      })[type] || 'Profil Velvet',
+      icon: ({
+        couple: '⚭',
+        woman: '♀',
+        man: '♂',
+        other: '◇'
+      })[type] || '◇'
+    };
+  }
+
+  function profilePreviewCard(profile, {
+    variant = 'grid',
+    showSeen = false,
+    summary = false,
+    followed = false,
+    notification = null
+  } = {}) {
+    if (!profile) return '';
     const cover = approvedProfilePhotos(profile)[0];
-    return `<button class="card member-tile profile-card-button" data-open-profile="${e(profile.id)}">
-      <div class="member-cover">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}${seenBadge(profile.id)}</div>
-      <div class="member-body">
-        <div class="member-meta"><span>${e(profile.profile_type === 'couple' ? 'Couple' : 'Individuel')}</span><span>${e(profileAges(profile))}</span></div>
-        <h3>${e(profile.display_name)}</h3>
-        <p class="member-public-zone">⌖ ${e(profile.location_zone || 'Zone publique non renseignée')}</p>
-        <div class="member-status-row">${presenceBadge(profile.id)}</div>
-        ${chips(list(profile.practices).slice(0, 4))}
-      </div>
+    const identity = profilePreviewIdentity(profile);
+    const status = state.presence[profile.id] || 'offline';
+    const presence = {
+      online: ['En ligne', 'green'],
+      today: ['Connecté aujourd’hui', 'orange'],
+      offline: ['Pas de connexion aujourd’hui', 'red']
+    }[status] || ['Pas de connexion aujourd’hui', 'red'];
+    const action = notification
+      ? `data-open-notification="${e(notification.id)}"`
+      : `data-open-profile="${e(profile.id)}"`;
+    const context = notification ? `<span class="profile-preview-context">
+      <small>${e(viewedAtLabel(notification.created_at))}</small>
+      <b>${e(notification.title)}</b>
+      <em>${e(notification.body || '')}</em>
+    </span>` : '';
+    return `<button class="profile-preview-card preview-${e(variant)} ${notification && !notification.read_at ? 'unread' : ''}" type="button" ${action}>
+      <span class="profile-preview-head">
+        <span class="profile-preview-kind" aria-label="${e(identity.label)}">${identity.icon}</span>
+        <strong>${e(profile.display_name)}</strong>
+        <i class="profile-preview-presence ${presence[1]}" title="${e(presence[0])}" aria-label="${e(presence[0])}"></i>
+      </span>
+      <span class="profile-preview-media">
+        ${cover ? `<img src="${e(cover.previewUrl)}" alt="Photo de profil de ${e(profile.display_name)}">` : `<b>${e(initials(profile.display_name))}</b>`}
+        ${showSeen ? seenBadge(profile.id) : ''}
+        ${followed ? '<small class="profile-preview-followed">Suivi</small>' : ''}
+      </span>
+      <span class="profile-preview-details">
+        <b>${e(identity.label)} · ${e(profileAges(profile))}</b>
+        <em>⌖ ${e(profile.location_zone || 'Ville non renseignée')}</em>
+        ${summary ? `<small>${e(profile.description || profile.search_text || 'Présentation à compléter.')}</small>` : ''}
+      </span>
+      ${context}
+      ${notification && !notification.read_at ? '<span class="profile-preview-unread">Nouveau</span>' : ''}
     </button>`;
+  }
+
+  function memberTile(profile) {
+    return profilePreviewCard(profile, { variant: 'grid', showSeen: true });
   }
 
   function discoverGridTile(profile) {
-    const cover = approvedProfilePhotos(profile)[0];
-    const type = discoverProfileType(profile);
-    const label = ({ couple: 'Couple', woman: 'Femme', man: 'Homme', other: 'Profil individuel' })[type];
-    return `<button class="discover-grid-tile" type="button" data-open-profile="${e(profile.id)}">
-      <span class="discover-grid-cover">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : `<b>${e(initials(profile.display_name))}</b>`}${seenBadge(profile.id)}</span>
-      <span class="discover-grid-copy"><strong>${e(profile.display_name)}</strong><small>${e(label)} · ${e(profileAges(profile))}</small><em>⌖ ${e(profile.location_zone || 'Zone non renseignée')}</em></span>
-    </button>`;
+    return profilePreviewCard(profile, {
+      variant: 'grid',
+      showSeen: true,
+      followed: state.following.includes(profile.id)
+    });
   }
 
   function discoverHorizontalTile(profile) {
-    const cover = approvedProfilePhotos(profile)[0];
-    const followed = state.following.includes(profile.id);
-    return `<button class="card discover-horizontal-tile" type="button" data-open-profile="${e(profile.id)}">
-      <span class="discover-horizontal-cover">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : `<b>${e(initials(profile.display_name))}</b>`}${seenBadge(profile.id)}</span>
-      <span class="discover-horizontal-copy">
-        <span class="member-meta"><i>${e(profile.profile_type === 'couple' ? 'Couple' : 'Individuel')}</i><i>${e(profileAges(profile))}</i>${followed ? '<i>Suivi</i>' : ''}</span>
-        <strong>${e(profile.display_name)}</strong>
-        <em>⌖ ${e(profile.location_zone || 'Zone publique non renseignée')}</em>
-        <p>${e(profile.description || profile.search_text || 'Résumé à compléter.')}</p>
-        <span>${presenceBadge(profile.id)}${seenBadge(profile.id)}</span>
-      </span>
-    </button>`;
+    return profilePreviewCard(profile, {
+      variant: 'horizontal',
+      showSeen: true,
+      summary: true,
+      followed: state.following.includes(profile.id)
+    });
   }
 
   function profileEngagementPanel(profile, own) {
@@ -3002,10 +3045,15 @@
 
   function notificationTile(notification) {
     const actor = list(state.directory.profiles).find((profile) => profile.id === notification.actor_profile_id);
-    const cover = actor ? approvedProfilePhotos(actor)[0] : null;
+    if (actor) {
+      return profilePreviewCard(actor, {
+        variant: 'notification',
+        notification
+      });
+    }
     return `<button class="notification-tile ${notification.read_at ? '' : 'unread'}" data-open-notification="${e(notification.id)}">
-      <span class="notification-avatar">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : notificationIcon(notification.event_type)}</span>
-      <span><small>${e(actor?.display_name || 'Velvet')} · ${e(viewedAtLabel(notification.created_at))}</small><b>${e(notification.title)}</b><em>${e(notification.body || '')}</em></span>
+      <span class="notification-avatar">${notificationIcon(notification.event_type)}</span>
+      <span><small>Velvet · ${e(viewedAtLabel(notification.created_at))}</small><b>${e(notification.title)}</b><em>${e(notification.body || '')}</em></span>
       ${notification.read_at ? '<i>→</i>' : '<i class="unread-dot" aria-label="Non lue"></i>'}
     </button>`;
   }
@@ -3018,7 +3066,7 @@
       'Chaque élément correspond à une action réellement enregistrée dans Velvet.',
       state.unreadCount ? `<button class="secondary" data-read-all-notifications>Tout marquer comme lu · ${state.unreadCount}</button>` : ''
     )}
-      ${notifications.length ? `<section class="notification-feed">${notifications.map(notificationTile).join('')}</section>` : emptyState('Aucune notification', 'Les messages, réactions, accès aux albums et inscriptions apparaîtront ici lorsqu’une action réelle aura lieu.', '○')}
+      ${notifications.length ? `<section class="notification-feed profile-preview-feed">${notifications.map(notificationTile).join('')}</section>` : emptyState('Aucune notification', 'Les messages, réactions, accès aux albums et inscriptions apparaîtront ici lorsqu’une action réelle aura lieu.', '○')}
     </div>`;
   }
 
@@ -3457,12 +3505,7 @@
             const member = visit.profile_id === state.profile.id
               ? state.profile
               : list(state.directory.profiles).find((profile) => profile.id === visit.profile_id);
-            const portrait = approvedProfilePhotos(member)[0];
-            return member ? `<button class="venue-visitor-card" type="button" data-open-profile="${e(member.id)}" aria-label="Ouvrir le profil de ${e(member.display_name)}">
-              <span class="venue-visitor-photo">${portrait ? `<img src="${e(portrait.previewUrl)}" alt="">` : e(initials(member.display_name))}</span>
-              <span class="venue-visitor-copy"><strong>${e(member.display_name)}</strong><small>${e(profileAges(member))} · ${e(member.location_zone || 'Ville non renseignée')}</small></span>
-              <i aria-hidden="true">→</i>
-            </button>` : '';
+            return profilePreviewCard(member, { variant: 'compact' });
           }).join('')}</div></article>`;
         }).join('')}</div>` : '<p class="muted">Aucun membre n’a encore annoncé sa venue.</p>'}
       </section>
