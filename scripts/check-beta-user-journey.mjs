@@ -23,6 +23,8 @@ const paths = [
   'functions/api/members/messages.js',
   'functions/api/members/event-registrations.js',
   'functions/api/members/map.js',
+  'functions/api/members/venue-address-coordinates.js',
+  'functions/api/members/venue-geocoding.js',
   'functions/api/members/venue-relationships.js',
   'functions/api/members/settings.js',
   'functions/api/members/verification.js',
@@ -118,7 +120,10 @@ const journeys = [
       && has('apps/beta/static/assets/members-live.js', 'mapVisibleVenues', 'data-dynamic-map', 'pointermove', 'panMapByPixels', 'defaultMapZoom', 'mapWorkspace')
       && has('apps/beta/static/assets/members-live.css', '.map-visible-results', '.map-workspace', 'cursor:grab', 'touch-action:none')
       && has('apps/beta/static/assets/location-verification.js', "title !== 'Établissements'")
-      && has('functions/api/members/map.js', 'radiusKm: 50', 'private_approximate_location', 'category_primary', 'categoryTags')
+      && has('functions/api/members/map.js', 'radiusKm: 50', 'private_approximate_location', 'category_primary', 'categoryTags', 'geocodeVenueAddress', 'public_address_geocoding')
+      && !files['functions/api/members/map.js'].includes('address_public,latitude,longitude')
+      && has('functions/api/members/venue-address-coordinates.js', '9 rue chemin vert lens france', '"precision": "address"')
+      && has('functions/api/members/venue-geocoding.js', 'venueAddressQuery', 'VENUE_ADDRESS_COORDINATES', 'data.geopf.fr/geocodage/search')
       && has('apps/beta/static/assets/members-live.js', '/api/members/location', 'exacte n’est jamais enregistrée')
   },
   {

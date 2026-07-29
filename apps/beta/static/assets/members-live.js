@@ -2086,7 +2086,7 @@
       <p>Cette liste suit automatiquement le déplacement, le zoom et les catégories actives de la carte.</p>
       ${venues.length ? `<div class="map-visible-list">${venues.slice(0, 8).map((venue) => `<button type="button" data-open-venue="${e(venue.id)}" data-map-venue="true">
         <span>${e(venue.distanceFromCenterKm)} km</span><div><strong>${e(venue.name)}</strong><small>${e([venue.city, venue.countryCode, venue.kind].filter(Boolean).join(' · '))}</small></div><i>→</i>
-      </button>`).join('')}</div>` : '<small class="map-data-note">Déplacez ou dézoomez la carte. Seuls les établissements disposant de coordonnées publiques vérifiées peuvent être positionnés.</small>'}
+      </button>`).join('')}</div>` : '<small class="map-data-note">Déplacez ou dézoomez la carte. Les établissements sont positionnés depuis leur adresse publique lorsqu’elle peut être localisée avec fiabilité.</small>'}
     </section>`;
   }
 
@@ -2203,7 +2203,7 @@
       ['hotel', 'Hôtels'],
       ['other', 'Autres lieux']
     ];
-    return `<div class="page">${pageHead('Zones publiques et lieux vérifiés', 'Maps', 'Les membres sont placés au centre approximatif de la zone qu’ils ont choisi d’afficher. Les établissements utilisent leurs coordonnées publiques.')}
+    return `<div class="page">${pageHead('Zones publiques et adresses d’établissements', 'Maps', 'Les membres sont placés au centre approximatif de la zone qu’ils ont choisi d’afficher. Les établissements sont localisés depuis leur adresse publique.')}
       <section class="card map-controls" aria-label="Réglages de la carte">
         <div class="map-zoom-controls">
           <button type="button" data-map-zoom="-1" aria-label="Dézoomer">−</button>

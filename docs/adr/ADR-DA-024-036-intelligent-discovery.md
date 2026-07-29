@@ -48,7 +48,9 @@ Amendement fonctionnel du 29 juillet 2026 :
 - il choisit séparément l'affichage des membres, clubs, spas, bars, love rooms, hôtels et autres lieux ;
 - la carte peut être déplacée librement et la liste des lieux se recalcule selon le centre, le zoom, les catégories actives et le périmètre réellement visible ;
 - la carte occupe toute la largeur disponible de son encadrement ;
-- un lieu dépourvu de coordonnées publiques vérifiées n'est jamais positionné artificiellement ;
+- l'adresse publique du lieu est la source de son positionnement ; les éventuelles coordonnées présentes dans le catalogue ne sont pas utilisées par Maps ;
+- le géocodage dérivé de l'adresse est mis en cache pour préserver les performances, sans écriture distante dans Supabase ;
+- une adresse absente, trop vague ou non résolue n'est jamais positionnée artificiellement ;
 - aucune coordonnée exacte de membre n'est exposée ni conservée par cette fonction.
 
 ## ADR-031 — Velvet Alchemy Index

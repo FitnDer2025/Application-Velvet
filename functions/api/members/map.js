@@ -6,6 +6,7 @@ import {
   withSession
 } from './_shared.js';
 import { enrichProfilesMedia } from './media.js';
+import { geocodeVenueAddress } from './venue-geocoding.js';
 
 const DEFAULT_CENTER = { latitude: 46.603354, longitude: 1.888334, zoom: 5 };
 const geocodeCache = new Map();
@@ -102,24 +103,31 @@ async function memberMarkers(env, token, currentProfileId) {
 async function venueMarkers(env, token) {
   const rows = await restJson(
     env,
-    '/rest/v1/venue_directory?select=id,name,kind,category_primary,category_tags,city,country_code,address_public,latitude,longitude,website,verification_status&latitude=not.is.null&longitude=not.is.null&verification_status=neq.closed&order=name.asc&limit=500',
+    '/rest/v1/venue_directory?select=id,name,kind,category_primary,category_tags,city,country_code,postal_code,address_public,website,verification_status&address_public=not.is.null&verification_status=neq.closed&order=name.asc&limit=500',
     token
   );
-  return (rows || []).map((venue) => ({
-    id: venue.id,
-    type: 'venue',
-    name: venue.name,
-    kind: venue.kind,
-    categoryPrimary: venue.category_primary,
-    categoryTags: venue.category_tags || [],
-    city: venue.city,
-    countryCode: venue.country_code,
-    address: venue.address_public,
-    latitude: finite(venue.latitude),
-    longitude: finite(venue.longitude),
-    website: venue.website,
-    verificationStatus: venue.verification_status
-  })).filter((venue) => venue.latitude !== null && venue.longitude !== null);
+  const markers = await Promise.all((rows || []).map(async (venue) => {
+    const coordinates = await geocodeVenueAddress(venue);
+    if (!coordinates) return null;
+    return {
+      id: venue.id,
+      type: 'venue',
+      name: venue.name,
+      kind: venue.kind,
+      categoryPrimary: venue.category_primary,
+      categoryTags: venue.category_tags || [],
+      city: venue.city,
+      countryCode: venue.country_code,
+      address: venue.address_public,
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
+      locationPrecision: coordinates.precision,
+      positionSource: 'public_address_geocoding',
+      website: venue.website,
+      verificationStatus: venue.verification_status
+    };
+  }));
+  return markers.filter(Boolean);
 }
 
 async function mapCenter(env, access, markers) {
@@ -165,7 +173,7 @@ export async function onRequestGet({ request, env }) {
       privacy: {
         exactMemberCoordinatesExposed: false,
         memberMarkerMeaning: 'Centre approximatif de la zone publique déclarée',
-        venueMarkerMeaning: 'Coordonnées publiques de l’établissement'
+        venueMarkerMeaning: 'Position calculée depuis l’adresse publique de l’établissement'
       }
     }, access.session);
   } catch (error) {
