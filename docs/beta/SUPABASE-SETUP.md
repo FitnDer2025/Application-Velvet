@@ -45,6 +45,7 @@ Appliquer dans l’ordre :
 17. `0017_velvet_pro_workspace.sql`
 18. `0018_velvet_control_operations.sql`
 19. `0019_beta_release_readiness.sql`
+20. `0020_velvet_venue_catalog.sql`
 
 Puis ouvrir le Security Advisor et corriger toute alerte avant de connecter les interfaces.
 
