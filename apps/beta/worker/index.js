@@ -46,6 +46,7 @@ import {
 import {
   onRequestDelete as memberPhotosDelete,
   onRequestGet as memberPhotosGet,
+  onRequestPatch as memberPhotosPatch,
   onRequestPost as memberPhotosPost
 } from '../../../functions/api/members/photos.js';
 import {
@@ -132,6 +133,7 @@ const API_ROUTES = new Map([
   ['POST /api/members/couple-invite', coupleInvitePost],
   ['GET /api/members/photos', memberPhotosGet],
   ['POST /api/members/photos', memberPhotosPost],
+  ['PATCH /api/members/photos', memberPhotosPatch],
   ['DELETE /api/members/photos', memberPhotosDelete],
   ['GET /api/admin/invites', adminInviteGet],
   ['POST /api/admin/invites', adminInvitePost],
