@@ -16,8 +16,10 @@ const files = Object.fromEntries(await Promise.all([
   'functions/api/members/notifications.js',
   'functions/api/members/map.js',
   'functions/api/members/directory.js',
+  'functions/api/pro/workspace.js',
   'functions/api/admin/invites.js',
   'apps/beta/static/assets/members-live.js',
+  'apps/beta/static/assets/pro-live.js',
   'apps/web/velvet-control-intelligence-beta-final.html'
 ].map(async (path) => [path, await readFile(path, 'utf8')])));
 
@@ -38,9 +40,11 @@ const requirements = [
   [includes('functions/api/members/notifications.js', '/rest/v1/member_notifications', 'read_all', 'notificationFeed'), 'Les notifications doivent être lues et acquittées dans Supabase'],
   [includes('functions/api/members/map.js', 'location_zone', 'exactMemberCoordinatesExposed: false', 'venue_directory'), 'Maps doit utiliser les zones publiques et les coordonnées publiques des lieux'],
   [!files['functions/api/members/directory.js'].includes("'city',"), 'L’annuaire membre ne doit pas exposer la commune privée'],
+  [includes('functions/api/pro/workspace.js', 'save_venue_draft', 'publish_venue', 'create_event', 'registration_status'), 'Velvet Pro doit enregistrer ses actions métier dans Supabase'],
   [includes('functions/api/admin/invites.js', 'invite_persistence_failed', 'registrationUrl'), 'Une invitation doit être confirmée et fournir son lien'],
   [includes('apps/beta/static/assets/members-live.js', '/api/members/photo-reactions', 'photo_reaction_persistence_failed'), 'L’interface membre doit refuser une réaction non confirmée'],
   [includes('apps/beta/static/assets/members-live.js', '/api/members/notifications', '/api/members/map', 'data-open-venue'), 'L’interface doit exploiter notifications, Maps et mini-sites établissements'],
+  [includes('apps/beta/static/assets/pro-live.js', '/api/pro/workspace', 'S.threads = []', 'Cette vue ne contient plus aucune donnée de démonstration'), 'Velvet Pro doit neutraliser les données fictives et charger son workspace serveur'],
   [includes('apps/web/velvet-control-intelligence-beta-final.html', '/api/admin/invites', 'Générer le code sécurisé'), 'Velvet Control doit utiliser l’API réelle des invitations']
 ];
 
