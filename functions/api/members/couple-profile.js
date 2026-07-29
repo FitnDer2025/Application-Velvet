@@ -7,6 +7,8 @@ import {
   withSession
 } from './_shared.js';
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 function nullableYear(value) {
   if (value === '' || value === null || value === undefined) return null;
   const year = Number(value);
@@ -54,7 +56,17 @@ export async function onRequestPost({ request, env }) {
         body: JSON.stringify({ profile_payload: profilePayload })
       }
     );
-    return withSession({ ok: true, profileId: result }, access.session, 201);
+    const profileId = String(result || '');
+    if (!UUID.test(profileId)) throw new Error('couple_profile_persistence_failed');
+    const persisted = await restJson(
+      env,
+      `/rest/v1/member_profiles?select=id,profile_type,profile_members!inner(user_id,status)&id=eq.${encodeURIComponent(profileId)}&profile_members.user_id=eq.${encodeURIComponent(access.account.userId)}&profile_members.status=eq.active&limit=1`,
+      access.session
+    );
+    if (persisted?.[0]?.id !== profileId || persisted?.[0]?.profile_type !== 'couple') {
+      throw new Error('couple_profile_persistence_failed');
+    }
+    return withSession({ ok: true, profileId }, access.session, 201);
   } catch (error) {
     return json({ error: error.message || 'couple_profile_write_failed' }, 400);
   }
