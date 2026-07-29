@@ -1712,6 +1712,7 @@
               <span class="eyebrow">Album système public</span>
               <strong>Photos de profil</strong>
               <small>Alimenté automatiquement par le carrousel</small>
+              <span class="album-folder-meta">${profilePhotos.length} photo${profilePhotos.length > 1 ? 's' : ''}</span>
               <span class="album-open-label"><span class="closed-label">Ouvrir le dossier</span><span class="open-label">Fermer le dossier</span> <b>⌄</b></span>
             </span>
           </summary>
@@ -1749,6 +1750,7 @@
               <span class="eyebrow">${e(confidentialityLabel(album.confidentiality))}</span>
               <strong>${e(album.name)}</strong>
               <small>${canSee ? 'Ouvrez le dossier pour parcourir son contenu' : 'Aucun aperçu avant autorisation'}</small>
+              <span class="album-folder-meta">${canSee ? countLabel : 'Contenu privé'}</span>
               <span class="album-open-label"><span class="closed-label">Ouvrir le dossier</span><span class="open-label">Fermer le dossier</span> <b>⌄</b></span>
             </span>
           </summary>
