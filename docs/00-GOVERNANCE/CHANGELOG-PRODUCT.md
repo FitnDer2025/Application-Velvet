@@ -10,6 +10,7 @@ Ce document retrace les décisions produit validées. Il ne remplace ni les ADR 
 - Les établissements peuvent être filtrés par nature et dans un rayon de 5, 10, 15 ou 20 km autour d'une zone approximative consentie.
 - Découvrir filtre les couples, hommes, femmes et les pratiques via une liste contrôlée.
 - Maps démarre sur un rayon d'environ 50 km autour du membre, permet le zoom et le choix des catégories visibles.
+- Maps devient déplaçable et synchronise en temps réel la liste des lieux avec la zone réellement visible, tout en occupant toute la largeur disponible.
 - Les agendas de soirées sont limités aux clubs, spas et bars.
 - Les comptes uniquement membres rejoignent directement leur espace ; le choix d'univers est réservé aux administrateurs et modérateurs.
 

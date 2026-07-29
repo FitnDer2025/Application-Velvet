@@ -46,6 +46,9 @@ Amendement fonctionnel du 29 juillet 2026 :
 - le cadrage initial couvre un rayon d'environ 50 km autour de la localisation approximative consentie du membre ;
 - le membre peut zoomer et dézoomer ;
 - il choisit séparément l'affichage des membres, clubs, spas, bars, love rooms, hôtels et autres lieux ;
+- la carte peut être déplacée librement et la liste des lieux se recalcule selon le centre, le zoom, les catégories actives et le périmètre réellement visible ;
+- la carte occupe toute la largeur disponible de son encadrement ;
+- un lieu dépourvu de coordonnées publiques vérifiées n'est jamais positionné artificiellement ;
 - aucune coordonnée exacte de membre n'est exposée ni conservée par cette fonction.
 
 ## ADR-031 — Velvet Alchemy Index

@@ -33,6 +33,7 @@
     homeVenueKind: '',
     homeVenueRadius: '20',
     mapZoom: 10,
+    mapCenter: null,
     mapLayers: {
       members: true,
       club: true,
@@ -58,6 +59,7 @@
   const content = document.querySelector('#content');
   const toastNode = document.querySelector('#toast');
   const navButtons = [...document.querySelectorAll('[data-route]')];
+  let mapResizeObserver = null;
 
   const errorMessages = {
     authentication_required: 'Ta session a expiré. Reconnecte-toi.',
@@ -1947,14 +1949,36 @@
     };
   }
 
+  function mapCoordinates(point, zoom) {
+    const scale = 256 * (2 ** zoom);
+    const x = ((point.x % scale) + scale) % scale;
+    const y = Math.max(0, Math.min(scale, point.y));
+    const longitude = x / scale * 360 - 180;
+    const mercator = Math.PI - 2 * Math.PI * y / scale;
+    const latitude = 180 / Math.PI * Math.atan(Math.sinh(mercator));
+    return { latitude, longitude };
+  }
+
   function mapViewport(preferredCenter) {
-    const width = 900;
-    const height = 520;
+    const pageWidth = document.querySelector('#content .page')?.clientWidth || content.clientWidth || 900;
+    const width = Math.max(320, Math.min(1280, Math.round(pageWidth)));
+    const height = window.innerWidth <= 760 ? 520 : 600;
+    const selectedCenter = state.mapCenter || preferredCenter;
     const center = {
-      latitude: Number(preferredCenter?.latitude ?? 46.603354),
-      longitude: Number(preferredCenter?.longitude ?? 1.888334)
+      latitude: Number(selectedCenter?.latitude ?? 46.603354),
+      longitude: Number(selectedCenter?.longitude ?? 1.888334)
     };
     return { width, height, center, zoom: Math.max(5, Math.min(13, Number(state.mapZoom || 10))) };
+  }
+
+  function defaultMapZoom(center) {
+    const pageWidth = document.querySelector('#content .page')?.clientWidth || content.clientWidth || 900;
+    const width = Math.max(320, Math.min(1280, Math.round(pageWidth)));
+    const latitude = Number(center?.latitude ?? 46.603354);
+    const targetMetresPerPixel = 50000 * 2 / width;
+    return Math.max(5, Math.min(13,
+      Math.log2(156543.03392 * Math.cos(latitude * Math.PI / 180) / targetMetresPerPixel)
+    ));
   }
 
   function venueMapCategory(venue) {
@@ -1968,39 +1992,75 @@
     return ['club', 'spa', 'bar', 'love_room'].includes(kind) ? kind : 'other';
   }
 
-  function visibleMapMarkers(mapData) {
+  function enabledMapMarkers(mapData) {
     const members = state.mapLayers.members ? list(mapData.members) : [];
     const venues = list(mapData.venues).filter((venue) => state.mapLayers[venueMapCategory(venue)]);
     return [...members, ...venues];
   }
 
+  function markerPosition(marker, view) {
+    const origin = mapPoint(view.center.latitude, view.center.longitude, view.zoom);
+    const point = mapPoint(marker.latitude, marker.longitude, view.zoom);
+    return {
+      left: point.x - origin.x + view.width / 2,
+      top: point.y - origin.y + view.height / 2
+    };
+  }
+
+  function markerInViewport(marker, view, margin = 0) {
+    const position = markerPosition(marker, view);
+    return position.left >= -margin
+      && position.left <= view.width + margin
+      && position.top >= -margin
+      && position.top <= view.height + margin;
+  }
+
+  function mapDistanceKm(from, marker) {
+    const earthRadiusKm = 6371;
+    const latitudeDelta = (Number(marker.latitude) - Number(from.latitude)) * Math.PI / 180;
+    const longitudeDelta = (Number(marker.longitude) - Number(from.longitude)) * Math.PI / 180;
+    const fromLatitude = Number(from.latitude) * Math.PI / 180;
+    const toLatitude = Number(marker.latitude) * Math.PI / 180;
+    const haversine = Math.sin(latitudeDelta / 2) ** 2
+      + Math.cos(fromLatitude) * Math.cos(toLatitude) * Math.sin(longitudeDelta / 2) ** 2;
+    return earthRadiusKm * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+  }
+
+  function mapVisibleVenues(mapData) {
+    const view = mapViewport(mapData.center);
+    return list(mapData.venues)
+      .filter((venue) => state.mapLayers[venueMapCategory(venue)])
+      .filter((venue) => markerInViewport(venue, view))
+      .map((venue) => ({ ...venue, distanceFromCenterKm: Math.round(mapDistanceKm(view.center, venue)) }))
+      .sort((left, right) => left.distanceFromCenterKm - right.distanceFromCenterKm);
+  }
+
   function mapRadiusLabel() {
-    const latitude = Number(state.mapData?.center?.latitude ?? 46.603354);
-    const metresPerPixel = 156543.03392 * Math.cos(latitude * Math.PI / 180) / (2 ** state.mapZoom);
-    return Math.max(1, Math.round(metresPerPixel * 900 / 2000));
+    const view = mapViewport(state.mapData?.center);
+    const metresPerPixel = 156543.03392 * Math.cos(view.center.latitude * Math.PI / 180) / (2 ** view.zoom);
+    return Math.max(1, Math.round(metresPerPixel * view.width / 2000));
   }
 
   function mapCanvas(mapData) {
-    const markers = visibleMapMarkers(mapData);
     const view = mapViewport(mapData.center);
+    const markers = enabledMapMarkers(mapData).filter((marker) => markerInViewport(marker, view, 40));
     const origin = mapPoint(view.center.latitude, view.center.longitude, view.zoom);
-    const tileCount = 2 ** view.zoom;
-    const startX = Math.floor((origin.x - view.width / 2) / 256);
-    const endX = Math.floor((origin.x + view.width / 2) / 256);
-    const startY = Math.max(0, Math.floor((origin.y - view.height / 2) / 256));
-    const endY = Math.min(tileCount - 1, Math.floor((origin.y + view.height / 2) / 256));
+    const tileZoom = Math.floor(view.zoom);
+    const tileSize = 256 * (2 ** (view.zoom - tileZoom));
+    const tileCount = 2 ** tileZoom;
+    const startX = Math.floor((origin.x - view.width / 2) / tileSize);
+    const endX = Math.floor((origin.x + view.width / 2) / tileSize);
+    const startY = Math.max(0, Math.floor((origin.y - view.height / 2) / tileSize));
+    const endY = Math.min(tileCount - 1, Math.floor((origin.y + view.height / 2) / tileSize));
     const tiles = [];
     for (let tileX = startX; tileX <= endX; tileX += 1) {
       for (let tileY = startY; tileY <= endY; tileY += 1) {
         const wrappedX = ((tileX % tileCount) + tileCount) % tileCount;
-        tiles.push(`<img class="map-tile" alt="" aria-hidden="true" src="https://tile.openstreetmap.org/${view.zoom}/${wrappedX}/${tileY}.png" style="left:${tileX * 256 - origin.x + view.width / 2}px;top:${tileY * 256 - origin.y + view.height / 2}px">`);
+        tiles.push(`<img class="map-tile" alt="" aria-hidden="true" src="https://tile.openstreetmap.org/${tileZoom}/${wrappedX}/${tileY}.png" style="left:${tileX * tileSize - origin.x + view.width / 2}px;top:${tileY * tileSize - origin.y + view.height / 2}px;width:${tileSize + 1}px;height:${tileSize + 1}px">`);
       }
     }
     const markerHtml = markers.map((marker) => {
-      const point = mapPoint(marker.latitude, marker.longitude, view.zoom);
-      const left = point.x - origin.x + view.width / 2;
-      const top = point.y - origin.y + view.height / 2;
-      if (left < -30 || left > view.width + 30 || top < -30 || top > view.height + 30) return '';
+      const { left, top } = markerPosition(marker, view);
       if (marker.type === 'member') {
         return `<button class="map-marker member-map-marker" style="left:${left}px;top:${top}px" data-open-profile="${e(marker.id)}" title="${e(marker.name)} · ${e(marker.zone)}">
           ${marker.photoUrl ? `<img src="${e(marker.photoUrl)}" alt="">` : `<span>${e(initials(marker.name))}</span>`}<small>${e(marker.name)}</small>
@@ -2010,11 +2070,121 @@
         <span>⌑</span><small>${e(marker.name)}</small>
       </button>`;
     }).join('');
-    return `<section class="velvet-map" style="--map-width:${view.width}px;--map-height:${view.height}px" aria-label="Carte des zones publiques et établissements">
+    return `<section class="velvet-map" data-dynamic-map data-map-width="${view.width}" tabindex="0" style="--map-width:${view.width}px;--map-height:${view.height}px" aria-label="Carte interactive. Faites glisser pour vous déplacer, utilisez la molette ou les boutons pour zoomer.">
       <div class="map-stage" style="width:${view.width}px;height:${view.height}px">${tiles.join('')}${markerHtml}</div>
+      <div class="map-center-indicator" aria-hidden="true"><span></span></div>
+      <span class="map-gesture-hint">Glisser pour explorer · molette pour zoomer</span>
       <div class="map-legend"><span><i class="member-dot"></i>Membres · zone approximative</span><span><i class="venue-dot"></i>Établissements · adresse publique</span></div>
       <small class="map-credit">© contributeurs OpenStreetMap</small>
     </section>`;
+  }
+
+  function mapVisibleVenuesPanel(mapData) {
+    const venues = mapVisibleVenues(mapData);
+    return `<section class="card map-visible-results" aria-live="polite">
+      <header><div><p class="eyebrow">Zone actuellement affichée</p><h2>${venues.length ? `Lieux visibles sur la carte (${venues.length})` : 'Aucun lieu visible dans cette zone'}</h2></div><button class="text-button" type="button" data-map-recenter>Recentrer sur moi</button></header>
+      <p>Cette liste suit automatiquement le déplacement, le zoom et les catégories actives de la carte.</p>
+      ${venues.length ? `<div class="map-visible-list">${venues.slice(0, 8).map((venue) => `<button type="button" data-open-venue="${e(venue.id)}" data-map-venue="true">
+        <span>${e(venue.distanceFromCenterKm)} km</span><div><strong>${e(venue.name)}</strong><small>${e([venue.city, venue.countryCode, venue.kind].filter(Boolean).join(' · '))}</small></div><i>→</i>
+      </button>`).join('')}</div>` : '<small class="map-data-note">Déplacez ou dézoomez la carte. Seuls les établissements disposant de coordonnées publiques vérifiées peuvent être positionnés.</small>'}
+    </section>`;
+  }
+
+  function renderMapWorkspace() {
+    return `${mapVisibleVenuesPanel(state.mapData)}${mapCanvas(state.mapData)}`;
+  }
+
+  function refreshMapWorkspace() {
+    const workspace = document.querySelector('#mapWorkspace');
+    if (!workspace || !state.mapData) return;
+    workspace.innerHTML = renderMapWorkspace();
+    const radius = document.querySelector('[data-map-radius]');
+    if (radius) radius.textContent = `Rayon d’environ ${mapRadiusLabel()} km`;
+    bindMapInteraction();
+  }
+
+  function panMapByPixels(deltaX, deltaY) {
+    const view = mapViewport(state.mapData?.center);
+    const origin = mapPoint(view.center.latitude, view.center.longitude, view.zoom);
+    state.mapCenter = mapCoordinates({
+      x: origin.x - deltaX,
+      y: origin.y - deltaY
+    }, view.zoom);
+    refreshMapWorkspace();
+  }
+
+  function bindMapInteraction() {
+    const map = document.querySelector('[data-dynamic-map]');
+    if (!map || map.dataset.interactive === 'true') return;
+    map.dataset.interactive = 'true';
+    const stage = map.querySelector('.map-stage');
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+    let deltaX = 0;
+    let deltaY = 0;
+
+    const finishDrag = (event) => {
+      if (pointerId === null || event.pointerId !== pointerId) return;
+      map.releasePointerCapture?.(pointerId);
+      map.classList.remove('dragging');
+      stage.style.transform = '';
+      pointerId = null;
+      if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) panMapByPixels(deltaX, deltaY);
+    };
+
+    map.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0 || event.target.closest('.map-marker')) return;
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      startY = event.clientY;
+      deltaX = 0;
+      deltaY = 0;
+      map.setPointerCapture?.(pointerId);
+      map.classList.add('dragging');
+      event.preventDefault();
+    });
+    map.addEventListener('pointermove', (event) => {
+      if (pointerId === null || event.pointerId !== pointerId) return;
+      deltaX = event.clientX - startX;
+      deltaY = event.clientY - startY;
+      stage.style.transform = `translate(${deltaX}px,${deltaY}px)`;
+    });
+    map.addEventListener('pointerup', finishDrag);
+    map.addEventListener('pointercancel', finishDrag);
+    map.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      state.mapZoom = Math.max(5, Math.min(13, state.mapZoom + (event.deltaY < 0 ? 1 : -1)));
+      refreshMapWorkspace();
+    }, { passive: false });
+    map.addEventListener('keydown', (event) => {
+      const movements = {
+        ArrowLeft: [80, 0],
+        ArrowRight: [-80, 0],
+        ArrowUp: [0, 80],
+        ArrowDown: [0, -80]
+      };
+      if (!movements[event.key]) return;
+      event.preventDefault();
+      panMapByPixels(...movements[event.key]);
+    });
+    document.querySelector('[data-map-recenter]')?.addEventListener('click', () => {
+      state.mapCenter = {
+        latitude: Number(state.mapData.center?.latitude ?? 46.603354),
+        longitude: Number(state.mapData.center?.longitude ?? 1.888334)
+      };
+      state.mapZoom = defaultMapZoom(state.mapCenter);
+      refreshMapWorkspace();
+    });
+
+    mapResizeObserver?.disconnect();
+    if ('ResizeObserver' in window) {
+      mapResizeObserver = new ResizeObserver((entries) => {
+        const width = Math.round(entries[0]?.contentRect?.width || 0);
+        if (width && Math.abs(width - Number(map.dataset.mapWidth)) > 8) refreshMapWorkspace();
+      });
+      mapResizeObserver.observe(map);
+    }
   }
 
   function renderMaps() {
@@ -2023,7 +2193,6 @@
         <section class="loading-state"><span class="loader"></span><p>Chargement des zones publiques…</p></section>
       </div>`;
     }
-    const visibleMarkers = visibleMapMarkers(state.mapData);
     const locationEnabled = state.mapData.center?.source === 'private_approximate_location';
     const layerOptions = [
       ['members', 'Membres'],
@@ -2038,7 +2207,7 @@
       <section class="card map-controls" aria-label="Réglages de la carte">
         <div class="map-zoom-controls">
           <button type="button" data-map-zoom="-1" aria-label="Dézoomer">−</button>
-          <span><small>Zone affichée</small><strong>Rayon d’environ ${e(mapRadiusLabel())} km</strong></span>
+          <span><small>Zone affichée</small><strong data-map-radius>Rayon d’environ ${e(mapRadiusLabel())} km</strong></span>
           <button type="button" data-map-zoom="1" aria-label="Zoomer">+</button>
         </div>
         <fieldset><legend>Afficher sur la carte</legend><div class="map-layer-options">
@@ -2048,7 +2217,7 @@
           ? '<p class="proximity-note">Carte centrée sur votre localisation approximative. Le rayon initial est de 50 km.</p>'
           : '<p class="proximity-note">Activez votre zone pour centrer la carte dans un rayon initial de 50 km autour de vous. Votre position exacte n’est jamais enregistrée.</p><button class="secondary" type="button" data-enable-location>Activer ma zone de proximité</button>'}
       </section>
-      ${visibleMarkers.length ? mapCanvas(state.mapData) : emptyState('Aucun élément dans cette sélection', 'Activez au moins une catégorie ou dézoomez pour élargir la zone affichée.', '⌖')}
+      <div id="mapWorkspace" class="map-workspace">${renderMapWorkspace()}</div>
     </div>`;
   }
 
@@ -2056,7 +2225,11 @@
     content.innerHTML = renderMaps();
     try {
       state.mapData = await api('/api/members/map');
-      state.mapZoom = 10;
+      state.mapCenter = {
+        latitude: Number(state.mapData.center?.latitude ?? 46.603354),
+        longitude: Number(state.mapData.center?.longitude ?? 1.888334)
+      };
+      state.mapZoom = defaultMapZoom(state.mapCenter);
       if (state.route === 'maps') {
         content.innerHTML = renderMaps();
         bindDynamicForms();
@@ -2087,7 +2260,11 @@
         })
       });
       state.mapData = await api('/api/members/map');
-      state.mapZoom = 10;
+      state.mapCenter = {
+        latitude: Number(state.mapData.center?.latitude ?? 46.603354),
+        longitude: Number(state.mapData.center?.longitude ?? 1.888334)
+      };
+      state.mapZoom = defaultMapZoom(state.mapCenter);
       content.innerHTML = state.route === 'maps' ? renderMaps() : renderHome();
       bindDynamicForms();
       toast('Votre zone approximative est activée.');
@@ -2626,6 +2803,7 @@
       return;
     }
     state.route = name;
+    if (name !== 'maps') mapResizeObserver?.disconnect();
     state.editing = false;
     navButtons.forEach((button) => button.classList.toggle('active', button.dataset.route === name));
     document.querySelector('.sidebar')?.classList.remove('open');
@@ -2707,20 +2885,19 @@
     document.querySelectorAll('[data-map-zoom]').forEach((button) => {
       button.addEventListener('click', () => {
         state.mapZoom = Math.max(5, Math.min(13, state.mapZoom + Number(button.dataset.mapZoom)));
-        content.innerHTML = renderMaps();
-        bindDynamicForms();
+        refreshMapWorkspace();
       });
     });
     document.querySelectorAll('[data-map-layer]').forEach((input) => {
       input.addEventListener('change', () => {
         state.mapLayers[input.dataset.mapLayer] = input.checked;
-        content.innerHTML = renderMaps();
-        bindDynamicForms();
+        refreshMapWorkspace();
       });
     });
     document.querySelectorAll('[data-enable-location]').forEach((button) => {
       button.addEventListener('click', () => enableProximity(button));
     });
+    bindMapInteraction();
     document.querySelectorAll('[data-profile-carousel]').forEach((shell) => {
       const track = shell.querySelector('[data-carousel-track]');
       const slides = [...track.querySelectorAll('[data-carousel-slide]')];

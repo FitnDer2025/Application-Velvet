@@ -230,7 +230,7 @@
   async function refreshNearbyVenues(force = false) {
     const page = document.querySelector('#content .page');
     const title = page?.querySelector('.page-head h1')?.textContent?.trim();
-    if (!page || !['Établissements', 'Maps'].includes(title)) return;
+    if (!page || title !== 'Établissements') return;
     if (!force && page.querySelector('[data-velvet-nearby]')) return;
     page.querySelector('[data-velvet-nearby]')?.remove();
 
