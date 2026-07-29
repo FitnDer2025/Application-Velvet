@@ -23,6 +23,7 @@
     personalProfileComplete: false,
     photos: [],
     settings: null,
+    socialActions: {},
     route: 'home',
     selectedProfileId: null,
     profileTab: 'couple',
@@ -56,7 +57,12 @@
     personal_photo_owner_required: 'Chaque personne doit publier elle-même son portrait.',
     photo_access_denied: 'Cette photo n’est plus accessible.',
     cannot_react_to_own_photo: 'Tu peux consulter les réactions reçues, mais pas réagir à ta propre photo.',
-    photo_reaction_persistence_failed: 'La réaction n’a pas pu être confirmée dans la mémoire Velvet.'
+    photo_reaction_persistence_failed: 'La réaction n’a pas pu être confirmée dans la mémoire Velvet.',
+    profile_contact_not_allowed: 'Ce profil n’accepte pas les messages de ta catégorie de profil.',
+    profile_contact_blocked: 'Cette conversation ne peut pas être ouverte.',
+    report_category_required: 'Choisis la raison du signalement.',
+    event_registration_closed: 'Les inscriptions à cette sortie sont closes.',
+    event_unavailable: 'Cette sortie n’est plus disponible.'
   };
 
   const REFERENCES = {
@@ -1572,9 +1578,10 @@
         <p class="eyebrow">${e(profile.profile_type === 'couple' ? 'Profil couple' : 'Profil individuel')} · ${e(profile.city || 'Localisation privée')}</p>
         <h1>${e(profile.display_name)}</h1><p class="lead">${e(profile.description)}</p>
         <div class="badges"><span class="pill gold">Membre BETA réel</span>${profile.relationship_since ? `<span class="pill">Depuis ${e(profile.relationship_since)}</span>` : ''}<span class="pill">${e(profile.location_zone || 'Zone privée')}</span></div>
-        <div class="actions">${own ? '<button class="primary" data-edit-profile>Modifier mon profil</button>' : ''}${!own ? '<button class="secondary" data-route="conversations">Conversations</button>' : ''}</div>
+        <div class="actions">${own ? '<button class="primary" data-edit-profile>Modifier mon profil</button>' : ''}${!own ? `<button class="primary" data-message-profile="${e(profile.id)}">Écrire</button><button class="secondary" data-favorite-profile="${e(profile.id)}">${state.socialActions[profile.id]?.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}</button>` : ''}</div>
       </div></section>
       ${profileEngagementPanel(profile, own)}
+      ${own ? '' : profileSafetyPanel(profile)}
       <nav class="profile-nav" aria-label="Sections du profil">
         <button data-profile-tab="couple" class="${state.profileTab === 'couple' ? 'active' : ''}">${profile.profile_type === 'couple' ? 'Le couple' : 'Présentation'}</button>
         ${people.map((person, index) => `<button data-profile-tab="person${index}" class="${state.profileTab === `person${index}` ? 'active' : ''}">${e(person.first_name || `Personne ${index + 1}`)}</button>`).join('')}
@@ -1582,6 +1589,22 @@
       </nav>
       ${activeContent}
     </div>`;
+  }
+
+  function profileSafetyPanel(profile) {
+    const blocked = Boolean(state.socialActions[profile.id]?.blocked);
+    return `<details class="card profile-safety">
+      <summary>Sécurité et discrétion</summary>
+      <div class="profile-safety-grid">
+        <div><h3>${blocked ? 'Profil bloqué' : 'Bloquer ce profil'}</h3><p>${blocked ? 'Ce profil ne peut plus entrer en contact avec toi.' : 'Le blocage coupe immédiatement la possibilité de contact entre vos profils.'}</p><button class="secondary" type="button" data-block-profile="${e(profile.id)}" data-enabled="${blocked ? 'false' : 'true'}">${blocked ? 'Débloquer' : 'Bloquer'}</button></div>
+        <form id="profileReportForm" data-profile-id="${e(profile.id)}">
+          <h3>Signaler discrètement</h3>
+          <label>Motif<select name="category" required><option value="">Choisir</option><option value="fake_profile">Suspicion de faux profil</option><option value="consent">Consentement ou comportement</option><option value="harassment">Harcèlement</option><option value="spam">Spam ou démarchage</option><option value="content">Contenu inapproprié</option><option value="other">Autre</option></select></label>
+          <label>Précisions<textarea name="description" maxlength="2000" placeholder="Décris les faits, sans information inutile."></textarea></label>
+          <button class="secondary" type="submit">Envoyer à la modération</button>
+        </form>
+      </div>
+    </details>`;
   }
 
   function renderMaps() {
@@ -1594,7 +1617,7 @@
   function renderEvents() {
     const events = list(state.directory.events);
     return `<div class="page">${pageHead('Agenda réel', 'Sorties', 'Seules les sorties effectivement publiées dans Supabase apparaissent ici.')}
-      ${events.length ? `<section class="grid two">${events.map((event) => `<article class="card"><p class="eyebrow">${e(new Date(event.starts_at).toLocaleString('fr-FR'))}</p><h2>${e(event.title)}</h2><p>${e(event.description || '')}</p><div class="facts"><div class="fact"><small>Lieu public</small><strong>${e(event.location_public || 'Confidentiel')}</strong></div><div class="fact"><small>Capacité</small><strong>${e(event.capacity)} places</strong></div><div class="fact"><small>Public</small><strong>${e(event.audience || 'Membres BETA')}</strong></div></div></article>`).join('')}</section>` : emptyState('Aucune sortie publiée', 'Aucune soirée fictive n’est conservée. Les prochaines sorties apparaîtront après leur publication par un organisateur ou un établissement validé.', '✦')}
+      ${events.length ? `<section class="grid two">${events.map((event) => `<article class="card"><p class="eyebrow">${e(new Date(event.starts_at).toLocaleString('fr-FR'))}</p><h2>${e(event.title)}</h2><p>${e(event.description || '')}</p><div class="facts"><div class="fact"><small>Lieu public</small><strong>${e(event.location_public || 'Confidentiel')}</strong></div><div class="fact"><small>Capacité</small><strong>${e(event.capacity)} places</strong></div><div class="fact"><small>Public</small><strong>${e(event.audience || 'Membres BETA')}</strong></div></div><button class="primary" data-open-event="${e(event.id)}">Voir la sortie et les participants</button></article>`).join('')}</section>` : emptyState('Aucune sortie publiée', 'Aucune soirée fictive n’est conservée. Les prochaines sorties apparaîtront après leur publication par un organisateur ou un établissement validé.', '✦')}
     </div>`;
   }
 
@@ -1847,6 +1870,77 @@
     }
   }
 
+  async function startConversation(profileId) {
+    try {
+      const result = await api('/api/members/conversations', {
+        method: 'POST',
+        body: JSON.stringify({ profileId })
+      });
+      await refreshData();
+      await openConversation(result.conversationId);
+    } catch (error) {
+      toast(errorMessages[error.message] || error.message, true);
+    }
+  }
+
+  async function updateSocialAction(profileId, action, enabled) {
+    try {
+      const result = await api('/api/members/social-actions', {
+        method: 'POST',
+        body: JSON.stringify({ profileId, action, enabled })
+      });
+      state.socialActions[profileId] = {
+        favorite: Boolean(result.favorite),
+        blocked: Boolean(result.blocked)
+      };
+      const profile = list(state.directory.profiles).find((row) => row.id === profileId);
+      content.innerHTML = renderProfile(profile, false);
+      bindDynamicForms();
+      toast(action === 'favorite'
+        ? (result.favorite ? 'Profil ajouté aux favoris.' : 'Profil retiré des favoris.')
+        : (result.blocked ? 'Profil bloqué.' : 'Profil débloqué.'));
+    } catch (error) {
+      toast(errorMessages[error.message] || error.message, true);
+    }
+  }
+
+  function profileForUser(userId) {
+    return list(state.directory.profiles).find((profile) =>
+      list(profile.individual_profiles).some((person) => person.linked_user_id === userId)
+    );
+  }
+
+  async function openEvent(eventId) {
+    const event = list(state.directory.events).find((row) => row.id === eventId);
+    if (!event) {
+      toast('Sortie introuvable.', true);
+      return;
+    }
+    content.innerHTML = `<div class="page"><section class="loading-state"><span class="loader"></span><p>Chargement de la sortie…</p></section></div>`;
+    try {
+      const result = await api(`/api/members/event-registrations?eventId=${encodeURIComponent(eventId)}`);
+      const mine = list(result.registrations).find((row) => row.user_id === result.currentUserId);
+      const profiles = [...new Map(list(result.registrations)
+        .filter((row) => row.visible_to_participants)
+        .map((row) => profileForUser(row.user_id))
+        .filter(Boolean)
+        .map((profile) => [profile.id, profile])).values()];
+      content.innerHTML = `<div class="page">
+        ${pageHead('Sortie Velvet', event.title, `${new Date(event.starts_at).toLocaleString('fr-FR')} · ${event.location_public || 'Lieu communiqué aux inscrits'}`, '<button class="secondary" data-route="events">Retour aux sorties</button>')}
+        <section class="grid two">
+          <article class="card section"><p class="eyebrow">Présentation</p><h2>${e(event.title)}</h2><p>${e(event.description || 'La présentation sera prochainement complétée par l’organisateur.')}</p>${chips([event.audience, `${event.capacity} places`].filter(Boolean))}</article>
+          <article class="card section"><p class="eyebrow">Votre participation</p><h2>${mine ? (mine.status === 'waitlisted' ? 'Liste d’attente' : 'Inscription enregistrée') : 'Envie de participer ?'}</h2>
+            ${mine ? `<p>${mine.places} place${mine.places > 1 ? 's' : ''} · statut ${e(mine.status)}</p><button class="secondary" data-cancel-event="${e(event.id)}">Annuler mon inscription</button>` : `<form id="eventRegistrationForm" data-event-id="${e(event.id)}"><label>Nombre de places<select name="places"><option value="1">1 place</option><option value="2">2 places</option></select></label><label class="toggle"><input type="checkbox" name="visible" checked><span>Montrer mon profil aux autres participants</span></label><button class="primary" type="submit">M’inscrire</button></form>`}
+          </article>
+        </section>
+        <section style="margin-top:18px">${profiles.length ? `<div class="page-head"><div><p class="eyebrow">Communauté de la sortie</p><h2>Participants visibles</h2><p>Seuls les membres ayant choisi d’apparaître sont présentés.</p></div></div><div class="grid three">${profiles.map(memberTile).join('')}</div>` : emptyState('Aucun participant visible', 'Les profils apparaîtront ici après leur inscription et avec leur accord.', '◇')}</section>
+      </div>`;
+      bindDynamicForms();
+    } catch (error) {
+      content.innerHTML = `<div class="page">${emptyState('Sortie indisponible', errorMessages[error.message] || error.message, '!')}</div>`;
+    }
+  }
+
   function route(name) {
     if (state.profile?.admission_status !== 'approved') {
       renderAdmission();
@@ -1889,10 +1983,16 @@
     state.profileTab = 'couple';
     if (id !== state.profile.id) {
       try {
-        const result = await api('/api/members/engagement', {
-          method: 'POST',
-          body: JSON.stringify({ action: 'view', profileId: id })
-        });
+        const [result, social] = await Promise.all([
+          api('/api/members/engagement', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'view', profileId: id })
+          }),
+          api(`/api/members/social-actions?profileId=${encodeURIComponent(id)}`).catch(() => ({
+            favorite: false,
+            blocked: false
+          }))
+        ]);
         state.engagement = {
           views: result.views || [],
           reactions: result.reactions || [],
@@ -1900,6 +2000,7 @@
           currentUserId: result.currentUserId,
           currentProfileId: result.currentProfileId
         };
+        state.socialActions[id] = social;
       } catch (error) {
         toast('La consultation n’a pas pu être ajoutée à ta mémoire Velvet.', true);
       }
@@ -1910,6 +2011,56 @@
   }
 
   function bindDynamicForms() {
+    const reportForm = document.querySelector('#profileReportForm');
+    if (reportForm) reportForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const button = reportForm.querySelector('[type=submit]');
+      const data = new FormData(reportForm);
+      button.disabled = true;
+      try {
+        await api('/api/members/social-actions', {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'report',
+            profileId: reportForm.dataset.profileId,
+            category: data.get('category'),
+            description: data.get('description')
+          })
+        });
+        reportForm.reset();
+        toast('Signalement transmis à la modération.');
+      } catch (error) {
+        toast(errorMessages[error.message] || error.message, true);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    const eventRegistrationForm = document.querySelector('#eventRegistrationForm');
+    if (eventRegistrationForm) eventRegistrationForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const data = new FormData(eventRegistrationForm);
+      const button = eventRegistrationForm.querySelector('[type=submit]');
+      button.disabled = true;
+      try {
+        const result = await api('/api/members/event-registrations', {
+          method: 'POST',
+          body: JSON.stringify({
+            eventId: eventRegistrationForm.dataset.eventId,
+            places: Number(data.get('places')),
+            visibleToParticipants: data.has('visible')
+          })
+        });
+        toast(result.registration?.registration_status === 'waitlisted'
+          ? 'La sortie est complète : tu es sur liste d’attente.'
+          : 'Ton inscription est confirmée.');
+        await openEvent(eventRegistrationForm.dataset.eventId);
+      } catch (error) {
+        toast(errorMessages[error.message] || error.message, true);
+        button.disabled = false;
+      }
+    });
+
     const albumForm = document.querySelector('#albumForm');
     if (albumForm) albumForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -2227,6 +2378,42 @@
     }
     if (event.target.closest('[data-couple-invite]')) {
       prepareCoupleInvitation();
+      return;
+    }
+    const messageProfileButton = event.target.closest('[data-message-profile]');
+    if (messageProfileButton) {
+      startConversation(messageProfileButton.dataset.messageProfile);
+      return;
+    }
+    const favoriteProfileButton = event.target.closest('[data-favorite-profile]');
+    if (favoriteProfileButton) {
+      const profileId = favoriteProfileButton.dataset.favoriteProfile;
+      updateSocialAction(profileId, 'favorite', !state.socialActions[profileId]?.favorite);
+      return;
+    }
+    const blockProfileButton = event.target.closest('[data-block-profile]');
+    if (blockProfileButton) {
+      updateSocialAction(
+        blockProfileButton.dataset.blockProfile,
+        'block',
+        blockProfileButton.dataset.enabled === 'true'
+      );
+      return;
+    }
+    const eventButton = event.target.closest('[data-open-event]');
+    if (eventButton) {
+      openEvent(eventButton.dataset.openEvent);
+      return;
+    }
+    const cancelEventButton = event.target.closest('[data-cancel-event]');
+    if (cancelEventButton) {
+      api('/api/members/event-registrations', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'cancel', eventId: cancelEventButton.dataset.cancelEvent })
+      }).then(() => {
+        toast('Ton inscription est annulée.');
+        return openEvent(cancelEventButton.dataset.cancelEvent);
+      }).catch((error) => toast(errorMessages[error.message] || error.message, true));
       return;
     }
     const conversationButton = event.target.closest('[data-open-conversation]');

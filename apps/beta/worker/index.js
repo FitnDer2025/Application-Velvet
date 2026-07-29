@@ -21,6 +21,15 @@ import {
   onRequestGet as messagesGet,
   onRequestPost as messagesPost
 } from '../../../functions/api/members/messages.js';
+import { onRequestPost as conversationsPost } from '../../../functions/api/members/conversations.js';
+import {
+  onRequestGet as socialActionsGet,
+  onRequestPost as socialActionsPost
+} from '../../../functions/api/members/social-actions.js';
+import {
+  onRequestGet as eventRegistrationsGet,
+  onRequestPost as eventRegistrationsPost
+} from '../../../functions/api/members/event-registrations.js';
 import { onRequestPost as albumsPost } from '../../../functions/api/members/albums.js';
 import {
   onRequestDelete as albumMediaDelete,
@@ -92,6 +101,11 @@ const API_ROUTES = new Map([
   ['POST /api/members/organizer-request', organizerRequestPost],
   ['GET /api/members/messages', messagesGet],
   ['POST /api/members/messages', messagesPost],
+  ['POST /api/members/conversations', conversationsPost],
+  ['GET /api/members/social-actions', socialActionsGet],
+  ['POST /api/members/social-actions', socialActionsPost],
+  ['GET /api/members/event-registrations', eventRegistrationsGet],
+  ['POST /api/members/event-registrations', eventRegistrationsPost],
   ['POST /api/members/albums', albumsPost],
   ['POST /api/members/album-media', albumMediaPost],
   ['DELETE /api/members/album-media', albumMediaDelete],
