@@ -19,12 +19,29 @@ export async function onRequestGet({ request, env }) {
     if (admission.response) return admission.response;
     const conversationId = new URL(request.url).searchParams.get('conversationId');
     if (!validUuid(conversationId)) return json({ error: 'invalid_conversation' }, 400);
-    const messages = await restJson(
-      env,
-      `/rest/v1/messages?select=id,conversation_id,sender_user_id,sender_identity,body,created_at,edited_at&conversation_id=eq.${conversationId}&deleted_at=is.null&order=created_at.asc&limit=500`,
-      access.session
-    );
-    return withSession({ messages, currentUserId: access.account.userId }, access.session);
+    const [messages, engagement] = await Promise.all([
+      restJson(
+        env,
+        `/rest/v1/messages?select=id,conversation_id,sender_user_id,sender_identity,body,created_at,edited_at&conversation_id=eq.${conversationId}&deleted_at=is.null&order=created_at.asc&limit=500`,
+        access.session
+      ),
+      restJson(
+        env,
+        `/rest/v1/conversation_engagement?select=conversation_id,current_streak,longest_streak,qualified_days,last_qualified_date,last_message_at,updated_at&conversation_id=eq.${conversationId}&limit=1`,
+        access.session
+      )
+    ]);
+    return withSession({
+      messages,
+      streak: engagement?.[0] || {
+        conversation_id: conversationId,
+        current_streak: 0,
+        longest_streak: 0,
+        qualified_days: 0,
+        last_qualified_date: null
+      },
+      currentUserId: access.account.userId
+    }, access.session);
   } catch (error) {
     return json({ error: error.message || 'messages_read_failed' }, 400);
   }
