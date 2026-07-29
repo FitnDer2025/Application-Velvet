@@ -448,12 +448,14 @@
         body: (d) => checkGrid('p0_partner_permissions', TARGETS, selected('p0_partner_permissions'))
       });
     }
-    steps.push({
-      audience: audience(), kicker: 'Tes envies personnelles',
-      title: 'Qu’aimerais-tu vivre ou explorer pour toi ?',
-      guide: 'Cette réponse appartient à ta fiche personnelle. Elle complète les pratiques communes sans les confondre.',
-      body: (d) => checkGrid('p0_desired_practices', PRACTICES, selected('p0_desired_practices'))
-    });
+    if (couple) {
+      steps.push({
+        audience: audience(), kicker: 'Tes envies personnelles',
+        title: 'Qu’aimerais-tu vivre ou explorer pour toi ?',
+        guide: 'Cette réponse appartient à ta fiche personnelle. Elle complète les pratiques communes sans les confondre.',
+        body: (d) => checkGrid('p0_desired_practices', PRACTICES, selected('p0_desired_practices'))
+      });
+    }
     steps.push({
       audience: audience(), kicker: 'Derrière le profil',
       title: 'Si tu devais te présenter librement…',
