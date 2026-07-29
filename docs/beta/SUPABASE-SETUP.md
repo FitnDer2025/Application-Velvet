@@ -42,6 +42,7 @@ Appliquer dans l’ordre :
 14. `0014_photo_reactions_control_invites_persistence.sql`
 15. `0015_member_actions_conversations_events.sql`
 16. `0016_member_notifications.sql`
+17. `0017_velvet_pro_workspace.sql`
 
 Puis ouvrir le Security Advisor et corriger toute alerte avant de connecter les interfaces.
 
