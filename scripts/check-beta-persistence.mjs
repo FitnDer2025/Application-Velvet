@@ -45,7 +45,7 @@ const requirements = [
   [includes('functions/api/members/engagement.js', 'engagementState'), 'La mémoire de consultation doit être relue après écriture'],
   [includes('functions/api/members/photo-reactions.js', 'result?.[0]', 'set_photo_reaction'), 'Une réaction photo doit retourner son agrégat persistant'],
   [includes('functions/api/members/notifications.js', '/rest/v1/member_notifications', 'read_all', 'notificationFeed'), 'Les notifications doivent être lues et acquittées dans Supabase'],
-  [includes('functions/api/members/map.js', 'location_zone', 'exactMemberCoordinatesExposed: false', 'venue_directory'), 'Maps doit utiliser les zones publiques et les coordonnées publiques des lieux'],
+  [includes('functions/api/members/map.js', 'location_zone', 'exactMemberCoordinatesExposed: false', 'venue_directory', 'geocodeVenueAddress', 'address_public=not.is.null'), 'Maps doit utiliser les zones publiques des membres et les adresses publiques des lieux'],
   [includes('functions/api/members/venue-relationships.js', 'set_my_venue_relationship', 'relationships: await relationships'), 'Favoris, visites et projets de sortie doivent être sauvegardés puis relus'],
   [includes('functions/api/members/directory.js', 'member_venue_catalog', 'venueRelationships', 'subscription_status'), 'L’annuaire doit charger le catalogue riche et son état Pro réel'],
   [!files['functions/api/members/directory.js'].includes("'city',"), 'L’annuaire membre ne doit pas exposer la commune privée'],
