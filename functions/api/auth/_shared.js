@@ -61,6 +61,39 @@ export async function readJson(request) {
   }
 }
 
+export function validateBetaPassword(password) {
+  const value = String(password || '');
+  if (value.length < 12) return { valid: false, error: 'password_too_short' };
+  if (!/[a-z]/.test(value) || !/[A-Z]/.test(value) || !/\d/.test(value) || !/[^A-Za-z0-9]/.test(value)) {
+    return { valid: false, error: 'password_too_weak' };
+  }
+  return { valid: true };
+}
+
+export async function verifyTurnstile(request, env, token, expectedAction) {
+  const secret = String(env.TURNSTILE_SECRET_KEY || '').trim();
+  if (!secret) return { ok: true, configured: false };
+  if (!token) return { ok: false, configured: true, error: 'human_verification_required' };
+
+  const form = new FormData();
+  form.set('secret', secret);
+  form.set('response', String(token));
+  const remoteIp = request.headers.get('cf-connecting-ip');
+  if (remoteIp) form.set('remoteip', remoteIp);
+  const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    body: form
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result.success) {
+    return { ok: false, configured: true, error: 'human_verification_failed' };
+  }
+  if (expectedAction && result.action && result.action !== expectedAction) {
+    return { ok: false, configured: true, error: 'human_verification_failed' };
+  }
+  return { ok: true, configured: true };
+}
+
 export async function refreshSession(request, env) {
   const token = parseCookies(request)[COOKIE_NAME];
   if (!token) return null;
