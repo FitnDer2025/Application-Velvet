@@ -32,6 +32,7 @@
     route: 'home',
     selectedProfileId: null,
     profileTab: 'couple',
+    carouselIndexes: {},
     editing: false,
     installPrompt: null,
     serviceWorker: null
@@ -337,8 +338,18 @@
     const photos = approvedProfilePhotos(profile);
     if (!photos.length) return '';
     const ownProfile = profile.id === state.profile?.id;
-    return `<div class="profile-carousel" aria-label="Photos publiques de ${e(profile.display_name)}">
-      ${photos.map((photo, index) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo publique ${index + 1} de ${e(profile.display_name)}">${photoReactionBar(photo, ownProfile)}</figure>`).join('')}
+    const initialIndex = Math.min(Number(state.carouselIndexes[profile.id]) || 0, photos.length - 1);
+    return `<div class="profile-carousel-shell" data-profile-carousel data-profile-id="${e(profile.id)}" data-carousel-index="${initialIndex}">
+      <div class="profile-carousel" data-carousel-track aria-label="Photos publiques de ${e(profile.display_name)}">
+        ${photos.map((photo, index) => `<figure data-carousel-slide="${index}"><img src="${e(photo.previewUrl)}" alt="Photo publique ${index + 1} de ${e(profile.display_name)}">${photoReactionBar(photo, ownProfile)}</figure>`).join('')}
+      </div>
+      ${photos.length > 1 ? `
+        <button class="carousel-arrow previous" type="button" data-carousel-previous aria-label="Photo précédente">‹</button>
+        <button class="carousel-arrow next" type="button" data-carousel-next aria-label="Photo suivante">›</button>
+        <div class="carousel-status" aria-label="${photos.length} photos">
+          <span><b data-carousel-current>${initialIndex + 1}</b> / ${photos.length}</span>
+          <div>${photos.map((photo, index) => `<button type="button" data-carousel-to="${index}" class="${index === initialIndex ? 'active' : ''}" aria-label="Afficher la photo ${index + 1}" aria-current="${index === initialIndex ? 'true' : 'false'}"></button>`).join('')}</div>
+        </div>` : ''}
     </div>`;
   }
 
@@ -2351,6 +2362,51 @@
   }
 
   function bindDynamicForms() {
+    document.querySelectorAll('[data-profile-carousel]').forEach((shell) => {
+      const track = shell.querySelector('[data-carousel-track]');
+      const slides = [...track.querySelectorAll('[data-carousel-slide]')];
+      if (!slides.length) return;
+      const profileId = shell.dataset.profileId;
+      const sync = (requestedIndex) => {
+        const index = Math.max(0, Math.min(slides.length - 1, requestedIndex));
+        shell.dataset.carouselIndex = String(index);
+        state.carouselIndexes[profileId] = index;
+        shell.querySelector('[data-carousel-current]')?.replaceChildren(document.createTextNode(String(index + 1)));
+        shell.querySelectorAll('[data-carousel-to]').forEach((dot) => {
+          const active = Number(dot.dataset.carouselTo) === index;
+          dot.classList.toggle('active', active);
+          dot.setAttribute('aria-current', active ? 'true' : 'false');
+        });
+      };
+      const move = (index) => {
+        sync(index);
+        track.scrollTo({ left: index * track.clientWidth, behavior: 'smooth' });
+      };
+      const initialIndex = Math.max(0, Math.min(slides.length - 1, Number(shell.dataset.carouselIndex) || 0));
+      track.scrollLeft = initialIndex * track.clientWidth;
+      sync(initialIndex);
+      shell.querySelector('[data-carousel-previous]')?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const current = Number(shell.dataset.carouselIndex) || 0;
+        move((current - 1 + slides.length) % slides.length);
+      });
+      shell.querySelector('[data-carousel-next]')?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const current = Number(shell.dataset.carouselIndex) || 0;
+        move((current + 1) % slides.length);
+      });
+      shell.querySelectorAll('[data-carousel-to]').forEach((dot) => dot.addEventListener('click', (event) => {
+        event.stopPropagation();
+        move(Number(dot.dataset.carouselTo));
+      }));
+      let frame;
+      track.addEventListener('scroll', () => {
+        window.cancelAnimationFrame(frame);
+        frame = window.requestAnimationFrame(() => {
+          if (track.clientWidth) sync(Math.round(track.scrollLeft / track.clientWidth));
+        });
+      }, { passive: true });
+    });
     const venueCatalogSearch = document.querySelector('#venueCatalogSearch');
     if (venueCatalogSearch) {
       venueCatalogSearch.addEventListener('input', () => {
