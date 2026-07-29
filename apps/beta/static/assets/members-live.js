@@ -283,6 +283,73 @@
     return ({ yes: 'Oui', no: 'Non', private: 'Information privée' })[value] || 'Non renseigné';
   }
 
+  function profileVoice(profile) {
+    if (profile?.profile_type === 'couple') {
+      return {
+        profileLabel: 'Profil couple',
+        betaLabel: 'Couple BETA réel',
+        aboutTitle: 'Qui sommes-nous ?',
+        storyTitle: 'Notre histoire',
+        journeyTitle: 'Notre parcours',
+        searchTitle: 'Ce que nous recherchons',
+        practicesEyebrow: 'Nos pratiques',
+        practicesTitle: 'Ce que nous aimons vivre',
+        recommendationsEyebrow: 'Ils parlent de nous',
+        peopleEyebrow: 'Les personnes',
+        locationCopy: 'Seule la zone choisie par le couple est affichée.',
+        descriptionFallback: 'Description à compléter.',
+        storyFallback: 'Histoire à compléter.',
+        journeyFallback: 'Parcours à compléter.',
+        searchFallback: 'Recherche à compléter.'
+      };
+    }
+
+    const gender = String(profilePeople(profile)[0]?.gender_identity || '').trim().toLowerCase();
+    const feminine = gender === 'femme' || gender === 'femme trans';
+    const masculine = gender === 'homme' || gender === 'homme trans';
+    const profileLabel = gender === 'femme'
+      ? 'Profil femme'
+      : gender === 'homme'
+        ? 'Profil homme'
+        : gender === 'femme trans'
+          ? 'Profil femme trans'
+          : gender === 'homme trans'
+            ? 'Profil homme trans'
+            : gender === 'personne non binaire'
+              ? 'Profil non binaire'
+              : 'Profil individuel';
+
+    return {
+      profileLabel,
+      betaLabel: feminine ? 'Membre BETA réelle' : masculine ? 'Membre BETA réel' : 'Profil BETA réel',
+      aboutTitle: 'Qui suis-je ?',
+      storyTitle: 'Mon histoire',
+      journeyTitle: 'Mon parcours',
+      searchTitle: 'Ce que je recherche',
+      practicesEyebrow: 'Mes pratiques',
+      practicesTitle: 'Ce que j’aime vivre',
+      recommendationsEyebrow: feminine
+        ? 'Ils parlent d’elle'
+        : masculine
+          ? 'Ils parlent de lui'
+          : 'Les membres parlent de cette personne',
+      peopleEyebrow: feminine
+        ? 'Sa fiche personnelle · Elle'
+        : masculine
+          ? 'Sa fiche personnelle · Lui'
+          : 'Sa fiche personnelle',
+      locationCopy: feminine
+        ? 'Seule la zone choisie par elle est affichée.'
+        : masculine
+          ? 'Seule la zone choisie par lui est affichée.'
+          : 'Seule la zone choisie par cette personne est affichée.',
+      descriptionFallback: 'Ma présentation reste à compléter.',
+      storyFallback: 'Mon histoire reste à compléter.',
+      journeyFallback: 'Mon parcours reste à compléter.',
+      searchFallback: 'Ma recherche reste à compléter.'
+    };
+  }
+
   function confidentialityLabel(value) {
     return ({
       public: 'Album public',
@@ -1547,11 +1614,25 @@
     return `<section>
       <div class="page-head"><div><p class="eyebrow">Bibliothèque organisée</p><h1>Albums publics & privés</h1><p>Les albums publics sont visibles par tous les membres admis. Les albums privés ne révèlent rien sans une autorisation accordée par leur propriétaire.</p></div></div>
       ${profilePhotos.length || albums.length ? `<div class="album-library">
-        ${profilePhotos.length ? `<article class="card album-detail public system-album">
-          <header><div><p class="eyebrow">Album système public</p><h2>Photos de profil</h2></div><span class="pill gold">${profilePhotos.length} photo${profilePhotos.length > 1 ? 's' : ''}</span></header>
-          <div class="album-gallery">${profilePhotos.map((photo, index) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo de profil ${index + 1} de ${e(profile.display_name)}">${photoReactionBar(photo, own)}</figure>`).join('')}</div>
-          <p class="muted">Cet album est alimenté automatiquement par le carrousel public. Il reste synchronisé sans dupliquer les photos.</p>
-        </article>` : ''}
+        ${profilePhotos.length ? `<details class="album-folder system-album" data-album-folder>
+          <summary class="album-folder-cover">
+            <span class="album-cover-media">
+              <img src="${e(profilePhotos[0].previewUrl)}" alt="Couverture de l’album Photos de profil de ${e(profile.display_name)}">
+              <span class="album-cover-count">${profilePhotos.length} photo${profilePhotos.length > 1 ? 's' : ''}</span>
+            </span>
+            <span class="album-cover-copy">
+              <span class="eyebrow">Album système public</span>
+              <strong>Photos de profil</strong>
+              <small>Alimenté automatiquement par le carrousel</small>
+              <span class="album-open-label"><span class="closed-label">Ouvrir le dossier</span><span class="open-label">Fermer le dossier</span> <b>⌄</b></span>
+            </span>
+          </summary>
+          <article class="card album-detail public">
+            <header><div><p class="eyebrow">Album système public</p><h2>Photos de profil</h2></div><span class="pill gold">${profilePhotos.length} photo${profilePhotos.length > 1 ? 's' : ''}</span></header>
+            <div class="album-gallery">${profilePhotos.map((photo, index) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo de profil ${index + 1} de ${e(profile.display_name)}">${photoReactionBar(photo, own)}</figure>`).join('')}</div>
+            <p class="muted">Cet album est alimenté automatiquement par le carrousel public. Il reste synchronisé sans dupliquer les photos.</p>
+          </article>
+        </details>` : ''}
         ${albums.map((album) => {
         const photos = list(album.media_assets).filter((photo) => photo.previewUrl);
         const pendingPhotos = photos.filter((photo) => photo.moderation_status === 'pending').length;
@@ -1561,32 +1642,49 @@
           (grant) => !grant.revoked_at && (!grant.expires_at || new Date(grant.expires_at) > new Date())
         );
         const grantedProfiles = [...new Set(activeGrants.map((grant) => grant.grantee_profile_id).filter(Boolean))];
-        return `<article class="card album-detail ${isPublic ? 'public' : 'private'}">
-          <header><div><p class="eyebrow">${e(confidentialityLabel(album.confidentiality))}</p><h2>${e(album.name)}</h2></div><span class="pill">${photos.length} photo${photos.length > 1 ? 's' : ''}</span></header>
-          ${canSee
-            ? (photos.length ? `<div class="album-gallery">${photos.map((photo) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo de l’album ${e(album.name)}">${photoReactionBar(photo, own)}</figure>`).join('')}</div>` : '<p class="muted">Aucune photo visible dans cet album.</p>')
-            : '<div class="private-vault"><span>⌑</span><strong>Album privé verrouillé</strong><p>Aucune miniature ni information sur son contenu n’est révélée.</p></div>'}
-          ${own && pendingPhotos ? `<p class="status-box">${pendingPhotos} photo${pendingPhotos > 1 ? 's' : ''} visible${pendingPhotos > 1 ? 's' : ''} seulement par vous, en attente de modération.</p>` : ''}
-          ${own ? `<form class="album-photo-form" data-album-id="${e(album.id)}">
-            <label>Ajouter des photos<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required></label>
-            <button class="secondary" type="submit">Ajouter à l’album</button><small class="photo-upload-status" role="status"></small>
-          </form>` : ''}
-          ${own && !isPublic ? `<div class="album-access-panel">
-            <p><strong>${grantedProfiles.length}</strong> profil${grantedProfiles.length > 1 ? 's' : ''} actuellement autorisé${grantedProfiles.length > 1 ? 's' : ''}.</p>
-            ${grantedProfiles.length ? `<div class="active-album-grants">${grantedProfiles.map((profileId) => {
-              const target = targetProfiles.find((row) => row.id === profileId);
-              const targetGrants = activeGrants.filter((grant) => grant.grantee_profile_id === profileId);
-              const permanent = targetGrants.some((grant) => !grant.expires_at);
-              const latest = targetGrants.map((grant) => grant.expires_at).filter(Boolean).sort().at(-1);
-              return `<span class="selected-venue"><span>${e(target?.display_name || 'Profil autorisé')} · ${permanent ? 'Permanent' : `jusqu’au ${e(new Date(latest).toLocaleString('fr-FR'))}`}</span><button type="button" data-revoke-album="${e(album.id)}" data-revoke-profile="${e(profileId)}" aria-label="Révoquer l’accès">×</button></span>`;
-            }).join('')}</div>` : ''}
-            <form class="album-access-form" data-album-id="${e(album.id)}">
-              <label>Membre bénéficiaire<select name="profileId" required><option value="">Choisir un profil</option>${targetProfiles.map((target) => `<option value="${e(target.id)}">${e(target.display_name)}</option>`).join('')}</select></label>
-              <label>Durée<select name="duration" required><option value="1">1 heure</option><option value="2">2 heures</option><option value="4">4 heures</option><option value="8">8 heures</option><option value="12">12 heures</option><option value="24">24 heures</option><option value="permanent">Permanent</option></select></label>
-              <button class="primary" type="submit">Donner l’accès</button>
-            </form>
-          </div>` : ''}
-        </article>`;
+        const countLabel = `${photos.length} photo${photos.length > 1 ? 's' : ''}`;
+        return `<details class="album-folder ${isPublic ? 'public' : 'private'}" data-album-folder>
+          <summary class="album-folder-cover">
+            <span class="album-cover-media ${canSee && photos.length ? '' : 'locked'}">
+              ${canSee && photos.length
+                ? `<img src="${e(photos[0].previewUrl)}" alt="Couverture de l’album ${e(album.name)}">`
+                : `<span class="album-cover-placeholder">${isPublic ? '⌑' : '◇'}</span>`}
+              <span class="album-cover-count">${canSee ? countLabel : 'Contenu privé'}</span>
+            </span>
+            <span class="album-cover-copy">
+              <span class="eyebrow">${e(confidentialityLabel(album.confidentiality))}</span>
+              <strong>${e(album.name)}</strong>
+              <small>${canSee ? 'Ouvrez le dossier pour parcourir son contenu' : 'Aucun aperçu avant autorisation'}</small>
+              <span class="album-open-label"><span class="closed-label">Ouvrir le dossier</span><span class="open-label">Fermer le dossier</span> <b>⌄</b></span>
+            </span>
+          </summary>
+          <article class="card album-detail ${isPublic ? 'public' : 'private'}">
+            <header><div><p class="eyebrow">${e(confidentialityLabel(album.confidentiality))}</p><h2>${e(album.name)}</h2></div>${canSee ? `<span class="pill">${countLabel}</span>` : ''}</header>
+            ${canSee
+              ? (photos.length ? `<div class="album-gallery">${photos.map((photo) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo de l’album ${e(album.name)}">${photoReactionBar(photo, own)}</figure>`).join('')}</div>` : '<p class="muted">Aucune photo visible dans cet album.</p>')
+              : '<div class="private-vault"><span>⌑</span><strong>Album privé verrouillé</strong><p>Aucune miniature ni information sur son contenu n’est révélée.</p></div>'}
+            ${own && pendingPhotos ? `<p class="status-box">${pendingPhotos} photo${pendingPhotos > 1 ? 's' : ''} visible${pendingPhotos > 1 ? 's' : ''} seulement par vous, en attente de modération.</p>` : ''}
+            ${own ? `<form class="album-photo-form" data-album-id="${e(album.id)}">
+              <label>Ajouter des photos<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required></label>
+              <button class="secondary" type="submit">Ajouter à l’album</button><small class="photo-upload-status" role="status"></small>
+            </form>` : ''}
+            ${own && !isPublic ? `<div class="album-access-panel">
+              <p><strong>${grantedProfiles.length}</strong> profil${grantedProfiles.length > 1 ? 's' : ''} actuellement autorisé${grantedProfiles.length > 1 ? 's' : ''}.</p>
+              ${grantedProfiles.length ? `<div class="active-album-grants">${grantedProfiles.map((profileId) => {
+                const target = targetProfiles.find((row) => row.id === profileId);
+                const targetGrants = activeGrants.filter((grant) => grant.grantee_profile_id === profileId);
+                const permanent = targetGrants.some((grant) => !grant.expires_at);
+                const latest = targetGrants.map((grant) => grant.expires_at).filter(Boolean).sort().at(-1);
+                return `<span class="selected-venue"><span>${e(target?.display_name || 'Profil autorisé')} · ${permanent ? 'Permanent' : `jusqu’au ${e(new Date(latest).toLocaleString('fr-FR'))}`}</span><button type="button" data-revoke-album="${e(album.id)}" data-revoke-profile="${e(profileId)}" aria-label="Révoquer l’accès">×</button></span>`;
+              }).join('')}</div>` : ''}
+              <form class="album-access-form" data-album-id="${e(album.id)}">
+                <label>Membre bénéficiaire<select name="profileId" required><option value="">Choisir un profil</option>${targetProfiles.map((target) => `<option value="${e(target.id)}">${e(target.display_name)}</option>`).join('')}</select></label>
+                <label>Durée<select name="duration" required><option value="1">1 heure</option><option value="2">2 heures</option><option value="4">4 heures</option><option value="8">8 heures</option><option value="12">12 heures</option><option value="24">24 heures</option><option value="permanent">Permanent</option></select></label>
+                <button class="primary" type="submit">Donner l’accès</button>
+              </form>
+            </div>` : ''}
+          </article>
+        </details>`;
       }).join('')}</div>` : emptyState('Aucun album publié', own ? 'Crée un album, donne-lui un nom et choisis s’il est public ou privé.' : 'Ce membre n’a encore publié aucun album.', '⌑')}
       ${own ? `<form id="albumForm" class="card" style="margin-top:16px">
         <h2>Créer un album</h2>
@@ -1600,24 +1698,25 @@
 
   function profileOverview(profile, own) {
     const people = profilePeople(profile);
+    const voice = profileVoice(profile);
     return `<section class="profile-layout">
       <div>
-        <article class="card section"><p class="eyebrow">En quelques mots</p><h2>Qui sommes-nous ?</h2><p class="quote">${e(profile.description || 'Description à compléter.')}</p>${chips(profile.values_list, 'Valeurs à compléter')}</article>
-        <article class="card section"><p class="eyebrow">Le récit</p><h2>Notre histoire</h2><p>${e(profile.story || 'Histoire à compléter.')}</p></article>
-        <article class="card section"><p class="eyebrow">Le chemin parcouru</p><h2>Notre parcours</h2><p>${e(profile.journey || 'Parcours à compléter.')}</p></article>
-        <article class="card section"><p class="eyebrow">Les rencontres souhaitées</p><h2>Ce que nous recherchons</h2><p>${e(profile.search_text || 'Recherche à compléter.')}</p></article>
-        <article class="card section"><p class="eyebrow">Nos pratiques</p><h2>Ce que nous aimons vivre</h2>${chips(profile.practices, 'Pratiques à compléter')}</article>
-        <article class="card section"><p class="eyebrow">Ils parlent de nous</p><h2>Recommandations</h2>${recommendationsFor(profile)}</article>
+        <article class="card section"><p class="eyebrow">En quelques mots</p><h2>${voice.aboutTitle}</h2><p class="quote">${e(profile.description || voice.descriptionFallback)}</p>${chips(profile.values_list, 'Valeurs à compléter')}</article>
+        <article class="card section"><p class="eyebrow">Le récit</p><h2>${voice.storyTitle}</h2><p>${e(profile.story || voice.storyFallback)}</p></article>
+        <article class="card section"><p class="eyebrow">Le chemin parcouru</p><h2>${voice.journeyTitle}</h2><p>${e(profile.journey || voice.journeyFallback)}</p></article>
+        <article class="card section"><p class="eyebrow">Les rencontres souhaitées</p><h2>${voice.searchTitle}</h2><p>${e(profile.search_text || voice.searchFallback)}</p></article>
+        <article class="card section"><p class="eyebrow">${voice.practicesEyebrow}</p><h2>${voice.practicesTitle}</h2>${chips(profile.practices, 'Pratiques à compléter')}</article>
+        <article class="card section"><p class="eyebrow">${voice.recommendationsEyebrow}</p><h2>Recommandations</h2>${recommendationsFor(profile)}</article>
         ${own ? `<article class="card section"><p class="eyebrow">Carrousel public</p><h2>Ajouter des photos de profil</h2><p>Ces photos complètent le carrousel principal après validation.</p><form class="profile-photo-form" data-photo-role="${profile.profile_type === 'couple' ? 'couple_gallery' : 'individual_gallery'}"><label>Choisir des photos<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required></label><button class="secondary" type="submit">Ajouter au carrousel</button><small class="photo-upload-status" role="status"></small></form></article>` : ''}
       </div>
       <aside>
         <article class="card">
-          <p class="eyebrow">Les personnes</p>
+          <p class="eyebrow">${voice.peopleEyebrow}</p>
           ${people.map((person, index) => `<button class="card person-card profile-card-button" style="margin-top:10px" data-profile-tab="person${index}">
             <span class="avatar">${e(initials(person.first_name))}</span><span><strong>${e(person.first_name || 'Fiche personnelle')}</strong><p>${e(person.biography || 'Découvrir cette personne')}</p></span><span>→</span>
           </button>`).join('')}
         </article>
-        <article class="card" style="margin-top:14px"><p class="eyebrow">Localisation publique</p><h3>${e(profile.location_zone || 'Privée')}</h3><p>Seule la zone choisie par le membre est affichée.</p></article>
+        <article class="card" style="margin-top:14px"><p class="eyebrow">Localisation publique</p><h3>${e(profile.location_zone || 'Privée')}</h3><p>${voice.locationCopy}</p></article>
         <article class="card" style="margin-top:14px"><p class="eyebrow">Lieux préférés</p>${chips(profile.favorite_places, 'Aucun lieu renseigné')}</article>
         <article class="card" style="margin-top:14px"><p class="eyebrow">Disponibilités</p><p>${e(profile.availability_text || 'Non renseignées')}</p></article>
         ${own ? partnerInviteBox(profile, people) : ''}
@@ -1644,6 +1743,7 @@
   function renderProfile(profile, own = false) {
     if (!profile) return `<div class="page">${emptyState('Profil introuvable', 'Ce profil n’est plus visible dans la BETA.', '♡')}</div>`;
     const people = profilePeople(profile);
+    const voice = profileVoice(profile);
     if (state.profileTab.startsWith('person') && !people[Number(state.profileTab.replace('person', ''))]) state.profileTab = 'couple';
     const activeContent = state.profileTab === 'albums'
       ? albumsView(profile, own)
@@ -1652,9 +1752,9 @@
         : profileOverview(profile, own);
     return `<div class="page">
       <section class="hero">${profileCarousel(profile)}<div class="hero-copy">
-        <p class="eyebrow">${e(profile.profile_type === 'couple' ? 'Profil couple' : 'Profil individuel')} · ${e(profile.location_zone || 'Localisation privée')}</p>
+        <p class="eyebrow">${e(voice.profileLabel)} · ${e(profile.location_zone || 'Localisation privée')}</p>
         <h1>${e(profile.display_name)}</h1><p class="lead">${e(profile.description)}</p>
-        <div class="badges"><span class="pill gold">Membre BETA réel</span>${profile.relationship_since ? `<span class="pill">Depuis ${e(profile.relationship_since)}</span>` : ''}<span class="pill">${e(profile.location_zone || 'Zone privée')}</span></div>
+        <div class="badges"><span class="pill gold">${e(voice.betaLabel)}</span>${profile.profile_type === 'couple' && profile.relationship_since ? `<span class="pill">Depuis ${e(profile.relationship_since)}</span>` : ''}<span class="pill">${e(profile.location_zone || 'Zone privée')}</span></div>
         <div class="actions">${own ? '<button class="primary" data-edit-profile>Modifier mon profil</button>' : ''}${!own ? `<button class="primary" data-message-profile="${e(profile.id)}">Écrire</button><button class="secondary" data-favorite-profile="${e(profile.id)}">${state.socialActions[profile.id]?.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}</button>` : ''}</div>
       </div></section>
       ${profileEngagementPanel(profile, own)}

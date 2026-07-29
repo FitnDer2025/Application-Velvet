@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 const paths = [
   'apps/beta/static/assets/members-onboarding-v2.js',
   'apps/beta/static/assets/members-live.js',
+  'apps/beta/static/assets/members-live.css',
   'apps/beta/static/assets/pro-live.js',
   'apps/beta/static/assets/control-live.js',
   'apps/beta/worker/index.js',
@@ -62,7 +63,7 @@ const journeys = [
       && has('functions/api/members/photos.js', 'onRequestPatch', 'photo_ai_retry_failed', '/storage/v1/object/authenticated/')
       && has('functions/api/members/media.js', '/storage/v1/', "replace(/^\\/+/, '')", 'expiresIn: 600')
       && has('apps/beta/static/assets/members-live.js', '/api/members/photos', 'photo-upload-status')
-      && has('apps/beta/static/assets/members-live.js', 'Album système public', 'Photos de profil', 'profilePhotos.length || albums.length')
+      && has('apps/beta/static/assets/members-live.js', 'Album système public', 'Photos de profil', 'profilePhotos.length || albums.length', 'data-album-folder', 'Ouvrir le dossier')
       && has('apps/beta/static/assets/members-onboarding-v2.js', "profile.profile_type === 'individual' && galleryCount < 3", 'data-add-gallery')
       && has('functions/api/control/workspace.js', 'decide_profile_photo', 'control_decide_profile_photo')
       && has('apps/beta/static/assets/control-live.js', 'data-photo-decision', 'Photos de profil à contrôler')
@@ -72,6 +73,13 @@ const journeys = [
     valid: has('functions/api/members/albums.js', 'album_persistence_failed')
       && has('functions/api/members/album-media.js', 'photo_persistence_failed')
       && has('functions/api/members/album-access.js', 'grant_private_album_to_profile', 'revoke_private_album_from_profile')
+      && has('apps/beta/static/assets/members-live.js', 'album-folder-cover', 'Contenu privé', 'Aucun aperçu avant autorisation')
+      && has('apps/beta/static/assets/members-live.css', '.album-folder[open]', '.album-cover-media', '.album-open-label')
+  },
+  {
+    name: 'Présentation singulier et genre',
+    valid: has('apps/beta/static/assets/members-live.js', 'function profileVoice', 'Qui suis-je ?', 'Mon histoire', 'Ce que je recherche')
+      && has('apps/beta/static/assets/members-live.js', 'Profil femme', 'Profil homme', 'Profil non binaire', 'Membre BETA réelle')
   },
   {
     name: 'Réactions aux photos',
