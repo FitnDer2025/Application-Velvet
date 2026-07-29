@@ -11,6 +11,11 @@
   tab.textContent = 'Opérations réelles';
   tab.addEventListener('click', () => showOperations(tab));
   document.querySelector('.tabs')?.prepend(tab);
+  document.querySelectorAll('.tab:not([data-view="invitations"]):not([data-view="operations"])').forEach((item) => {
+    item.hidden = true;
+    item.setAttribute('aria-hidden', 'true');
+  });
+  document.querySelector('.release')?.replaceChildren(document.createTextNode('BETA · Données réelles'));
 
   function optionAccounts() {
     return (data.accounts || []).filter((account) => account.status === 'active').map((account) =>
@@ -22,8 +27,15 @@
     const pendingOrganizers = (data.organizers || []).filter((item) => item.status === 'pending');
     const openReports = (data.reports || []).filter((item) => ['open', 'assigned'].includes(item.status));
     const publishedEvents = (data.events || []).filter((item) => item.visibility === 'published');
+    const releaseChecks = data.releaseChecks || [];
+    const failedChecks = releaseChecks.filter((item) => item.status === 'failed');
+    const warningChecks = releaseChecks.filter((item) => item.status === 'warning');
+    const releaseLabel = failedChecks.length ? 'Bloquée' : warningChecks.length ? 'À surveiller' : 'Prête';
+    const releaseState = failedChecks.length ? 'danger' : warningChecks.length ? 'warn' : 'ok';
     root.innerHTML = `<div class="head"><div><div class="ey">Supabase · source de vérité</div><h1>Opérations Velvet</h1><p class="lead">Établissements, soirées, inscriptions et demandes organisateur réellement enregistrés.</p></div><button class="btn secondary" id="controlRefresh">Actualiser</button></div>
       <div class="kpis"><div class="kpi"><small>Comptes actifs</small><b>${data.accounts.filter((item) => item.status === 'active').length}</b></div><div class="kpi"><small>Profils membres</small><b>${data.profiles.length}</b></div><div class="kpi"><small>Établissements</small><b>${data.establishments.length}</b></div><div class="kpi"><small>Soirées publiées</small><b>${publishedEvents.length}</b></div><div class="kpi"><small>Inscriptions</small><b>${data.registrations.length}</b></div><div class="kpi"><small>Signalements ouverts</small><b>${openReports.length}</b></div></div>
+      <div class="section-head"><div><h2>Préparation BETA</h2><p>Contrôles calculés directement sur la mémoire Velvet. Une anomalie rouge doit être corrigée avant la recette.</p></div><span class="state ${releaseState}">${releaseLabel}</span></div>
+      <section class="card">${releaseChecks.length ? releaseChecks.map((item) => `<div class="audit-row"><time><span class="state ${item.status === 'failed' ? 'danger' : item.status === 'warning' ? 'warn' : 'ok'}">${item.status === 'failed' ? 'À corriger' : item.status === 'warning' ? 'Attention' : 'Conforme'}</span></time><p><b>${safe(releaseCheckLabel(item.check_code))}</b><small>${safe(item.detail)}</small></p><strong>${safe(item.affected_count)}</strong></div>`).join('') : '<div class="invite-empty">Aucun contrôle de publication disponible. Appliquez la dernière migration Supabase.</div>'}</section>
       <div class="grid g2">
         <section class="card"><div class="ey">Velvet Pro</div><h2>Créer un établissement</h2><form id="controlVenueForm" class="invite-form">
           <label>Nom<input name="name" required minlength="2"></label><label>Identifiant public<input name="slug" required pattern="[a-z0-9-]+"></label>
@@ -76,7 +88,19 @@
   window.showOperations = (button = tab) => {
     document.querySelectorAll('.tab').forEach((item) => item.classList.toggle('active', item === button));
     document.querySelectorAll('.view').forEach((view) => view.classList.toggle('active', view === root));
-    suiteView.style.display = 'none';
+    const suite = document.querySelector('#suiteView');
+    if (suite) suite.style.display = 'none';
     load();
   };
+  const releaseCheckLabel = (code) => ({
+    active_accounts_without_role: 'Comptes actifs sans rôle',
+    profiles_pending_admission: 'Profils en attente d’admission',
+    incomplete_couple_profiles: 'Couples encore incomplets',
+    published_venues_incomplete: 'Établissements publiés incomplets',
+    events_over_capacity: 'Soirées au-delà de leur capacité',
+    overdue_data_requests: 'Demandes RGPD hors délai',
+    open_reports: 'Signalements ouverts',
+    pending_organizers: 'Demandes Organisateur en attente'
+  }[code] || code);
+  showOperations(tab);
 })();

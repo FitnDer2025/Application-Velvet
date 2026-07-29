@@ -18,10 +18,11 @@ const memberActions = await readFile('infra/supabase/migrations/0015_member_acti
 const memberNotifications = await readFile('infra/supabase/migrations/0016_member_notifications.sql', 'utf8');
 const proWorkspace = await readFile('infra/supabase/migrations/0017_velvet_pro_workspace.sql', 'utf8');
 const controlOperations = await readFile('infra/supabase/migrations/0018_velvet_control_operations.sql', 'utf8');
+const releaseReadiness = await readFile('infra/supabase/migrations/0019_beta_release_readiness.sql', 'utf8');
 
-const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}`;
+const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}`;
 const tables = [...migrationBundle.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}`;
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -105,6 +106,9 @@ const requirements = [
   [controlOperations.includes('control_create_establishment') && controlOperations.includes('establishment_created'), 'Control doit créer et auditer les établissements'],
   [controlOperations.includes('control_decide_organizer') && controlOperations.includes("target_decision='approved'"), 'Control doit traiter réellement les demandes Organisateur'],
   [controlOperations.includes('control_accounts') && controlOperations.includes('is_control_user'), 'L’annuaire des comptes doit rester réservé à Control'],
+  [releaseReadiness.includes('control_beta_release_checks') && releaseReadiness.includes('is_control_user'), 'Les contrôles de publication doivent rester réservés à Control'],
+  [releaseReadiness.includes('overdue_data_requests') && releaseReadiness.includes('events_over_capacity'), 'La recette doit couvrir RGPD et cohérence des capacités'],
+  [releaseReadiness.includes('incomplete_couple_profiles') && releaseReadiness.includes('published_venues_incomplete'), 'La recette doit détecter les profils et établissements incomplets'],
   [!migrationBundle.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 

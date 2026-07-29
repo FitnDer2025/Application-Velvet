@@ -14,7 +14,7 @@ async function controlAccess(request, env) {
 }
 
 async function workspace(env, access) {
-  const [accounts, profiles, establishments, staff, events, registrations, organizers, reports, audits] = await Promise.all([
+  const [accounts, profiles, establishments, staff, events, registrations, organizers, reports, audits, releaseChecks] = await Promise.all([
     restJson(env, '/rest/v1/rpc/control_accounts', access.session, { method: 'POST', body: '{}' }),
     restJson(env, '/rest/v1/member_profiles?select=id,profile_type,display_name,admission_status,verification_status,visibility,created_at&order=created_at.desc&limit=500', access.session),
     restJson(env, '/rest/v1/establishments?select=id,slug,name,kind,city,visibility,verified_at,created_at,updated_at&order=created_at.desc&limit=500', access.session),
@@ -23,9 +23,10 @@ async function workspace(env, access) {
     restJson(env, '/rest/v1/event_registrations?select=id,event_id,user_id,places,status,created_at&order=created_at.desc&limit=2000', access.session),
     restJson(env, '/rest/v1/organizer_requests?select=id,user_id,member_profile_id,message,status,reviewed_by,reviewed_at,created_at&order=created_at.desc&limit=500', access.session),
     restJson(env, '/rest/v1/reports?select=id,reporter_user_id,subject_type,subject_id,category,status,created_at&order=created_at.desc&limit=500', access.session),
-    restJson(env, '/rest/v1/audit_events?select=sequence_number,actor_user_id,action,entity_type,entity_id,occurred_at&order=sequence_number.desc&limit=100', access.session)
+    restJson(env, '/rest/v1/audit_events?select=sequence_number,actor_user_id,action,entity_type,entity_id,occurred_at&order=sequence_number.desc&limit=100', access.session),
+    restJson(env, '/rest/v1/rpc/control_beta_release_checks', access.session, { method: 'POST', body: '{}' })
   ]);
-  return { accounts, profiles, establishments, staff, events, registrations, organizers, reports, audits };
+  return { accounts, profiles, establishments, staff, events, registrations, organizers, reports, audits, releaseChecks };
 }
 
 export async function onRequestGet({ request, env }) {

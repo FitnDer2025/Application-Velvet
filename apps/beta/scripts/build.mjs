@@ -58,6 +58,15 @@ await emit(resolve(output, 'membres/index.html'), addLegalBar(await required(sou
 
 let pro = await required(sources.pro);
 pro = pro
+  .replace(/const BASE_VENUES=\[[\s\S]*?\];\s*const MEMBERS=/, 'const BASE_VENUES=[];\nconst MEMBERS=')
+  .replace(/const MEMBERS=\[[\s\S]*?\];\s*const BASE_EVENTS=/, 'const MEMBERS=[];\nconst BASE_EVENTS=')
+  .replace(/const BASE_EVENTS=\[[\s\S]*?\];\s*const BASE_BOOKINGS=/, 'const BASE_EVENTS=[];\nconst BASE_BOOKINGS=')
+  .replace(/const BASE_BOOKINGS=\[[\s\S]*?\];\s*const THREADS=/, 'const BASE_BOOKINGS=[];\nconst THREADS=')
+  .replace(/const THREADS=\[[\s\S]*?\];\s*let S=/, 'const THREADS=[];\nlet S=')
+  .replace(/function dashboard\(\)\{[\s\S]*?\n\}\nfunction eventCards/, 'function dashboard(){return `<div class="card">Connexion aux données Velvet Pro…</div>`}\nfunction eventCards')
+  .replace(/function teamPage\(\)\{[\s\S]*?\n\}\nfunction openTeamInvite/, 'function teamPage(){return `<div class="card">La gestion d’équipe sera activée après raccordement serveur.</div>`}\nfunction openTeamInvite')
+  .replace(/<div class="sidebar-foot">[\s\S]*?<\/div><\/div>\s*<\/aside>/, '<div class="sidebar-foot"><div class="account"><div><b>Compte Velvet Pro</b><small>Session sécurisée</small></div></div></div></aside>')
+  .replace(/\nrender\(\);\n<\/script>/, '\nif(!document.body.classList.contains("pro-live-pending"))render();\n</script>')
   .replace('<body>', '<body class="pro-live-pending"><style>.pro-live-pending .shell,.pro-live-pending .mobile-nav{visibility:hidden}.pro-live-pending:after{content:"VELVET PRO · Connexion au CRM…";position:fixed;inset:0;display:grid;place-items:center;background:#09090b;color:#d5b477;font:500 16px Georgia;letter-spacing:.14em}</style>')
   .replace('</body>', '<script src="/assets/pro-live.js"></script></body>');
 await emit(resolve(output, 'pro/index.html'), addLegalBar(pro));
