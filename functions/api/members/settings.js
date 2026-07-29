@@ -32,39 +32,29 @@ function safeTime(value) {
 async function ownProfile(env, session, userId) {
   const rows = await restJson(
     env,
-    `/rest/v1/member_profiles?select=id,verification_status&profile_members!inner(user_id,status)&profile_members.user_id=eq.${encodeURIComponent(userId)}&profile_members.status=eq.active&limit=1`,
+    `/rest/v1/member_profiles?select=id,profile_members!inner(user_id,status)&profile_members.user_id=eq.${encodeURIComponent(userId)}&profile_members.status=eq.active&limit=1`,
     session
   );
   return rows?.[0] || null;
 }
 
-async function readSettings(env, session, userId, profile) {
-  const [privacyRows, notificationRows, locationRows, verificationRows] = await Promise.all([
+async function readSettings(env, session, userId, profileId) {
+  const [privacyRows, notificationRows] = await Promise.all([
     restJson(
       env,
-      `/rest/v1/profile_privacy_settings?select=profile_id,discoverable_by,contactable_by,updated_at&profile_id=eq.${encodeURIComponent(profile.id)}&limit=1`,
+      `/rest/v1/profile_privacy_settings?select=profile_id,discoverable_by,contactable_by,updated_at&profile_id=eq.${encodeURIComponent(profileId)}&limit=1`,
       session
     ),
     restJson(
       env,
       `/rest/v1/member_notification_settings?select=user_id,notify_from,event_types,in_app_enabled,browser_enabled,email_enabled,quiet_hours_start,quiet_hours_end,updated_at&user_id=eq.${encodeURIComponent(userId)}&limit=1`,
       session
-    ),
-    restJson(
-      env,
-      `/rest/v1/member_location_settings?select=user_id,enabled,precision_km,consented_at,last_used_at,updated_at&user_id=eq.${encodeURIComponent(userId)}&limit=1`,
-      session
-    ),
-    restJson(
-      env,
-      `/rest/v1/account_identity_age_verifications?select=user_id,provider,status,identity_verified,majority_verified,verified_at,expires_at,last_checked_at,updated_at&user_id=eq.${encodeURIComponent(userId)}&limit=1`,
-      session
     )
   ]);
 
   return {
     privacy: privacyRows?.[0] || {
-      profile_id: profile.id,
+      profile_id: profileId,
       discoverable_by: [...AUDIENCES],
       contactable_by: [...AUDIENCES]
     },
@@ -77,31 +67,7 @@ async function readSettings(env, session, userId, profile) {
       email_enabled: true,
       quiet_hours_start: null,
       quiet_hours_end: null
-    },
-    location: locationRows?.[0] || {
-      user_id: userId,
-      enabled: false,
-      precision_km: 10,
-      consented_at: null,
-      last_used_at: null,
-      updated_at: null
-    },
-    verification: verificationRows?.[0] || {
-      user_id: userId,
-      provider: null,
-      status: 'not_started',
-      identity_verified: false,
-      majority_verified: false,
-      verified_at: null,
-      expires_at: null,
-      last_checked_at: null,
-      updated_at: null
-    },
-    profileVerificationStatus: profile.verification_status || 'not_started',
-    verificationProviderConfigured: Boolean(env.IDENTITY_AGE_VERIFICATION_START_URL),
-    exactLocationStored: false,
-    identityDocumentsStoredByVelvet: false,
-    verificationBlocksAccess: false
+    }
   };
 }
 
@@ -112,7 +78,7 @@ export async function onRequestGet({ request, env }) {
     const profile = await ownProfile(env, access.session, access.account.userId);
     if (!profile) return withSession({ error: 'profile_required' }, access.session, 409);
     return withSession(
-      await readSettings(env, access.session, access.account.userId, profile),
+      await readSettings(env, access.session, access.account.userId, profile.id),
       access.session
     );
   } catch (error) {
@@ -170,7 +136,7 @@ export async function onRequestPost({ request, env }) {
 
     return withSession({
       ok: true,
-      ...(await readSettings(env, access.session, access.account.userId, profile))
+      ...(await readSettings(env, access.session, access.account.userId, profile.id))
     }, access.session);
   } catch (error) {
     return json({ error: error.message || 'settings_write_failed' }, 400);
