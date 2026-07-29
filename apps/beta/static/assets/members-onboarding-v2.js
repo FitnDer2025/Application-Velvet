@@ -745,9 +745,10 @@
       <h1>${escapeHtml(title)}</h1>
       <div class="ov-photo-progress"><strong>${current.length}</strong><span>sur ${minimum} minimum</span></div>
       <form id="ovPhotoForm" class="ov-photo-form">
-        <label class="ov-drop">Choisir ${minimum > 1 ? 'des photos' : 'une photo'}<input type="file" name="photos" accept="image/jpeg,image/png,image/webp"${minimum > 1 ? ' multiple' : ''} required></label>
-        <button class="primary" type="submit">Ajouter et faire vérifier</button>
-        <p data-status></p>
+        <label class="ov-drop"><span data-file-label>Choisir ${minimum > 1 ? 'des photos' : 'une photo'}</span><input type="file" name="photos" accept="image/jpeg,image/png,image/webp"${minimum > 1 ? ' multiple' : ''} required></label>
+        <button class="primary" type="submit" data-upload disabled>Ajouter et faire vérifier</button>
+        <div data-selection hidden aria-live="polite" style="grid-column:1/-1;margin-top:12px"></div>
+        <p data-status role="status"></p>
       </form>
       <div class="ov-photo-list">${current.map((photo) => `<span class="${escapeHtml(photo.moderation_status)}">${photo.moderation_status === 'approved' ? 'Validée' : photo.moderation_status === 'rejected' ? 'À remplacer' : 'Analyse en cours'}</span>`).join('')}</div>
       <div class="ov-actions standalone">
@@ -755,13 +756,41 @@
       </div>
     </section></div>`;
     const form = content.querySelector('#ovPhotoForm');
+    const fileInput = form.elements.photos;
+    const fileLabel = form.querySelector('[data-file-label]');
+    const selection = form.querySelector('[data-selection]');
+    const uploadButton = form.querySelector('[data-upload]');
+    fileInput.addEventListener('change', () => {
+      const files = [...fileInput.files];
+      uploadButton.disabled = files.length === 0;
+      fileLabel.textContent = files.length
+        ? `${files.length} photo${files.length > 1 ? 's' : ''} sélectionnée${files.length > 1 ? 's' : ''}`
+        : `Choisir ${minimum > 1 ? 'des photos' : 'une photo'}`;
+      selection.hidden = files.length === 0;
+      selection.innerHTML = files.length ? `
+        <strong>${files.length} fichier${files.length > 1 ? 's' : ''} prêt${files.length > 1 ? 's' : ''} à être envoyé${files.length > 1 ? 's' : ''}</strong>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,120px));gap:10px;margin-top:10px">
+          ${files.map((file) => {
+            const previewUrl = URL.createObjectURL(file);
+            return `<figure style="margin:0"><img data-local-preview src="${escapeHtml(previewUrl)}" alt="Aperçu de ${escapeHtml(file.name)}" style="display:block;width:100%;height:110px;object-fit:cover;border-radius:14px"><figcaption style="margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px">${escapeHtml(file.name)}</figcaption></figure>`;
+          }).join('')}
+        </div>
+        <small style="display:block;margin-top:9px">Clique maintenant sur « Ajouter et faire vérifier » pour lancer l’enregistrement et l’analyse.</small>` : '';
+      selection.querySelectorAll('[data-local-preview]').forEach((image) => {
+        image.addEventListener('load', () => URL.revokeObjectURL(image.src), { once: true });
+      });
+      uploadButton.textContent = files.length
+        ? `Ajouter et vérifier ${files.length} photo${files.length > 1 ? 's' : ''}`
+        : 'Ajouter et faire vérifier';
+    });
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const button = form.querySelector('button');
+      const button = uploadButton;
       const status = form.querySelector('[data-status]');
       button.disabled = true;
       try {
-        const files = [...form.elements.photos.files];
+        const files = [...fileInput.files];
+        if (!files.length) throw new Error('invalid_photo_file');
         await uploadPhotos(files, role, individualProfileId, status);
         showPhotoStage({ role, minimum, title, guide, individualProfileId });
       } catch (error) {
