@@ -46,6 +46,9 @@ Appliquer dans l’ordre :
 18. `0018_velvet_control_operations.sql`
 19. `0019_beta_release_readiness.sql`
 20. `0020_velvet_venue_catalog.sql`
+21. `0021_profile_photo_human_moderation.sql`
+22. `0022_control_audit_actor.sql`
+23. `0023_member_discovery_preferences.sql`
 
 Puis ouvrir le Security Advisor et corriger toute alerte avant de connecter les interfaces.
 

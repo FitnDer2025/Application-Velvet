@@ -12,10 +12,13 @@ Velvet combine un flux de recommandations personnalisées, une recherche manuell
 
 Amendement fonctionnel du 29 juillet 2026 :
 
-- l'accueil présente explicitement les autres membres ;
-- les établissements de l'accueil se filtrent par nature et par rayon de 5, 10, 15 ou 20 km autour d'une localisation approximative consentie ;
-- la recherche de profils distingue les couples, les hommes et les femmes ;
-- les pratiques sont choisies dans une liste contrôlée plutôt que saisies librement.
+- l'accueil ne conserve que trois indicateurs actionnables : profils créés depuis minuit, événements situés à moins de 50 km et lieux référencés ;
+- le mur d'accueil contient uniquement les nouveaux profils, leurs nouvelles photos publiques et les événements proches compatibles avec la zone et les préférences du membre ;
+- la recherche de profils combine sans limite couples, hommes, femmes, profils qui recherchent ces catégories, ville ou proximité, âges séparés homme/femme, pratiques, morphologies, présence, photos et recommandations ;
+- toutes les valeurs contrôlées, notamment les pratiques, sont multisélectionnables ;
+- une recherche peut être nommée, sauvegardée, rappelée et supprimée par son propriétaire ;
+- les vignettes affichent le type de profil, les âges, la zone publique, le badge « Déjà vu » et seulement une présence approximative : en ligne, connecté aujourd'hui ou absent aujourd'hui ;
+- aucun horodatage exact de dernière connexion ni aucune commune privée n'est exposé.
 
 ## ADR-025 — Recommandations explicables
 
@@ -91,3 +94,5 @@ La géolocalisation de présence n'est jamais un suivi continu.
 - Le moteur de découverte doit rester explicable, respectueux de la vie privée et orienté vers la réciprocité.
 - Les expériences, événements, souvenirs et cercles de confiance alimentent un cycle cohérent sans générer de classement social.
 - Les paramètres de personnalisation, visibilité et localisation doivent être accessibles aux utilisateurs.
+- Les recherches sauvegardées sont privées par défaut et protégées par RLS.
+- Le thème clair reprend la palette Velvet validée — ivoire, beige chaud, pastel rosé, or champagne et bordeaux — sans modifier les règles de confidentialité.

@@ -1,4 +1,31 @@
 (() => {
+  const THEME_STORAGE_KEY = 'velvet-member-theme-v1';
+  const SAVED_SEARCH_STORAGE_KEY = 'velvet-saved-searches-v1';
+
+  function preferredTheme() {
+    try {
+      return localStorage.getItem(THEME_STORAGE_KEY) === 'light' ? 'light' : 'dark';
+    } catch {
+      return 'dark';
+    }
+  }
+
+  function applyTheme(theme) {
+    const value = theme === 'light' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = value;
+    document.documentElement.style.colorScheme = value;
+    return value;
+  }
+
+  function storeTheme(theme) {
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch {
+      // Le thème reste appliqué pour la session si le stockage local est bloqué.
+    }
+  }
+
+  applyTheme(preferredTheme());
   document.body.classList.add('admission-locked');
   const state = {
     account: null,
@@ -30,6 +57,30 @@
     unreadCount: 0,
     mapData: null,
     locationData: null,
+    presence: {},
+    presenceAvailable: false,
+    savedSearches: [],
+    savedSearchPersistenceAvailable: false,
+    selectedSavedSearchId: '',
+    discoverFilters: {
+      query: '',
+      types: [],
+      seeking: [],
+      city: '',
+      nearMe: false,
+      maleAgeMin: 18,
+      maleAgeMax: 99,
+      femaleAgeMin: 18,
+      femaleAgeMax: 99,
+      practices: [],
+      morphologies: [],
+      onlineOnly: false,
+      withPhotos: false,
+      withRecommendation: false,
+      createdToday: false
+    },
+    eventNearbyOnly: false,
+    theme: preferredTheme(),
     homeVenueKind: '',
     homeVenueRadius: '20',
     mapZoom: 10,
@@ -87,7 +138,9 @@
     profile_contact_blocked: 'Cette conversation ne peut pas être ouverte.',
     report_category_required: 'Choisis la raison du signalement.',
     event_registration_closed: 'Les inscriptions à cette sortie sont closes.',
-    event_unavailable: 'Cette sortie n’est plus disponible.'
+    event_unavailable: 'Cette sortie n’est plus disponible.',
+    saved_search_name_required: 'Donne un nom à cette recherche.',
+    saved_search_write_failed: 'La recherche n’a pas pu être enregistrée dans Velvet.'
   };
 
   const REFERENCES = {
@@ -541,8 +594,37 @@
 
   function pageHead(kicker, title, text, action = '') {
     return `<header class="page-head"><div>
-      <p class="eyebrow">${e(kicker)}</p><h1>${e(title)}</h1><p>${e(text)}</p>
+      <p class="eyebrow">${e(kicker)}</p><h1>${e(title)}</h1>${text ? `<p>${e(text)}</p>` : ''}
     </div>${action}</header>`;
+  }
+
+  function localSavedSearches() {
+    try {
+      const rows = JSON.parse(localStorage.getItem(SAVED_SEARCH_STORAGE_KEY) || '[]');
+      return Array.isArray(rows) ? rows : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveLocalSearches(rows) {
+    try {
+      localStorage.setItem(SAVED_SEARCH_STORAGE_KEY, JSON.stringify(list(rows).slice(0, 50)));
+    } catch {
+      // Le filtre reste actif même si le navigateur refuse le stockage local.
+    }
+  }
+
+  function applyDiscoveryState(result = {}) {
+    state.presence = Object.fromEntries(list(result.presence).map((row) => [
+      row.profile_id,
+      row.presence_status
+    ]));
+    state.presenceAvailable = result.presenceAvailable === true;
+    state.savedSearchPersistenceAvailable = result.persistenceAvailable === true;
+    state.savedSearches = state.savedSearchPersistenceAvailable
+      ? list(result.savedSearches)
+      : localSavedSearches();
   }
 
   async function loadAll() {
@@ -564,13 +646,20 @@
         return;
       }
       unlockApplication();
-      const [directoryResult, organizerResult, engagementResult, photoReactionResult, notificationResult, locationResult] = await Promise.all([
+      const [directoryResult, organizerResult, engagementResult, photoReactionResult, notificationResult, locationResult, mapResult, discoveryResult] = await Promise.all([
         api('/api/members/directory'),
         api('/api/members/organizer-request').catch(() => ({ request: null })),
         api('/api/members/engagement'),
         api('/api/members/photo-reactions'),
         api('/api/members/notifications'),
-        api('/api/members/location').catch(() => ({ location: { enabled: false }, nearbyVenues: [] }))
+        api('/api/members/location').catch(() => ({ location: { enabled: false }, nearbyVenues: [] })),
+        api('/api/members/map').catch(() => ({ center: null, members: [], venues: [], events: [] })),
+        api('/api/members/discovery').catch(() => ({
+          presence: [],
+          savedSearches: localSavedSearches(),
+          persistenceAvailable: false,
+          presenceAvailable: false
+        }))
       ]);
       state.directory = directoryResult;
       state.organizerRequest = organizerResult.request;
@@ -579,6 +668,8 @@
       state.notifications = notificationResult.notifications || [];
       state.unreadCount = Number(notificationResult.unreadCount || 0);
       state.locationData = locationResult;
+      state.mapData = mapResult;
+      applyDiscoveryState(discoveryResult);
       updateNotificationBadges();
       route('home');
     } catch (error) {
@@ -612,13 +703,20 @@
       await loadPhotos();
       return;
     }
-    const [directoryResult, organizerResult, engagementResult, photoReactionResult, notificationResult, locationResult] = await Promise.all([
+    const [directoryResult, organizerResult, engagementResult, photoReactionResult, notificationResult, locationResult, mapResult, discoveryResult] = await Promise.all([
       api('/api/members/directory'),
       api('/api/members/organizer-request').catch(() => ({ request: null })),
       api('/api/members/engagement'),
       api('/api/members/photo-reactions'),
       api('/api/members/notifications'),
-      api('/api/members/location').catch(() => ({ location: { enabled: false }, nearbyVenues: [] }))
+      api('/api/members/location').catch(() => ({ location: { enabled: false }, nearbyVenues: [] })),
+      api('/api/members/map').catch(() => ({ center: null, members: [], venues: [], events: [] })),
+      api('/api/members/discovery').catch(() => ({
+        presence: [],
+        savedSearches: localSavedSearches(),
+        persistenceAvailable: false,
+        presenceAvailable: false
+      }))
     ]);
     state.directory = directoryResult;
     state.organizerRequest = organizerResult.request;
@@ -627,6 +725,8 @@
     state.notifications = notificationResult.notifications || [];
     state.unreadCount = Number(notificationResult.unreadCount || 0);
     state.locationData = locationResult;
+    state.mapData = mapResult;
+    applyDiscoveryState(discoveryResult);
     updateNotificationBadges();
   }
 
@@ -1475,77 +1575,128 @@
     });
   }
 
+  function parisDayKey(value = new Date()) {
+    return new Intl.DateTimeFormat('fr-CA', {
+      timeZone: 'Europe/Paris',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date(value));
+  }
+
+  function profileAudienceLabel(profile) {
+    const type = discoverProfileType(profile);
+    return ({ couple: 'Couples', woman: 'Femmes', man: 'Hommes', other: 'Personnes non binaires' })[type] || '';
+  }
+
+  function profileMatchesOwnPreferences(profile) {
+    const preferences = new Set(profilePeople(state.profile).flatMap((person) => list(person.attracted_to)));
+    if (!preferences.size || preferences.has('Selon le feeling') || preferences.has('Information privée')) return true;
+    return preferences.has(profileAudienceLabel(profile));
+  }
+
+  function nearbyHomeEvents(radiusKm = 50) {
+    if (state.mapData?.center?.source !== 'private_approximate_location') return [];
+    const eventsById = new Map(list(state.directory.events).map((event) => [event.id, event]));
+    return list(state.mapData?.events)
+      .map((marker) => {
+        const event = eventsById.get(marker.id);
+        if (!event) return null;
+        return {
+          ...event,
+          distance_km: Math.round(mapDistanceKm(state.mapData.center, marker)),
+          mapMarker: marker
+        };
+      })
+      .filter((event) => event && event.distance_km <= radiusKm)
+      .sort((left, right) => new Date(left.starts_at) - new Date(right.starts_at));
+  }
+
+  function homeFeedItems() {
+    const locationEnabled = state.mapData?.center?.source === 'private_approximate_location';
+    const profiles = list(state.directory.profiles)
+      .filter((profile) => profile.id !== state.profile.id)
+      .filter(profileMatchesOwnPreferences)
+      .filter((profile) => !locationEnabled || (profileDistance(profile) ?? Infinity) <= 50);
+    const profileItems = profiles.map((profile) => ({
+      id: `profile-${profile.id}`,
+      type: 'profile',
+      date: profile.created_at,
+      profile
+    }));
+    const photoItems = profiles.flatMap((profile) => approvedProfilePhotos(profile).map((photo) => ({
+      id: `photo-${photo.id}`,
+      type: 'photo',
+      date: photo.created_at,
+      profile,
+      photo
+    })));
+    const eventItems = nearbyHomeEvents(50).map((event) => ({
+      id: `event-${event.id}`,
+      type: 'event',
+      date: event.created_at || event.updated_at || event.starts_at,
+      event
+    }));
+    return [...profileItems, ...photoItems, ...eventItems]
+      .filter((item) => item.date)
+      .sort((left, right) => new Date(right.date) - new Date(left.date))
+      .slice(0, 30);
+  }
+
+  function homeFeedItem(item) {
+    if (item.type === 'event') {
+      const event = item.event;
+      return `<article class="card home-feed-card event-feed-card">
+        <header><span class="feed-icon event">✦</span><div><strong>Événement près de chez toi</strong><small>${e(viewedAtLabel(item.date))}</small></div></header>
+        <button type="button" class="feed-event" data-open-event="${e(event.id)}">
+          <span><b>${e(event.title)}</b><small>${e(event.location_public || 'Lieu communiqué aux inscrits')} · ${e(event.distance_km)} km</small></span><i>→</i>
+        </button>
+      </article>`;
+    }
+    const profile = item.profile;
+    const cover = approvedProfilePhotos(profile)[0];
+    if (item.type === 'photo') {
+      return `<article class="card home-feed-card photo-feed-card">
+        <header><span class="feed-avatar">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}</span><div><strong>${e(profile.display_name)} a publié une nouvelle photo</strong><small>${e(viewedAtLabel(item.date))}</small></div></header>
+        <button type="button" class="feed-photo" data-open-profile="${e(profile.id)}"><img src="${e(item.photo.previewUrl)}" alt="Nouvelle photo publique de ${e(profile.display_name)}"></button>
+      </article>`;
+    }
+    return `<article class="card home-feed-card profile-feed-card">
+      <header><span class="feed-avatar">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}</span><div><strong>Nouveau profil : ${e(profile.display_name)}</strong><small>${e(viewedAtLabel(item.date))}</small></div></header>
+      <button type="button" class="feed-profile" data-open-profile="${e(profile.id)}">
+        <span><b>${e(profile.profile_type === 'couple' ? 'Couple' : 'Profil individuel')} · ${e(profileAges(profile))}</b><small>${e(profile.location_zone || 'Zone publique non renseignée')}</small></span><i>Découvrir →</i>
+      </button>
+    </article>`;
+  }
+
   function renderHome() {
     const own = state.profile;
-    const others = list(state.directory.profiles).filter((profile) => profile.id !== own.id);
-    const upcoming = list(state.directory.events)
-      .filter((event) => new Date(event.starts_at) >= new Date())
-      .slice(0, 4);
-    const locationEnabled = Boolean(state.locationData?.location?.enabled);
-    const radius = Number(state.homeVenueRadius || 20);
-    const directoryVenues = new Map(list(state.directory.venueDirectory).map((venue) => [venue.id, venue]));
-    const venueSource = locationEnabled
-      ? list(state.locationData?.nearbyVenues).map((venue) => ({ ...directoryVenues.get(venue.id), ...venue }))
-      : list(state.directory.venueDirectory);
-    const venues = venueSource
-      .filter((venue) => !state.homeVenueKind || venueMapCategory(venue) === state.homeVenueKind)
-      .filter((venue) => !locationEnabled || Number(venue.distance_km) <= radius)
-      .slice(0, 4);
-    const notifications = list(state.notifications).slice(0, 4);
-    return `<div class="page">
-      ${pageHead('Votre espace privé', `Bonjour ${own.display_name}`, 'Toute l’activité affichée provient des membres, des sorties et des établissements réellement enregistrés dans Velvet.')}
-      <section class="grid four">
-        <article class="card kpi"><strong>${others.length}</strong><span>autre profil réel</span></article>
-        <article class="card kpi"><strong>${upcoming.length}</strong><span>sortie publiée</span></article>
-        <article class="card kpi"><strong>${list(state.directory.venueDirectory).length}</strong><span>lieux référencés</span></article>
-        <article class="card kpi"><strong>${state.unreadCount}</strong><span>notification non lue</span></article>
+    const today = parisDayKey();
+    const profilesToday = list(state.directory.profiles).filter(
+      (profile) => profile.id !== own.id && parisDayKey(profile.created_at) === today
+    );
+    const nearbyEvents = nearbyHomeEvents(50);
+    const feed = homeFeedItems();
+    const locationEnabled = state.mapData?.center?.source === 'private_approximate_location';
+    return `<div class="page home-page">
+      ${pageHead('Votre espace privé', `Bonjour ${own.display_name}`, '')}
+      <section class="home-kpis">
+        <button type="button" class="card kpi" data-home-new-profiles><strong>${profilesToday.length}</strong><span>profil${profilesToday.length > 1 ? 's' : ''} créé${profilesToday.length > 1 ? 's' : ''} aujourd’hui</span><i>Voir →</i></button>
+        <button type="button" class="card kpi" data-home-events><strong>${locationEnabled ? nearbyEvents.length : '—'}</strong><span>événement${nearbyEvents.length > 1 ? 's' : ''} près de chez toi</span><i>${locationEnabled ? 'Voir →' : 'Activer ma zone →'}</i></button>
+        <button type="button" class="card kpi" data-route="venues"><strong>${list(state.directory.venueDirectory).length}</strong><span>lieux référencés</span><i>Explorer →</i></button>
       </section>
-      <section class="grid two" style="margin-top:16px">
-        <article class="card">
-          <p class="eyebrow">Votre profil central</p><h2>${e(own.display_name)}</h2>
-          <p>${e(own.description)}</p>
-          <button class="primary" data-route="me">Ouvrir ma fiche complète</button>
-        </article>
-        <article class="card">
-          <p class="eyebrow">Communauté BETA</p><h2>${others.length ? 'Les premiers membres sont arrivés' : 'La communauté commence ici'}</h2>
-          <p>${others.length ? 'Découvre uniquement les profils authentiques admis à cette BETA.' : 'Aucun profil de démonstration n’est affiché. Les nouveaux membres apparaîtront après leur inscription et la publication de leur fiche.'}</p>
-          <button class="secondary" data-route="discover">Accéder à Découvrir</button>
-        </article>
-      </section>
-      <section class="home-section">
-        <header class="section-heading"><div><p class="eyebrow">Découvrir maintenant</p><h2>Découvrir d’autres membres</h2></div>${others.length ? '<button class="text-button" data-route="discover">Tout voir →</button>' : ''}</header>
-        ${others.length ? `<div class="grid three">${others.slice(0, 3).map(memberTile).join('')}</div>` : emptyState('Aucun nouveau profil', 'Les profils apparaîtront ici dès que les testeurs auront terminé et publié leur fiche.', '◇')}
-      </section>
-      <section class="home-section">
-        <header class="section-heading"><div><p class="eyebrow">Prochainement</p><h2>Sorties à venir</h2></div>${upcoming.length ? '<button class="text-button" data-route="events">Agenda complet →</button>' : ''}</header>
-        ${upcoming.length ? `<div class="grid two">${upcoming.map(eventTile).join('')}</div>` : emptyState('Aucune sortie programmée', 'Les événements publiés par les organisateurs et établissements apparaîtront ici.', '✦')}
-      </section>
-      <section class="grid two home-section">
-        <div>
-          <header class="section-heading"><div><p class="eyebrow">Lieux Velvet</p><h2>Établissements</h2></div></header>
-          <div class="home-venue-filters" aria-label="Filtres des établissements">
-            <label>Nature<select id="homeVenueKind">
-              <option value="">Toutes</option>
-              <option value="club"${state.homeVenueKind === 'club' ? ' selected' : ''}>Clubs</option>
-              <option value="spa"${state.homeVenueKind === 'spa' ? ' selected' : ''}>Spas</option>
-              <option value="bar"${state.homeVenueKind === 'bar' ? ' selected' : ''}>Bars</option>
-              <option value="love_room"${state.homeVenueKind === 'love_room' ? ' selected' : ''}>Love rooms</option>
-              <option value="hotel"${state.homeVenueKind === 'hotel' ? ' selected' : ''}>Hôtels</option>
-              <option value="other"${state.homeVenueKind === 'other' ? ' selected' : ''}>Autres</option>
-            </select></label>
-            <label>Zone<select id="homeVenueRadius"${locationEnabled ? '' : ' disabled'}>
-              ${[5,10,15,20].map((distance) => `<option value="${distance}"${Number(state.homeVenueRadius) === distance ? ' selected' : ''}>${distance} km</option>`).join('')}
-            </select></label>
-          </div>
-          ${locationEnabled
-            ? `<p class="proximity-note">Autour de votre localisation approximative · précision ${e(state.locationData.location.precision_km || 10)} km.</p>`
-            : '<p class="proximity-note">Activez votre zone pour filtrer les lieux par distance. Votre position exacte n’est jamais enregistrée.</p><button class="secondary proximity-action" type="button" data-enable-location>Activer ma zone de proximité</button>'}
-          ${venues.length ? `<div class="compact-stack">${venues.slice(0, 3).map(venueTile).join('')}</div>` : emptyState('Aucun lieu dans cette sélection', 'Élargissez la zone ou choisissez une autre nature d’établissement.', '⌑')}
-        </div>
-        <div>
-          <header class="section-heading"><div><p class="eyebrow">Depuis votre dernière visite</p><h2>Activité</h2></div>${notifications.length ? '<button class="text-button" data-route="notifications">Tout voir →</button>' : ''}</header>
-          ${notifications.length ? `<div class="compact-stack">${notifications.map(notificationTile).join('')}</div>` : emptyState('Aucune activité', 'Velvet affichera ici uniquement les actions réellement destinées à votre profil.', '○')}
-        </div>
+      <section class="home-feed">
+        <header class="section-heading"><div><p class="eyebrow">Sélection personnalisée</p><h2>Votre actualité Velvet</h2></div></header>
+        ${feed.length
+          ? `<div class="home-feed-list">${feed.map(homeFeedItem).join('')}</div>`
+          : emptyState(
+              'Votre fil se prépare',
+              locationEnabled
+                ? 'Les nouveaux profils, photos publiques et événements correspondant à vos préférences apparaîtront ici.'
+                : 'Activez votre zone pour ajouter les événements situés à moins de 50 km à votre actualité.',
+              'V',
+              locationEnabled ? '' : '<button class="secondary" type="button" data-enable-location>Activer ma zone</button>'
+            )}
       </section>
     </div>`;
   }
@@ -1583,14 +1734,33 @@
     </span>`;
   }
 
+  function profileAges(profile) {
+    const values = profilePeople(profile)
+      .map((person) => person.birth_year ? new Date().getFullYear() - Number(person.birth_year) : null)
+      .filter(Number.isFinite);
+    if (!values.length) return 'Âge non renseigné';
+    return `${values.join(profile.profile_type === 'couple' ? ' et ' : '')} an${values.length === 1 && values[0] === 1 ? '' : 's'}`;
+  }
+
+  function presenceBadge(profileId) {
+    const status = state.presence[profileId] || 'offline';
+    const details = {
+      online: ['En ligne', 'green'],
+      today: ['Connecté aujourd’hui', 'orange'],
+      offline: ['Pas de connexion aujourd’hui', 'red']
+    }[status] || ['Pas de connexion aujourd’hui', 'red'];
+    return `<span class="presence-badge ${details[1]}" data-profile-presence="${e(profileId)}"><i aria-hidden="true"></i>${details[0]}</span>`;
+  }
+
   function memberTile(profile) {
     const cover = approvedProfilePhotos(profile)[0];
     return `<button class="card member-tile profile-card-button" data-open-profile="${e(profile.id)}">
       <div class="member-cover">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}${seenBadge(profile.id)}</div>
       <div class="member-body">
-        <div class="member-meta"><span>${e(profile.profile_type === 'couple' ? 'Couple' : 'Individuel')}</span><span>${e(profile.location_zone || 'Zone privée')}</span></div>
+        <div class="member-meta"><span>${e(profile.profile_type === 'couple' ? 'Couple' : 'Individuel')}</span><span>${e(profileAges(profile))}</span></div>
         <h3>${e(profile.display_name)}</h3>
-        <p>${e(profile.description || 'Profil en cours de rédaction.')}</p>
+        <p class="member-public-zone">⌖ ${e(profile.location_zone || 'Zone publique non renseignée')}</p>
+        <div class="member-status-row">${presenceBadge(profile.id)}</div>
         ${chips(list(profile.practices).slice(0, 4))}
       </div>
     </button>`;
@@ -1639,26 +1809,6 @@
     </section>`;
   }
 
-  function renderDiscover() {
-    const profiles = list(state.directory.profiles).filter((profile) => profile.id !== state.profile.id);
-    return `<div class="page">
-      ${pageHead('Profils authentiques', 'Découvrir', 'Chaque résultat provient directement de Supabase. Aucun profil fictif, aucun chiffre artificiel.')}
-      <form id="discoverFilters" class="filters">
-        <input name="query" placeholder="Nom, zone, recherche ou pratique" aria-label="Rechercher">
-        <select name="type"><option value="">Tous les profils</option><option value="couple">Couples</option><option value="man">Homme</option><option value="woman">Femme</option></select>
-        <input name="city" placeholder="Zone publique ou secteur" aria-label="Zone publique">
-        <select name="practice" aria-label="Pratique"><option value="">Toutes les pratiques</option>${REFERENCES.practices.map((practice) => `<option value="${e(practice)}">${e(practice)}</option>`).join('')}</select>
-      </form>
-      <div id="discoverResults">
-        ${profiles.length ? `<section class="grid three">${profiles.map(memberTile).join('')}</section>` : emptyState(
-          'Aucun autre profil pour le moment',
-          'La base est volontairement neutre. Les profils apparaîtront ici uniquement après l’inscription de véritables testeurs.',
-          '◇'
-        )}
-      </div>
-    </div>`;
-  }
-
   function discoverProfileType(profile) {
     if (profile.profile_type === 'couple') return 'couple';
     const identity = String(profilePeople(profile)[0]?.gender_identity || '').toLocaleLowerCase('fr');
@@ -1667,27 +1817,304 @@
     return 'other';
   }
 
+  function discoverChoices(name, choices, selected, formatter = (value) => value) {
+    const selectedValues = new Set(list(selected));
+    return `<div class="discover-choice-list">${choices.map((value) => `
+      <label class="discover-choice">
+        <input type="checkbox" name="${e(name)}" value="${e(value)}"${selectedValues.has(value) ? ' checked' : ''}>
+        <span><i aria-hidden="true"></i>${e(formatter(value))}</span>
+      </label>`).join('')}</div>`;
+  }
+
+  function ageForPerson(person) {
+    return person?.birth_year ? new Date().getFullYear() - Number(person.birth_year) : null;
+  }
+
+  function personGenderGroup(person) {
+    const identity = String(person?.gender_identity || '').toLocaleLowerCase('fr');
+    if (identity.includes('femme')) return 'woman';
+    if (identity.includes('homme')) return 'man';
+    return 'other';
+  }
+
+  function profileMatchesAge(profile, group, minimum, maximum) {
+    const constrained = Number(minimum) > 18 || Number(maximum) < 99;
+    if (!constrained) return true;
+    const ages = profilePeople(profile)
+      .filter((person) => personGenderGroup(person) === group)
+      .map(ageForPerson)
+      .filter(Number.isFinite);
+    return ages.length > 0 && ages.some((value) => value >= Number(minimum) && value <= Number(maximum));
+  }
+
+  function profileDistance(profile) {
+    if (state.mapData?.center?.source !== 'private_approximate_location') return null;
+    const marker = list(state.mapData.members).find((item) => item.id === profile.id);
+    return marker ? mapDistanceKm(state.mapData.center, marker) : null;
+  }
+
+  function candidateSeeking(profile) {
+    return new Set(profilePeople(profile).flatMap((person) => list(person.attracted_to)));
+  }
+
+  function filteredDiscoverProfiles() {
+    const filters = state.discoverFilters;
+    const query = filters.query.toLocaleLowerCase('fr').trim();
+    const city = filters.city.toLocaleLowerCase('fr').trim();
+    const recommendationIds = new Set(list(state.directory.recommendations)
+      .filter((item) => item.target_type === 'profile')
+      .map((item) => item.target_id));
+    return list(state.directory.profiles)
+      .filter((profile) => profile.id !== state.profile.id)
+      .filter((profile) => !filters.types.length || filters.types.includes(discoverProfileType(profile)))
+      .filter((profile) => {
+        if (!filters.seeking.length) return true;
+        const seeking = candidateSeeking(profile);
+        return filters.seeking.every((value) => seeking.has(value));
+      })
+      .filter((profile) => !city || String(profile.location_zone || '').toLocaleLowerCase('fr').includes(city))
+      .filter((profile) => !filters.nearMe || (profileDistance(profile) ?? Infinity) <= 50)
+      .filter((profile) => profileMatchesAge(profile, 'man', filters.maleAgeMin, filters.maleAgeMax))
+      .filter((profile) => profileMatchesAge(profile, 'woman', filters.femaleAgeMin, filters.femaleAgeMax))
+      .filter((profile) => filters.practices.every((practice) => list(profile.practices).includes(practice)))
+      .filter((profile) => !filters.morphologies.length || filters.morphologies.some((morphology) =>
+        profilePeople(profile).some((person) => person.morphology === morphology)
+      ))
+      .filter((profile) => !filters.onlineOnly || state.presence[profile.id] === 'online')
+      .filter((profile) => !filters.withPhotos || approvedProfilePhotos(profile).length > 0)
+      .filter((profile) => !filters.withRecommendation || recommendationIds.has(profile.id))
+      .filter((profile) => !filters.createdToday || parisDayKey(profile.created_at) === parisDayKey())
+      .filter((profile) => !query || [
+        profile.display_name,
+        profile.location_zone,
+        profile.description,
+        profile.search_text,
+        ...list(profile.practices),
+        ...list(profile.values_list)
+      ].join(' ').toLocaleLowerCase('fr').includes(query));
+  }
+
+  function renderDiscoverResults() {
+    const rows = filteredDiscoverProfiles();
+    return `<div class="discover-results-heading">
+      <div><strong>${rows.length}</strong><span>profil${rows.length > 1 ? 's' : ''} correspondant${rows.length > 1 ? 's' : ''}${state.discoverFilters.createdToday ? ' · créé aujourd’hui' : ''}</span></div>
+      <button class="text-button" type="button" data-reset-discover>Effacer les filtres</button>
+    </div>
+    ${rows.length
+      ? `<section class="grid three">${rows.map(memberTile).join('')}</section>`
+      : emptyState('Aucun résultat', 'Modifie les critères ou efface les filtres pour élargir la recherche.', '◇')}`;
+  }
+
+  function renderDiscover() {
+    const filters = state.discoverFilters;
+    const locationReady = state.mapData?.center?.source === 'private_approximate_location';
+    const typeLabels = { couple: 'Tous les couples', woman: 'Toutes les femmes', man: 'Tous les hommes' };
+    return `<div class="page discover-page">
+      ${pageHead('Recherche sur mesure', 'Découvrir', 'Combine librement les critères : chaque groupe accepte plusieurs sélections sans limite.')}
+      <section class="card saved-search-bar">
+        <label>Mes recherches
+          <select id="savedSearchSelect">
+            <option value="">Choisir une recherche sauvegardée…</option>
+            ${list(state.savedSearches).map((search) => `<option value="${e(search.id)}"${String(state.selectedSavedSearchId) === String(search.id) ? ' selected' : ''}>${e(search.name)}</option>`).join('')}
+          </select>
+        </label>
+        <label>Nom de cette recherche<input id="savedSearchName" maxlength="80" placeholder="Ex. Couples échangistes autour de Lille"></label>
+        <button class="primary" type="button" data-save-search>Enregistrer</button>
+        <button class="secondary" type="button" data-delete-search${state.selectedSavedSearchId ? '' : ' disabled'}>Supprimer</button>
+        <small>${state.savedSearchPersistenceAvailable ? 'Synchronisée avec ton compte Velvet.' : 'Enregistrée sur cet appareil jusqu’à l’installation de la migration Supabase.'}</small>
+      </section>
+      <div class="discover-layout">
+        <form id="discoverFilters" class="card discover-filter-panel">
+          <label class="discover-query">Recherche libre<input name="query" value="${e(filters.query)}" placeholder="Nom, zone, envie ou pratique"></label>
+          <details class="discover-filter-section" open>
+            <summary>Nous recherchons</summary>
+            ${discoverChoices('types', ['couple', 'woman', 'man'], filters.types, (value) => typeLabels[value])}
+          </details>
+          <details class="discover-filter-section">
+            <summary>Qui recherchent</summary>
+            ${discoverChoices('seeking', ['Couples', 'Femmes', 'Hommes'], filters.seeking)}
+          </details>
+          <details class="discover-filter-section" open>
+            <summary>Localisation</summary>
+            <div class="discover-location">
+              <label>Ville ou zone publique<input name="city" value="${e(filters.city)}" placeholder="Saisissez une ville"></label>
+              <span>ou</span>
+              <label class="discover-switch">
+                <input type="checkbox" name="nearMe"${filters.nearMe ? ' checked' : ''}${locationReady ? '' : ' disabled'}>
+                <i aria-hidden="true"></i><b>Près de chez moi · 50 km</b>
+              </label>
+              ${locationReady ? '' : '<small>Active ta zone approximative pour utiliser ce filtre.</small>'}
+            </div>
+          </details>
+          <details class="discover-filter-section" open>
+            <summary>Âges</summary>
+            <div class="discover-age-grid">
+              <fieldset><legend>Pour l’homme</legend><label>De<input type="number" name="maleAgeMin" min="18" max="99" value="${e(filters.maleAgeMin)}"></label><label>À<input type="number" name="maleAgeMax" min="18" max="99" value="${e(filters.maleAgeMax)}"></label></fieldset>
+              <fieldset><legend>Pour la femme</legend><label>De<input type="number" name="femaleAgeMin" min="18" max="99" value="${e(filters.femaleAgeMin)}"></label><label>À<input type="number" name="femaleAgeMax" min="18" max="99" value="${e(filters.femaleAgeMax)}"></label></fieldset>
+            </div>
+          </details>
+          <details class="discover-filter-section">
+            <summary>Pratiques <small>plusieurs choix possibles</small></summary>
+            ${discoverChoices('practices', REFERENCES.practices, filters.practices)}
+          </details>
+          <details class="discover-filter-section">
+            <summary>Physique</summary>
+            ${discoverChoices('morphologies', REFERENCES.morphologies, filters.morphologies)}
+          </details>
+          <details class="discover-filter-section">
+            <summary>Divers</summary>
+            ${discoverChoices('extras', ['onlineOnly', 'withPhotos', 'withRecommendation'], [
+              ...(filters.onlineOnly ? ['onlineOnly'] : []),
+              ...(filters.withPhotos ? ['withPhotos'] : []),
+              ...(filters.withRecommendation ? ['withRecommendation'] : [])
+            ], (value) => ({
+              onlineOnly: 'Actuellement connecté',
+              withPhotos: 'Avec photos publiques',
+              withRecommendation: 'Avec recommandation'
+            })[value])}
+          </details>
+        </form>
+        <section id="discoverResults" class="discover-results">${renderDiscoverResults()}</section>
+      </div>
+    </div>`;
+  }
+
+  function readDiscoverFilters(form) {
+    const data = new FormData(form);
+    const clampAge = (name, fallback) => Math.max(18, Math.min(99, Number(data.get(name)) || fallback));
+    const extras = new Set(data.getAll('extras'));
+    state.discoverFilters = {
+      query: String(data.get('query') || ''),
+      types: data.getAll('types'),
+      seeking: data.getAll('seeking'),
+      city: String(data.get('city') || ''),
+      nearMe: data.has('nearMe'),
+      maleAgeMin: clampAge('maleAgeMin', 18),
+      maleAgeMax: clampAge('maleAgeMax', 99),
+      femaleAgeMin: clampAge('femaleAgeMin', 18),
+      femaleAgeMax: clampAge('femaleAgeMax', 99),
+      practices: data.getAll('practices'),
+      morphologies: data.getAll('morphologies'),
+      onlineOnly: extras.has('onlineOnly'),
+      withPhotos: extras.has('withPhotos'),
+      withRecommendation: extras.has('withRecommendation'),
+      createdToday: state.discoverFilters.createdToday
+    };
+  }
+
+  function resetDiscoverFilters() {
+    state.discoverFilters = {
+      query: '',
+      types: [],
+      seeking: [],
+      city: '',
+      nearMe: false,
+      maleAgeMin: 18,
+      maleAgeMax: 99,
+      femaleAgeMin: 18,
+      femaleAgeMax: 99,
+      practices: [],
+      morphologies: [],
+      onlineOnly: false,
+      withPhotos: false,
+      withRecommendation: false,
+      createdToday: false
+    };
+    state.selectedSavedSearchId = '';
+  }
+
+  async function saveDiscoverSearch(name) {
+    const cleanName = String(name || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+    if (!cleanName) throw new Error('saved_search_name_required');
+    const filters = JSON.parse(JSON.stringify(state.discoverFilters));
+    if (state.savedSearchPersistenceAvailable) {
+      const result = await api('/api/members/discovery', {
+        method: 'POST',
+        body: JSON.stringify({ name: cleanName, filters })
+      });
+      applyDiscoveryState(result);
+      const saved = state.savedSearches.find((row) => row.name === cleanName);
+      state.selectedSavedSearchId = saved?.id || '';
+      return;
+    }
+    const existing = localSavedSearches().find((row) => row.name === cleanName);
+    const row = {
+      id: existing?.id || `local-${Date.now()}`,
+      name: cleanName,
+      filters,
+      updated_at: new Date().toISOString()
+    };
+    state.savedSearches = [row, ...localSavedSearches().filter((item) => item.name !== cleanName)];
+    saveLocalSearches(state.savedSearches);
+    state.selectedSavedSearchId = row.id;
+  }
+
+  async function deleteDiscoverSearch(id) {
+    if (!id) return;
+    if (state.savedSearchPersistenceAvailable) {
+      const result = await api(`/api/members/discovery?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      applyDiscoveryState(result);
+    } else {
+      state.savedSearches = localSavedSearches().filter((row) => String(row.id) !== String(id));
+      saveLocalSearches(state.savedSearches);
+    }
+    state.selectedSavedSearchId = '';
+  }
+
   function bindDiscover() {
     const form = document.querySelector('#discoverFilters');
     if (!form) return;
-    form.addEventListener('input', () => {
-      const data = new FormData(form);
-      const query = String(data.get('query') || '').toLowerCase();
-      const city = String(data.get('city') || '').toLowerCase();
-      const practice = String(data.get('practice') || '').toLowerCase();
-      const type = String(data.get('type') || '');
-      const rows = list(state.directory.profiles)
-        .filter((profile) => profile.id !== state.profile.id)
-        .filter((profile) => !type || discoverProfileType(profile) === type)
-        .filter((profile) => !city || String(profile.location_zone || '').toLowerCase().includes(city))
-        .filter((profile) => !practice || list(profile.practices).join(' ').toLowerCase().includes(practice))
-        .filter((profile) => !query || [
-          profile.display_name, profile.location_zone, profile.description,
-          profile.search_text, ...list(profile.practices), ...list(profile.values_list)
-        ].join(' ').toLowerCase().includes(query));
-      document.querySelector('#discoverResults').innerHTML = rows.length
-        ? `<section class="grid three">${rows.map(memberTile).join('')}</section>`
-        : emptyState('Aucun résultat', 'Modifie les filtres pour élargir la recherche.', '◇');
+    const bindResultControls = () => {
+      document.querySelector('[data-reset-discover]')?.addEventListener('click', () => {
+        resetDiscoverFilters();
+        content.innerHTML = renderDiscover();
+        bindDiscover();
+      });
+    };
+    const refreshResults = () => {
+      readDiscoverFilters(form);
+      document.querySelector('#discoverResults').innerHTML = renderDiscoverResults();
+      bindResultControls();
+    };
+    form.addEventListener('input', refreshResults);
+    form.addEventListener('change', refreshResults);
+    bindResultControls();
+    document.querySelector('#savedSearchSelect')?.addEventListener('change', (event) => {
+      const search = state.savedSearches.find((row) => String(row.id) === String(event.target.value));
+      if (!search) {
+        state.selectedSavedSearchId = '';
+        return;
+      }
+      state.selectedSavedSearchId = search.id;
+      state.discoverFilters = { ...state.discoverFilters, ...search.filters, createdToday: false };
+      content.innerHTML = renderDiscover();
+      bindDiscover();
+      toast(`Recherche « ${search.name} » appliquée.`);
+    });
+    document.querySelector('[data-save-search]')?.addEventListener('click', async (event) => {
+      readDiscoverFilters(form);
+      event.currentTarget.disabled = true;
+      try {
+        await saveDiscoverSearch(document.querySelector('#savedSearchName')?.value);
+        content.innerHTML = renderDiscover();
+        bindDiscover();
+        toast('Recherche sauvegardée.');
+      } catch (error) {
+        toast(errorMessages[error.message] || error.message, true);
+        event.currentTarget.disabled = false;
+      }
+    });
+    document.querySelector('[data-delete-search]')?.addEventListener('click', async (event) => {
+      event.currentTarget.disabled = true;
+      try {
+        await deleteDiscoverSearch(state.selectedSavedSearchId);
+        content.innerHTML = renderDiscover();
+        bindDiscover();
+        toast('Recherche supprimée.');
+      } catch (error) {
+        toast(errorMessages[error.message] || error.message, true);
+        event.currentTarget.disabled = false;
+      }
     });
   }
 
@@ -2281,7 +2708,7 @@
     const date = new Date(event.starts_at);
     return `<button class="card event-tile" data-open-event="${e(event.id)}">
       <time datetime="${e(event.starts_at)}"><strong>${e(date.toLocaleDateString('fr-FR', { day: '2-digit' }))}</strong><span>${e(date.toLocaleDateString('fr-FR', { month: 'short' }))}</span></time>
-      <span><small>${e(date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }))} · ${e(event.location_public || 'Lieu confidentiel')}</small><b>${e(event.title)}</b><em>${e(event.capacity)} places · ${e(event.audience || 'Membres Velvet')}</em></span>
+      <span><small>${e(date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }))} · ${e(event.location_public || 'Lieu confidentiel')}${Number.isFinite(Number(event.distance_km)) ? ` · ${e(event.distance_km)} km` : ''}</small><b>${e(event.title)}</b><em>${e(event.capacity)} places · ${e(event.audience || 'Membres Velvet')}</em></span>
       <i>→</i>
     </button>`;
   }
@@ -2293,9 +2720,26 @@
   }
 
   function renderEvents() {
-    const events = list(state.directory.events);
-    return `<div class="page">${pageHead('Agenda réel', 'Sorties', 'Seules les sorties effectivement publiées dans Supabase apparaissent ici.')}
-      ${events.length ? `<section class="grid two">${events.map(eventTile).join('')}</section>` : emptyState('Aucune sortie publiée', 'Aucune soirée fictive n’est conservée. Les prochaines sorties apparaîtront après leur publication par un organisateur ou un établissement validé.', '✦')}
+    const events = state.eventNearbyOnly ? nearbyHomeEvents(50) : list(state.directory.events);
+    const action = state.eventNearbyOnly
+      ? '<button class="secondary" type="button" data-all-events>Voir tout l’agenda</button>'
+      : '';
+    return `<div class="page">${pageHead(
+      state.eventNearbyOnly ? 'À moins de 50 km' : 'Agenda réel',
+      state.eventNearbyOnly ? 'Événements près de chez toi' : 'Sorties',
+      state.eventNearbyOnly
+        ? 'Soirées de clubs, événements professionnels et soirées privées situés dans ta zone approximative.'
+        : 'Seules les sorties effectivement publiées dans Supabase apparaissent ici.',
+      action
+    )}
+      ${events.length ? `<section class="grid two">${events.map(eventTile).join('')}</section>` : emptyState(
+        state.eventNearbyOnly ? 'Aucun événement dans un rayon de 50 km' : 'Aucune sortie publiée',
+        state.eventNearbyOnly
+          ? 'Élargis à tout l’agenda pour découvrir les autres événements publiés.'
+          : 'Aucune soirée fictive n’est conservée. Les prochaines sorties apparaîtront après leur publication par un organisateur ou un établissement validé.',
+        '✦',
+        state.eventNearbyOnly ? '<button class="secondary" type="button" data-all-events>Voir tout l’agenda</button>' : ''
+      )}
     </div>`;
   }
 
@@ -2390,6 +2834,18 @@
     return `<div class="page settings-page">
       ${pageHead('Confidentialité · tranquillité · contrôle', 'Paramètres', 'Décide précisément qui peut te découvrir, qui peut t’écrire et ce que Velvet est autorisé à te signaler.')}
       <form id="settingsForm" class="settings-layout">
+        <section class="card settings-card appearance-card">
+          <p class="eyebrow">Apparence</p><h2>Ambiance Velvet</h2>
+          <p>Bascule tout l’espace membre entre le velours sombre et une version claire ivoire, beige, or et bordeaux.</p>
+          <div class="settings-options">
+            <label class="settings-toggle">
+              <span><strong>Mode clair</strong><small>Le choix est mémorisé sur cet appareil et appliqué immédiatement.</small></span>
+              <input type="checkbox" name="light_theme"${state.theme === 'light' ? ' checked' : ''}>
+              <i aria-hidden="true"></i>
+            </label>
+          </div>
+          <div class="theme-swatches" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        </section>
         <section class="card settings-card">
           <p class="eyebrow">Visibilité</p><h2>Qui peut voir votre profil ?</h2>
           <p>Les catégories décochées ne verront plus votre fiche dans Découvrir et ne pourront pas l’ouvrir directement.</p>
@@ -2451,12 +2907,18 @@
   function bindSettings() {
     const form = document.querySelector('#settingsForm');
     if (!form) return;
+    form.querySelector('[name=light_theme]')?.addEventListener('change', (event) => {
+      state.theme = applyTheme(event.target.checked ? 'light' : 'dark');
+      storeTheme(state.theme);
+    });
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       const button = form.querySelector('[type=submit]');
       const status = form.querySelector('#settingsStatus');
       const data = new FormData(form);
       const enabledEvents = new Set(data.getAll('event_type'));
+      state.theme = applyTheme(data.has('light_theme') ? 'light' : 'dark');
+      storeTheme(state.theme);
       const payload = {
         discoverable_by: data.getAll('discoverable_by'),
         contactable_by: data.getAll('contactable_by'),
@@ -3237,9 +3699,42 @@
       }
       return;
     }
+    const newProfilesButton = event.target.closest('[data-home-new-profiles]');
+    if (newProfilesButton) {
+      event.preventDefault();
+      resetDiscoverFilters();
+      state.discoverFilters.createdToday = true;
+      route('discover');
+      return;
+    }
+    const nearbyEventsButton = event.target.closest('[data-home-events]');
+    if (nearbyEventsButton) {
+      event.preventDefault();
+      if (state.mapData?.center?.source === 'private_approximate_location') {
+        state.eventNearbyOnly = true;
+        route('events');
+      } else {
+        enableProximity(nearbyEventsButton).then(() => {
+          if (state.mapData?.center?.source === 'private_approximate_location') {
+            state.eventNearbyOnly = true;
+            route('events');
+          }
+        });
+      }
+      return;
+    }
+    if (event.target.closest('[data-all-events]')) {
+      event.preventDefault();
+      state.eventNearbyOnly = false;
+      content.innerHTML = renderEvents();
+      bindDynamicForms();
+      return;
+    }
     const routeButton = event.target.closest('[data-route]');
     if (routeButton) {
       event.preventDefault();
+      if (routeButton.dataset.route === 'events') state.eventNearbyOnly = false;
+      if (routeButton.dataset.route === 'discover') state.discoverFilters.createdToday = false;
       route(routeButton.dataset.route);
       return;
     }
@@ -3437,6 +3932,26 @@
     const open = !sidebar.classList.contains('open');
     sidebar.classList.toggle('open', open);
     event.currentTarget.setAttribute('aria-expanded', String(open));
+  });
+
+  async function refreshPresence() {
+    if (!state.profile || state.profile.admission_status !== 'approved' || document.hidden) return;
+    try {
+      const result = await api('/api/members/discovery');
+      applyDiscoveryState(result);
+      document.querySelectorAll('[data-profile-presence]').forEach((badge) => {
+        const template = document.createElement('template');
+        template.innerHTML = presenceBadge(badge.dataset.profilePresence);
+        badge.replaceWith(template.content.firstElementChild);
+      });
+    } catch {
+      // La migration peut ne pas encore être appliquée : l’interface reste utilisable.
+    }
+  }
+
+  window.setInterval(refreshPresence, 4 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshPresence();
   });
 
   initializeWebExperience();
