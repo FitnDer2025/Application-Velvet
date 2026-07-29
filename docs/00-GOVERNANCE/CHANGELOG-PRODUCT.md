@@ -4,6 +4,15 @@ Ce document retrace les décisions produit validées. Il ne remplace ni les ADR 
 
 ## 29 juillet 2026
 
+### Découverte locale, Maps et accès membre
+
+- L'accueil distingue désormais clairement la découverte d'autres membres.
+- Les établissements peuvent être filtrés par nature et dans un rayon de 5, 10, 15 ou 20 km autour d'une zone approximative consentie.
+- Découvrir filtre les couples, hommes, femmes et les pratiques via une liste contrôlée.
+- Maps démarre sur un rayon d'environ 50 km autour du membre, permet le zoom et le choix des catégories visibles.
+- Les agendas de soirées sont limités aux clubs, spas et bars.
+- Les comptes uniquement membres rejoignent directement leur espace ; le choix d'univers est réservé aux administrateurs et modérateurs.
+
 ### ADR-GOV-003 — Autonomie de livraison Codex
 
 - Codex peut conduire les évolutions Velvet de la branche jusqu'à la fusion et au déploiement sans validation intermédiaire.

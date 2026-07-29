@@ -102,7 +102,7 @@ async function memberMarkers(env, token, currentProfileId) {
 async function venueMarkers(env, token) {
   const rows = await restJson(
     env,
-    '/rest/v1/venue_directory?select=id,name,kind,city,country_code,address_public,latitude,longitude,website,verification_status&latitude=not.is.null&longitude=not.is.null&verification_status=neq.closed&order=name.asc&limit=500',
+    '/rest/v1/venue_directory?select=id,name,kind,category_primary,category_tags,city,country_code,address_public,latitude,longitude,website,verification_status&latitude=not.is.null&longitude=not.is.null&verification_status=neq.closed&order=name.asc&limit=500',
     token
   );
   return (rows || []).map((venue) => ({
@@ -110,6 +110,8 @@ async function venueMarkers(env, token) {
     type: 'venue',
     name: venue.name,
     kind: venue.kind,
+    categoryPrimary: venue.category_primary,
+    categoryTags: venue.category_tags || [],
     city: venue.city,
     countryCode: venue.country_code,
     address: venue.address_public,
@@ -131,7 +133,7 @@ async function mapCenter(env, access, markers) {
     const latitude = finite(location.latitude_bucket);
     const longitude = finite(location.longitude_bucket);
     if (latitude !== null && longitude !== null) {
-      return { latitude, longitude, zoom: 8, source: 'private_approximate_location' };
+      return { latitude, longitude, zoom: 10, radiusKm: 50, source: 'private_approximate_location' };
     }
   }
   if (markers.length) {

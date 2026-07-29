@@ -4,6 +4,7 @@ const paths = [
   'apps/beta/static/assets/members-onboarding-v2.js',
   'apps/beta/static/assets/members-live.js',
   'apps/beta/static/assets/members-live.css',
+  'apps/beta/static/assets/real-auth-gate.js',
   'apps/beta/static/assets/pro-live.js',
   'apps/beta/static/assets/control-live.js',
   'apps/beta/worker/index.js',
@@ -20,6 +21,7 @@ const paths = [
   'functions/api/members/conversations.js',
   'functions/api/members/messages.js',
   'functions/api/members/event-registrations.js',
+  'functions/api/members/map.js',
   'functions/api/members/venue-relationships.js',
   'functions/api/members/settings.js',
   'functions/api/members/verification.js',
@@ -103,6 +105,25 @@ const journeys = [
     name: 'Préférences établissements',
     valid: has('functions/api/members/venue-relationships.js', 'set_my_venue_relationship', 'relationships: await relationships')
       && has('apps/beta/static/assets/members-live.js', '/api/members/venue-relationships', 'data-venue-relation')
+  },
+  {
+    name: 'Accueil et découverte filtrés',
+    valid: has('apps/beta/static/assets/members-live.js', 'Découvrir d’autres membres', 'homeVenueKind', 'homeVenueRadius', 'data-enable-location')
+      && has('apps/beta/static/assets/members-live.js', '<option value="couple">Couples</option>', '<option value="man">Homme</option>', '<option value="woman">Femme</option>', 'Toutes les pratiques', 'discoverProfileType')
+  },
+  {
+    name: 'Maps pilotable et privée',
+    valid: has('apps/beta/static/assets/members-live.js', 'mapZoom: 10', 'data-map-zoom', 'data-map-layer', 'Rayon d’environ', 'Hôtels')
+      && has('functions/api/members/map.js', 'radiusKm: 50', 'private_approximate_location', 'category_primary', 'categoryTags')
+      && has('apps/beta/static/assets/members-live.js', '/api/members/location', 'exacte n’est jamais enregistrée')
+  },
+  {
+    name: 'Agenda réservé aux lieux concernés',
+    valid: has('apps/beta/static/assets/members-live.js', "['club', 'spa', 'bar']", 'supportsAgenda', 'Prochaines soirées')
+  },
+  {
+    name: 'Routage direct des membres',
+    valid: has('apps/beta/static/assets/real-auth-gate.js', 'canChooseDestination', "roles.includes('admin')", "roles.includes('moderator')", "window.location.replace(destination)", "'/membres/'")
   },
   {
     name: 'Invitation depuis Control',

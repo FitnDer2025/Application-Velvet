@@ -29,6 +29,19 @@
     notifications: [],
     unreadCount: 0,
     mapData: null,
+    locationData: null,
+    homeVenueKind: '',
+    homeVenueRadius: '20',
+    mapZoom: 10,
+    mapLayers: {
+      members: true,
+      club: true,
+      spa: true,
+      bar: true,
+      love_room: true,
+      hotel: true,
+      other: true
+    },
     route: 'home',
     selectedProfileId: null,
     profileTab: 'couple',
@@ -549,12 +562,13 @@
         return;
       }
       unlockApplication();
-      const [directoryResult, organizerResult, engagementResult, photoReactionResult, notificationResult] = await Promise.all([
+      const [directoryResult, organizerResult, engagementResult, photoReactionResult, notificationResult, locationResult] = await Promise.all([
         api('/api/members/directory'),
         api('/api/members/organizer-request').catch(() => ({ request: null })),
         api('/api/members/engagement'),
         api('/api/members/photo-reactions'),
-        api('/api/members/notifications')
+        api('/api/members/notifications'),
+        api('/api/members/location').catch(() => ({ location: { enabled: false }, nearbyVenues: [] }))
       ]);
       state.directory = directoryResult;
       state.organizerRequest = organizerResult.request;
@@ -562,6 +576,7 @@
       state.photoReactions = photoReactionResult.reactions || [];
       state.notifications = notificationResult.notifications || [];
       state.unreadCount = Number(notificationResult.unreadCount || 0);
+      state.locationData = locationResult;
       updateNotificationBadges();
       route('home');
     } catch (error) {
@@ -591,15 +606,17 @@
       state.notifications = [];
       state.unreadCount = 0;
       state.mapData = null;
+      state.locationData = null;
       await loadPhotos();
       return;
     }
-    const [directoryResult, organizerResult, engagementResult, photoReactionResult, notificationResult] = await Promise.all([
+    const [directoryResult, organizerResult, engagementResult, photoReactionResult, notificationResult, locationResult] = await Promise.all([
       api('/api/members/directory'),
       api('/api/members/organizer-request').catch(() => ({ request: null })),
       api('/api/members/engagement'),
       api('/api/members/photo-reactions'),
-      api('/api/members/notifications')
+      api('/api/members/notifications'),
+      api('/api/members/location').catch(() => ({ location: { enabled: false }, nearbyVenues: [] }))
     ]);
     state.directory = directoryResult;
     state.organizerRequest = organizerResult.request;
@@ -607,6 +624,7 @@
     state.photoReactions = photoReactionResult.reactions || [];
     state.notifications = notificationResult.notifications || [];
     state.unreadCount = Number(notificationResult.unreadCount || 0);
+    state.locationData = locationResult;
     updateNotificationBadges();
   }
 
@@ -1461,7 +1479,16 @@
     const upcoming = list(state.directory.events)
       .filter((event) => new Date(event.starts_at) >= new Date())
       .slice(0, 4);
-    const venues = list(state.directory.venueDirectory).slice(0, 4);
+    const locationEnabled = Boolean(state.locationData?.location?.enabled);
+    const radius = Number(state.homeVenueRadius || 20);
+    const directoryVenues = new Map(list(state.directory.venueDirectory).map((venue) => [venue.id, venue]));
+    const venueSource = locationEnabled
+      ? list(state.locationData?.nearbyVenues).map((venue) => ({ ...directoryVenues.get(venue.id), ...venue }))
+      : list(state.directory.venueDirectory);
+    const venues = venueSource
+      .filter((venue) => !state.homeVenueKind || venueMapCategory(venue) === state.homeVenueKind)
+      .filter((venue) => !locationEnabled || Number(venue.distance_km) <= radius)
+      .slice(0, 4);
     const notifications = list(state.notifications).slice(0, 4);
     return `<div class="page">
       ${pageHead('Votre espace privé', `Bonjour ${own.display_name}`, 'Toute l’activité affichée provient des membres, des sorties et des établissements réellement enregistrés dans Velvet.')}
@@ -1484,7 +1511,7 @@
         </article>
       </section>
       <section class="home-section">
-        <header class="section-heading"><div><p class="eyebrow">Découvrir maintenant</p><h2>Nouveaux univers</h2></div>${others.length ? '<button class="text-button" data-route="discover">Tout voir →</button>' : ''}</header>
+        <header class="section-heading"><div><p class="eyebrow">Découvrir maintenant</p><h2>Découvrir d’autres membres</h2></div>${others.length ? '<button class="text-button" data-route="discover">Tout voir →</button>' : ''}</header>
         ${others.length ? `<div class="grid three">${others.slice(0, 3).map(memberTile).join('')}</div>` : emptyState('Aucun nouveau profil', 'Les profils apparaîtront ici dès que les testeurs auront terminé et publié leur fiche.', '◇')}
       </section>
       <section class="home-section">
@@ -1494,7 +1521,24 @@
       <section class="grid two home-section">
         <div>
           <header class="section-heading"><div><p class="eyebrow">Lieux Velvet</p><h2>Établissements</h2></div></header>
-          ${venues.length ? `<div class="compact-stack">${venues.slice(0, 3).map(venueTile).join('')}</div>` : emptyState('Aucun lieu publié', 'La sélection se remplira depuis Velvet Pro.', '⌑')}
+          <div class="home-venue-filters" aria-label="Filtres des établissements">
+            <label>Nature<select id="homeVenueKind">
+              <option value="">Toutes</option>
+              <option value="club"${state.homeVenueKind === 'club' ? ' selected' : ''}>Clubs</option>
+              <option value="spa"${state.homeVenueKind === 'spa' ? ' selected' : ''}>Spas</option>
+              <option value="bar"${state.homeVenueKind === 'bar' ? ' selected' : ''}>Bars</option>
+              <option value="love_room"${state.homeVenueKind === 'love_room' ? ' selected' : ''}>Love rooms</option>
+              <option value="hotel"${state.homeVenueKind === 'hotel' ? ' selected' : ''}>Hôtels</option>
+              <option value="other"${state.homeVenueKind === 'other' ? ' selected' : ''}>Autres</option>
+            </select></label>
+            <label>Zone<select id="homeVenueRadius"${locationEnabled ? '' : ' disabled'}>
+              ${[5,10,15,20].map((distance) => `<option value="${distance}"${Number(state.homeVenueRadius) === distance ? ' selected' : ''}>${distance} km</option>`).join('')}
+            </select></label>
+          </div>
+          ${locationEnabled
+            ? `<p class="proximity-note">Autour de votre localisation approximative · précision ${e(state.locationData.location.precision_km || 10)} km.</p>`
+            : '<p class="proximity-note">Activez votre zone pour filtrer les lieux par distance. Votre position exacte n’est jamais enregistrée.</p><button class="secondary proximity-action" type="button" data-enable-location>Activer ma zone de proximité</button>'}
+          ${venues.length ? `<div class="compact-stack">${venues.slice(0, 3).map(venueTile).join('')}</div>` : emptyState('Aucun lieu dans cette sélection', 'Élargissez la zone ou choisissez une autre nature d’établissement.', '⌑')}
         </div>
         <div>
           <header class="section-heading"><div><p class="eyebrow">Depuis votre dernière visite</p><h2>Activité</h2></div>${notifications.length ? '<button class="text-button" data-route="notifications">Tout voir →</button>' : ''}</header>
@@ -1599,9 +1643,9 @@
       ${pageHead('Profils authentiques', 'Découvrir', 'Chaque résultat provient directement de Supabase. Aucun profil fictif, aucun chiffre artificiel.')}
       <form id="discoverFilters" class="filters">
         <input name="query" placeholder="Nom, zone, recherche ou pratique" aria-label="Rechercher">
-        <select name="type"><option value="">Tous les profils</option><option value="couple">Couples</option><option value="individual">Individuels</option></select>
+        <select name="type"><option value="">Tous les profils</option><option value="couple">Couples</option><option value="man">Homme</option><option value="woman">Femme</option></select>
         <input name="city" placeholder="Zone publique ou secteur" aria-label="Zone publique">
-        <input name="practice" placeholder="Pratique" aria-label="Pratique">
+        <select name="practice" aria-label="Pratique"><option value="">Toutes les pratiques</option>${REFERENCES.practices.map((practice) => `<option value="${e(practice)}">${e(practice)}</option>`).join('')}</select>
       </form>
       <div id="discoverResults">
         ${profiles.length ? `<section class="grid three">${profiles.map(memberTile).join('')}</section>` : emptyState(
@@ -1611,6 +1655,14 @@
         )}
       </div>
     </div>`;
+  }
+
+  function discoverProfileType(profile) {
+    if (profile.profile_type === 'couple') return 'couple';
+    const identity = String(profilePeople(profile)[0]?.gender_identity || '').toLocaleLowerCase('fr');
+    if (identity === 'homme' || identity === 'homme trans') return 'man';
+    if (identity === 'femme' || identity === 'femme trans') return 'woman';
+    return 'other';
   }
 
   function bindDiscover() {
@@ -1624,7 +1676,7 @@
       const type = String(data.get('type') || '');
       const rows = list(state.directory.profiles)
         .filter((profile) => profile.id !== state.profile.id)
-        .filter((profile) => !type || profile.profile_type === type)
+        .filter((profile) => !type || discoverProfileType(profile) === type)
         .filter((profile) => !city || String(profile.location_zone || '').toLowerCase().includes(city))
         .filter((profile) => !practice || list(profile.practices).join(' ').toLowerCase().includes(practice))
         .filter((profile) => !query || [
@@ -1895,31 +1947,42 @@
     };
   }
 
-  function mapViewport(markers, preferredCenter) {
+  function mapViewport(preferredCenter) {
     const width = 900;
     const height = 520;
     const center = {
       latitude: Number(preferredCenter?.latitude ?? 46.603354),
       longitude: Number(preferredCenter?.longitude ?? 1.888334)
     };
-    let zoom = Number(preferredCenter?.zoom || 6);
-    if (markers.length > 1 && preferredCenter?.source !== 'private_approximate_location') {
-      for (zoom = 8; zoom >= 4; zoom -= 1) {
-        const origin = mapPoint(center.latitude, center.longitude, zoom);
-        const fits = markers.every((marker) => {
-          const point = mapPoint(marker.latitude, marker.longitude, zoom);
-          return Math.abs(point.x - origin.x) < width * 0.42
-            && Math.abs(point.y - origin.y) < height * 0.38;
-        });
-        if (fits) break;
-      }
-    }
-    return { width, height, center, zoom: Math.max(4, Math.min(11, zoom)) };
+    return { width, height, center, zoom: Math.max(5, Math.min(13, Number(state.mapZoom || 10))) };
+  }
+
+  function venueMapCategory(venue) {
+    const kind = String(venue.kind || '').toLocaleLowerCase('fr');
+    const category = [
+      venue.categoryPrimary,
+      venue.category_primary,
+      ...list(venue.categoryTags || venue.category_tags)
+    ].join(' ').toLocaleLowerCase('fr');
+    if (/\bh[oô]tel\b|h[eé]bergement|chambre/.test(category)) return 'hotel';
+    return ['club', 'spa', 'bar', 'love_room'].includes(kind) ? kind : 'other';
+  }
+
+  function visibleMapMarkers(mapData) {
+    const members = state.mapLayers.members ? list(mapData.members) : [];
+    const venues = list(mapData.venues).filter((venue) => state.mapLayers[venueMapCategory(venue)]);
+    return [...members, ...venues];
+  }
+
+  function mapRadiusLabel() {
+    const latitude = Number(state.mapData?.center?.latitude ?? 46.603354);
+    const metresPerPixel = 156543.03392 * Math.cos(latitude * Math.PI / 180) / (2 ** state.mapZoom);
+    return Math.max(1, Math.round(metresPerPixel * 900 / 2000));
   }
 
   function mapCanvas(mapData) {
-    const markers = [...list(mapData.members), ...list(mapData.venues)];
-    const view = mapViewport(markers, mapData.center);
+    const markers = visibleMapMarkers(mapData);
+    const view = mapViewport(mapData.center);
     const origin = mapPoint(view.center.latitude, view.center.longitude, view.zoom);
     const tileCount = 2 ** view.zoom;
     const startX = Math.floor((origin.x - view.width / 2) / 256);
@@ -1960,9 +2023,32 @@
         <section class="loading-state"><span class="loader"></span><p>Chargement des zones publiques…</p></section>
       </div>`;
     }
-    const total = list(state.mapData.members).length + list(state.mapData.venues).length;
+    const visibleMarkers = visibleMapMarkers(state.mapData);
+    const locationEnabled = state.mapData.center?.source === 'private_approximate_location';
+    const layerOptions = [
+      ['members', 'Membres'],
+      ['club', 'Clubs'],
+      ['spa', 'Spas'],
+      ['bar', 'Bars'],
+      ['love_room', 'Love rooms'],
+      ['hotel', 'Hôtels'],
+      ['other', 'Autres lieux']
+    ];
     return `<div class="page">${pageHead('Zones publiques et lieux vérifiés', 'Maps', 'Les membres sont placés au centre approximatif de la zone qu’ils ont choisi d’afficher. Les établissements utilisent leurs coordonnées publiques.')}
-      ${total ? mapCanvas(state.mapData) : emptyState('La carte est encore calme', 'Les premiers marqueurs apparaîtront quand des membres partageront une zone publique ou qu’un établissement sera référencé.', '⌖')}
+      <section class="card map-controls" aria-label="Réglages de la carte">
+        <div class="map-zoom-controls">
+          <button type="button" data-map-zoom="-1" aria-label="Dézoomer">−</button>
+          <span><small>Zone affichée</small><strong>Rayon d’environ ${e(mapRadiusLabel())} km</strong></span>
+          <button type="button" data-map-zoom="1" aria-label="Zoomer">+</button>
+        </div>
+        <fieldset><legend>Afficher sur la carte</legend><div class="map-layer-options">
+          ${layerOptions.map(([value, label]) => `<label><input type="checkbox" data-map-layer="${value}"${state.mapLayers[value] ? ' checked' : ''}><span>${e(label)}</span></label>`).join('')}
+        </div></fieldset>
+        ${locationEnabled
+          ? '<p class="proximity-note">Carte centrée sur votre localisation approximative. Le rayon initial est de 50 km.</p>'
+          : '<p class="proximity-note">Activez votre zone pour centrer la carte dans un rayon initial de 50 km autour de vous. Votre position exacte n’est jamais enregistrée.</p><button class="secondary" type="button" data-enable-location>Activer ma zone de proximité</button>'}
+      </section>
+      ${visibleMarkers.length ? mapCanvas(state.mapData) : emptyState('Aucun élément dans cette sélection', 'Activez au moins une catégorie ou dézoomez pour élargir la zone affichée.', '⌖')}
     </div>`;
   }
 
@@ -1970,12 +2056,47 @@
     content.innerHTML = renderMaps();
     try {
       state.mapData = await api('/api/members/map');
+      state.mapZoom = 10;
       if (state.route === 'maps') {
         content.innerHTML = renderMaps();
         bindDynamicForms();
       }
     } catch (error) {
       content.innerHTML = `<div class="page">${emptyState('Carte indisponible', `Velvet n’a pas pu charger Maps : ${errorMessages[error.message] || error.message}`, '!')}</div>`;
+    }
+  }
+
+  async function enableProximity(button) {
+    if (!navigator.geolocation) {
+      toast('La localisation n’est pas disponible sur cet appareil.', true);
+      return;
+    }
+    button.disabled = true;
+    try {
+      const position = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(
+        resolve,
+        reject,
+        { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 }
+      ));
+      state.locationData = await api('/api/members/location', {
+        method: 'POST',
+        body: JSON.stringify({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          consent: true
+        })
+      });
+      state.mapData = await api('/api/members/map');
+      state.mapZoom = 10;
+      content.innerHTML = state.route === 'maps' ? renderMaps() : renderHome();
+      bindDynamicForms();
+      toast('Votre zone approximative est activée.');
+    } catch (error) {
+      const message = error?.code
+        ? 'Autorisez la localisation dans votre navigateur pour activer la proximité.'
+        : (errorMessages[error.message] || error.message);
+      toast(message, true);
+      button.disabled = false;
     }
   }
 
@@ -1990,7 +2111,7 @@
 
   function venueTile(venue) {
     return `<button class="card venue-tile" data-open-venue="${e(venue.id)}">
-      <span class="venue-symbol">⌑</span><span><small>${e(venue.kind || 'lieu Velvet')} · ${e(venue.city || 'Localisation à confirmer')}</small><b>${e(venue.name)}</b><em>${e(venue.claim_status === 'claimed' ? 'Fiche professionnelle reliée à Velvet Pro' : 'Référencé par Velvet · informations à confirmer')}</em></span><i>→</i>
+      <span class="venue-symbol">⌑</span><span><small>${e(venue.kind || 'lieu Velvet')} · ${e(venue.city || 'Localisation à confirmer')}${Number.isFinite(Number(venue.distance_km)) ? ` · ${e(Math.round(Number(venue.distance_km)))} km` : ''}</small><b>${e(venue.name)}</b><em>${e(venue.claim_status === 'claimed' ? 'Fiche professionnelle reliée à Velvet Pro' : 'Référencé par Velvet · informations à confirmer')}</em></span><i>→</i>
     </button>`;
   }
 
@@ -2347,8 +2468,10 @@
     }
     const establishmentId = venue.claimed_establishment_id || (venue.source === 'establishment' ? venue.id : null);
     const professionalActive = Boolean(establishmentId && ['trial','active'].includes(venue.subscription_status));
+    const supportsAgenda = ['club', 'spa', 'bar'].includes(String(venue.kind || '').toLocaleLowerCase('fr'));
     const events = list(state.directory.events)
       .filter((event) => event.establishment_id === establishmentId)
+      .filter((event) => new Date(event.starts_at) >= new Date())
       .sort((left, right) => new Date(left.starts_at) - new Date(right.starts_at));
     const recommendations = list(state.directory.recommendations)
       .filter((item) => item.target_type === 'establishment' && item.target_id === establishmentId);
@@ -2378,9 +2501,9 @@
         </article>
       </section>
       ${venue.manual_review_required ? '<p class="card muted">Fiche issue d’un recensement documentaire. Adresse, horaires, tarifs et statut commercial doivent être confirmés avant déplacement.</p>' : ''}
-      <section class="home-section"><header class="section-heading"><div><p class="eyebrow">Agenda</p><h2>Prochaines soirées</h2></div></header>
+      ${supportsAgenda ? `<section class="home-section"><header class="section-heading"><div><p class="eyebrow">Agenda</p><h2>Prochaines soirées</h2></div></header>
         ${professionalActive ? (events.length ? `<div class="grid two">${events.map(eventTile).join('')}</div>` : emptyState('Aucune soirée publiée', 'Ce professionnel peut publier son agenda depuis Velvet Pro.', '✦')) : emptyState('Agenda non disponible', 'L’établissement pourra ouvrir son agenda après revendication de la fiche, validation par Velvet et activation de son abonnement Pro.', '✦')}
-      </section>
+      </section>` : ''}
       <section class="grid two home-section">
         <article><header class="section-heading"><div><p class="eyebrow">Galerie</p><h2>L’univers du lieu</h2></div></header>${emptyState(professionalActive ? 'Galerie à venir' : 'Galerie verrouillée', professionalActive ? 'Les photos seront ajoutées par l’établissement depuis son espace professionnel.' : 'Aucune photo n’est publiée sans autorisation. La galerie sera ouverte uniquement par un professionnel abonné.', '◇')}</article>
         <article><header class="section-heading"><div><p class="eyebrow">La communauté en parle</p><h2>Recommandations</h2></div></header>${recommendations.length ? recommendations.map((item) => `<blockquote class="card"><p>« ${e(item.body)} »</p><small>${item.rating ? `${e(item.rating)}/5` : 'Recommandation membre'}</small></blockquote>`).join('') : emptyState('Aucune recommandation', 'Les avis authentiques apparaîtront après les premières visites.', '♡')}</article>
@@ -2571,6 +2694,33 @@
   }
 
   function bindDynamicForms() {
+    document.querySelector('#homeVenueKind')?.addEventListener('change', (event) => {
+      state.homeVenueKind = event.target.value;
+      content.innerHTML = renderHome();
+      bindDynamicForms();
+    });
+    document.querySelector('#homeVenueRadius')?.addEventListener('change', (event) => {
+      state.homeVenueRadius = event.target.value;
+      content.innerHTML = renderHome();
+      bindDynamicForms();
+    });
+    document.querySelectorAll('[data-map-zoom]').forEach((button) => {
+      button.addEventListener('click', () => {
+        state.mapZoom = Math.max(5, Math.min(13, state.mapZoom + Number(button.dataset.mapZoom)));
+        content.innerHTML = renderMaps();
+        bindDynamicForms();
+      });
+    });
+    document.querySelectorAll('[data-map-layer]').forEach((input) => {
+      input.addEventListener('change', () => {
+        state.mapLayers[input.dataset.mapLayer] = input.checked;
+        content.innerHTML = renderMaps();
+        bindDynamicForms();
+      });
+    });
+    document.querySelectorAll('[data-enable-location]').forEach((button) => {
+      button.addEventListener('click', () => enableProximity(button));
+    });
     document.querySelectorAll('[data-profile-carousel]').forEach((shell) => {
       const track = shell.querySelector('[data-carousel-track]');
       const slides = [...track.querySelectorAll('[data-carousel-slide]')];
