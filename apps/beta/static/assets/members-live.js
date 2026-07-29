@@ -6,6 +6,8 @@
     directory: {
       profiles: [],
       establishments: [],
+      venueDirectory: [],
+      venueRelationships: [],
       events: [],
       conversations: [],
       recommendations: []
@@ -33,6 +35,10 @@
     editing: false,
     installPrompt: null,
     serviceWorker: null
+    ,
+    venueQuery: '',
+    venueKind: '',
+    venueCountry: ''
   };
 
   const content = document.querySelector('#content');
@@ -412,7 +418,7 @@
     state.membership = profileResult.membership;
     state.personalProfileComplete = profileResult.personalProfileComplete;
     if (state.profile?.admission_status !== 'approved') {
-      state.directory = { profiles: [], establishments: [], events: [], conversations: [], recommendations: [] };
+      state.directory = { profiles: [], establishments: [], venueDirectory: [], venueRelationships: [], events: [], conversations: [], recommendations: [] };
       state.engagement = { views: [], reactions: [], streaks: [], currentUserId: null, currentProfileId: null };
       state.photoReactions = [];
       state.organizerRequest = null;
@@ -1289,14 +1295,14 @@
     const upcoming = list(state.directory.events)
       .filter((event) => new Date(event.starts_at) >= new Date())
       .slice(0, 4);
-    const venues = list(state.directory.establishments).slice(0, 4);
+    const venues = list(state.directory.venueDirectory).slice(0, 4);
     const notifications = list(state.notifications).slice(0, 4);
     return `<div class="page">
       ${pageHead('Votre espace privé', `Bonjour ${own.display_name}`, 'Toute l’activité affichée provient des membres, des sorties et des établissements réellement enregistrés dans Velvet.')}
       <section class="grid four">
         <article class="card kpi"><strong>${others.length}</strong><span>autre profil réel</span></article>
         <article class="card kpi"><strong>${upcoming.length}</strong><span>sortie publiée</span></article>
-        <article class="card kpi"><strong>${venues.length}</strong><span>établissement publié</span></article>
+        <article class="card kpi"><strong>${list(state.directory.venueDirectory).length}</strong><span>lieux référencés</span></article>
         <article class="card kpi"><strong>${state.unreadCount}</strong><span>notification non lue</span></article>
       </section>
       <section class="grid two" style="margin-top:16px">
@@ -1764,7 +1770,7 @@
 
   function venueTile(venue) {
     return `<button class="card venue-tile" data-open-venue="${e(venue.id)}">
-      <span class="venue-symbol">⌑</span><span><small>${e(venue.kind || 'lieu Velvet')} · ${e(venue.city || 'Localisation à venir')}</small><b>${e(venue.name)}</b><em>${e(venue.description || 'Découvrir cet établissement')}</em></span><i>→</i>
+      <span class="venue-symbol">⌑</span><span><small>${e(venue.kind || 'lieu Velvet')} · ${e(venue.city || 'Localisation à confirmer')}</small><b>${e(venue.name)}</b><em>${e(venue.claim_status === 'claimed' ? 'Fiche professionnelle reliée à Velvet Pro' : 'Référencé par Velvet · informations à confirmer')}</em></span><i>→</i>
     </button>`;
   }
 
@@ -1776,9 +1782,15 @@
   }
 
   function renderVenues() {
-    const venues = list(state.directory.establishments);
-    return `<div class="page">${pageHead('Partenaires validés', 'Établissements', 'Chaque fiche visible provient du CRM Velvet Pro et de la même base Supabase.')}
-      ${venues.length ? `<section class="grid three">${venues.map(venueTile).join('')}</section>` : emptyState('Aucun établissement publié', 'La rubrique restera neutre jusqu’à la validation d’un véritable établissement dans Velvet Pro.', '⌑')}
+    const query = state.venueQuery.toLocaleLowerCase('fr');
+    const venues = list(state.directory.venueDirectory).filter((venue) =>
+      (!query || `${venue.name} ${venue.city || ''} ${venue.address_public || ''}`.toLocaleLowerCase('fr').includes(query))
+      && (!state.venueKind || venue.kind === state.venueKind)
+      && (!state.venueCountry || venue.country_code === state.venueCountry)
+    );
+    return `<div class="page">${pageHead('Référentiel France & Belgique', 'Établissements', 'Les fiches non revendiquées sont proposées à titre informatif et clairement distinguées des professionnels abonnés à Velvet Pro.')}
+      <section class="card venue-catalog-filters"><div class="form-grid"><label>Rechercher<input id="venueCatalogSearch" value="${e(state.venueQuery)}" placeholder="Nom, ville ou adresse"></label><label>Type<select id="venueCatalogKind"><option value="">Tous les types</option>${[['club','Club'],['spa','Spa / sauna'],['bar','Bar'],['love_room','Love room'],['other','Autre professionnel']].map(([value,label]) => `<option value="${value}"${state.venueKind === value ? ' selected' : ''}>${label}</option>`).join('')}</select></label><label>Pays<select id="venueCatalogCountry"><option value="">France et Belgique</option><option value="FR"${state.venueCountry === 'FR' ? ' selected' : ''}>France</option><option value="BE"${state.venueCountry === 'BE' ? ' selected' : ''}>Belgique</option></select></label></div><p class="muted">${venues.length} résultat${venues.length > 1 ? 's' : ''} · les données marquées « à confirmer » ne constituent pas une validation professionnelle.</p></section>
+      ${venues.length ? `<section class="grid three">${venues.map(venueTile).join('')}</section>` : emptyState('Aucun établissement correspondant', 'Modifie les filtres pour élargir la recherche.', '⌑')}
     </div>`;
   }
 
@@ -2081,17 +2093,30 @@
   }
 
   function venueById(id, fromMap = false) {
-    const published = list(state.directory.establishments).find((venue) => venue.id === id);
-    if (published) return { ...published, source: 'establishment' };
+    const reference = list(state.directory.venueDirectory).find((venue) => venue.id === id);
+    if (reference) {
+      const published = list(state.directory.establishments).find((venue) =>
+        venue.id === reference.claimed_establishment_id || venue.directory_venue_id === reference.id
+      );
+      return published
+        ? { ...reference, ...published, id: reference.id, claimed_establishment_id: published.id, source: 'establishment' }
+        : { ...reference, source: 'directory' };
+    }
     if (!fromMap) return null;
-    const reference = list(state.mapData?.venues).find((venue) => venue.id === id);
-    if (!reference) return null;
+    const mapReference = list(state.mapData?.venues).find((venue) => venue.id === id);
+    if (!mapReference) return null;
     const linked = list(state.directory.establishments).find((venue) =>
-      String(venue.name).trim().toLowerCase() === String(reference.name).trim().toLowerCase()
+      String(venue.name).trim().toLowerCase() === String(mapReference.name).trim().toLowerCase()
     );
     return linked
-      ? { ...reference, ...linked, latitude: reference.latitude, longitude: reference.longitude, source: 'establishment' }
-      : { ...reference, source: 'directory' };
+      ? { ...mapReference, ...linked, latitude: mapReference.latitude, longitude: mapReference.longitude, source: 'establishment' }
+      : { ...mapReference, source: 'directory' };
+  }
+
+  function venueRelationship(venueId, relation) {
+    return list(state.directory.venueRelationships).some((row) =>
+      row.venue_id === venueId && row.relation_type === relation
+    );
   }
 
   function openVenue(id, fromMap = false) {
@@ -2100,13 +2125,15 @@
       toast('Établissement introuvable.', true);
       return;
     }
+    const establishmentId = venue.claimed_establishment_id || (venue.source === 'establishment' ? venue.id : null);
+    const professionalActive = Boolean(establishmentId && ['trial','active'].includes(venue.subscription_status));
     const events = list(state.directory.events)
-      .filter((event) => event.establishment_id === venue.id)
+      .filter((event) => event.establishment_id === establishmentId)
       .sort((left, right) => new Date(left.starts_at) - new Date(right.starts_at));
     const recommendations = list(state.directory.recommendations)
-      .filter((item) => item.target_type === 'establishment' && item.target_id === venue.id);
+      .filter((item) => item.target_type === 'establishment' && item.target_id === establishmentId);
     const website = safeExternalUrl(venue.website);
-    const routeQuery = [venue.address_public || venue.address, venue.city, venue.countryCode].filter(Boolean).join(', ');
+    const routeQuery = [venue.address_public || venue.address, venue.city, venue.country_code || venue.countryCode].filter(Boolean).join(', ');
     const routeUrl = routeQuery
       ? `https://www.openstreetmap.org/search?query=${encodeURIComponent(routeQuery)}`
       : venue.latitude && venue.longitude
@@ -2115,8 +2142,8 @@
     content.innerHTML = `<div class="page venue-site">
       <section class="venue-hero">
         <div><p class="eyebrow">${e(venue.kind || 'Établissement Velvet')}</p><h1>${e(venue.name)}</h1><p>${e(venue.description || 'Cet établissement complète actuellement sa présentation dans Velvet Pro.')}</p>
-          <div class="badges"><span class="pill gold">${venue.verified_at || venue.verificationStatus === 'professional_verified' ? 'Établissement vérifié' : 'Référencé Velvet'}</span>${venue.city ? `<span class="pill">${e(venue.city)}</span>` : ''}</div>
-          <div class="actions">${routeUrl ? `<a class="primary" href="${e(routeUrl)}" target="_blank" rel="noopener noreferrer">Itinéraire</a>` : ''}${website ? `<a class="secondary" href="${e(website)}" target="_blank" rel="noopener noreferrer">Site officiel</a>` : ''}<button class="secondary" data-route="venues">Retour</button></div>
+          <div class="badges"><span class="pill gold">${professionalActive ? 'Professionnel Velvet Pro' : venue.claim_status === 'claimed' ? 'Fiche revendiquée · abonnement inactif' : 'Référencé Velvet · à confirmer'}</span>${venue.city ? `<span class="pill">${e(venue.city)}</span>` : ''}</div>
+          <div class="actions">${routeUrl ? `<a class="primary" href="${e(routeUrl)}" target="_blank" rel="noopener noreferrer">Itinéraire</a>` : ''}${website ? `<a class="secondary" href="${e(website)}" target="_blank" rel="noopener noreferrer">Site officiel</a>` : ''}<button class="secondary" data-venue-relation="favorite" data-venue-id="${e(venue.id)}">${venueRelationship(venue.id,'favorite') ? 'Retirer des favoris' : 'Ajouter aux favoris'}</button><button class="secondary" data-venue-relation="visited" data-venue-id="${e(venue.id)}">${venueRelationship(venue.id,'visited') ? 'Déjà fréquenté ✓' : 'J’y suis déjà allé(e)'}</button><button class="secondary" data-venue-relation="planning" data-venue-id="${e(venue.id)}">${venueRelationship(venue.id,'planning') ? 'Envie enregistrée ✓' : 'J’ai envie d’y aller'}</button><button class="secondary" data-route="venues">Retour</button></div>
         </div><span class="venue-hero-mark">V</span>
       </section>
       <nav class="venue-summary" aria-label="Résumé de l’établissement">
@@ -2125,16 +2152,17 @@
         <span><small>Adresse</small><b>${e(venue.address_public || venue.address || 'À venir')}</b></span>
       </nav>
       <section class="grid two venue-content">
-        <article class="card section"><p class="eyebrow">L’essentiel</p><h2>Présentation</h2><p>${e(venue.description || 'La présentation détaillée sera publiée par l’équipe de l’établissement depuis Velvet Pro.')}</p><h3>Équipements</h3>${chips(venue.amenities, 'Équipements à renseigner')}</article>
-        <article class="card section"><p class="eyebrow">Préparer sa venue</p><h2>Horaires</h2>${openingHoursView(venue.opening_hours)}<h3>Contact public</h3>
-          <div class="contact-list">${venue.phone_public ? `<a href="tel:${e(String(venue.phone_public).replace(/[^+0-9]/g, ''))}">${e(venue.phone_public)}</a>` : ''}${venue.email_public ? `<a href="mailto:${e(venue.email_public)}">${e(venue.email_public)}</a>` : ''}${!venue.phone_public && !venue.email_public ? '<span>Coordonnées à venir</span>' : ''}</div>
+        <article class="card section"><p class="eyebrow">L’essentiel</p><h2>Présentation</h2><p>${e(venue.description || venue.practical_info || 'Cette fiche provient du référentiel Velvet et doit encore être confirmée par le professionnel.')}</p><h3>Public et programmation</h3>${chips([venue.audience,venue.evening_types].filter(Boolean),'Informations à confirmer')}<h3>Équipements</h3>${chips(venue.amenities, 'Équipements à renseigner')}</article>
+        <article class="card section"><p class="eyebrow">Préparer sa venue</p><h2>Horaires</h2>${venue.opening_hours_text ? `<p>${e(venue.opening_hours_text)}</p>` : openingHoursView(venue.opening_hours)}<h3>Tarifs indicatifs</h3><p>${e(venue.pricing_text || 'Tarifs à confirmer auprès de l’établissement.')}</p><h3>Contact public</h3>
+          <div class="contact-list">${venue.phone_public || venue.phone ? `<a href="tel:${e(String(venue.phone_public || venue.phone).replace(/[^+0-9]/g, ''))}">${e(venue.phone_public || venue.phone)}</a>` : ''}${venue.email_public || venue.email ? `<a href="mailto:${e(venue.email_public || venue.email)}">${e(venue.email_public || venue.email)}</a>` : ''}${!venue.phone_public && !venue.phone && !venue.email_public && !venue.email ? '<span>Coordonnées à confirmer</span>' : ''}</div>
         </article>
       </section>
+      ${venue.manual_review_required ? '<p class="card muted">Fiche issue d’un recensement documentaire. Adresse, horaires, tarifs et statut commercial doivent être confirmés avant déplacement.</p>' : ''}
       <section class="home-section"><header class="section-heading"><div><p class="eyebrow">Agenda</p><h2>Prochaines soirées</h2></div></header>
-        ${events.length ? `<div class="grid two">${events.map(eventTile).join('')}</div>` : emptyState('Aucune soirée publiée', 'L’agenda apparaîtra ici dès sa publication depuis Velvet Pro.', '✦')}
+        ${professionalActive ? (events.length ? `<div class="grid two">${events.map(eventTile).join('')}</div>` : emptyState('Aucune soirée publiée', 'Ce professionnel peut publier son agenda depuis Velvet Pro.', '✦')) : emptyState('Agenda non disponible', 'L’établissement pourra ouvrir son agenda après revendication de la fiche, validation par Velvet et activation de son abonnement Pro.', '✦')}
       </section>
       <section class="grid two home-section">
-        <article><header class="section-heading"><div><p class="eyebrow">Galerie</p><h2>L’univers du lieu</h2></div></header>${emptyState('Galerie à venir', 'Les photos seront ajoutées par l’établissement depuis son espace professionnel.', '◇')}</article>
+        <article><header class="section-heading"><div><p class="eyebrow">Galerie</p><h2>L’univers du lieu</h2></div></header>${emptyState(professionalActive ? 'Galerie à venir' : 'Galerie verrouillée', professionalActive ? 'Les photos seront ajoutées par l’établissement depuis son espace professionnel.' : 'Aucune photo n’est publiée sans autorisation. La galerie sera ouverte uniquement par un professionnel abonné.', '◇')}</article>
         <article><header class="section-heading"><div><p class="eyebrow">La communauté en parle</p><h2>Recommandations</h2></div></header>${recommendations.length ? recommendations.map((item) => `<blockquote class="card"><p>« ${e(item.body)} »</p><small>${item.rating ? `${e(item.rating)}/5` : 'Recommandation membre'}</small></blockquote>`).join('') : emptyState('Aucune recommandation', 'Les avis authentiques apparaîtront après les premières visites.', '♡')}</article>
       </section>
     </div>`;
@@ -2323,6 +2351,28 @@
   }
 
   function bindDynamicForms() {
+    const venueCatalogSearch = document.querySelector('#venueCatalogSearch');
+    if (venueCatalogSearch) {
+      venueCatalogSearch.addEventListener('input', () => {
+        state.venueQuery = venueCatalogSearch.value;
+        window.clearTimeout(window.venueCatalogTimer);
+        window.venueCatalogTimer = window.setTimeout(() => {
+          content.innerHTML = renderVenues();
+          bindDynamicForms();
+          document.querySelector('#venueCatalogSearch')?.focus();
+        }, 180);
+      });
+      document.querySelector('#venueCatalogKind')?.addEventListener('change', (event) => {
+        state.venueKind = event.target.value;
+        content.innerHTML = renderVenues();
+        bindDynamicForms();
+      });
+      document.querySelector('#venueCatalogCountry')?.addEventListener('change', (event) => {
+        state.venueCountry = event.target.value;
+        content.innerHTML = renderVenues();
+        bindDynamicForms();
+      });
+    }
     const reportForm = document.querySelector('#profileReportForm');
     if (reportForm) reportForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -2720,6 +2770,25 @@
     const venueButton = event.target.closest('[data-open-venue]');
     if (venueButton) {
       openVenue(venueButton.dataset.openVenue, venueButton.dataset.mapVenue === 'true');
+      return;
+    }
+    const venueRelationButton = event.target.closest('[data-venue-relation]');
+    if (venueRelationButton) {
+      const venueId = venueRelationButton.dataset.venueId;
+      const relation = venueRelationButton.dataset.venueRelation;
+      const enabled = !venueRelationship(venueId, relation);
+      venueRelationButton.disabled = true;
+      api('/api/members/venue-relationships', {
+        method: 'POST',
+        body: JSON.stringify({ venueId, relation, enabled })
+      }).then((result) => {
+        state.directory.venueRelationships = result.relationships || [];
+        openVenue(venueId);
+        toast(enabled ? 'Ton choix est enregistré dans ton profil.' : 'Ton choix a été retiré.');
+      }).catch((error) => {
+        toast(errorMessages[error.message] || error.message, true);
+        venueRelationButton.disabled = false;
+      });
       return;
     }
     const notificationButton = event.target.closest('[data-open-notification]');
