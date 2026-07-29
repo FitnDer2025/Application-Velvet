@@ -401,6 +401,94 @@
     </div>`;
   }
 
+  function albumPhotoFigure(photo, albumKey, index, alt, ownProfile) {
+    return `<figure class="album-photo">
+      <button class="album-photo-button" type="button" data-album-lightbox="${e(albumKey)}" data-lightbox-index="${index}" aria-label="Agrandir ${e(alt)}">
+        <img src="${e(photo.previewUrl)}" alt="${e(alt)}">
+        <span class="album-photo-zoom" aria-hidden="true">⌕</span>
+      </button>
+      ${photoReactionBar(photo, ownProfile)}
+    </figure>`;
+  }
+
+  function openAlbumLightbox(albumKey, requestedIndex = 0) {
+    const triggers = [...document.querySelectorAll('[data-album-lightbox]')]
+      .filter((button) => button.dataset.albumLightbox === albumKey);
+    const photos = triggers.map((button) => {
+      const image = button.querySelector('img');
+      return { src: image?.src || '', alt: image?.alt || 'Photo Velvet' };
+    }).filter((photo) => photo.src);
+    if (!photos.length) return;
+
+    let index = Math.max(0, Math.min(Number(requestedIndex) || 0, photos.length - 1));
+    const returnFocus = triggers[index];
+    const lightbox = document.createElement('section');
+    lightbox.className = 'album-lightbox';
+    lightbox.setAttribute('role', 'dialog');
+    lightbox.setAttribute('aria-modal', 'true');
+    lightbox.setAttribute('aria-label', 'Visionneuse de l’album');
+    lightbox.innerHTML = `
+      <button class="lightbox-close" type="button" data-lightbox-close aria-label="Fermer la photo">×</button>
+      <div class="lightbox-stage" data-lightbox-stage>
+        <figure><img data-lightbox-image alt=""></figure>
+      </div>
+      ${photos.length > 1 ? `
+        <button class="lightbox-arrow previous" type="button" data-lightbox-previous aria-label="Photo précédente">‹</button>
+        <button class="lightbox-arrow next" type="button" data-lightbox-next aria-label="Photo suivante">›</button>` : ''}
+      <div class="lightbox-footer">
+        <p data-lightbox-caption></p>
+        <span><b data-lightbox-current></b> / ${photos.length}</span>
+      </div>`;
+
+    const render = () => {
+      const photo = photos[index];
+      const image = lightbox.querySelector('[data-lightbox-image]');
+      image.src = photo.src;
+      image.alt = photo.alt;
+      lightbox.querySelector('[data-lightbox-caption]').textContent = photo.alt;
+      lightbox.querySelector('[data-lightbox-current]').textContent = String(index + 1);
+    };
+    const move = (direction) => {
+      index = (index + direction + photos.length) % photos.length;
+      render();
+    };
+    const close = () => {
+      document.removeEventListener('keydown', onKeydown);
+      document.body.classList.remove('lightbox-open');
+      lightbox.remove();
+      returnFocus?.focus();
+    };
+    const onKeydown = (event) => {
+      if (event.key === 'Escape') close();
+      if (event.key === 'ArrowLeft' && photos.length > 1) move(-1);
+      if (event.key === 'ArrowRight' && photos.length > 1) move(1);
+    };
+
+    lightbox.addEventListener('click', (event) => {
+      if (event.target === lightbox || event.target.closest('[data-lightbox-close]')) close();
+      if (event.target.closest('[data-lightbox-previous]')) move(-1);
+      if (event.target.closest('[data-lightbox-next]')) move(1);
+    });
+
+    let touchStartX = null;
+    const stage = lightbox.querySelector('[data-lightbox-stage]');
+    stage.addEventListener('touchstart', (event) => {
+      touchStartX = event.changedTouches[0]?.clientX ?? null;
+    }, { passive: true });
+    stage.addEventListener('touchend', (event) => {
+      if (touchStartX === null || photos.length < 2) return;
+      const delta = (event.changedTouches[0]?.clientX ?? touchStartX) - touchStartX;
+      if (Math.abs(delta) > 45) move(delta < 0 ? 1 : -1);
+      touchStartX = null;
+    }, { passive: true });
+
+    document.body.append(lightbox);
+    document.body.classList.add('lightbox-open');
+    document.addEventListener('keydown', onKeydown);
+    render();
+    lightbox.querySelector('[data-lightbox-close]').focus();
+  }
+
   function profileCarousel(profile) {
     const photos = approvedProfilePhotos(profile);
     if (!photos.length) return '';
@@ -1629,7 +1717,13 @@
           </summary>
           <article class="card album-detail public">
             <header><div><p class="eyebrow">Album système public</p><h2>Photos de profil</h2></div><span class="pill gold">${profilePhotos.length} photo${profilePhotos.length > 1 ? 's' : ''}</span></header>
-            <div class="album-gallery">${profilePhotos.map((photo, index) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo de profil ${index + 1} de ${e(profile.display_name)}">${photoReactionBar(photo, own)}</figure>`).join('')}</div>
+            <div class="album-gallery">${profilePhotos.map((photo, index) => albumPhotoFigure(
+              photo,
+              `profile-photos-${profile.id}`,
+              index,
+              `Photo de profil ${index + 1} de ${profile.display_name}`,
+              own
+            )).join('')}</div>
             <p class="muted">Cet album est alimenté automatiquement par le carrousel public. Il reste synchronisé sans dupliquer les photos.</p>
           </article>
         </details>` : ''}
@@ -1661,7 +1755,13 @@
           <article class="card album-detail ${isPublic ? 'public' : 'private'}">
             <header><div><p class="eyebrow">${e(confidentialityLabel(album.confidentiality))}</p><h2>${e(album.name)}</h2></div>${canSee ? `<span class="pill">${countLabel}</span>` : ''}</header>
             ${canSee
-              ? (photos.length ? `<div class="album-gallery">${photos.map((photo) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo de l’album ${e(album.name)}">${photoReactionBar(photo, own)}</figure>`).join('')}</div>` : '<p class="muted">Aucune photo visible dans cet album.</p>')
+              ? (photos.length ? `<div class="album-gallery">${photos.map((photo, index) => albumPhotoFigure(
+                photo,
+                `album-${album.id}`,
+                index,
+                `Photo ${index + 1} de l’album ${album.name}`,
+                own
+              )).join('')}</div>` : '<p class="muted">Aucune photo visible dans cet album.</p>')
               : '<div class="private-vault"><span>⌑</span><strong>Album privé verrouillé</strong><p>Aucune miniature ni information sur son contenu n’est révélée.</p></div>'}
             ${own && pendingPhotos ? `<p class="status-box">${pendingPhotos} photo${pendingPhotos > 1 ? 's' : ''} visible${pendingPhotos > 1 ? 's' : ''} seulement par vous, en attente de modération.</p>` : ''}
             ${own ? `<form class="album-photo-form" data-album-id="${e(album.id)}">
@@ -2788,6 +2888,12 @@
   }
 
   document.addEventListener('click', (event) => {
+    const albumPhotoButton = event.target.closest('[data-album-lightbox]');
+    if (albumPhotoButton) {
+      event.preventDefault();
+      openAlbumLightbox(albumPhotoButton.dataset.albumLightbox, albumPhotoButton.dataset.lightboxIndex);
+      return;
+    }
     if (event.target.closest('[data-admission]')) {
       renderAdmission();
       return;
