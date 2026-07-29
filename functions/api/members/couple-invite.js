@@ -5,7 +5,67 @@ import {
   restJson,
   withSession
 } from './_shared.js';
-import { sendCoupleInvitationEmail } from './couple-invitation-email.js';
+import { buildCoupleInvitationEmail } from './couple-invitation-email.js';
+
+async function recordDelivery(env, session, invitationId, status, provider = null, messageId = null) {
+  if (!invitationId) return;
+  await restJson(
+    env,
+    '/rest/v1/rpc/record_couple_invitation_delivery',
+    session,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        target_invitation_id: invitationId,
+        target_status: status,
+        target_provider: provider,
+        target_message_id: messageId
+      })
+    }
+  ).catch(() => null);
+}
+
+async function sendInvitationEmail(env, { email, registrationUrl, profileName, invitationId }, session) {
+  if (!env.RESEND_API_KEY || !env.VELVET_FROM_EMAIL) {
+    await recordDelivery(env, session, invitationId, 'not_configured');
+    return { status: 'not_configured', provider: null, messageId: null };
+  }
+
+  const template = buildCoupleInvitationEmail({ profileName, registrationUrl });
+  const message = {
+    from: env.VELVET_FROM_EMAIL,
+    to: [email],
+    subject: template.subject,
+    text: template.text,
+    html: template.html,
+    tags: [{ name: 'category', value: 'couple_invitation' }]
+  };
+  if (env.VELVET_REPLY_TO_EMAIL) message.reply_to = env.VELVET_REPLY_TO_EMAIL;
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${env.RESEND_API_KEY}`,
+      'content-type': 'application/json',
+      'idempotency-key': `velvet-couple-${invitationId}`
+    },
+    body: JSON.stringify(message)
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    await recordDelivery(env, session, invitationId, 'failed', 'resend');
+    return {
+      status: 'failed',
+      provider: 'resend',
+      messageId: null,
+      providerError: payload?.message || payload?.name || 'resend_delivery_failed'
+    };
+  }
+
+  await recordDelivery(env, session, invitationId, 'sent', 'resend', payload.id || null);
+  return { status: 'sent', provider: 'resend', messageId: payload.id || null };
+}
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -13,17 +73,19 @@ export async function onRequestGet({ request, env }) {
     if (access.response) return access.response;
     const rows = await restJson(
       env,
-      `/rest/v1/couple_partner_invitations?select=id,profile_id,invited_email,status,accepted_at,created_at&inviter_user_id=eq.${encodeURIComponent(access.account.userId)}&order=created_at.desc&limit=1`,
+      '/rest/v1/couple_partner_invitations?select=id,profile_id,invited_email,status,accepted_user_id,accepted_at,created_at,delivery_status,delivery_provider,delivery_attempted_at&order=created_at.desc&limit=1',
       access.session
     );
     const invitation = rows?.[0] || null;
     return withSession({
-      ok: true,
-      invitation,
-      invitedEmail: invitation?.invited_email || null
+      invitation: invitation ? {
+        ...invitation,
+        partnerAccepted: invitation.status === 'accepted',
+        status: invitation.status === 'accepted' ? 'pending' : invitation.status
+      } : null
     }, access.session);
   } catch (error) {
-    return json({ error: error.message || 'couple_invitation_lookup_failed' }, 400);
+    return json({ error: error.message || 'couple_invitation_read_failed' }, 400);
   }
 }
 
@@ -50,41 +112,31 @@ export async function onRequestPost({ request, env }) {
         })
       }
     );
-    if (!result?.[0]?.partner_invitation_id || !result?.[0]?.invite_code) {
+    const invitation = result?.[0] || null;
+    if (!invitation?.partner_invitation_id || !invitation?.invite_code) {
       throw new Error('couple_invitation_persistence_failed');
     }
     const registrationUrl = new URL('/', request.url);
-    registrationUrl.searchParams.set('invite', result?.[0]?.invite_code || '');
+    registrationUrl.searchParams.set('invite', invitation.invite_code);
     registrationUrl.searchParams.set('email', email);
-    let emailDelivery = {
-      status: 'not_attempted',
-      provider: 'resend'
-    };
-    try {
-      const profileRows = await restJson(
-        env,
-        `/rest/v1/member_profiles?select=display_name&profile_members!inner(user_id,status)&profile_members.user_id=eq.${encodeURIComponent(access.account.userId)}&profile_members.status=eq.active&limit=1`,
-        access.session
-      );
-      emailDelivery = await sendCoupleInvitationEmail({
-        env,
-        invitedEmail: email,
-        profileName: profileRows?.[0]?.display_name || 'Votre moitié',
-        registrationUrl: registrationUrl.toString()
-      });
-    } catch (deliveryError) {
-      emailDelivery = {
-        status: 'failed',
-        provider: 'resend',
-        error: deliveryError.message || 'email_delivery_failed'
-      };
-    }
+    const profileRows = await restJson(
+      env,
+      '/rest/v1/member_profiles?select=display_name&profile_members!inner(user_id,status)&profile_members.user_id=eq.' + encodeURIComponent(access.account.userId) + '&profile_members.status=eq.active&limit=1',
+      access.session
+    );
+    const delivery = await sendInvitationEmail(env, {
+      email,
+      registrationUrl: registrationUrl.toString(),
+      profileName: profileRows?.[0]?.display_name || 'Votre moitié',
+      invitationId: invitation.partner_invitation_id
+    }, access.session);
+
     return withSession({
       ok: true,
-      invitation: result?.[0] || null,
+      invitation,
       invitedEmail: email,
       registrationUrl: registrationUrl.toString(),
-      emailDelivery
+      emailDelivery: delivery
     }, access.session, 201);
   } catch (error) {
     return json({ error: error.message || 'couple_invitation_failed' }, 400);
