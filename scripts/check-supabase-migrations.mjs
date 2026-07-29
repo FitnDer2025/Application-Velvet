@@ -14,10 +14,11 @@ const stagedCouple = await readFile('infra/supabase/migrations/0011_couple_first
 const locationVerification = await readFile('infra/supabase/migrations/0012_optional_location_identity_age_foundation.sql', 'utf8');
 const memberEngagement = await readFile('infra/supabase/migrations/0013_profile_memory_reactions_conversation_streaks.sql', 'utf8');
 const photoInteractions = await readFile('infra/supabase/migrations/0014_photo_reactions_control_invites_persistence.sql', 'utf8');
+const memberActions = await readFile('infra/supabase/migrations/0015_member_actions_conversations_events.sql', 'utf8');
 
-const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}`;
+const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}`;
 const tables = [...migrationBundle.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}`;
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -86,6 +87,11 @@ const requirements = [
   [photoInteractions.includes('cannot_react_to_own_photo'), 'Un profil ne doit pas pouvoir réagir à ses propres photos'],
   [photoInteractions.includes('photo_reaction_summaries') && photoInteractions.includes('count(pr.media_id)'), 'Les membres doivent recevoir uniquement les compteurs agrégés'],
   [photoInteractions.includes('admin_list_beta_invites') && photoInteractions.includes("public.has_role('admin')"), 'L’historique des invitations doit rester réservé aux administrateurs'],
+  [memberActions.includes('start_direct_profile_conversation') && memberActions.includes('direct_conversation_profiles'), 'La conversation directe doit être créée par une fonction transactionnelle dédiée'],
+  [memberActions.includes('profile_privacy_settings') && memberActions.includes('contactable_by'), 'La création d’une conversation doit respecter les préférences de contact'],
+  [memberActions.includes('public.blocks'), 'La création d’une conversation doit respecter les blocages'],
+  [memberActions.includes('register_for_event') && memberActions.includes('for update'), 'Les places d’une sortie doivent être attribuées sous verrou transactionnel'],
+  [memberActions.includes('is_registered_for_event') && memberActions.includes('registrations_participant_read'), 'Les participants visibles doivent être protégés sans récursion RLS'],
   [!migrationBundle.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 
