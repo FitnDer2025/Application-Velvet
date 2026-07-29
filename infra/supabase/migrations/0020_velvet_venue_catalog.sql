@@ -56,6 +56,8 @@ create table if not exists public.profile_venue_relationships (
 );
 
 alter table public.profile_venue_relationships enable row level security;
+drop policy if exists profile_venue_relationships_owner
+  on public.profile_venue_relationships;
 create policy profile_venue_relationships_owner
 on public.profile_venue_relationships
 for all to authenticated
@@ -79,12 +81,18 @@ create table if not exists public.establishment_claims (
 create unique index if not exists establishment_claims_one_pending_idx
   on public.establishment_claims(venue_id) where status='pending';
 alter table public.establishment_claims enable row level security;
+drop policy if exists establishment_claims_self_read
+  on public.establishment_claims;
 create policy establishment_claims_self_read
 on public.establishment_claims for select to authenticated
 using (claimant_user_id=auth.uid() or public.is_control_user());
+drop policy if exists establishment_claims_self_create
+  on public.establishment_claims;
 create policy establishment_claims_self_create
 on public.establishment_claims for insert to authenticated
 with check (claimant_user_id=auth.uid());
+drop policy if exists establishment_claims_control_update
+  on public.establishment_claims;
 create policy establishment_claims_control_update
 on public.establishment_claims for update to authenticated
 using (public.is_control_user()) with check (public.is_control_user());
