@@ -31,6 +31,17 @@ Appliquer dans l’ordre :
 3. `0003_velvet_beta_storage.sql`
 4. `0004_fix_invite_crypto_schema.sql`
 5. `0005_authenticated_api_grants.sql`
+6. `0006_neutral_beta_profiles.sql`
+7. `0007_shared_couple_ownership.sql`
+8. `0008_member_onboarding_identity.sql`
+9. `0009_photo_admission_and_venue_directory.sql`
+10. `0010_member_privacy_notifications_pwa.sql`
+11. `0011_couple_first_parallel_onboarding.sql`
+12. `0012_optional_location_identity_age_foundation.sql`
+13. `0013_profile_memory_reactions_conversation_streaks.sql`
+14. `0014_photo_reactions_control_invites_persistence.sql`
+15. `0015_member_actions_conversations_events.sql`
+16. `0016_member_notifications.sql`
 
 Puis ouvrir le Security Advisor et corriger toute alerte avant de connecter les interfaces.
 
