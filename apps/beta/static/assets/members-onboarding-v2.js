@@ -6,7 +6,8 @@
     invitation: null,
     photos: [],
     draft: {},
-    wizard: null
+    wizard: null,
+    waitingMessage: ''
   };
 
   const GENDERS = [
@@ -869,6 +870,7 @@
     const approvedGallery = gallery.filter((photo) => photo.moderation_status === 'approved').length;
     const pendingGallery = gallery.filter((photo) => photo.moderation_status === 'pending').length;
     const rejectedGallery = gallery.filter((photo) => photo.moderation_status === 'rejected').length;
+    const missingGallery = Math.max(0, 3 - gallery.length);
     const approvedPortraits = new Set(portraits.filter((photo) => photo.moderation_status === 'approved').map((photo) => photo.individual_profile_id)).size;
     const isCouple = profile.profile_type === 'couple';
     const guide = isCouple
@@ -892,10 +894,13 @@
         <article><strong>${approvedGallery}/3</strong><span>Photos du carrousel validées</span></article>
         ${isCouple ? `<article><strong>${approvedPortraits}/2</strong><span>Portraits individuels validés</span></article>` : ''}
       </div>
+      ${missingGallery ? `<p class="ov-alert">${missingGallery === 3 ? 'Aucune photo n’a encore été enregistrée.' : `${missingGallery} photo${missingGallery > 1 ? 's manquent' : ' manque'} encore.`} Ajoute ${missingGallery > 1 ? 'tes photos' : 'la photo manquante'} pour poursuivre ton admission.</p>` : ''}
       ${pendingGallery ? `<p class="ov-alert">${pendingGallery} photo${pendingGallery > 1 ? 's sont enregistrées' : ' est enregistrée'} et ${pendingGallery > 1 ? 'attendent' : 'attend'} une validation. Tu n’as rien à renvoyer.</p>` : ''}
       ${rejectedGallery ? `<p class="ov-alert">${rejectedGallery} photo${rejectedGallery > 1 ? 's ont' : ' a'} été refusée${rejectedGallery > 1 ? 's' : ''}. Remplace-${rejectedGallery > 1 ? 'les' : 'la'} pour poursuivre.</p>` : ''}
       ${isCouple && !ownPortrait && own ? '<p class="ov-alert">Ta photo individuelle manque encore.</p>' : ''}
+      ${state.waitingMessage ? `<p class="ov-alert" role="status">${escapeHtml(state.waitingMessage)}</p>` : ''}
       <div class="ov-actions standalone">
+        ${missingGallery ? '<button class="secondary" type="button" data-add-gallery>Ajouter mes photos</button>' : ''}
         ${rejectedGallery ? '<button class="secondary" type="button" data-replace-gallery>Remplacer les photos refusées</button>' : ''}
         ${isCouple && !ownPortrait && own ? '<button class="secondary" type="button" data-own-photo>Ajouter ma photo</button>' : ''}
         <button class="primary" type="button" data-refresh>Actualiser l’avancement</button>
@@ -912,10 +917,20 @@
       const refreshedProfile = state.profileResult.profile;
       const refreshedApproved = state.photos.filter((photo) => photo.moderation_status === 'approved').length;
       if (refreshedProfile.admission_status === previousStatus && refreshedApproved === previousApproved) {
-        toast('Le contrôle est toujours en cours. Tes photos sont bien enregistrées ; tu n’as rien à renvoyer.');
+        const refreshedGallery = state.photos.filter((photo) => photo.media_role === galleryRole);
+        state.waitingMessage = refreshedGallery.length
+          ? `Vérification effectuée à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}. Le contrôle est toujours en cours ; tes photos sont bien enregistrées.`
+          : `Vérification effectuée à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}. Aucune photo n’est enregistrée : utilise « Ajouter mes photos ».`;
+      } else {
+        state.waitingMessage = 'L’avancement vient d’être mis à jour.';
       }
       await renderWaitingGate();
     });
+    content.querySelector('[data-add-gallery]')?.addEventListener('click', () => showPhotoStage({
+      role: galleryRole, minimum: 3,
+      title: isCouple ? 'Ajoutez les photos publiques de votre couple.' : 'Ajoute les photos publiques de ton profil.',
+      guide: isCouple ? 'Vous devez être visibles tous les deux, au minimum à mi-corps et avec une netteté suffisante.' : 'Tu dois être clairement visible, au minimum à mi-corps et avec une netteté suffisante.'
+    }));
     content.querySelector('[data-replace-gallery]')?.addEventListener('click', () => showPhotoStage({
       role: galleryRole, minimum: 3,
       title: isCouple ? 'Remplacez les photos refusées de votre couple.' : 'Remplace les photos refusées de ton profil.',
@@ -975,6 +990,16 @@
 
       if (profile.profile_type === 'individual' && !ownComplete) {
         startSolo();
+        return;
+      }
+
+      if (profile.profile_type === 'individual' && galleryCount < 3) {
+        showPhotoStage({
+          role: 'individual_gallery',
+          minimum: 3,
+          title: 'Ajoute les premières photos de ton profil.',
+          guide: 'Ces photos alimenteront directement ton carrousel public. Tu dois être clairement visible, au minimum à mi-corps.'
+        });
         return;
       }
 
