@@ -14,10 +14,11 @@ async function controlAccess(request, env) {
 }
 
 async function workspace(env, access) {
-  const [accounts, profiles, establishments, staff, events, registrations, organizers, reports, audits, releaseChecks] = await Promise.all([
+  const [accounts, profiles, establishments, venueDirectory, staff, events, registrations, organizers, reports, audits, releaseChecks] = await Promise.all([
     restJson(env, '/rest/v1/rpc/control_accounts', access.session, { method: 'POST', body: '{}' }),
     restJson(env, '/rest/v1/member_profiles?select=id,profile_type,display_name,admission_status,verification_status,visibility,created_at&order=created_at.desc&limit=500', access.session),
-    restJson(env, '/rest/v1/establishments?select=id,slug,name,kind,city,visibility,verified_at,created_at,updated_at&order=created_at.desc&limit=500', access.session),
+    restJson(env, '/rest/v1/establishments?select=id,directory_venue_id,slug,name,kind,city,visibility,subscription_status,verified_at,created_at,updated_at&order=created_at.desc&limit=500', access.session),
+    restJson(env, '/rest/v1/venue_directory?select=id,slug,name,kind,city,country_code,claim_status,claimed_establishment_id,manual_review_required&public_visibility=eq.listed&verification_status=neq.closed&order=name.asc&limit=500', access.session),
     restJson(env, '/rest/v1/establishment_staff?select=establishment_id,user_id,staff_role,status,created_at&limit=1000', access.session),
     restJson(env, '/rest/v1/events?select=id,establishment_id,organizer_profile_id,owner_type,title,starts_at,capacity,visibility,created_at&order=starts_at.desc&limit=1000', access.session),
     restJson(env, '/rest/v1/event_registrations?select=id,event_id,user_id,places,status,created_at&order=created_at.desc&limit=2000', access.session),
@@ -26,7 +27,7 @@ async function workspace(env, access) {
     restJson(env, '/rest/v1/audit_events?select=sequence_number,actor_user_id,action,entity_type,entity_id,occurred_at&order=sequence_number.desc&limit=100', access.session),
     restJson(env, '/rest/v1/rpc/control_beta_release_checks', access.session, { method: 'POST', body: '{}' })
   ]);
-  return { accounts, profiles, establishments, staff, events, registrations, organizers, reports, audits, releaseChecks };
+  return { accounts, profiles, establishments, venueDirectory, staff, events, registrations, organizers, reports, audits, releaseChecks };
 }
 
 export async function onRequestGet({ request, env }) {
@@ -69,6 +70,22 @@ export async function onRequestPost({ request, env }) {
       }
       await restJson(env, `/rest/v1/establishments?id=eq.${encodeURIComponent(body.venueId)}`, access.session, {
         method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ visibility: body.visibility })
+      });
+    } else if (body.action === 'claim_directory_venue') {
+      if (!UUID.test(body.venueId || '') || !UUID.test(body.ownerUserId || '')) {
+        return withSession({ error: 'invalid_venue_claim' }, access.session, 400);
+      }
+      await restJson(env, '/rest/v1/rpc/control_claim_directory_venue', access.session, {
+        method: 'POST',
+        body: JSON.stringify({ target_venue: body.venueId, target_owner: body.ownerUserId })
+      });
+    } else if (body.action === 'subscription_status') {
+      if (!UUID.test(body.venueId || '') || !['inactive','trial','active','past_due','cancelled'].includes(body.status)) {
+        return withSession({ error: 'invalid_subscription_status' }, access.session, 400);
+      }
+      await restJson(env, '/rest/v1/rpc/control_set_establishment_subscription', access.session, {
+        method: 'POST',
+        body: JSON.stringify({ target_establishment: body.venueId, target_status: body.status })
       });
     } else {
       return withSession({ error: 'invalid_control_action' }, access.session, 400);
