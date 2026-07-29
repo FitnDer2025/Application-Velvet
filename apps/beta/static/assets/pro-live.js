@@ -13,6 +13,8 @@
   const kindValue = { 'Club privé': 'club', 'Spa privé': 'spa', 'Bar libertin': 'bar', 'Love room': 'love_room' };
   const avatar = (name) => `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><rect width="100%" height="100%" fill="#471629"/><text x="50%" y="55%" text-anchor="middle" fill="#d5b477" font-size="42" font-family="serif">${String(name || 'V').split(/\s+/).map((x) => x[0]).join('').slice(0, 2)}</text></svg>`)}`;
   let workspace = null;
+  menu.splice(0, menu.length, ...menu.filter((item) => ['dashboard', 'venue', 'events', 'bookings'].includes(item[0])));
+  localStorage.removeItem('velvetProCrmV1');
 
   function venueInput() {
     return {
