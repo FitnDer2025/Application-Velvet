@@ -3458,7 +3458,11 @@
               ? state.profile
               : list(state.directory.profiles).find((profile) => profile.id === visit.profile_id);
             const portrait = approvedProfilePhotos(member)[0];
-            return member ? `<button type="button" data-open-profile="${e(member.id)}" aria-label="Ouvrir le profil de ${e(member.display_name)}" title="${e(member.display_name)}"><span>${portrait ? `<img src="${e(portrait.previewUrl)}" alt="">` : e(initials(member.display_name))}</span></button>` : '';
+            return member ? `<button class="venue-visitor-card" type="button" data-open-profile="${e(member.id)}" aria-label="Ouvrir le profil de ${e(member.display_name)}">
+              <span class="venue-visitor-photo">${portrait ? `<img src="${e(portrait.previewUrl)}" alt="">` : e(initials(member.display_name))}</span>
+              <span class="venue-visitor-copy"><strong>${e(member.display_name)}</strong><small>${e(profileAges(member))} · ${e(member.location_zone || 'Ville non renseignée')}</small></span>
+              <i aria-hidden="true">→</i>
+            </button>` : '';
           }).join('')}</div></article>`;
         }).join('')}</div>` : '<p class="muted">Aucun membre n’a encore annoncé sa venue.</p>'}
       </section>
