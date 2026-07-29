@@ -10,6 +10,13 @@ Ce document enregistre le lot de décisions validées pour la recherche, la reco
 
 Velvet combine un flux de recommandations personnalisées, une recherche manuelle et des filtres avancés. Le swipe reste facultatif et ne constitue jamais le cœur de l'expérience.
 
+Amendement fonctionnel du 29 juillet 2026 :
+
+- l'accueil présente explicitement les autres membres ;
+- les établissements de l'accueil se filtrent par nature et par rayon de 5, 10, 15 ou 20 km autour d'une localisation approximative consentie ;
+- la recherche de profils distingue les couples, les hommes et les femmes ;
+- les pratiques sont choisies dans une liste contrôlée plutôt que saisies librement.
+
 ## ADR-025 — Recommandations explicables
 
 Chaque recommandation peut présenter des raisons qualitatives compréhensibles : proximité, lieux communs, centres d'intérêt, événements, disponibilité ou philosophie partagée.
@@ -33,6 +40,13 @@ Le flux présente d'abord une sélection limitée des profils les plus pertinent
 ## ADR-030 — Carte premium
 
 Velvet propose une carte fluide de qualité comparable aux références grand public, avec clustering, zoom, filtres et affichage des membres, clubs, événements et professionnels. Les positions restent approximatives et configurables ; un mode invisible est disponible.
+
+Amendement fonctionnel du 29 juillet 2026 :
+
+- le cadrage initial couvre un rayon d'environ 50 km autour de la localisation approximative consentie du membre ;
+- le membre peut zoomer et dézoomer ;
+- il choisit séparément l'affichage des membres, clubs, spas, bars, love rooms, hôtels et autres lieux ;
+- aucune coordonnée exacte de membre n'est exposée ni conservée par cette fonction.
 
 ## ADR-031 — Velvet Alchemy Index
 

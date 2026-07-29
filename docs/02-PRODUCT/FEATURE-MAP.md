@@ -34,7 +34,9 @@ Ce document facilite le travail de CODEX. Il ne remplace pas les ADR.
 
 - Accueil intelligent déjà validé.
 - Suggestions personnalisées de profils, événements, clubs et voyages.
-- Recherche et filtres selon les critères autorisés.
+- Recherche de profils par couple, homme ou femme, et filtre des pratiques par liste contrôlée.
+- Établissements filtrables par nature et par rayon de 5, 10, 15 ou 20 km.
+- Carte zoomable centrée par défaut sur un rayon d'environ 50 km, avec couches membres et catégories de lieux activables séparément.
 - Proximité et géolocalisation uniquement avec consentement.
 - Aucune promesse de compatibilité absolue ni classement humiliant.
 
@@ -78,6 +80,7 @@ Cycle : Découverte → Invitation Velvet → Salon Velvet → Confiance → Exp
 ## 8. Événements, clubs et voyages
 
 - Découverte, recherche et fiches détaillées.
+- Agenda « Prochaines soirées » réservé aux clubs, spas et bars.
 - Participation et intérêt selon les paramètres de visibilité.
 - Création et gestion pour les comptes autorisés.
 - Avis et recommandations soumis aux règles de confiance et de modération.

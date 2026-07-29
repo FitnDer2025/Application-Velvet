@@ -242,10 +242,23 @@
   }
 
   function destinations(account) {
+    const roles = Array.isArray(account.roles) ? account.roles : [];
+    const canChooseDestination = roles.includes('admin') || roles.includes('moderator');
+    if (!canChooseDestination) {
+      const controlRoles = ['support', 'auditor', 'direction'];
+      const proRoles = ['organizer', 'pro_owner', 'pro_staff'];
+      const destination = controlRoles.some((role) => roles.includes(role))
+        ? '/control/'
+        : proRoles.some((role) => roles.includes(role))
+          ? '/pro/'
+          : '/membres/';
+      window.location.replace(destination);
+      return;
+    }
     const links = [{ href: '/membres/', label: 'Velvet Membres', roles: [] }];
     links.push({ href: '/pro/', label: 'Velvet Pro', roles: ['organizer', 'pro_owner', 'pro_staff', 'direction', 'admin'] });
     links.push({ href: '/control/', label: 'Velvet Control', roles: ['moderator', 'support', 'auditor', 'direction', 'admin'] });
-    const allowed = links.filter((link) => !link.roles.length || link.roles.some((role) => account.roles.includes(role)));
+    const allowed = links.filter((link) => !link.roles.length || link.roles.some((role) => roles.includes(role)));
     gate.innerHTML = shell(`
       <p class="vg-intro">Bienvenue ${escape(account.email)}. Choisis ton espace autorisé.</p>
       <div class="vg-destinations">${allowed.map((link) => `<a href="${link.href}">${link.label}<span>Ouvrir →</span></a>`).join('')}</div>
