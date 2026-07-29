@@ -739,20 +739,29 @@
 
   function showPhotoStage({ role, minimum, title, guide, individualProfileId = null }) {
     const current = state.photos.filter((photo) => photo.media_role === role && (!individualProfileId || photo.individual_profile_id === individualProfileId));
+    const approved = current.filter((photo) => photo.moderation_status === 'approved');
+    const pending = current.filter((photo) => photo.moderation_status === 'pending');
+    const rejected = current.filter((photo) => photo.moderation_status === 'rejected');
     content.innerHTML = `<div class="ov-page"><section class="ov-shell">
       <div class="ov-guide"><span>V</span><p><strong>Velvet</strong>${escapeHtml(guide)}</p></div>
       <p class="ov-kicker">Photos obligatoires</p>
       <h1>${escapeHtml(title)}</h1>
-      <div class="ov-photo-progress"><strong>${current.length}</strong><span>sur ${minimum} minimum</span></div>
+      <div class="ov-photo-progress"><strong>${approved.length}</strong><span>sur ${minimum} validée${minimum > 1 ? 's' : ''}</span></div>
       <form id="ovPhotoForm" class="ov-photo-form">
         <label class="ov-drop"><span data-file-label>Choisir ${minimum > 1 ? 'des photos' : 'une photo'}</span><input type="file" name="photos" accept="image/jpeg,image/png,image/webp"${minimum > 1 ? ' multiple' : ''} required></label>
         <button class="primary" type="submit" data-upload disabled>Ajouter et faire vérifier</button>
         <div data-selection hidden aria-live="polite" style="grid-column:1/-1;margin-top:12px"></div>
         <p data-status role="status"></p>
       </form>
-      <div class="ov-photo-list">${current.map((photo) => `<span class="${escapeHtml(photo.moderation_status)}">${photo.moderation_status === 'approved' ? 'Validée' : photo.moderation_status === 'rejected' ? 'À remplacer' : 'Analyse en cours'}</span>`).join('')}</div>
+      ${pending.length ? `<p class="ov-alert">${pending.length} photo${pending.length > 1 ? 's sont' : ' est'} enregistrée${pending.length > 1 ? 's' : ''} et transmise${pending.length > 1 ? 's' : ''} au contrôle. Il est inutile de ${pending.length > 1 ? 'les' : 'la'} renvoyer.</p>` : ''}
+      ${rejected.length ? `<p class="ov-alert">${rejected.length} photo${rejected.length > 1 ? 's doivent' : ' doit'} être remplacée${rejected.length > 1 ? 's' : ''}.</p>` : ''}
+      <div class="ov-photo-list">${current.map((photo) => `<figure style="margin:0;display:grid;gap:7px;min-width:110px">
+        ${photo.previewUrl ? `<img src="${escapeHtml(photo.previewUrl)}" alt="Photo de profil enregistrée" style="width:110px;height:130px;object-fit:cover;border-radius:14px">` : ''}
+        <span class="${escapeHtml(photo.moderation_status)}">${photo.moderation_status === 'approved' ? 'Validée' : photo.moderation_status === 'rejected' ? 'À remplacer' : 'Contrôle en attente'}</span>
+        ${photo.moderation_status === 'rejected' ? `<button type="button" class="secondary" data-delete-photo="${escapeHtml(photo.id)}">Supprimer</button>` : ''}
+      </figure>`).join('')}</div>
       <div class="ov-actions standalone">
-        <button class="primary" type="button" data-next${current.length < minimum ? ' disabled' : ''}>${role === 'couple_gallery' ? 'Maintenant, parlons de moi' : 'Continuer'}</button>
+        <button class="primary" type="button" data-next${approved.length < minimum ? ' disabled' : ''}>${role === 'couple_gallery' ? 'Maintenant, parlons de moi' : 'Continuer'}</button>
       </div>
     </section></div>`;
     const form = content.querySelector('#ovPhotoForm');
@@ -798,6 +807,17 @@
         button.disabled = false;
       }
     });
+    content.querySelectorAll('[data-delete-photo]').forEach((button) => button.addEventListener('click', async () => {
+      button.disabled = true;
+      try {
+        await api(`/api/members/photos?id=${encodeURIComponent(button.dataset.deletePhoto)}`, { method: 'DELETE' });
+        await refreshState();
+        showPhotoStage({ role, minimum, title, guide, individualProfileId });
+      } catch (error) {
+        toast(error.message, true);
+        button.disabled = false;
+      }
+    }));
     content.querySelector('[data-next]').addEventListener('click', async () => {
       if (role === 'couple_gallery') {
         startCouplePersonal();
@@ -847,26 +867,60 @@
     const partnerPending = profile.profile_type === 'couple' && linkedPeople.length < 2;
     const ownPortrait = own && portraits.some((photo) => photo.individual_profile_id === own.id);
     const approvedGallery = gallery.filter((photo) => photo.moderation_status === 'approved').length;
+    const pendingGallery = gallery.filter((photo) => photo.moderation_status === 'pending').length;
+    const rejectedGallery = gallery.filter((photo) => photo.moderation_status === 'rejected').length;
     const approvedPortraits = new Set(portraits.filter((photo) => photo.moderation_status === 'approved').map((photo) => photo.individual_profile_id)).size;
+    const isCouple = profile.profile_type === 'couple';
+    const guide = isCouple
+      ? partnerPending
+        ? 'Ta partie est entre de bonnes mains. Pendant ce temps, ta moitié avance à son rythme.'
+        : 'Vous vous êtes tous les deux confiés. Velvet Intelligence termine maintenant les vérifications.'
+      : 'Ton profil est bien enregistré. Velvet Intelligence termine maintenant la vérification de tes photos.';
+    const title = isCouple
+      ? partnerPending
+        ? 'Un peu de patience, votre moitié n’a pas fini de se confier.'
+        : 'Votre histoire est presque prête à être dévoilée.'
+      : 'Ton profil est presque prêt à être dévoilé.';
 
     content.innerHTML = `<div class="ov-page"><section class="ov-shell ov-waiting">
-      <div class="ov-guide"><span>V</span><p><strong>Velvet</strong>${partnerPending ? 'Ta partie est entre de bonnes mains. Pendant ce temps, ta moitié avance à son rythme.' : 'Vous vous êtes tous les deux confiés. Velvet Intelligence termine maintenant les vérifications.'}</p></div>
+      <div class="ov-guide"><span>V</span><p><strong>Velvet</strong>${escapeHtml(guide)}</p></div>
       <p class="ov-kicker">Admission Velvet</p>
-      <h1>${partnerPending ? 'Un peu de patience, votre moitié n’a pas fini de se confier.' : 'Votre histoire est presque prête à être dévoilée.'}</h1>
+      <h1>${escapeHtml(title)}</h1>
       <div class="ov-progress-cards">
-        <article><strong>✓</strong><span>Fiche du couple</span></article>
+        <article><strong>✓</strong><span>${isCouple ? 'Fiche du couple' : 'Fiche individuelle'}</span></article>
         <article><strong>${linkedPeople.length}/${profile.profile_type === 'couple' ? 2 : 1}</strong><span>Fiches personnelles</span></article>
         <article><strong>${approvedGallery}/3</strong><span>Photos du carrousel validées</span></article>
-        ${profile.profile_type === 'couple' ? `<article><strong>${approvedPortraits}/2</strong><span>Portraits individuels validés</span></article>` : ''}
+        ${isCouple ? `<article><strong>${approvedPortraits}/2</strong><span>Portraits individuels validés</span></article>` : ''}
       </div>
-      ${profile.profile_type === 'couple' && !ownPortrait && own ? '<p class="ov-alert">Ta photo individuelle manque encore.</p>' : ''}
+      ${pendingGallery ? `<p class="ov-alert">${pendingGallery} photo${pendingGallery > 1 ? 's sont enregistrées' : ' est enregistrée'} et ${pendingGallery > 1 ? 'attendent' : 'attend'} une validation. Tu n’as rien à renvoyer.</p>` : ''}
+      ${rejectedGallery ? `<p class="ov-alert">${rejectedGallery} photo${rejectedGallery > 1 ? 's ont' : ' a'} été refusée${rejectedGallery > 1 ? 's' : ''}. Remplace-${rejectedGallery > 1 ? 'les' : 'la'} pour poursuivre.</p>` : ''}
+      ${isCouple && !ownPortrait && own ? '<p class="ov-alert">Ta photo individuelle manque encore.</p>' : ''}
       <div class="ov-actions standalone">
-        ${profile.profile_type === 'couple' && !ownPortrait && own ? '<button class="secondary" type="button" data-own-photo>Ajouter ma photo</button>' : ''}
+        ${rejectedGallery ? '<button class="secondary" type="button" data-replace-gallery>Remplacer les photos refusées</button>' : ''}
+        ${isCouple && !ownPortrait && own ? '<button class="secondary" type="button" data-own-photo>Ajouter ma photo</button>' : ''}
         <button class="primary" type="button" data-refresh>Actualiser l’avancement</button>
       </div>
       <button class="ov-logout" type="button" data-logout>Se déconnecter</button>
     </section></div>`;
-    content.querySelector('[data-refresh]').addEventListener('click', renderWaitingGate);
+    content.querySelector('[data-refresh]').addEventListener('click', async (event) => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      button.textContent = 'Vérification en cours…';
+      const previousStatus = profile.admission_status;
+      const previousApproved = approvedGallery + approvedPortraits;
+      await refreshState();
+      const refreshedProfile = state.profileResult.profile;
+      const refreshedApproved = state.photos.filter((photo) => photo.moderation_status === 'approved').length;
+      if (refreshedProfile.admission_status === previousStatus && refreshedApproved === previousApproved) {
+        toast('Le contrôle est toujours en cours. Tes photos sont bien enregistrées ; tu n’as rien à renvoyer.');
+      }
+      await renderWaitingGate();
+    });
+    content.querySelector('[data-replace-gallery]')?.addEventListener('click', () => showPhotoStage({
+      role: galleryRole, minimum: 3,
+      title: isCouple ? 'Remplacez les photos refusées de votre couple.' : 'Remplace les photos refusées de ton profil.',
+      guide: isCouple ? 'Vous devez être visibles tous les deux, au minimum à mi-corps et avec une netteté suffisante.' : 'Tu dois être clairement visible, au minimum à mi-corps et avec une netteté suffisante.'
+    }));
     content.querySelector('[data-own-photo]')?.addEventListener('click', () => showPhotoStage({
       role: 'individual_portrait', minimum: 1, individualProfileId: own.id,
       title: `Ajoute la photo personnelle de ${own.first_name}.`,
