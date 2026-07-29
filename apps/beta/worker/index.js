@@ -91,6 +91,10 @@ import {
   onRequestGet as proWorkspaceGet,
   onRequestPost as proWorkspacePost
 } from '../../../functions/api/pro/workspace.js';
+import {
+  onRequestGet as controlWorkspaceGet,
+  onRequestPost as controlWorkspacePost
+} from '../../../functions/api/control/workspace.js';
 import { velvetIconResponse } from './velvet-icons.js';
 
 const API_ROUTES = new Map([
@@ -149,7 +153,9 @@ const API_ROUTES = new Map([
   ['POST /api/members/notifications', memberNotificationsPost],
   ['GET /api/members/map', memberMapGet],
   ['GET /api/pro/workspace', proWorkspaceGet],
-  ['POST /api/pro/workspace', proWorkspacePost]
+  ['POST /api/pro/workspace', proWorkspacePost],
+  ['GET /api/control/workspace', controlWorkspaceGet],
+  ['POST /api/control/workspace', controlWorkspacePost]
 ]);
 
 const PROTECTED_PREFIXES = ['/membres', '/pro', '/control'];
