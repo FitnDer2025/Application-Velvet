@@ -17,6 +17,7 @@
       currentUserId: null,
       currentProfileId: null
     },
+    photoReactions: [],
     organizerRequest: null,
     membership: null,
     personalProfileComplete: false,
@@ -52,7 +53,10 @@
     message_required: 'Écris un message avant de l’envoyer.',
     photo_admission_required: 'Les photos publiques doivent être validées avant cette action.',
     invalid_photo_file: 'Choisis une photo JPG, PNG ou WebP de moins de 4 Mo.',
-    personal_photo_owner_required: 'Chaque personne doit publier elle-même son portrait.'
+    personal_photo_owner_required: 'Chaque personne doit publier elle-même son portrait.',
+    photo_access_denied: 'Cette photo n’est plus accessible.',
+    cannot_react_to_own_photo: 'Tu peux consulter les réactions reçues, mais pas réagir à ta propre photo.',
+    photo_reaction_persistence_failed: 'La réaction n’a pas pu être confirmée dans la mémoire Velvet.'
   };
 
   const REFERENCES = {
@@ -283,11 +287,43 @@
     );
   }
 
+  function photoReactionSummary(mediaId) {
+    return list(state.photoReactions).find((row) => row.media_id === mediaId) || {
+      media_id: mediaId,
+      like_count: 0,
+      love_count: 0,
+      adore_count: 0,
+      total_count: 0,
+      my_reaction: null
+    };
+  }
+
+  const PHOTO_REACTIONS = [
+    ['like', '👍', 'J’aime', 'like_count'],
+    ['love', '❤️', 'J’adore', 'love_count'],
+    ['adore', '🔥', 'Canon', 'adore_count']
+  ];
+
+  function photoReactionBar(photo, ownProfile = false) {
+    if (!photo?.id) return '';
+    const summary = photoReactionSummary(photo.id);
+    return `<div class="photo-reaction-bar ${ownProfile ? 'read-only' : ''}" data-photo-reaction-bar="${e(photo.id)}">
+      ${PHOTO_REACTIONS.map(([value, icon, label, countKey]) => ownProfile
+        ? `<span title="${e(label)}"><b>${icon}</b><small>${e(summary[countKey] || 0)}</small></span>`
+        : `<button type="button" class="${summary.my_reaction === value ? 'active' : ''}" data-photo-reaction="${e(value)}" data-photo-id="${e(photo.id)}" aria-label="${e(label)}">
+            <b>${icon}</b><small>${e(summary[countKey] || 0)}</small>
+          </button>`
+      ).join('')}
+      <em>${e(summary.total_count || 0)} réaction${summary.total_count === 1 ? '' : 's'}</em>
+    </div>`;
+  }
+
   function profileCarousel(profile) {
     const photos = approvedProfilePhotos(profile);
     if (!photos.length) return '';
+    const ownProfile = profile.id === state.profile?.id;
     return `<div class="profile-carousel" aria-label="Photos publiques de ${e(profile.display_name)}">
-      ${photos.map((photo, index) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo publique ${index + 1} de ${e(profile.display_name)}"></figure>`).join('')}
+      ${photos.map((photo, index) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo publique ${index + 1} de ${e(profile.display_name)}">${photoReactionBar(photo, ownProfile)}</figure>`).join('')}
     </div>`;
   }
 
@@ -332,14 +368,16 @@
         return;
       }
       unlockApplication();
-      const [directoryResult, organizerResult, engagementResult] = await Promise.all([
+      const [directoryResult, organizerResult, engagementResult, photoReactionResult] = await Promise.all([
         api('/api/members/directory'),
         api('/api/members/organizer-request').catch(() => ({ request: null })),
-        api('/api/members/engagement')
+        api('/api/members/engagement'),
+        api('/api/members/photo-reactions')
       ]);
       state.directory = directoryResult;
       state.organizerRequest = organizerResult.request;
       state.engagement = engagementResult;
+      state.photoReactions = photoReactionResult.reactions || [];
       route('home');
     } catch (error) {
       if (error.message === 'authentication_required') {
@@ -363,18 +401,21 @@
     if (state.profile?.admission_status !== 'approved') {
       state.directory = { profiles: [], establishments: [], events: [], conversations: [], recommendations: [] };
       state.engagement = { views: [], reactions: [], streaks: [], currentUserId: null, currentProfileId: null };
+      state.photoReactions = [];
       state.organizerRequest = null;
       await loadPhotos();
       return;
     }
-    const [directoryResult, organizerResult, engagementResult] = await Promise.all([
+    const [directoryResult, organizerResult, engagementResult, photoReactionResult] = await Promise.all([
       api('/api/members/directory'),
       api('/api/members/organizer-request').catch(() => ({ request: null })),
-      api('/api/members/engagement')
+      api('/api/members/engagement'),
+      api('/api/members/photo-reactions')
     ]);
     state.directory = directoryResult;
     state.organizerRequest = organizerResult.request;
     state.engagement = engagementResult;
+    state.photoReactions = photoReactionResult.reactions || [];
   }
 
   function lockApplication() {
@@ -1404,7 +1445,7 @@
       <aside>
         <article class="card"><p class="eyebrow">Orientation et attirances</p><h3>${e(person.orientation || 'Non renseignées')}</h3></article>
         <article class="card" style="margin-top:14px"><p class="eyebrow">Photos individuelles</p>
-          ${personalPhotos.length ? `<div class="mini-gallery">${personalPhotos.map((photo) => `<img src="${e(photo.previewUrl)}" alt="Photo individuelle de ${e(person.first_name)}">`).join('')}</div>` : '<h3>Aucune photo publiée</h3><p>Velvet n’affiche aucune image de substitution.</p>'}
+          ${personalPhotos.length ? `<div class="mini-gallery">${personalPhotos.map((photo) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo individuelle de ${e(person.first_name)}">${photoReactionBar(photo, own)}</figure>`).join('')}</div>` : '<h3>Aucune photo publiée</h3><p>Velvet n’affiche aucune image de substitution.</p>'}
           ${canAddPersonalPhotos ? `<form class="profile-photo-form" data-photo-role="individual_portrait" data-individual-profile="${e(person.id)}">
             <label>Ajouter des photos individuelles<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required></label>
             <button class="secondary" type="submit">Ajouter</button><small class="photo-upload-status" role="status"></small>
@@ -1440,7 +1481,7 @@
         return `<article class="card album-detail ${isPublic ? 'public' : 'private'}">
           <header><div><p class="eyebrow">${e(confidentialityLabel(album.confidentiality))}</p><h2>${e(album.name)}</h2></div><span class="pill">${photos.length} photo${photos.length > 1 ? 's' : ''}</span></header>
           ${canSee
-            ? (photos.length ? `<div class="album-gallery">${photos.map((photo) => `<figure><img src="${e(photo.previewUrl)}" alt=""></figure>`).join('')}</div>` : '<p class="muted">Aucune photo visible dans cet album.</p>')
+            ? (photos.length ? `<div class="album-gallery">${photos.map((photo) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo de l’album ${e(album.name)}">${photoReactionBar(photo, own)}</figure>`).join('')}</div>` : '<p class="muted">Aucune photo visible dans cet album.</p>')
             : '<div class="private-vault"><span>⌑</span><strong>Album privé verrouillé</strong><p>Aucune miniature ni information sur son contenu n’est révélée.</p></div>'}
           ${own && pendingPhotos ? `<p class="status-box">${pendingPhotos} photo${pendingPhotos > 1 ? 's' : ''} visible${pendingPhotos > 1 ? 's' : ''} seulement par vous, en attente de modération.</p>` : ''}
           ${own ? `<form class="album-photo-form" data-album-id="${e(album.id)}">
@@ -2122,6 +2163,38 @@
       }).catch((error) => {
         toast(errorMessages[error.message] || error.message, true);
         reactionButton.disabled = false;
+      });
+      return;
+    }
+    const photoReactionButton = event.target.closest('[data-photo-reaction]');
+    if (photoReactionButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      const mediaId = photoReactionButton.dataset.photoId;
+      const requestedReaction = photoReactionButton.dataset.photoReaction;
+      const current = photoReactionSummary(mediaId);
+      const reaction = current.my_reaction === requestedReaction ? null : requestedReaction;
+      photoReactionButton.disabled = true;
+      api('/api/members/photo-reactions', {
+        method: 'POST',
+        body: JSON.stringify({ mediaId, reaction })
+      }).then((result) => {
+        if (!result.summary) throw new Error('photo_reaction_persistence_failed');
+        state.photoReactions = [
+          result.summary,
+          ...list(state.photoReactions).filter((row) => row.media_id !== mediaId)
+        ];
+        const profile = state.selectedProfileId === state.profile.id
+          ? state.profile
+          : list(state.directory.profiles).find((row) => row.id === state.selectedProfileId);
+        if (profile) {
+          content.innerHTML = renderProfile(profile, profile.id === state.profile.id);
+          bindDynamicForms();
+        }
+        toast(reaction ? 'Ta réaction est enregistrée.' : 'Ta réaction est retirée.');
+      }).catch((error) => {
+        toast(errorMessages[error.message] || error.message, true);
+        photoReactionButton.disabled = false;
       });
       return;
     }
