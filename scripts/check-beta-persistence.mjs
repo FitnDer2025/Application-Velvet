@@ -2,6 +2,8 @@ import { readFile } from 'node:fs/promises';
 
 const files = Object.fromEntries(await Promise.all([
   'functions/api/members/profile.js',
+  'functions/api/members/couple-profile.js',
+  'functions/api/members/couple-invite.js',
   'functions/api/members/photos.js',
   'functions/api/members/album-media.js',
   'functions/api/members/albums.js',
@@ -15,6 +17,7 @@ const files = Object.fromEntries(await Promise.all([
   'functions/api/members/photo-reactions.js',
   'functions/api/members/notifications.js',
   'functions/api/members/map.js',
+  'functions/api/members/venue-relationships.js',
   'functions/api/members/directory.js',
   'functions/api/pro/workspace.js',
   'functions/api/control/workspace.js',
@@ -28,6 +31,8 @@ const files = Object.fromEntries(await Promise.all([
 const includes = (path, ...tokens) => tokens.every((token) => files[path].includes(token));
 const requirements = [
   [includes('functions/api/members/profile.js', 'profile_persistence_failed', 'await myProfile'), 'Le profil doit être relu après sauvegarde'],
+  [includes('functions/api/members/couple-profile.js', 'couple_profile_persistence_failed', 'persisted?.[0]?.id'), 'La fiche couple doit être relue après création'],
+  [includes('functions/api/members/couple-invite.js', 'couple_invitation_persistence_failed', 'partner_invitation_id'), 'L’invitation partenaire doit être confirmée par Supabase'],
   [includes('functions/api/members/photos.js', 'photo_persistence_failed', '/storage/v1/object/velvet-media/', "method: 'DELETE'"), 'Une photo de profil échouée doit être vérifiée et nettoyée'],
   [includes('functions/api/members/album-media.js', 'photo_persistence_failed', '/storage/v1/object/velvet-media/', "method: 'DELETE'"), 'Une photo d’album échouée doit être vérifiée et nettoyée'],
   [includes('functions/api/members/albums.js', 'album_persistence_failed'), 'La création d’un album doit être confirmée par Supabase'],
@@ -41,14 +46,16 @@ const requirements = [
   [includes('functions/api/members/photo-reactions.js', 'result?.[0]', 'set_photo_reaction'), 'Une réaction photo doit retourner son agrégat persistant'],
   [includes('functions/api/members/notifications.js', '/rest/v1/member_notifications', 'read_all', 'notificationFeed'), 'Les notifications doivent être lues et acquittées dans Supabase'],
   [includes('functions/api/members/map.js', 'location_zone', 'exactMemberCoordinatesExposed: false', 'venue_directory'), 'Maps doit utiliser les zones publiques et les coordonnées publiques des lieux'],
+  [includes('functions/api/members/venue-relationships.js', 'set_my_venue_relationship', 'relationships: await relationships'), 'Favoris, visites et projets de sortie doivent être sauvegardés puis relus'],
+  [includes('functions/api/members/directory.js', 'member_venue_catalog', 'venueRelationships', 'subscription_status'), 'L’annuaire doit charger le catalogue riche et son état Pro réel'],
   [!files['functions/api/members/directory.js'].includes("'city',"), 'L’annuaire membre ne doit pas exposer la commune privée'],
-  [includes('functions/api/pro/workspace.js', 'save_venue_draft', 'publish_venue', 'create_event', 'registration_status'), 'Velvet Pro doit enregistrer ses actions métier dans Supabase'],
-  [includes('functions/api/control/workspace.js', 'create_establishment', 'decide_organizer', 'venue_visibility', 'control_beta_release_checks'), 'Velvet Control doit piloter ses opérations et sa recette dans Supabase'],
+  [includes('functions/api/pro/workspace.js', 'save_venue_draft', 'publish_venue', 'create_event', 'registration_status', 'pro_subscription_required'), 'Velvet Pro doit enregistrer ses actions métier et bloquer les comptes non abonnés'],
+  [includes('functions/api/control/workspace.js', 'create_establishment', 'decide_organizer', 'venue_visibility', 'control_beta_release_checks', 'claim_directory_venue', 'subscription_status'), 'Velvet Control doit piloter sa recette, l’attribution du catalogue et les abonnements Pro'],
   [includes('functions/api/admin/invites.js', 'invite_persistence_failed', 'registrationUrl'), 'Une invitation doit être confirmée et fournir son lien'],
   [includes('apps/beta/static/assets/members-live.js', '/api/members/photo-reactions', 'photo_reaction_persistence_failed'), 'L’interface membre doit refuser une réaction non confirmée'],
-  [includes('apps/beta/static/assets/members-live.js', '/api/members/notifications', '/api/members/map', 'data-open-venue'), 'L’interface doit exploiter notifications, Maps et mini-sites établissements'],
-  [includes('apps/beta/static/assets/pro-live.js', '/api/pro/workspace', 'S.threads = []', "localStorage.removeItem('velvetProCrmV1')", 'Cette vue ne contient plus aucune donnée de démonstration'), 'Velvet Pro doit neutraliser les données fictives et charger son workspace serveur'],
-  [includes('apps/beta/static/assets/control-live.js', '/api/control/workspace', 'Opérations Velvet', 'data-organizer-decision', 'Préparation BETA', 'originalShowView', "document.querySelectorAll('.page')", 'showOperations(tab)'), 'Velvet Control doit ouvrir les opérations réelles et permettre le retour depuis Invitations'],
+  [includes('apps/beta/static/assets/members-live.js', '/api/members/notifications', '/api/members/map', '/api/members/venue-relationships', 'data-open-venue'), 'L’interface doit exploiter notifications, Maps, catalogue et préférences établissements'],
+  [includes('apps/beta/static/assets/pro-live.js', '/api/pro/workspace', 'S.threads = []', "localStorage.removeItem('velvetProCrmV1')", 'Cette vue ne contient plus aucune donnée de démonstration', "'trial', 'active'"), 'Velvet Pro doit neutraliser les données fictives et respecter l’abonnement serveur'],
+  [includes('apps/beta/static/assets/control-live.js', '/api/control/workspace', 'Opérations Velvet', 'data-organizer-decision', 'data-subscription-status', 'controlClaimVenueForm', 'originalShowView', "document.querySelectorAll('.page')", 'showOperations(tab)'), 'Velvet Control doit piloter le catalogue Pro et permettre le retour depuis Invitations'],
   [includes('apps/web/velvet-control-intelligence-beta-final.html', '/api/admin/invites', 'Générer le code sécurisé'), 'Velvet Control doit utiliser l’API réelle des invitations']
 ];
 
