@@ -327,6 +327,76 @@ export async function onRequestPost({ request, env }) {
   }
 }
 
+export async function onRequestPatch({ request, env }) {
+  try {
+    const access = await memberSession(request, env);
+    if (access.response) return access.response;
+    const profile = await ownedProfile(env, access);
+    if (!profile) return json({ error: 'profile_required' }, 409);
+
+    const pending = await restJson(
+      env,
+      `/rest/v1/media_assets?select=id,profile_id,owner_user_id,storage_path,media_role,moderation_status,ai_reviewed_at&profile_id=eq.${encodeURIComponent(profile.id)}&owner_user_id=eq.${encodeURIComponent(access.account.userId)}&album_id=is.null&moderation_status=eq.pending&ai_reviewed_at=is.null&order=created_at.asc&limit=6`,
+      access.session
+    );
+    const results = [];
+
+    for (const photo of pending || []) {
+      try {
+        const stored = await supabase(
+          env,
+          `/storage/v1/object/authenticated/velvet-media/${photo.storage_path}`,
+          { method: 'GET' },
+          access.session.access_token
+        );
+        if (!stored.ok) throw new Error('photo_storage_read_failed');
+        const analyzed = await analyzePhoto(
+          env,
+          new Uint8Array(await stored.arrayBuffer()),
+          photo.media_role === 'couple_gallery' ? 2 : 1,
+          photo.media_role
+        );
+        const signedAt = Math.floor(Date.now() / 1000);
+        const signature = await signDecision(
+          String(env.PHOTO_MODERATION_HMAC_KEY || ''),
+          photo.id,
+          analyzed.decision,
+          signedAt
+        );
+        const status = await restJson(
+          env,
+          '/rest/v1/rpc/record_photo_ai_decision',
+          access.session,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              target_media_id: photo.id,
+              decision: analyzed.decision,
+              assessment: analyzed.assessment,
+              signed_at: signedAt,
+              signature
+            })
+          }
+        );
+        results.push({ id: photo.id, ok: true, decision: analyzed.decision, status });
+      } catch (error) {
+        results.push({ id: photo.id, ok: false, error: error.message || 'photo_ai_retry_failed' });
+      }
+    }
+
+    return withSession({
+      ok: true,
+      attempted: results.length,
+      approved: results.filter((item) => item.decision === 'approved').length,
+      review: results.filter((item) => item.decision === 'review').length,
+      rejected: results.filter((item) => item.decision === 'rejected').length,
+      failed: results.filter((item) => !item.ok).length
+    }, access.session);
+  } catch (error) {
+    return json({ error: error.message || 'photo_ai_retry_failed' }, 400);
+  }
+}
+
 export async function onRequestDelete({ request, env }) {
   try {
     const access = await memberSession(request, env);
