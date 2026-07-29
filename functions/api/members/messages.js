@@ -73,7 +73,11 @@ export async function onRequestPost({ request, env }) {
         })
       }
     );
-    return withSession({ ok: true, message: created?.[0] }, access.session, 201);
+    const savedMessage = created?.[0];
+    if (!savedMessage?.id || savedMessage.body !== message || savedMessage.conversation_id !== conversationId) {
+      throw new Error('message_persistence_failed');
+    }
+    return withSession({ ok: true, message: savedMessage }, access.session, 201);
   } catch (error) {
     return json({ error: error.message || 'message_send_failed' }, 400);
   }

@@ -29,9 +29,12 @@ async function ownedAlbum(env, access, albumId, profileId) {
 
 export async function onRequestPost({ request, env }) {
   let uploadedPath = null;
+  let cleanupSession = null;
+  let createdMediaId = null;
   try {
     const access = await memberSession(request, env);
     if (access.response) return access.response;
+    cleanupSession = access.session;
     const admission = await requireAdmittedMember(env, access);
     if (admission.response) return admission.response;
 
@@ -86,6 +89,10 @@ export async function onRequestPost({ request, env }) {
       }
     );
     const photo = created?.[0];
+    createdMediaId = photo?.id || null;
+    if (!photo?.id || photo.storage_path !== uploadedPath) {
+      throw new Error('photo_persistence_failed');
+    }
 
     try {
         const analyzed = album.confidentiality === 'public'
@@ -119,6 +126,22 @@ export async function onRequestPost({ request, env }) {
 
     return withSession({ ok: true, photo }, access.session, 201);
   } catch (error) {
+    if (createdMediaId && cleanupSession) {
+      await restJson(
+        env,
+        `/rest/v1/media_assets?id=eq.${encodeURIComponent(createdMediaId)}`,
+        cleanupSession,
+        { method: 'DELETE', headers: { prefer: 'return=minimal' } }
+      ).catch(() => null);
+    }
+    if (uploadedPath && cleanupSession) {
+      await supabase(
+        env,
+        `/storage/v1/object/velvet-media/${uploadedPath}`,
+        { method: 'DELETE' },
+        cleanupSession.access_token
+      ).catch(() => null);
+    }
     return json({ error: error.message || 'album_photo_upload_failed' }, 400);
   }
 }

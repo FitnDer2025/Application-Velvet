@@ -36,7 +36,11 @@ export async function onRequestPost({ request, env }) {
         })
       }
     );
-    return withSession({ ok: true, album: created?.[0] }, access.session, 201);
+    const album = created?.[0];
+    if (!album?.id || album.name !== name || album.confidentiality !== confidentiality) {
+      throw new Error('album_persistence_failed');
+    }
+    return withSession({ ok: true, album }, access.session, 201);
   } catch (error) {
     return json({ error: error.message || 'album_creation_failed' }, 400);
   }

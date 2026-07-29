@@ -13,10 +13,11 @@ const memberPreferences = await readFile('infra/supabase/migrations/0010_member_
 const stagedCouple = await readFile('infra/supabase/migrations/0011_couple_first_parallel_onboarding.sql', 'utf8');
 const locationVerification = await readFile('infra/supabase/migrations/0012_optional_location_identity_age_foundation.sql', 'utf8');
 const memberEngagement = await readFile('infra/supabase/migrations/0013_profile_memory_reactions_conversation_streaks.sql', 'utf8');
+const photoInteractions = await readFile('infra/supabase/migrations/0014_photo_reactions_control_invites_persistence.sql', 'utf8');
 
-const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}`;
+const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}`;
 const tables = [...migrationBundle.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}`;
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -79,6 +80,12 @@ const requirements = [
   [memberEngagement.includes('reaction in (-1,1,2,3)'), 'Les quatre niveaux de ressenti doivent être bornés en base'],
   [memberEngagement.includes('count(distinct m.sender_user_id) >= 2') && memberEngagement.includes('count(distinct pm.profile_id) >= 2'), 'Une journée de série doit exiger un échange entre deux personnes et deux profils distincts'],
   [memberEngagement.includes("time zone 'Europe/Paris'"), 'Les séries de conversation doivent utiliser la journée locale française'],
+  [photoInteractions.includes("reaction in ('like','love','adore')"), 'Les réactions photo doivent être bornées à trois niveaux'],
+  [photoInteractions.includes('public.can_access_media') && photoInteractions.includes("a.confidentiality='public'"), 'Les réactions doivent respecter la visibilité publique des albums'],
+  [photoInteractions.includes('album_access_grants') && photoInteractions.includes('g.expires_at>now()'), 'Un album privé expiré ne doit plus exposer ses réactions'],
+  [photoInteractions.includes('cannot_react_to_own_photo'), 'Un profil ne doit pas pouvoir réagir à ses propres photos'],
+  [photoInteractions.includes('photo_reaction_summaries') && photoInteractions.includes('count(pr.media_id)'), 'Les membres doivent recevoir uniquement les compteurs agrégés'],
+  [photoInteractions.includes('admin_list_beta_invites') && photoInteractions.includes("public.has_role('admin')"), 'L’historique des invitations doit rester réservé aux administrateurs'],
   [!migrationBundle.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 

@@ -36,7 +36,10 @@ import {
   onRequestGet as memberPhotosGet,
   onRequestPost as memberPhotosPost
 } from '../../../functions/api/members/photos.js';
-import { onRequestPost as adminInvitePost } from '../../../functions/api/admin/invites.js';
+import {
+  onRequestGet as adminInviteGet,
+  onRequestPost as adminInvitePost
+} from '../../../functions/api/admin/invites.js';
 import { onRequestPost as adminVenueImportPost } from '../../../functions/api/admin/venue-import.js';
 import { onRequestGet as communeReferenceGet } from '../../../functions/api/reference/communes.js';
 import { onRequestGet as venueReferenceGet } from '../../../functions/api/reference/venues.js';
@@ -63,6 +66,10 @@ import {
   onRequestGet as memberEngagementGet,
   onRequestPost as memberEngagementPost
 } from '../../../functions/api/members/engagement.js';
+import {
+  onRequestGet as photoReactionsGet,
+  onRequestPost as photoReactionsPost
+} from '../../../functions/api/members/photo-reactions.js';
 import { velvetIconResponse } from './velvet-icons.js';
 
 const API_ROUTES = new Map([
@@ -89,6 +96,7 @@ const API_ROUTES = new Map([
   ['GET /api/members/photos', memberPhotosGet],
   ['POST /api/members/photos', memberPhotosPost],
   ['DELETE /api/members/photos', memberPhotosDelete],
+  ['GET /api/admin/invites', adminInviteGet],
   ['POST /api/admin/invites', adminInvitePost],
   ['POST /api/admin/venue-import', adminVenueImportPost],
   ['GET /api/reference/communes', communeReferenceGet],
@@ -105,7 +113,9 @@ const API_ROUTES = new Map([
   ['POST /api/members/verification', memberVerificationPost],
   ['GET /api/members/verification/callback', memberVerificationCallback],
   ['GET /api/members/engagement', memberEngagementGet],
-  ['POST /api/members/engagement', memberEngagementPost]
+  ['POST /api/members/engagement', memberEngagementPost],
+  ['GET /api/members/photo-reactions', photoReactionsGet],
+  ['POST /api/members/photo-reactions', photoReactionsPost]
 ]);
 
 const PROTECTED_PREFIXES = ['/membres', '/pro', '/control'];

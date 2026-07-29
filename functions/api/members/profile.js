@@ -158,10 +158,15 @@ export async function onRequestPost({ request, env }) {
         body: JSON.stringify({ profile_payload: profilePayload })
       }
     );
-    return withSession({
-      ok: true,
-      profile: await enrichProfileMedia(env, access.session, await myProfile(env, access.session))
-    }, access.session);
+    const savedProfile = await enrichProfileMedia(
+      env,
+      access.session,
+      await myProfile(env, access.session)
+    );
+    if (!savedProfile?.id || savedProfile.display_name !== profilePayload.display_name) {
+      throw new Error('profile_persistence_failed');
+    }
+    return withSession({ ok: true, profile: savedProfile }, access.session);
   } catch (error) {
     return json({ error: error.message || 'profile_write_failed' }, 400);
   }
