@@ -17,7 +17,7 @@ const MAX_BYTES = 4 * 1024 * 1024;
 async function ownedProfile(env, access) {
   const rows = await restJson(
     env,
-    `/rest/v1/member_profiles?select=id,profile_type,admission_status,individual_profiles(id,linked_user_id,first_name)&profile_members!inner(user_id,status)&profile_members.user_id=eq.${encodeURIComponent(access.account.userId)}&profile_members.status=eq.active&limit=1`,
+    `/rest/v1/member_profiles?select=id,profile_type,admission_status,profile_members!inner(user_id,status),individual_profiles(id,linked_user_id,first_name)&profile_members.user_id=eq.${encodeURIComponent(access.account.userId)}&profile_members.status=eq.active&limit=1`,
     access.session
   );
   return rows?.[0] || null;
