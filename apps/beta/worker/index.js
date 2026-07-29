@@ -4,6 +4,9 @@ import { onRequestPost as login } from '../../../functions/api/auth/login.js';
 import { onRequestGet as status } from '../../../functions/api/auth/status.js';
 import { onRequestPost as consent } from '../../../functions/api/auth/consent.js';
 import { onRequestPost as logout } from '../../../functions/api/auth/logout.js';
+import { onRequestGet as authConfig } from '../../../functions/api/auth/config.js';
+import { onRequestPost as recoveryRequest } from '../../../functions/api/auth/recovery-request.js';
+import { onRequestPost as passwordUpdate } from '../../../functions/api/auth/password-update.js';
 import {
   onRequestGet as memberProfileGet,
   onRequestPost as memberProfilePost
@@ -78,6 +81,9 @@ const API_ROUTES = new Map([
   ['GET /api/auth/status', status],
   ['POST /api/auth/consent', consent],
   ['POST /api/auth/logout', logout],
+  ['GET /api/auth/config', authConfig],
+  ['POST /api/auth/recovery-request', recoveryRequest],
+  ['POST /api/auth/password-update', passwordUpdate],
   ['GET /api/members/profile', memberProfileGet],
   ['POST /api/members/profile', memberProfilePost],
   ['POST /api/members/couple-profile', coupleProfilePost],
@@ -127,6 +133,9 @@ function securityHeaders(response) {
   secured.headers.set('referrer-policy', 'no-referrer');
   secured.headers.set('permissions-policy', 'camera=(), microphone=(), geolocation=(self), payment=(), usb=()');
   secured.headers.set('x-robots-tag', 'noindex, nofollow, noarchive');
+  secured.headers.set('strict-transport-security', 'max-age=31536000; includeSubDomains');
+  secured.headers.set('cross-origin-opener-policy', 'same-origin');
+  secured.headers.set('cross-origin-resource-policy', 'same-origin');
   return secured;
 }
 
