@@ -11,6 +11,12 @@
   tab.textContent = 'Opérations réelles';
   tab.addEventListener('click', () => showOperations(tab));
   document.querySelector('.tabs')?.prepend(tab);
+  const originalShowView = window.showView;
+  window.showView = (view, button) => {
+    root.hidden = true;
+    root.classList.remove('active');
+    originalShowView(view, button);
+  };
   document.querySelectorAll('.tab:not([data-view="invitations"]):not([data-view="operations"])').forEach((item) => {
     item.hidden = true;
     item.setAttribute('aria-hidden', 'true');
@@ -87,7 +93,9 @@
 
   window.showOperations = (button = tab) => {
     document.querySelectorAll('.tab').forEach((item) => item.classList.toggle('active', item === button));
-    document.querySelectorAll('.view').forEach((view) => view.classList.toggle('active', view === root));
+    document.querySelectorAll('.page').forEach((page) => page.classList.remove('active'));
+    root.hidden = false;
+    root.classList.add('active');
     const suite = document.querySelector('#suiteView');
     if (suite) suite.style.display = 'none';
     load();
