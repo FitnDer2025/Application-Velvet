@@ -82,6 +82,11 @@ import {
   onRequestGet as photoReactionsGet,
   onRequestPost as photoReactionsPost
 } from '../../../functions/api/members/photo-reactions.js';
+import {
+  onRequestGet as memberNotificationsGet,
+  onRequestPost as memberNotificationsPost
+} from '../../../functions/api/members/notifications.js';
+import { onRequestGet as memberMapGet } from '../../../functions/api/members/map.js';
 import { velvetIconResponse } from './velvet-icons.js';
 
 const API_ROUTES = new Map([
@@ -135,7 +140,10 @@ const API_ROUTES = new Map([
   ['GET /api/members/engagement', memberEngagementGet],
   ['POST /api/members/engagement', memberEngagementPost],
   ['GET /api/members/photo-reactions', photoReactionsGet],
-  ['POST /api/members/photo-reactions', photoReactionsPost]
+  ['POST /api/members/photo-reactions', photoReactionsPost],
+  ['GET /api/members/notifications', memberNotificationsGet],
+  ['POST /api/members/notifications', memberNotificationsPost],
+  ['GET /api/members/map', memberMapGet]
 ]);
 
 const PROTECTED_PREFIXES = ['/membres', '/pro', '/control'];
@@ -150,6 +158,10 @@ function securityHeaders(response) {
   secured.headers.set('strict-transport-security', 'max-age=31536000; includeSubDomains');
   secured.headers.set('cross-origin-opener-policy', 'same-origin');
   secured.headers.set('cross-origin-resource-policy', 'same-origin');
+  secured.headers.set(
+    'content-security-policy',
+    "default-src 'self'; base-uri 'none'; frame-ancestors 'self'; form-action 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.unsplash.com https://tile.openstreetmap.org; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; upgrade-insecure-requests"
+  );
   return secured;
 }
 
