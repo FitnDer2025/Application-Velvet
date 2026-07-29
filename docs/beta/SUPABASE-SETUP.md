@@ -43,6 +43,7 @@ Appliquer dans l’ordre :
 15. `0015_member_actions_conversations_events.sql`
 16. `0016_member_notifications.sql`
 17. `0017_velvet_pro_workspace.sql`
+18. `0018_velvet_control_operations.sql`
 
 Puis ouvrir le Security Advisor et corriger toute alerte avant de connecter les interfaces.
 
