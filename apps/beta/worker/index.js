@@ -88,6 +88,10 @@ import {
 } from '../../../functions/api/members/notifications.js';
 import { onRequestGet as memberMapGet } from '../../../functions/api/members/map.js';
 import {
+  onRequestGet as venueRelationshipsGet,
+  onRequestPost as venueRelationshipsPost
+} from '../../../functions/api/members/venue-relationships.js';
+import {
   onRequestGet as proWorkspaceGet,
   onRequestPost as proWorkspacePost
 } from '../../../functions/api/pro/workspace.js';
@@ -152,6 +156,8 @@ const API_ROUTES = new Map([
   ['GET /api/members/notifications', memberNotificationsGet],
   ['POST /api/members/notifications', memberNotificationsPost],
   ['GET /api/members/map', memberMapGet],
+  ['GET /api/members/venue-relationships', venueRelationshipsGet],
+  ['POST /api/members/venue-relationships', venueRelationshipsPost],
   ['GET /api/pro/workspace', proWorkspaceGet],
   ['POST /api/pro/workspace', proWorkspacePost],
   ['GET /api/control/workspace', controlWorkspaceGet],
