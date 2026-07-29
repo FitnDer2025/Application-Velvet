@@ -20,7 +20,7 @@ function cleanFilters(value) {
 }
 
 async function discoveryState(env, access) {
-  const [presenceResult, searchesResult] = await Promise.allSettled([
+  const [presenceResult, searchesResult, followingResult] = await Promise.allSettled([
     restJson(
       env,
       '/rest/v1/rpc/member_presence_snapshot',
@@ -31,12 +31,20 @@ async function discoveryState(env, access) {
       env,
       `/rest/v1/member_saved_searches?select=id,name,filters,created_at,updated_at&user_id=eq.${encodeURIComponent(access.account.userId)}&order=updated_at.desc&limit=50`,
       access.session
+    ),
+    restJson(
+      env,
+      `/rest/v1/favorites?select=profile_id,created_at&owner_user_id=eq.${encodeURIComponent(access.account.userId)}&order=created_at.desc`,
+      access.session
     )
   ]);
 
   return {
     presence: presenceResult.status === 'fulfilled' ? presenceResult.value : [],
     savedSearches: searchesResult.status === 'fulfilled' ? searchesResult.value : [],
+    following: followingResult.status === 'fulfilled'
+      ? followingResult.value.map((row) => row.profile_id)
+      : [],
     persistenceAvailable: searchesResult.status === 'fulfilled',
     presenceAvailable: presenceResult.status === 'fulfilled'
   };

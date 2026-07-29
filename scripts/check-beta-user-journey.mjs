@@ -21,6 +21,9 @@ const paths = [
   'functions/api/members/photo-reactions.js',
   'functions/api/members/conversations.js',
   'functions/api/members/messages.js',
+  'functions/api/members/social-actions.js',
+  'functions/api/members/plans.js',
+  'functions/api/members/account-actions.js',
   'functions/api/members/event-registrations.js',
   'functions/api/members/discovery.js',
   'functions/api/members/map.js',
@@ -152,6 +155,22 @@ const journeys = [
       && has('functions/api/pro/workspace.js', 'pro_subscription_required', 'publish_venue', 'create_event')
       && has('apps/beta/static/assets/control-live.js', 'controlClaimVenueForm', 'data-subscription-status')
       && has('apps/beta/static/assets/pro-live.js', "'trial', 'active'", 'Abonnement Velvet Pro requis')
+  },
+  {
+    name: 'Messagerie avec pièces jointes',
+    valid: has('functions/api/members/messages.js', 'message_attachments', 'ATTACHMENT_TYPES', 'message_attachment_persistence_failed')
+      && has('apps/beta/static/assets/members-live.js', 'messageAttachments', 'name="attachments"', 'Photo, vidéo ou PDF')
+  },
+  {
+    name: 'Sorties et séjours publics',
+    valid: has('functions/api/members/plans.js', 'profile_venue_visits', 'profile_travel_plans', 'cap_dagde_village')
+      && has('apps/beta/static/assets/members-live.js', 'profilePlansView', 'venue-visit-form', 'Village naturiste du Cap d’Agde')
+  },
+  {
+    name: 'Suivi, sécurité et cycle du compte',
+    valid: has('functions/api/members/social-actions.js', "body.action === 'report'", '/rest/v1/blocks')
+      && has('functions/api/members/account-actions.js', 'request_profile_lifecycle_action', 'confirm_profile_lifecycle_action', '30 jours')
+      && has('apps/beta/static/assets/members-live.js', 'Suivre ce membre', 'vient de se connecter', 'data-lifecycle-action')
   }
 ];
 

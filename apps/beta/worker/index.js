@@ -21,6 +21,15 @@ import {
   onRequestGet as messagesGet,
   onRequestPost as messagesPost
 } from '../../../functions/api/members/messages.js';
+import {
+  onRequestDelete as memberPlansDelete,
+  onRequestGet as memberPlansGet,
+  onRequestPost as memberPlansPost
+} from '../../../functions/api/members/plans.js';
+import {
+  onRequestGet as accountActionsGet,
+  onRequestPost as accountActionsPost
+} from '../../../functions/api/members/account-actions.js';
 import { onRequestPost as conversationsPost } from '../../../functions/api/members/conversations.js';
 import {
   onRequestGet as socialActionsGet,
@@ -124,6 +133,11 @@ const API_ROUTES = new Map([
   ['POST /api/members/organizer-request', organizerRequestPost],
   ['GET /api/members/messages', messagesGet],
   ['POST /api/members/messages', messagesPost],
+  ['GET /api/members/plans', memberPlansGet],
+  ['POST /api/members/plans', memberPlansPost],
+  ['DELETE /api/members/plans', memberPlansDelete],
+  ['GET /api/members/account-actions', accountActionsGet],
+  ['POST /api/members/account-actions', accountActionsPost],
   ['POST /api/members/conversations', conversationsPost],
   ['GET /api/members/social-actions', socialActionsGet],
   ['POST /api/members/social-actions', socialActionsPost],
