@@ -60,7 +60,11 @@ export async function onRequestPost({ request, env }) {
         })
       }
     );
-    return withSession({ ok: true, request: created?.[0] }, access.session, 201);
+    const savedRequest = created?.[0];
+    if (!savedRequest?.id || savedRequest.status !== 'pending') {
+      throw new Error('organizer_request_persistence_failed');
+    }
+    return withSession({ ok: true, request: savedRequest }, access.session, 201);
   } catch (error) {
     return json({ error: error.message || 'organizer_request_failed' }, 400);
   }
