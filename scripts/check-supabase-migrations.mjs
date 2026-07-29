@@ -20,10 +20,11 @@ const proWorkspace = await readFile('infra/supabase/migrations/0017_velvet_pro_w
 const controlOperations = await readFile('infra/supabase/migrations/0018_velvet_control_operations.sql', 'utf8');
 const releaseReadiness = await readFile('infra/supabase/migrations/0019_beta_release_readiness.sql', 'utf8');
 const venueCatalog = await readFile('infra/supabase/migrations/0020_velvet_venue_catalog.sql', 'utf8');
+const profilePhotoModeration = await readFile('infra/supabase/migrations/0021_profile_photo_human_moderation.sql', 'utf8');
 
-const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}`;
+const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}`;
 const tables = [...migrationBundle.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}`;
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -117,6 +118,8 @@ const requirements = [
   [venueCatalog.includes("subscription_status in ('trial','active')") && venueCatalog.includes('establishment_drafts_staff'), 'La publication Pro doit exiger un essai ou un abonnement actif'],
   [venueCatalog.includes('"photo_reuse_status":"permission_requise"') && !venueCatalog.includes('"photo_reuse_status":"autorisee"'), 'Aucune photo du fichier source ne doit être réutilisée sans autorisation'],
   [venueCatalog.includes("public_visibility in ('listed','hidden','archived')") && venueCatalog.includes('"public_visibility":"archived"'), 'Les établissements possiblement fermés doivent pouvoir rester archivés'],
+  [profilePhotoModeration.includes('control_decide_profile_photo') && profilePhotoModeration.includes("public.has_role('moderator')"), 'Les photos ambiguës doivent disposer d’une décision humaine réservée à la modération'],
+  [profilePhotoModeration.includes('refresh_profile_admission') && profilePhotoModeration.includes('profile_photo_'), 'Une décision humaine doit recalculer l’admission et rester auditée'],
   [!migrationBundle.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 

@@ -50,6 +50,8 @@ const journeys = [
     name: 'Photos de profil et admission',
     valid: has('functions/api/members/photos.js', 'photo_persistence_failed', 'record_photo_ai_decision', 'admission')
       && has('apps/beta/static/assets/members-live.js', '/api/members/photos', 'photo-upload-status')
+      && has('functions/api/control/workspace.js', 'decide_profile_photo', 'control_decide_profile_photo')
+      && has('apps/beta/static/assets/control-live.js', 'data-photo-decision', 'Photos de profil à contrôler')
   },
   {
     name: 'Albums publics et privés',

@@ -48,10 +48,22 @@
     const releaseState = failedChecks.length ? 'danger' : warningChecks.length ? 'warn' : 'ok';
     const catalogCount = (data.venueDirectory || []).length;
     const unclaimedCount = (data.venueDirectory || []).filter((venue) => venue.claim_status === 'unclaimed').length;
+    const pendingMedia = data.pendingMedia || [];
     root.innerHTML = `<div class="head"><div><div class="ey">Supabase · source de vérité</div><h1>Opérations Velvet</h1><p class="lead">Établissements, soirées, inscriptions et demandes organisateur réellement enregistrés.</p></div><button class="btn secondary" id="controlRefresh">Actualiser</button></div>
       <div class="kpis"><div class="kpi"><small>Comptes actifs</small><b>${data.accounts.filter((item) => item.status === 'active').length}</b></div><div class="kpi"><small>Profils membres</small><b>${data.profiles.length}</b></div><div class="kpi"><small>Lieux recensés</small><b>${catalogCount}</b></div><div class="kpi"><small>Fiches à attribuer</small><b>${unclaimedCount}</b></div><div class="kpi"><small>Pro attribués</small><b>${data.establishments.length}</b></div><div class="kpi"><small>Soirées publiées</small><b>${publishedEvents.length}</b></div><div class="kpi"><small>Inscriptions</small><b>${data.registrations.length}</b></div><div class="kpi"><small>Signalements ouverts</small><b>${openReports.length}</b></div></div>
       <div class="section-head"><div><h2>Préparation BETA</h2><p>Contrôles calculés directement sur la mémoire Velvet. Une anomalie rouge doit être corrigée avant la recette.</p></div><span class="state ${releaseState}">${releaseLabel}</span></div>
       <section class="card">${releaseChecks.length ? releaseChecks.map((item) => `<div class="audit-row"><time><span class="state ${item.status === 'failed' ? 'danger' : item.status === 'warning' ? 'warn' : 'ok'}">${item.status === 'failed' ? 'À corriger' : item.status === 'warning' ? 'Attention' : 'Conforme'}</span></time><p><b>${safe(releaseCheckLabel(item.check_code))}</b><small>${safe(item.detail)}</small></p><strong>${safe(item.affected_count)}</strong></div>`).join('') : '<div class="invite-empty">Aucun contrôle de publication disponible. Appliquez la dernière migration Supabase.</div>'}</section>
+      <div class="section-head"><div><h2>Photos de profil à contrôler</h2><p>Velvet Intelligence a transmis ces photos à un humain. La décision met immédiatement à jour l’admission du membre.</p></div><span class="state ${pendingMedia.length ? 'warn' : 'ok'}">${pendingMedia.length} en attente</span></div>
+      <section class="card">${pendingMedia.length ? pendingMedia.map((media) => {
+        const profile = media.member_profiles || data.profiles.find((item) => item.id === media.profile_id) || {};
+        const assessment = media.ai_assessment || {};
+        const role = media.media_role === 'couple_gallery' ? 'Carrousel couple' : media.media_role === 'individual_portrait' ? 'Portrait individuel' : 'Carrousel individuel';
+        return `<div class="audit-row" data-media-review="${safe(media.id)}">
+          <time>${media.previewUrl ? `<img src="${safe(media.previewUrl)}" alt="Photo à contrôler" style="width:82px;height:92px;object-fit:cover;border-radius:14px">` : '<span class="state warn">Aperçu indisponible</span>'}</time>
+          <p><b>${safe(profile.display_name || 'Profil membre')} · ${safe(role)}</b><small>${safe(assessment.summary || 'Analyse automatique indécise ou interrompue. Contrôle humain nécessaire.')}</small><input data-moderation-reason maxlength="500" placeholder="Motif obligatoire en cas de refus" style="margin-top:9px;width:100%"></p>
+          <span><button class="btn secondary" data-photo-decision="rejected" data-media="${safe(media.id)}">Refuser</button> <button class="btn" data-photo-decision="approved" data-media="${safe(media.id)}">Valider</button></span>
+        </div>`;
+      }).join('') : '<div class="invite-empty">Aucune photo en attente. Les admissions automatiques sont à jour.</div>'}</section>
       <div class="grid g2">
         <section class="card"><div class="ey">Prospection Velvet Pro</div><h2>Attribuer une fiche recensée</h2><p>La fiche reste en mode référence et les outils Pro demeurent verrouillés tant que l’abonnement n’est pas activé.</p><form id="controlClaimVenueForm" class="invite-form">
           <label>Établissement<select name="venueId" required><option value="">Choisir parmi ${unclaimedCount} fiche${unclaimedCount > 1 ? 's' : ''}</option>${optionDirectoryVenues()}</select></label>
@@ -102,6 +114,20 @@
     root.querySelectorAll('[data-subscription-status]').forEach((select) => select.addEventListener('change', () =>
       mutate({ action: 'subscription_status', venueId: select.dataset.subscriptionStatus, status: select.value }, 'Statut Velvet Pro synchronisé.')
     ));
+    root.querySelectorAll('[data-photo-decision]').forEach((button) => button.addEventListener('click', () => {
+      const row = button.closest('[data-media-review]');
+      const reason = row?.querySelector('[data-moderation-reason]')?.value.trim() || '';
+      if (button.dataset.photoDecision === 'rejected' && !reason) {
+        toastMsg('Indiquez le motif du refus avant de continuer.');
+        return;
+      }
+      mutate({
+        action: 'decide_profile_photo',
+        mediaId: button.dataset.media,
+        decision: button.dataset.photoDecision,
+        reason
+      }, button.dataset.photoDecision === 'approved' ? 'Photo validée et admission recalculée.' : 'Photo refusée. Le membre pourra la remplacer.');
+    }));
   }
 
   async function mutate(payload, message) {
