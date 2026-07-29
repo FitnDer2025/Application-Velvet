@@ -15,12 +15,12 @@ export async function onRequestGet({ request, env }) {
     const [directory, establishments] = await Promise.all([
       restJson(
         env,
-        `/rest/v1/venue_directory?select=id,name,kind,city,country_code,address_public,website,verification_status,source&verification_status=neq.closed&name=ilike.${encoded}&order=name.asc&limit=12`,
+        `/rest/v1/venue_directory?select=id,slug,name,kind,city,country_code,address_public,website,verification_status,source,category_primary,opening_hours_text,pricing_text,claim_status,claimed_establishment_id&public_visibility=eq.listed&verification_status=neq.closed&or=(name.ilike.${encoded},city.ilike.${encoded})&order=name.asc&limit=20`,
         access.session
       ),
       restJson(
         env,
-        `/rest/v1/establishments?select=id,name,kind,city,address_public,verified_at&visibility=eq.published&name=ilike.${encoded}&order=name.asc&limit=12`,
+        `/rest/v1/establishments?select=id,directory_venue_id,name,kind,city,address_public,verified_at,subscription_status&visibility=eq.published&name=ilike.${encoded}&order=name.asc&limit=20`,
         access.session
       )
     ]);
@@ -37,6 +37,8 @@ export async function onRequestGet({ request, env }) {
         country_code: 'FR',
         verification_status: venue.verified_at ? 'professional_verified' : 'community_confirmed',
         source: 'velvet',
+        claimed_establishment_id: venue.id,
+        claim_status: 'claimed',
         label: [venue.name,venue.city].filter(Boolean).join(' · ')
       });
     });
