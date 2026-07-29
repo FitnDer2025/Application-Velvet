@@ -449,6 +449,12 @@
       });
     }
     steps.push({
+      audience: audience(), kicker: 'Tes envies personnelles',
+      title: 'Qu’aimerais-tu vivre ou explorer pour toi ?',
+      guide: 'Cette réponse appartient à ta fiche personnelle. Elle complète les pratiques communes sans les confondre.',
+      body: (d) => checkGrid('p0_desired_practices', PRACTICES, selected('p0_desired_practices'))
+    });
+    steps.push({
       audience: audience(), kicker: 'Derrière le profil',
       title: 'Si tu devais te présenter librement…',
       guide: 'Raconte ton caractère, ta manière d’aborder les rencontres et ce que les autres devraient comprendre de toi.',
@@ -619,7 +625,7 @@
           frequency: draft.p0_frequency,
           biography: draft.p0_biography,
           attracted_to: draft.p0_attracted_to || [],
-          desired_practices: [],
+          desired_practices: draft.p0_desired_practices || [],
           partner_permissions: profileType === 'couple' ? (draft.p0_partner_permissions || []) : []
         }
       })
