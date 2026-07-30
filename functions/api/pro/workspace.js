@@ -20,7 +20,18 @@ async function workspace(env, access) {
     access.session
   );
   const ids = venues.map((venue) => venue.id);
-  if (!ids.length) return { venues: [], events: [], registrations: [], drafts: [] };
+  const priceResult = await Promise.allSettled([
+    restJson(
+      env,
+      '/rest/v1/billing_prices?select=price_code,plan_code,currency,amount_cents,interval_unit,interval_count&plan_code=eq.pro_workspace&active=eq.true&order=amount_cents.asc',
+      access.session
+    )
+  ]);
+  const billingPrices = priceResult[0].status === 'fulfilled' ? priceResult[0].value : [
+    { price_code: 'pro_monthly_eur', plan_code: 'pro_workspace', currency: 'EUR', amount_cents: 3990, interval_unit: 'month', interval_count: 1 },
+    { price_code: 'pro_annual_eur', plan_code: 'pro_workspace', currency: 'EUR', amount_cents: 39900, interval_unit: 'year', interval_count: 1 }
+  ];
+  if (!ids.length) return { venues: [], events: [], registrations: [], drafts: [], billingPrices };
   const filter = ids.map(encodeURIComponent).join(',');
   const [events, drafts, registrationGroups] = await Promise.all([
     restJson(
@@ -40,7 +51,7 @@ async function workspace(env, access) {
       { method: 'POST', body: JSON.stringify({ target_establishment: id }) }
     )))
   ]);
-  return { venues, events, drafts, registrations: registrationGroups.flat() };
+  return { venues, events, drafts, registrations: registrationGroups.flat(), billingPrices };
 }
 
 function venuePayload(body) {

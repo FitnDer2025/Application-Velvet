@@ -6,6 +6,20 @@ const CONTROL_ROLES = new Set(['admin', 'direction', 'moderator', 'support', 'au
 const MEDIA_REVIEW_ROLES = new Set(['admin', 'direction', 'moderator']);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+function randomPromotionCode() {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(12));
+  const token = [...bytes].map((byte) => alphabet[byte % alphabet.length]).join('');
+  return `VELVET-${token.slice(0, 4)}-${token.slice(4, 8)}-${token.slice(8, 12)}`;
+}
+
+async function sha256(value) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 async function controlAccess(request, env) {
   const access = await memberSession(request, env);
   if (access.response) return access;
@@ -37,6 +51,11 @@ async function workspace(env, access) {
     ...media,
     previewUrl: await signedMediaUrl(env, access.session, media.storage_path, 300)
   })));
+  const monetizationResults = await Promise.allSettled([
+    restJson(env, '/rest/v1/promotion_campaigns?select=id,name,distribution_mode,subject_type,entitlement_code,target_audience,duration_days,starts_at,ends_at,max_redemptions,redemption_count,per_subject_limit,active,created_at&order=created_at.desc&limit=250', access.session),
+    restJson(env, '/rest/v1/billing_plans?select=code,label,audience,features,active&order=code.asc', access.session),
+    restJson(env, '/rest/v1/billing_prices?select=id,plan_code,price_code,currency,amount_cents,interval_unit,interval_count,active&order=amount_cents.asc', access.session)
+  ]);
   return {
     accounts,
     profiles,
@@ -50,7 +69,11 @@ async function workspace(env, access) {
     audits,
     releaseChecks,
     pendingMedia,
-    mediaReviewAllowed: canReviewMedia
+    mediaReviewAllowed: canReviewMedia,
+    promotions: monetizationResults[0].status === 'fulfilled' ? monetizationResults[0].value : [],
+    billingPlans: monetizationResults[1].status === 'fulfilled' ? monetizationResults[1].value : [],
+    billingPrices: monetizationResults[2].status === 'fulfilled' ? monetizationResults[2].value : [],
+    monetizationAvailable: monetizationResults.every((result) => result.status === 'fulfilled')
   };
 }
 
@@ -69,6 +92,7 @@ export async function onRequestPost({ request, env }) {
     const access = await controlAccess(request, env);
     if (access.response) return access.response;
     const body = await readJson(request);
+    let generatedPromotionCode = null;
     if (body.action === 'create_establishment') {
       if (!UUID.test(body.ownerUserId || '')) return withSession({ error: 'invalid_owner' }, access.session, 400);
       await restJson(env, '/rest/v1/rpc/control_create_establishment', access.session, {
@@ -127,10 +151,98 @@ export async function onRequestPost({ request, env }) {
           target_reason: reason || null
         })
       });
+    } else if (body.action === 'create_promotion') {
+      const subjectType = body.subjectType === 'establishment' ? 'establishment' : 'profile';
+      const allowedAudiences = subjectType === 'establishment'
+        ? ['pro']
+        : ['couple', 'solo_man', 'paid_member', 'any_member'];
+      if (!allowedAudiences.includes(body.audience)) {
+        return withSession({ error: 'invalid_promotion_audience' }, access.session, 400);
+      }
+      const durationDays = Number(body.durationDays);
+      const maxRedemptions = Number(body.maxRedemptions);
+      if (!Number.isInteger(durationDays) || durationDays < 1 || durationDays > 3650
+        || !Number.isInteger(maxRedemptions) || maxRedemptions < 1 || maxRedemptions > 1000000) {
+        return withSession({ error: 'invalid_promotion_limits' }, access.session, 400);
+      }
+      generatedPromotionCode = randomPromotionCode();
+      await restJson(env, '/rest/v1/rpc/control_create_promotion', access.session, {
+        method: 'POST',
+        body: JSON.stringify({
+          target_name: cleanText(body.name, 120),
+          target_code_hash: await sha256(generatedPromotionCode),
+          target_subject_type: subjectType,
+          target_audience: body.audience,
+          target_duration_days: durationDays,
+          target_max_redemptions: maxRedemptions,
+          target_starts_at: body.startsAt || null,
+          target_ends_at: body.endsAt || null
+        })
+      });
+    } else if (body.action === 'promotion_status') {
+      if (!UUID.test(body.campaignId || '')) {
+        return withSession({ error: 'invalid_promotion' }, access.session, 400);
+      }
+      await restJson(env, '/rest/v1/rpc/control_set_promotion_active', access.session, {
+        method: 'POST',
+        body: JSON.stringify({
+          target_campaign: body.campaignId,
+          target_active: Boolean(body.active)
+        })
+      });
+    } else if (body.action === 'grant_campaign') {
+      if (!UUID.test(body.campaignId || '') || !UUID.test(body.subjectId || '')
+        || !['profile', 'establishment'].includes(body.subjectType)) {
+        return withSession({ error: 'invalid_campaign_grant' }, access.session, 400);
+      }
+      await restJson(env, '/rest/v1/rpc/control_grant_campaign', access.session, {
+        method: 'POST',
+        body: JSON.stringify({
+          target_campaign: body.campaignId,
+          target_subject_type: body.subjectType,
+          target_subject: body.subjectId
+        })
+      });
+    } else if (body.action === 'member_access') {
+      if (!UUID.test(body.profileId || '') || !['discovery', 'signature'].includes(body.mode)) {
+        return withSession({ error: 'invalid_member_access' }, access.session, 400);
+      }
+      const durationDays = body.mode === 'signature' && body.durationDays
+        ? Number(body.durationDays)
+        : null;
+      await restJson(env, '/rest/v1/rpc/control_set_member_access', access.session, {
+        method: 'POST',
+        body: JSON.stringify({
+          target_profile: body.profileId,
+          target_mode: body.mode,
+          target_duration_days: durationDays,
+          target_reason: cleanText(body.reason, 500) || null
+        })
+      });
+    } else if (body.action === 'account_state') {
+      if (!UUID.test(body.userId || '') || !['activate', 'suspend', 'block', 'delete'].includes(body.accountAction)) {
+        return withSession({ error: 'invalid_account_action' }, access.session, 400);
+      }
+      const durationHours = body.accountAction === 'suspend'
+        ? Number(body.durationHours)
+        : null;
+      await restJson(env, '/rest/v1/rpc/control_manage_account', access.session, {
+        method: 'POST',
+        body: JSON.stringify({
+          target_user: body.userId,
+          target_action: body.accountAction,
+          target_duration_hours: durationHours,
+          target_reason: cleanText(body.reason, 500) || null
+        })
+      });
     } else {
       return withSession({ error: 'invalid_control_action' }, access.session, 400);
     }
-    return withSession({ ok: true, ...(await workspace(env, access)) }, access.session);
+    return withSession({
+      ok: true,
+      ...(await workspace(env, access)),
+      generatedPromotionCode
+    }, access.session);
   } catch (error) {
     return json({ error: error.message || 'control_workspace_write_failed' }, 400);
   }

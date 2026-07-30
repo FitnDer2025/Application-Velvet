@@ -1,6 +1,6 @@
 # Velvet Product Metrics
 
-**Dernière mise à jour :** 29 juillet 2026
+**Dernière mise à jour :** 30 juillet 2026
 
 ## Indicateur global
 
@@ -25,9 +25,9 @@ ADR-GOV-003 clarifie l'autonomie de livraison sans modifier les pourcentages d'a
 | Clubs | 70 % |
 | Professionnels | 90 % |
 | Voyages Velvet | 90 % |
-| Administration / back-office | 40 % |
+| Administration / back-office | 65 % |
 | IA Velvet | 75 % |
-| Monétisation | 70 % |
+| Monétisation | 95 % |
 | Gamification | 70 % |
 | Mobile avancé | 50 % |
 | Analytics | 20 % |
@@ -45,6 +45,12 @@ ADR-GOV-003 clarifie l'autonomie de livraison sans modifier les pourcentages d'a
 - IA Velvet : 40 % → 75 %
 - Gamification : 25 % → 70 %
 - Ajout du domaine Voyages Velvet : 90 %
+
+## Progression apportée par ADR-MON-057
+
+- Administration / back-office : 40 % → 65 %
+- Monétisation : 70 % → 95 %
+- Le solde dépend de l'accord écrit du prestataire de paiement et de la revue juridique avant vente réelle.
 
 ## Règles de calcul
 

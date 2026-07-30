@@ -64,7 +64,7 @@ Démontrer le cœur de valeur Velvet avec une expérience cohérente, premium et
 - Traçabilité des actions administratives.
 
 ## Hors périmètre initial, sauf arbitrage contraire
-- Paiement réel et abonnements complets.
+- Paiement réel et abonnements complets, désormais amendés par ADR-MON-057 : moteur de droits et raccordement préparés, encaissement bloqué jusqu'à validation du prestataire et revue juridique.
 - Marketplace avancée.
 - Concierge humain complet.
 - Voyages complexes avec réservation.

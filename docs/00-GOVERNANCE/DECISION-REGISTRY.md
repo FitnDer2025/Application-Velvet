@@ -70,6 +70,9 @@
 
 - Le modèle freemium, les essais, promotions, codes administrateur et mécanismes de parrainage ont déjà été arbitrés.
 - ADR-042 n'a pas été créée afin de ne pas rouvrir ce sujet.
+- ADR-MON-057 formalise l'exécution : Découverte gratuite, Signature à 14,90 €/mois, 34,90 €/3 mois ou 99,90 €/an, Pro à 39,90 €/mois ou 399 €/an, cohortes fondatrices et paiement hébergé indépendant du prestataire.
+- Les femmes seules vérifiées reçoivent Signature sans paiement ; un abonnement couvre une fiche Couple.
+- Le paiement réel reste désactivé jusqu'à l'accord écrit d'un prestataire compatible et à la validation juridique de la politique commerciale.
 
 ### Gamification — ADR-043 et ADR-044
 
@@ -108,6 +111,7 @@
 - `ADR-PRO-038-041` : IA organisateur, CRM métier, IA professionnelle et voyages.
 - `ADR-GAM-043-044` : gamification positive et distinctions évolutives.
 - `ADR-TECH-045` : application web responsive installable en PWA pour la V1.
+- `ADR-MON-057` : offres Découverte, Signature et Pro, cohortes fondatrices, promotions et moteur de droits.
 - `ADR-GOV-001` : documentation et commit immédiats après acceptation.
 - `ADR-GOV-002` : pilotage continu par roadmap, métriques et changelog.
 - `ADR-GOV-003` : autonomie complète de livraison Codex, avec exécution SQL Supabase réservée à Cyril.
