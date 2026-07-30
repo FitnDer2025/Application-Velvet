@@ -20,9 +20,15 @@ struct RootView: View {
             case .onboarding:
                 OnboardingFlowView()
                     .transition(.move(edge: .trailing).combined(with: .opacity))
+            case let .profileSetup(profile):
+                ProfileSetupView(profile: profile)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
             case let .home(profile):
                 MainShellView(profile: profile)
                     .transition(.opacity)
+            case let .passwordReset(tokens):
+                PasswordResetView(tokens: tokens)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
         .animation(.easeInOut(duration: VelvetMotion.normal), value: appState.phase.id)
@@ -39,6 +45,7 @@ struct RootView: View {
         } message: {
             Text(appState.alertMessage ?? "")
         }
+        .onOpenURL(perform: appState.handle)
     }
 }
 

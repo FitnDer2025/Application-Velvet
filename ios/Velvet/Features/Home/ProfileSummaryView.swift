@@ -3,6 +3,7 @@ import SwiftUI
 struct ProfileSummaryView: View {
     @EnvironmentObject private var appState: AppState
     let profile: MemberProfile
+    @State private var showsPrivacy = false
 
     var body: some View {
         ZStack {
@@ -46,6 +47,16 @@ struct ProfileSummaryView: View {
                         }
                     }
 
+                    Button {
+                        showsPrivacy = true
+                    } label: {
+                        Label("Réglages, confidentialité et compte", systemImage: "slider.horizontal.3")
+                            .font(VelvetTypography.body(size: 15, weight: .semibold))
+                            .frame(maxWidth: .infinity, minHeight: 50)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(VelvetColor.champagneGold)
+
                     Button(role: .destructive) {
                         Task {
                             await appState.logout()
@@ -63,5 +74,8 @@ struct ProfileSummaryView: View {
         }
         .navigationTitle("Profil")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showsPrivacy) {
+            PrivacySettingsView()
+        }
     }
 }

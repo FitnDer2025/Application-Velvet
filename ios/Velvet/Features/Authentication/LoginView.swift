@@ -7,6 +7,7 @@ struct LoginView: View {
     @State private var configuration: AuthConfiguration?
     @State private var turnstileToken: String?
     @State private var configurationError = false
+    @State private var authenticationSheet: AuthenticationSheet?
 
     private var needsTurnstile: Bool {
         configuration?.turnstileSiteKey?.isEmpty == false
@@ -101,6 +102,18 @@ struct LoginView: View {
                                 )
                             }
                         }
+
+                        HStack {
+                            Button("Créer un compte") {
+                                authenticationSheet = .signUp
+                            }
+                            Spacer()
+                            Button("Mot de passe oublié ?") {
+                                authenticationSheet = .recovery
+                            }
+                        }
+                        .font(VelvetTypography.caption(size: 13, weight: .semibold))
+                        .foregroundStyle(VelvetColor.champagneGold)
                     }
                 }
 
@@ -135,5 +148,19 @@ struct LoginView: View {
                 configurationError = true
             }
         }
+        .sheet(item: $authenticationSheet) { sheet in
+            switch sheet {
+            case .signUp:
+                SignUpView(configuration: configuration)
+            case .recovery:
+                ForgotPasswordView(configuration: configuration)
+            }
+        }
     }
+}
+
+private enum AuthenticationSheet: String, Identifiable {
+    case signUp
+    case recovery
+    var id: String { rawValue }
 }

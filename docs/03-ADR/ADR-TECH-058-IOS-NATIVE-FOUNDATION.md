@@ -15,30 +15,33 @@ Le fondateur demande explicitement de préparer une vraie application native iOS
 Velvet ouvre une piste iOS native en SwiftUI dans le dépôt principal.
 
 - Le Web reste la plateforme de référence et le backend reste la source unique de vérité.
-- L’application iOS consomme les mêmes API versionnées, comptes, profils, consentements et permissions.
-- La première tranche couvre : design system natif, connexion, consentements, onboarding initial et accueil.
+- L’application iOS consomme les mêmes API, comptes, profils, consentements et permissions.
+- Le périmètre natif couvre l’authentification complète, l’onboarding individuel/Couple, l’admission, l’annuaire, les événements, la messagerie et la sécurité membre.
 - Les évolutions de données et de règles serveur sont partagées immédiatement.
 - Les changements d’interface propres à iOS suivent des versions TestFlight/App Store.
-- L’application iOS n’embarque aucun secret Supabase ou Cloudflare.
-- Le contrôle anti-robot reste assuré par Cloudflare Turnstile dans un composant WebKit isolé ; l’expérience applicative reste native.
-- La présentation App Store et les contenus accessibles sur iOS doivent respecter les règles Apple, sans contourner la validation.
+- L’application iOS n’embarque aucun secret Supabase, Cloudflare ou Apple.
+- Cloudflare Turnstile reste isolé dans WebKit ; l’expérience applicative reste native.
+- La récupération utilise le schéma contrôlé `velvet://recovery`.
+- La suppression de compte est effectuée par une Function authentifiée utilisant une clé de service exclusivement côté serveur.
+- APNs et StoreKit 2 ne sont activés qu’après définition de leurs contrats serveur.
 
 ## Conséquences
 
-- ADR-TECH-045 reste valable pour le périmètre Web et pour l’obligation de maintenir une expérience navigateur complète.
-- La phrase « les applications natives iOS et Android sont exclues du périmètre V1 » est amendée pour iOS uniquement.
+- ADR-TECH-045 reste valable pour le Web et l’obligation de maintenir une expérience navigateur complète.
 - Android reste différé.
-- Toute API consommée par iOS doit conserver une compatibilité versionnée ou prévoir une stratégie de migration.
-- Les fonctions natives sont livrées par tranches verticales, une fois leur comportement métier stabilisé côté Web.
+- Toute API consommée par iOS doit conserver une compatibilité ou prévoir une migration.
+- La recherche sur le lot d’annuaire est acceptable pour la BETA ; la pagination serveur devient obligatoire au changement d’échelle.
+- La clé `SUPABASE_SERVICE_ROLE_KEY` nécessaire à l’effacement n’est jamais publique et doit être configurée comme secret Cloudflare.
+- Les déclarations de confidentialité Apple doivent rester synchronisées avec les données réellement collectées.
 
-## Hors périmètre de cette décision
+## Hors périmètre
 
-- activation des paiements réels ;
+- activation immédiate des paiements réels ;
 - choix définitif du compte Apple individuel ou organisation ;
 - soumission immédiate à l’App Store ;
-- ouverture des médias sensibles sur iOS ;
+- diffusion d’albums privés explicites sur iOS ;
 - application Android.
 
 ## Retour arrière
 
-La piste iOS est isolée dans `ios/`. Elle peut être suspendue sans affecter la BETA Web, le backend ou les migrations Supabase.
+La piste iOS est isolée dans `ios/`. Elle peut être suspendue sans affecter le client Web. Les deux adaptations backend ajoutées sont rétrocompatibles : le redirect Web reste le défaut et l’effacement exige un appel explicite authentifié.

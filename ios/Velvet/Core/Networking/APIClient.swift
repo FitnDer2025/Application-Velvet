@@ -2,6 +2,21 @@ import Foundation
 
 struct EmptyBody: Encodable, Sendable {}
 
+struct MultipartPart: Sendable {
+    let name: String
+    let fileName: String?
+    let mimeType: String?
+    let data: Data
+
+    static func field(_ name: String, value: String) -> MultipartPart {
+        MultipartPart(name: name, fileName: nil, mimeType: nil, data: Data(value.utf8))
+    }
+
+    static func file(_ name: String, fileName: String, mimeType: String, data: Data) -> MultipartPart {
+        MultipartPart(name: name, fileName: fileName, mimeType: mimeType, data: data)
+    }
+}
+
 final class APIClient: @unchecked Sendable {
     private let baseURL: URL
     private let session: URLSession
@@ -39,9 +54,16 @@ final class APIClient: @unchecked Sendable {
 
     func get<Response: Decodable & Sendable>(
         _ path: String,
+        query: [URLQueryItem] = [],
         as type: Response.Type = Response.self
     ) async throws -> Response {
-        try await request(path: path, method: "GET", body: Optional<EmptyBody>.none, as: type)
+        try await request(
+            path: path,
+            query: query,
+            method: "GET",
+            body: Optional<EmptyBody>.none,
+            as: type
+        )
     }
 
     func post<Body: Encodable & Sendable, Response: Decodable & Sendable>(
@@ -50,6 +72,60 @@ final class APIClient: @unchecked Sendable {
         as type: Response.Type = Response.self
     ) async throws -> Response {
         try await request(path: path, method: "POST", body: body, as: type)
+    }
+
+    func patch<Body: Encodable & Sendable, Response: Decodable & Sendable>(
+        _ path: String,
+        body: Body,
+        as type: Response.Type = Response.self
+    ) async throws -> Response {
+        try await request(path: path, method: "PATCH", body: body, as: type)
+    }
+
+    func delete<Response: Decodable & Sendable>(
+        _ path: String,
+        query: [URLQueryItem] = [],
+        as type: Response.Type = Response.self
+    ) async throws -> Response {
+        try await request(
+            path: path,
+            query: query,
+            method: "DELETE",
+            body: Optional<EmptyBody>.none,
+            as: type
+        )
+    }
+
+    func upload<Response: Decodable & Sendable>(
+        _ path: String,
+        parts: [MultipartPart],
+        as type: Response.Type = Response.self
+    ) async throws -> Response {
+        let boundary = "Velvet-\(UUID().uuidString)"
+        var data = Data()
+        for part in parts {
+            data.append(Data("--\(boundary)\r\n".utf8))
+            var disposition = "Content-Disposition: form-data; name=\"\(part.name)\""
+            if let fileName = part.fileName {
+                disposition += "; filename=\"\(fileName)\""
+            }
+            data.append(Data("\(disposition)\r\n".utf8))
+            if let mimeType = part.mimeType {
+                data.append(Data("Content-Type: \(mimeType)\r\n".utf8))
+            }
+            data.append(Data("\r\n".utf8))
+            data.append(part.data)
+            data.append(Data("\r\n".utf8))
+        }
+        data.append(Data("--\(boundary)--\r\n".utf8))
+
+        return try await dataRequest(
+            path: path,
+            method: "POST",
+            contentType: "multipart/form-data; boundary=\(boundary)",
+            body: data,
+            as: type
+        )
     }
 
     func postWithoutResponse<Body: Encodable & Sendable>(
@@ -66,13 +142,21 @@ final class APIClient: @unchecked Sendable {
 
     private func request<Body: Encodable & Sendable, Response: Decodable & Sendable>(
         path: String,
+        query: [URLQueryItem] = [],
         method: String,
         body: Body?,
         as type: Response.Type
     ) async throws -> Response {
-        guard let url = URL(string: path, relativeTo: baseURL) else {
+        guard
+            let rawURL = URL(string: path, relativeTo: baseURL),
+            var components = URLComponents(url: rawURL, resolvingAgainstBaseURL: true)
+        else {
             throw APIError.invalidConfiguration
         }
+        if !query.isEmpty {
+            components.queryItems = (components.queryItems ?? []) + query
+        }
+        guard let url = components.url else { throw APIError.invalidConfiguration }
 
         var request = URLRequest(url: url)
         request.httpMethod = method
@@ -85,6 +169,33 @@ final class APIClient: @unchecked Sendable {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
 
+        return try await execute(request, as: type)
+    }
+
+    private func dataRequest<Response: Decodable & Sendable>(
+        path: String,
+        method: String,
+        contentType: String,
+        body: Data,
+        as type: Response.Type
+    ) async throws -> Response {
+        guard let url = URL(string: path, relativeTo: baseURL) else {
+            throw APIError.invalidConfiguration
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Velvet-iOS/0.2", forHTTPHeaderField: "X-Velvet-Client")
+        request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+        request.httpBody = body
+        return try await execute(request, as: type)
+    }
+
+    private func execute<Response: Decodable & Sendable>(
+        _ request: URLRequest,
+        as type: Response.Type
+    ) async throws -> Response {
         do {
             let (data, response) = try await session.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse else {

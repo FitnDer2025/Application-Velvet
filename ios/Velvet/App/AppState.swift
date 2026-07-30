@@ -8,7 +8,9 @@ final class AppState: ObservableObject {
         case signedOut
         case consentRequired(Account)
         case onboarding(Account)
+        case profileSetup(MemberProfile)
         case home(MemberProfile)
+        case passwordReset(RecoveryTokens)
 
         var id: String {
             switch self {
@@ -16,7 +18,9 @@ final class AppState: ObservableObject {
             case .signedOut: "signedOut"
             case .consentRequired: "consentRequired"
             case .onboarding: "onboarding"
+            case .profileSetup: "profileSetup"
             case .home: "home"
+            case .passwordReset: "passwordReset"
             }
         }
     }
@@ -61,10 +65,43 @@ final class AppState: ObservableObject {
         }
     }
 
+    func restoreAfterSignUp() async {
+        await perform {
+            let account = try await session.restore()
+            try await route(account: account)
+        }
+    }
+
     func completeOnboarding(_ request: ProfileUpsertRequest) async {
         await perform {
             let response = try await session.saveProfile(request)
-            phase = .home(response.profile)
+            phase = response.profile.isAdmitted ? .home(response.profile) : .profileSetup(response.profile)
+        }
+    }
+
+    func refreshProfile() async {
+        await perform {
+            guard let profile = try await session.profile().profile else {
+                throw APIError.transport("Le profil Velvet est introuvable.")
+            }
+            phase = profile.isAdmitted ? .home(profile) : .profileSetup(profile)
+        }
+    }
+
+    func continueToPreview(_ profile: MemberProfile) {
+        phase = .home(profile)
+    }
+
+    func handle(url: URL) {
+        guard let tokens = RecoveryTokens(url: url) else { return }
+        phase = .passwordReset(tokens)
+    }
+
+    func updatePassword(_ password: String, tokens: RecoveryTokens) async {
+        await perform {
+            try await session.updatePassword(password, tokens: tokens)
+            let account = try await session.restore()
+            try await route(account: account)
         }
     }
 
@@ -83,7 +120,7 @@ final class AppState: ObservableObject {
 
         let profile = try await session.profile()
         if let memberProfile = profile.profile {
-            phase = .home(memberProfile)
+            phase = memberProfile.isAdmitted ? .home(memberProfile) : .profileSetup(memberProfile)
         } else {
             phase = .onboarding(account)
         }

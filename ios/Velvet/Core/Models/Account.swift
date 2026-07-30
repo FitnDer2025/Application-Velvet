@@ -43,3 +43,38 @@ struct AuthConfiguration: Decodable, Sendable {
     let turnstileSiteKey: String?
     let passwordPolicy: PasswordPolicy
 }
+
+struct SignUpResponse: Decodable, Sendable {
+    let ok: Bool
+    let confirmationRequired: Bool
+    let message: String
+}
+
+struct RecoveryResponse: Decodable, Sendable {
+    let ok: Bool
+    let message: String
+}
+
+struct PasswordUpdateResponse: Decodable, Sendable {
+    let ok: Bool
+    let message: String
+}
+
+struct RecoveryTokens: Sendable {
+    let accessToken: String
+    let refreshToken: String
+
+    init?(url: URL) {
+        guard url.scheme == "velvet", url.host == "recovery" else { return nil }
+        let fragment = URLComponents(string: "https://velvet.invalid?\(url.fragment ?? "")")
+        let items = fragment?.queryItems ?? []
+        guard
+            let accessToken = items.first(where: { $0.name == "access_token" })?.value,
+            let refreshToken = items.first(where: { $0.name == "refresh_token" })?.value,
+            !accessToken.isEmpty,
+            !refreshToken.isEmpty
+        else { return nil }
+        self.accessToken = accessToken
+        self.refreshToken = refreshToken
+    }
+}

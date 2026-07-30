@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject private var store: VelvetStore
     let profile: MemberProfile
+    @State private var showsNotifications = false
 
     var body: some View {
         ZStack {
@@ -24,20 +26,20 @@ struct HomeView: View {
                     VStack(spacing: VelvetSpacing.md) {
                         HomeActionCard(
                             icon: "person.crop.rectangle.stack",
-                            title: "Découvrir avec intention",
-                            detail: "Des profils cohérents avec tes choix, jamais un classement de popularité.",
+                            title: "\(store.directory?.profiles.count ?? 0) profils à découvrir",
+                            detail: "Recherche locale parmi les membres admis et visibles.",
                             accent: VelvetColor.softBlush
                         )
                         HomeActionCard(
                             icon: "calendar.badge.plus",
-                            title: "Préparer une belle sortie",
-                            detail: "Événements, clubs et présences confirmées réunis au même endroit.",
+                            title: "\(store.directory?.events.count ?? 0) événements à venir",
+                            detail: "\(store.directory?.establishments.count ?? 0) clubs et professionnels publiés.",
                             accent: VelvetColor.champagneGold
                         )
                         HomeActionCard(
                             icon: "lock.shield",
-                            title: "Garder le contrôle",
-                            detail: "Tes consentements, tes albums et ta visibilité restent révocables.",
+                            title: "\(store.notificationFeed.unreadCount) notification\(store.notificationFeed.unreadCount > 1 ? "s" : "")",
+                            detail: "Messages, inscriptions et activité de ton compte.",
                             accent: VelvetColor.success
                         )
                     }
@@ -59,11 +61,20 @@ struct HomeView: View {
                 VelvetMark(size: 34)
             }
             ToolbarItem(placement: .topBarTrailing) {
-                Image(systemName: "bell")
-                    .foregroundStyle(VelvetColor.ivory)
-                    .frame(width: 44, height: 44)
-                    .accessibilityLabel("Notifications")
+                Button {
+                    showsNotifications = true
+                } label: {
+                    Image(systemName: store.notificationFeed.unreadCount > 0 ? "bell.badge.fill" : "bell")
+                        .foregroundStyle(VelvetColor.ivory)
+                        .frame(width: 44, height: 44)
+                }
+                .accessibilityLabel("Notifications")
             }
+        }
+        .refreshable { await store.load() }
+        .sheet(isPresented: $showsNotifications) {
+            NotificationsView()
+                .environmentObject(store)
         }
     }
 
@@ -119,7 +130,7 @@ struct HomeView: View {
                 Text("Profil en cours d’admission")
                     .font(VelvetTypography.body(size: 15, weight: .semibold))
                     .foregroundStyle(VelvetColor.ivory)
-                Text("Complète les photographies demandées depuis le Web pendant que le parcours natif est finalisé.")
+                Text("L’accueil reste en aperçu tant que le backend n’a pas validé l’admission.")
                     .font(VelvetTypography.caption(size: 12, weight: .regular))
                     .foregroundStyle(VelvetColor.textSecondary)
             }

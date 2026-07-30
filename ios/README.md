@@ -1,55 +1,70 @@
 # Velvet iOS
 
-Fondation native SwiftUI de Velvet, connectée au backend de la BETA Web.
+Application native SwiftUI de Velvet, connectée au même backend Cloudflare/Supabase que la BETA Web.
 
-## Périmètre livré
+## Périmètre présent dans la branche
 
-- projet Xcode iPhone, cible iOS 17+ ;
-- design system synchronisé avec `docs/01-BRAND/DESIGN-TOKENS.json` ;
-- authentification par e-mail et mot de passe ;
-- prise en charge de Cloudflare Turnstile dans un composant WebKit isolé ;
-- consentements explicites ;
-- onboarding initial individuel ou couple ;
-- accueil natif et navigation à cinq destinations ;
-- session HTTP conservée par les cookies sécurisés du backend existant ;
-- états chargement, erreur, vide et succès.
+- connexion, inscription avec code d’invitation et consentements ;
+- récupération du mot de passe via `velvet://recovery` ;
+- onboarding individuel et Couple, invitation privée du partenaire ;
+- sélection Photos, compression JPEG locale, upload et états de modération ;
+- admission et démarrage de la vérification externe d’identité/majorité ;
+- accueil alimenté par l’annuaire et les notifications du backend ;
+- découverte, recherche locale et fiches membres ;
+- clubs, professionnels, lieux, événements et inscription ;
+- conversations privées et Salons Velvet liés aux événements ;
+- favoris côté contrat, blocage, signalement et suppression du compte ;
+- préparation des notifications APNs, de la localisation approximative et de StoreKit 2 ;
+- manifeste de confidentialité et validation structurelle.
+
+Le backend reste la source de vérité. L’app ne contourne ni l’admission, ni la visibilité, ni la modération, ni les consentements.
 
 ## Ouvrir sur Mac
 
-1. Cloner le dépôt et sélectionner la branche `feat/velvet-ios-foundation`.
-2. Ouvrir `ios/Velvet.xcodeproj` dans Xcode 16 ou plus récent.
-3. Sélectionner la cible `Velvet`.
-4. Dans **Signing & Capabilities**, choisir l'équipe Apple.
-5. Remplacer `PRODUCT_BUNDLE_IDENTIFIER` avant la première inscription App Store.
-6. Lancer sur un simulateur iPhone ou un iPhone physique.
+1. Cloner le dépôt et sélectionner `feat/velvet-ios-foundation`.
+2. Ouvrir `ios/Velvet.xcodeproj` avec Xcode 16 ou plus récent.
+3. Dans la cible **Velvet > Signing & Capabilities**, choisir l’équipe Apple.
+4. Remplacer `com.velvetapplication.app` si cet identifiant n’est pas celui réservé dans Apple Developer.
+5. Ajouter l’icône 1024 × 1024 dans `AppIcon.appiconset`.
+6. Lancer d’abord sur un simulateur iPhone, puis sur un iPhone physique pour Photos, localisation et notifications.
 
-L'URL BETA est définie dans :
+L’URL de la BETA est définie dans `Config/Debug.xcconfig` et `Config/Release.xcconfig`.
 
-- `Config/Debug.xcconfig`
-- `Config/Release.xcconfig`
+## Activation backend nécessaire
 
-Elle pointe actuellement vers `https://velvet-beta.sh96hv64dj.workers.dev`.
+- Ajouter `velvet://recovery` à la liste des redirect URLs autorisées dans Supabase Auth.
+- Déployer la version adaptée de `functions/api/auth/recovery-request.js`.
+- Définir `SUPABASE_SERVICE_ROLE_KEY` comme secret Cloudflare pour la suppression de compte. Cette clé ne doit jamais être placée dans Xcode, GitHub ou une variable publique.
+- Vérifier les cascades et la politique de conservation avant d’activer l’effacement définitif.
+- Choisir le prestataire de vérification puis définir `IDENTITY_AGE_VERIFICATION_START_URL`.
 
-## Limites de cette première tranche
+## Activation Apple nécessaire
 
-- l'inscription sur invitation, la récupération du mot de passe et l'envoi de photos seront ajoutés dans les tranches suivantes ;
-- l'onboarding pose l'identité initiale, mais le parcours Couple complet, l'invitation du partenaire et l'admission photo restent pilotés par le backend et la version Web ;
-- les onglets Découvrir, Événements et Messages posent la navigation native mais seront alimentés dans les prochaines tranches ;
-- aucune clé Supabase, aucun secret Cloudflare et aucune donnée personnelle ne sont intégrés à l'application.
-- l'icône officielle 1024 × 1024 doit être ajoutée dans `AppIcon.appiconset` avant l'archive App Store ; le logo d'interface officiel est déjà inclus.
+- Notifications : ajouter la capability **Push Notifications**, puis **Background Modes > Remote notifications** si le traitement silencieux est requis. Le backend doit recevoir et gérer les jetons APNs ; le contrat Web Push existant ne convient pas à APNs.
+- StoreKit : créer les produits dans App Store Connect et ajouter une correspondance serveur `plan Velvet ↔ product ID Apple`. Aucun identifiant de produit n’est codé en dur.
+- Confidentialité : aligner les réponses App Store Connect avec `Resources/PrivacyInfo.xcprivacy` et avec le comportement réel du backend.
+- Récupération : tester le schéma `velvet://recovery` sur un appareil.
 
-## Architecture
+## Vérifications
 
-```text
-Velvet/
-├── App/               état global et routage
-├── Core/              API, session et modèles
-├── DesignSystem/      couleurs, métriques et composants Velvet
-├── Features/
-│   ├── Authentication
-│   ├── Onboarding
-│   └── Home
-└── Resources/         catalogue d'assets
+Depuis la racine :
+
+```bash
+node ios/scripts/validate-foundation.mjs
+node --test ios/tests/native-structure.test.mjs
+node --check functions/api/auth/recovery-request.js
+node --check functions/api/members/account-deletion.js
 ```
 
-Le backend reste la source de vérité. L'application ne contourne jamais les permissions, la modération, l'admission ou les consentements serveur.
+Sur Mac :
+
+```bash
+xcodebuild \
+  -project ios/Velvet.xcodeproj \
+  -scheme Velvet \
+  -sdk iphonesimulator \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+  build
+```
+
+Voir aussi `ARCHITECTURE.md` et `APP-STORE-CHECKLIST.md`.

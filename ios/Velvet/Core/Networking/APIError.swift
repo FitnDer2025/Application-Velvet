@@ -24,7 +24,17 @@ enum ErrorMessage {
         "first_names_required": "Le prénom est obligatoire.",
         "gender_identity_required": "Choisis une identité de genre.",
         "profile_persistence_failed": "Le profil n’a pas pu être confirmé. Réessaie.",
-        "authentication_required": "Ta session a expiré. Reconnecte-toi."
+        "authentication_required": "Ta session a expiré. Reconnecte-toi.",
+        "email_password_invitation_required": "L’e-mail, le mot de passe et le code d’invitation sont obligatoires.",
+        "password_too_short": "Le mot de passe doit contenir au moins 12 caractères.",
+        "password_too_weak": "Ajoute une majuscule, une minuscule, un chiffre et un symbole.",
+        "invalid_partner_email": "L’adresse du ou de la partenaire est invalide.",
+        "partner_email_must_be_different": "Utilise une adresse différente de la tienne.",
+        "invalid_photo_file": "Choisis une image JPEG, PNG ou WebP de moins de 4 Mo.",
+        "verification_provider_not_configured": "Le prestataire de vérification n’est pas encore configuré.",
+        "admission_required": "Cette fonction est réservée aux membres admis.",
+        "account_deletion_not_configured": "La suppression doit encore être activée côté serveur.",
+        "account_deletion_confirmation_required": "Écris SUPPRIMER pour confirmer."
     ]
 
     static func text(for error: Error) -> String {

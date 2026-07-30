@@ -25,15 +25,67 @@ struct MemberProfile: Codable, Identifiable, Sendable {
     let verificationStatus: String?
     let createdAt: String?
     let updatedAt: String?
+    let story: String?
+    let searchText: String?
+    let practices: [String]?
+    let valuesList: [String]?
+    let relationshipSince: Int?
+    let journey: String?
+    let favoritePlaces: [String]?
+    let availabilityText: String?
+    let individualProfiles: [IndividualProfile]?
+    let mediaAssets: [MediaAsset]?
 
     var isAdmitted: Bool {
         admissionStatus == "approved"
     }
 }
 
+struct IndividualProfile: Codable, Identifiable, Sendable {
+    let id: UUID
+    let firstName: String?
+    let genderIdentity: String?
+    let birthYear: Int?
+    let heightCm: Int?
+    let bodyType: String?
+    let profession: String?
+    let professionPrivate: Bool?
+}
+
 struct ProfileResponse: Decodable, Sendable {
     let profile: MemberProfile?
     let personalProfileComplete: Bool?
+    let access: MemberAccess?
+}
+
+struct MemberAccess: Decodable, Sendable {
+    let migrationPending: Bool?
+    let features: [String: FeatureValue]?
+}
+
+enum FeatureValue: Codable, Sendable {
+    case bool(Bool)
+    case int(Int)
+    case string(String)
+    case null
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if container.decodeNil() { self = .null }
+        else if let value = try? container.decode(Bool.self) { self = .bool(value) }
+        else if let value = try? container.decode(Int.self) { self = .int(value) }
+        else { self = .string(try container.decode(String.self)) }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case let .bool(value): try container.encode(value)
+        case let .int(value): try container.encode(value)
+        case let .string(value): try container.encode(value)
+        case .null: try container.encodeNil()
+        }
+    }
 }
 
 struct SavedProfileResponse: Decodable, Sendable {
