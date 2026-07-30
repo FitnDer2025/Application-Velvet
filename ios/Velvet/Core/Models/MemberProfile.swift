@@ -35,6 +35,7 @@ struct MemberProfile: Codable, Identifiable, Sendable {
     let availabilityText: String?
     let individualProfiles: [IndividualProfile]?
     let mediaAssets: [MediaAsset]?
+    let albums: [ProfileAlbum]?
 
     var isAdmitted: Bool {
         admissionStatus == "approved"
@@ -47,9 +48,22 @@ struct IndividualProfile: Codable, Identifiable, Sendable {
     let genderIdentity: String?
     let birthYear: Int?
     let heightCm: Int?
+    let weightKg: Int?
+    let morphology: String?
     let bodyType: String?
+    let hairColor: String?
+    let eyeColor: String?
+    let childrenStatus: String?
     let profession: String?
     let professionPrivate: Bool?
+    let orientation: String?
+    let frequency: String?
+    let biography: String?
+    let attractedTo: [String]?
+    let desiredPractices: [String]?
+    let partnerPermissions: [String]?
+    let linkedUserId: UUID?
+    let memberSlot: String?
 }
 
 struct ProfileResponse: Decodable, Sendable {
