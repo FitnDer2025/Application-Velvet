@@ -1,5 +1,6 @@
 import { json, readJson } from '../auth/_shared.js';
 import {
+  memberAccessState,
   memberSession,
   requireAdmittedMember,
   restJson,
@@ -20,7 +21,7 @@ function cleanFilters(value) {
 }
 
 async function discoveryState(env, access) {
-  const [presenceResult, searchesResult, followingResult] = await Promise.allSettled([
+  const [presenceResult, searchesResult, followingResult, accessResult] = await Promise.allSettled([
     restJson(
       env,
       '/rest/v1/rpc/member_presence_snapshot',
@@ -36,15 +37,22 @@ async function discoveryState(env, access) {
       env,
       `/rest/v1/favorites?select=profile_id,created_at&owner_user_id=eq.${encodeURIComponent(access.account.userId)}&order=created_at.desc`,
       access.session
-    )
+    ),
+    memberAccessState(env, access)
   ]);
 
+  const memberAccess = accessResult.status === 'fulfilled' ? accessResult.value : null;
+  const savedSearchesAllowed = memberAccess?.migrationPending
+    || memberAccess?.features?.savedSearches;
   return {
     presence: presenceResult.status === 'fulfilled' ? presenceResult.value : [],
-    savedSearches: searchesResult.status === 'fulfilled' ? searchesResult.value : [],
+    savedSearches: searchesResult.status === 'fulfilled' && savedSearchesAllowed
+      ? searchesResult.value
+      : [],
     following: followingResult.status === 'fulfilled'
       ? followingResult.value.map((row) => row.profile_id)
       : [],
+    access: memberAccess,
     persistenceAvailable: searchesResult.status === 'fulfilled',
     presenceAvailable: presenceResult.status === 'fulfilled'
   };
@@ -73,6 +81,13 @@ export async function onRequestPost({ request, env }) {
     const result = await admittedAccess(request, env);
     if (result.response) return result.response;
     const body = await readJson(request);
+    const memberAccess = await memberAccessState(env, result.access);
+    if (!memberAccess.migrationPending && !memberAccess.features?.savedSearches) {
+      return withSession({
+        error: 'signature_required_saved_search',
+        access: memberAccess
+      }, result.access.session, 403);
+    }
     const name = cleanName(body.name);
     if (!name) return withSession({ error: 'saved_search_name_required' }, result.access.session, 400);
     const filters = cleanFilters(body.filters);

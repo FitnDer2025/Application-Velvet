@@ -39,6 +39,55 @@ export async function requireAdmittedMember(env, access) {
   return { admission };
 }
 
+export function monetizationMigrationMissing(error) {
+  const message = String(error?.message || error || '').toLowerCase();
+  return message.includes('member_access_snapshot')
+    || message.includes('consume_my_profile_ai')
+    || message.includes('set_my_profile_favorite')
+    || message.includes('redeem_my_promotion')
+    || message.includes('pgrst202')
+    || message.includes('schema cache');
+}
+
+export function betaFullAccess(profileId = null) {
+  return {
+    profileId,
+    tier: 'beta_full',
+    planCode: 'member_signature',
+    source: 'migration_pending',
+    validUntil: null,
+    migrationPending: true,
+    features: {
+      advancedSearch: true,
+      savedSearches: true,
+      newConversationsPerWeek: null,
+      newConversationsUsed: 0,
+      followLimit: null,
+      followingUsed: 0,
+      profileAiLimit: null,
+      profileAiUsed: 0,
+      profileAiPeriod: 'beta',
+      followConnectionAlerts: true,
+      personalizedAlerts: true
+    }
+  };
+}
+
+export async function memberAccessState(env, access) {
+  try {
+    const result = await restJson(
+      env,
+      '/rest/v1/rpc/member_access_snapshot',
+      access.session,
+      { method: 'POST', body: '{}' }
+    );
+    return result || betaFullAccess();
+  } catch (error) {
+    if (monetizationMigrationMissing(error)) return betaFullAccess();
+    throw error;
+  }
+}
+
 export async function restJson(env, path, session, init = {}) {
   const response = await supabase(env, path, init, session.access_token);
   const payload = await response.json().catch(() => null);

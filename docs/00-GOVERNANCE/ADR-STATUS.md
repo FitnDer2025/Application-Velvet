@@ -1,6 +1,6 @@
 # Velvet ADR Status
 
-**Dernière mise à jour :** 29 juillet 2026
+**Dernière mise à jour :** 30 juillet 2026
 
 Ce tableau permet de vérifier rapidement les domaines déjà arbitrés avant toute nouvelle proposition.
 
@@ -12,6 +12,7 @@ Ce tableau permet de vérifier rapidement les domaines déjà arbitrés avant to
 | Professionnels et IA métier | ADR-038 à ADR-040 | ✅ Accepté | `docs/adr/ADR-PRO-038-041-professional-ecosystem-and-trips.md` |
 | Voyages Velvet | ADR-041 | ✅ Accepté | `docs/adr/ADR-PRO-038-041-professional-ecosystem-and-trips.md` |
 | ADR-042 | Sujet déjà couvert | 🔒 Verrouillé | Modèle freemium, essai, promotions et parrainage déjà décidés |
+| Monétisation opérationnelle | ADR-MON-057 | ✅ Accepté | `docs/03-ADR/ADR-MON-057-MEMBER-PRO-MONETIZATION.md` |
 | Gamification | ADR-043 à ADR-044 | ✅ Accepté | `docs/adr/ADR-GAM-043-044-positive-gamification.md` |
 | Gouvernance de livraison | ADR-GOV-003 | ✅ Accepté | `docs/adr/ADR-GOV-003-code-delivery-autonomy.md` |
 

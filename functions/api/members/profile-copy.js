@@ -2,7 +2,9 @@ import { json, readJson } from '../auth/_shared.js';
 import {
   cleanList,
   cleanText,
+  monetizationMigrationMissing,
   memberSession,
+  restJson,
   withSession
 } from './_shared.js';
 
@@ -75,6 +77,17 @@ export async function onRequestPost({ request, env }) {
       return withSession({ error: 'ai_source_too_short' }, access.session, 400);
     }
     if (!env.AI) return withSession({ error: 'profile_ai_unavailable' }, access.session, 503);
+    let usage = null;
+    try {
+      usage = await restJson(
+        env,
+        '/rest/v1/rpc/consume_my_profile_ai',
+        access.session,
+        { method: 'POST', body: '{}' }
+      );
+    } catch (error) {
+      if (!monetizationMigrationMissing(error)) throw error;
+    }
 
     const profileType = body.profileType === 'couple' ? 'couple' : 'individual';
     const voice = profileType === 'couple'
@@ -128,7 +141,8 @@ Retourne uniquement le texte final, en paragraphes courts, dans une limite de ${
       ok: true,
       text,
       model: MODEL,
-      purpose: String(body.purpose)
+      purpose: String(body.purpose),
+      usage
     }, access.session);
   } catch (error) {
     return json({ error: error.message || 'profile_ai_generation_failed' }, 400);

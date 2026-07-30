@@ -96,6 +96,36 @@
     return `<section class="card" style="max-width:760px;margin:8vh auto"><div class="ey">Velvet Pro connecté</div><h1>${esc(title)}</h1><p class="lead">${esc(text)}</p></section>`;
   }
 
+  function proPaywall() {
+    const prices = workspace?.billingPrices || [];
+    return `<section class="card" style="max-width:820px;margin:8vh auto;background:radial-gradient(circle at 92% 0,rgba(213,180,119,.16),transparent 38%),var(--panel)">
+      <div class="ey">Velvet Pro · un établissement</div><h1>Activez votre espace professionnel</h1>
+      <p class="lead">La fiche factuelle reste visible gratuitement. La gestion de la page, les événements et le CRM sont inclus dans Velvet Pro, sans commission sur les soirées au lancement.</p>
+      <div class="grid g2" style="margin:24px 0">${prices.map((price) => `<button class="btn secondary" data-pro-checkout="${esc(price.price_code)}" style="display:grid;gap:5px;padding:18px"><b style="font-size:22px">${esc((Number(price.amount_cents) / 100).toLocaleString('fr-FR', { style: 'currency', currency: price.currency }))}</b><small>${price.interval_unit === 'year' ? 'par an' : 'par mois'}</small></button>`).join('')}</div>
+      <small>Le module est prêt. Le paiement s’ouvrira après validation écrite du partenaire bancaire spécialisé.</small>
+    </section>`;
+  }
+
+  async function startProCheckout(priceCode, button) {
+    button.disabled = true;
+    try {
+      const response = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ priceCode, establishmentId: venue()?.id })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'billing_checkout_failed');
+      if (result.checkoutUrl) window.location.href = result.checkoutUrl;
+    } catch (error) {
+      toastMsg(error.message === 'billing_provider_not_configured'
+        ? 'Le paiement sera ouvert après validation du partenaire bancaire.'
+        : 'Le paiement est momentanément indisponible.');
+      button.disabled = false;
+    }
+  }
+
   async function reload() {
     workspace = await api();
     hydrate(workspace);
@@ -106,7 +136,10 @@
       return;
     }
     if (!['trial', 'active'].includes(venue().subscription)) {
-      content.innerHTML = neutral('Fiche professionnelle attribuée', 'Votre établissement est bien relié à votre compte, mais les outils de publication, l’agenda, la galerie et le CRM restent verrouillés jusqu’à l’activation de votre abonnement Velvet Pro.');
+      content.innerHTML = proPaywall();
+      content.querySelectorAll('[data-pro-checkout]').forEach((button) => button.addEventListener('click', () =>
+        startProCheckout(button.dataset.proCheckout, button)
+      ));
       return;
     }
     render();

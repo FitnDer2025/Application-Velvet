@@ -111,6 +111,13 @@ export async function accountContext(env, session) {
   const userId = session.user?.id;
   if (!userId) return null;
 
+  await supabase(
+    env,
+    '/rest/v1/rpc/resume_my_expired_suspension',
+    { method: 'POST', body: '{}' },
+    session.access_token
+  ).catch(() => null);
+
   const [accountResponse, rolesResponse] = await Promise.all([
     supabase(
       env,

@@ -2,6 +2,19 @@
 
 Ce document retrace les décisions produit validées. Il ne remplace ni les ADR ni l'historique technique Git.
 
+## 30 juillet 2026
+
+### ADR-MON-057 — Découverte, Signature et Velvet Pro
+
+- Velvet Découverte conserve la recherche essentielle, trois nouvelles conversations par semaine, dix suivis, un essai IA et toutes les fonctions essentielles de sécurité.
+- Velvet Signature apporte recherche avancée et sauvegardée, conversations et suivis illimités, vingt générations IA mensuelles et alertes personnalisées.
+- Les femmes seules vérifiées bénéficient de Signature sans paiement ; les couples partagent un abonnement.
+- Signature est préparé à 14,90 €/mois, 34,90 €/3 mois et 99,90 €/an.
+- Velvet Pro est préparé à 39,90 €/mois et 399 €/an, sans commission événement au lancement.
+- Les cohortes fondatrices offrent 90 jours à 250 couples, 150 hommes seuls et 30 établissements.
+- Velvet Control pilote droits, campagnes, codes, suspensions, blocages et suppressions différées.
+- Le prestataire de paiement reste interchangeable et aucun encaissement réel n'est ouvert avant son accord écrit et la validation juridique.
+
 ## 29 juillet 2026
 
 ### Accueil personnalisé, recherche avancée et thème clair

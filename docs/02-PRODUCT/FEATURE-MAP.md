@@ -118,6 +118,19 @@ Cycle : Découverte → Invitation Velvet → Salon Velvet → Confiance → Exp
 ## 12. Administration
 
 - Modération des membres, médias, événements, clubs et organisateurs.
+- Pilotage des accès Découverte, Signature et Pro.
+- Suspension temporaire, blocage et suppression programmée à J+30.
+- Campagnes, codes promotionnels et cohortes fondatrices avec limites et audit.
+
+## 13. Monétisation
+
+- Velvet Découverte gratuit et fonctionnel.
+- Velvet Signature : recherche avancée et sauvegardée, conversations et suivis illimités, vingt générations IA mensuelles et alertes personnalisées.
+- Signature offert aux profils individuels vérifiés déclarés `Femme`.
+- Un abonnement unique par fiche Couple.
+- Velvet Pro par établissement, sans commission événement au lancement.
+- Paiement hébergé et indépendant du prestataire ; aucune donnée de carte conservée par Velvet.
+- Vente réelle bloquée avant accord écrit du prestataire et validation juridique.
 - Gestion des signalements et sanctions graduées.
 - Journal d'audit sécurisé.
 - Support et appels.

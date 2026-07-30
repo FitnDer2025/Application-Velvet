@@ -30,6 +30,8 @@
   document.body.classList.add('admission-locked');
   const state = {
     account: null,
+    access: null,
+    billingCatalog: null,
     profile: null,
     directory: {
       profiles: [],
@@ -188,7 +190,17 @@
     lifecycle_email_failed: 'L’e-mail de confirmation n’a pas pu être envoyé.',
     ai_source_too_short: 'Ajoute au moins trois mots-clés précis avant de solliciter Velvet IA.',
     profile_ai_unavailable: 'Velvet IA est momentanément indisponible.',
-    profile_ai_generation_failed: 'Velvet IA n’a pas pu composer ce texte. Enrichis légèrement ton brouillon puis réessaie.'
+    profile_ai_generation_failed: 'Velvet IA n’a pas pu composer ce texte. Enrichis légèrement ton brouillon puis réessaie.',
+    signature_required_saved_search: 'Les recherches sauvegardées font partie de Velvet Signature.',
+    signature_conversation_limit: 'Tes 3 nouvelles conversations de la semaine sont utilisées. Les échanges déjà ouverts restent illimités.',
+    signature_follow_limit: 'Velvet Découverte permet de suivre 10 profils. Passe à Signature pour suivre sans limite.',
+    signature_profile_ai_limit: 'Ton quota Velvet IA est utilisé pour cette période.',
+    promotion_invalid: 'Ce code promotionnel est inconnu ou incorrect.',
+    promotion_expired: 'Ce code promotionnel a expiré.',
+    promotion_limit_reached: 'Toutes les activations prévues pour ce code ont été utilisées.',
+    promotion_already_used: 'Ce code a déjà été utilisé par ce profil.',
+    promotion_audience_mismatch: 'Ce code n’est pas destiné à ce type de profil.',
+    billing_provider_not_configured: 'Le paiement sera ouvert après validation définitive de notre partenaire bancaire.'
   };
 
   const REFERENCES = {
@@ -762,6 +774,7 @@
       ? list(result.savedSearches)
       : localSavedSearches();
     state.following = list(result.following);
+    if (result.access) state.access = result.access;
   }
 
   async function loadAll() {
@@ -769,6 +782,7 @@
       const profileResult = await api('/api/members/profile');
       state.profile = profileResult.profile;
       state.account = profileResult.account;
+      state.access = profileResult.access || state.access;
       state.membership = profileResult.membership;
       state.personalProfileComplete = profileResult.personalProfileComplete;
       if (!state.profile || !state.personalProfileComplete) {
@@ -830,6 +844,7 @@
     const profileResult = await api('/api/members/profile');
     state.profile = profileResult.profile;
     state.account = profileResult.account;
+    state.access = profileResult.access || state.access;
     state.membership = profileResult.membership;
     state.personalProfileComplete = profileResult.personalProfileComplete;
     if (state.profile?.admission_status !== 'approved') {
@@ -2165,10 +2180,12 @@
 
   function renderDiscover() {
     const filters = state.discoverFilters;
+    const signature = ['signature', 'beta_full'].includes(state.access?.tier);
     const locationReady = state.mapData?.center?.source === 'private_approximate_location';
     const typeLabels = { couple: 'Tous les couples', woman: 'Toutes les femmes', man: 'Tous les hommes' };
     return `<div class="page discover-page">
       ${pageHead('Recherche sur mesure', 'Recherche', 'Combine librement les critères : chaque groupe accepte plusieurs sélections sans limite.')}
+      ${signature ? '' : '<section class="signature-notice"><div><p class="eyebrow">Velvet Découverte</p><strong>La recherche essentielle reste accessible.</strong><small>Âges, pratiques, physique, présence et recherches sauvegardées sont inclus dans Velvet Signature.</small></div><button class="secondary" type="button" data-route="settings">Voir Signature</button></section>'}
       <section class="card saved-search-bar">
         <label>Mes recherches
           <select id="savedSearchSelect">
@@ -2177,14 +2194,14 @@
           </select>
         </label>
         <label>Nom de cette recherche<input id="savedSearchName" maxlength="80" placeholder="Ex. Couples échangistes autour de Lille"></label>
-        <button class="primary" type="button" data-save-search>Enregistrer</button>
+        <button class="primary" type="button" data-save-search${signature ? '' : ' disabled'}>Enregistrer</button>
         <button class="secondary" type="button" data-delete-search${state.selectedSavedSearchId ? '' : ' disabled'}>Supprimer</button>
-        <small>${state.savedSearchPersistenceAvailable ? 'Synchronisée avec ton compte Velvet.' : 'Enregistrée sur cet appareil jusqu’à l’installation de la migration Supabase.'}</small>
+        <small>${signature ? (state.savedSearchPersistenceAvailable ? 'Synchronisée avec ton compte Velvet.' : 'Enregistrée sur cet appareil jusqu’à l’installation de la migration Supabase.') : 'Disponible avec Velvet Signature.'}</small>
       </section>
       <div class="discover-layout">
         <form id="discoverFilters" class="card discover-filter-panel">
           <label class="discover-query">Recherche libre<input name="query" value="${e(filters.query)}" placeholder="Nom, zone, envie ou pratique"></label>
-          <details class="discover-filter-section" open>
+          <details class="discover-filter-section${signature ? '' : ' signature-locked'}" open>
             <summary>Nous recherchons</summary>
             ${discoverChoices('types', ['couple', 'woman', 'man'], filters.types, (value) => typeLabels[value])}
           </details>
@@ -2207,21 +2224,21 @@
           <details class="discover-filter-section" open>
             <summary>Âges</summary>
             <div class="discover-age-grid">
-              <fieldset><legend>Pour l’homme</legend><label>De<input type="number" name="maleAgeMin" min="18" max="99" value="${e(filters.maleAgeMin)}"></label><label>À<input type="number" name="maleAgeMax" min="18" max="99" value="${e(filters.maleAgeMax)}"></label></fieldset>
-              <fieldset><legend>Pour la femme</legend><label>De<input type="number" name="femaleAgeMin" min="18" max="99" value="${e(filters.femaleAgeMin)}"></label><label>À<input type="number" name="femaleAgeMax" min="18" max="99" value="${e(filters.femaleAgeMax)}"></label></fieldset>
+              <fieldset${signature ? '' : ' disabled'}><legend>Pour l’homme</legend><label>De<input type="number" name="maleAgeMin" min="18" max="99" value="${e(filters.maleAgeMin)}"></label><label>À<input type="number" name="maleAgeMax" min="18" max="99" value="${e(filters.maleAgeMax)}"></label></fieldset>
+              <fieldset${signature ? '' : ' disabled'}><legend>Pour la femme</legend><label>De<input type="number" name="femaleAgeMin" min="18" max="99" value="${e(filters.femaleAgeMin)}"></label><label>À<input type="number" name="femaleAgeMax" min="18" max="99" value="${e(filters.femaleAgeMax)}"></label></fieldset>
             </div>
           </details>
-          <details class="discover-filter-section">
+          <details class="discover-filter-section${signature ? '' : ' signature-locked'}">
             <summary>Pratiques <small>plusieurs choix possibles</small></summary>
-            ${discoverChoices('practices', REFERENCES.practices, filters.practices)}
+            <fieldset${signature ? '' : ' disabled'}>${discoverChoices('practices', REFERENCES.practices, filters.practices)}</fieldset>
           </details>
-          <details class="discover-filter-section">
+          <details class="discover-filter-section${signature ? '' : ' signature-locked'}">
             <summary>Physique</summary>
-            ${discoverChoices('morphologies', REFERENCES.morphologies, filters.morphologies)}
+            <fieldset${signature ? '' : ' disabled'}>${discoverChoices('morphologies', REFERENCES.morphologies, filters.morphologies)}</fieldset>
           </details>
-          <details class="discover-filter-section">
+          <details class="discover-filter-section${signature ? '' : ' signature-locked'}">
             <summary>Divers</summary>
-            ${discoverChoices('extras', ['onlineOnly', 'withPhotos', 'withRecommendation'], [
+            <fieldset${signature ? '' : ' disabled'}>${discoverChoices('extras', ['onlineOnly', 'withPhotos', 'withRecommendation'], [
               ...(filters.onlineOnly ? ['onlineOnly'] : []),
               ...(filters.withPhotos ? ['withPhotos'] : []),
               ...(filters.withRecommendation ? ['withRecommendation'] : [])
@@ -2229,7 +2246,7 @@
               onlineOnly: 'Actuellement connecté',
               withPhotos: 'Avec photos publiques',
               withRecommendation: 'Avec recommandation'
-            })[value])}
+            })[value])}</fieldset>
           </details>
         </form>
         <section id="discoverResults" class="discover-results">${renderDiscoverResults()}</section>
@@ -3326,9 +3343,31 @@
     const browserPermission = 'Notification' in window ? Notification.permission : 'unsupported';
     const lifecycleProfile = state.lifecycle?.profile || {};
     const lifecycleAction = state.lifecycle?.action;
+    const access = state.access || {};
+    const accessFeatures = access.features || {};
+    const signature = ['signature', 'beta_full'].includes(access.tier);
+    const memberPrices = list(state.billingCatalog?.prices).filter((price) => price.plan_code === 'member_signature');
+    const priceLabel = (price) => (Number(price.amount_cents || 0) / 100).toLocaleString('fr-FR', {
+      style: 'currency',
+      currency: price.currency || 'EUR'
+    });
     return `<div class="page settings-page">
       ${pageHead('Confidentialité · tranquillité · contrôle', 'Paramètres', 'Décide précisément qui peut te découvrir, qui peut t’écrire et ce que Velvet est autorisé à te signaler.')}
       <form id="settingsForm" class="settings-layout">
+        <section class="card settings-card membership-card ${signature ? 'active' : ''}">
+          <div class="membership-head"><div><p class="eyebrow">Votre accès</p><h2>${signature ? 'Velvet Signature' : 'Velvet Découverte'}</h2><p>${access.source === 'verified_woman' ? 'Accès complet offert à votre profil vérifié.' : access.source === 'founder' ? 'Accès fondateur offert pendant la période de lancement.' : signature ? 'Votre accès complet est actif.' : 'Le cœur de Velvet reste accessible gratuitement.'}</p></div><span>${signature ? 'SIGNATURE' : 'DÉCOUVERTE'}</span></div>
+          ${access.validUntil ? `<small>Accès actif jusqu’au ${e(new Date(access.validUntil).toLocaleDateString('fr-FR'))}.</small>` : ''}
+          <div class="membership-comparison">
+            <div><strong>Découverte</strong><small>Recherche essentielle</small><small>3 nouvelles conversations / semaine</small><small>10 profils suivis</small><small>1 essai Velvet IA</small></div>
+            <div><strong>Signature</strong><small>Recherche avancée et sauvegardée</small><small>Conversations et suivis illimités</small><small>20 textes IA / mois</small><small>Alertes personnalisées</small></div>
+          </div>
+          ${signature ? `<p class="membership-usage">Velvet IA : ${e(accessFeatures.profileAiUsed || 0)} / ${e(accessFeatures.profileAiLimit || '∞')} · profils suivis : ${e(accessFeatures.followingUsed || 0)}${accessFeatures.followLimit ? ` / ${e(accessFeatures.followLimit)}` : ''}</p>` : `<div class="membership-prices">${memberPrices.map((price) => `<button class="secondary" type="button" data-checkout-price="${e(price.price_code)}"><b>${e(priceLabel(price))}</b><small>${price.interval_count === 3 ? 'pour 3 mois' : price.interval_unit === 'year' ? 'par an' : 'par mois'}</small></button>`).join('')}</div>`}
+          ${state.billingCatalog?.provider?.configured ? '' : '<small>Le module est prêt. L’ouverture des paiements attend la validation écrite du partenaire bancaire spécialisé.</small>'}
+          <div class="promotion-redeem" data-promotion-redeem>
+            <label>Vous avez un code promotionnel ?<input name="code" autocomplete="off" maxlength="40" placeholder="VELVET-XXXX-XXXX-XXXX"></label>
+            <button class="secondary" type="button">Activer le code</button>
+          </div>
+        </section>
         <section class="card settings-card appearance-card">
           <p class="eyebrow">Apparence</p><h2>Ambiance Velvet</h2>
           <p>Bascule tout l’espace membre entre le velours sombre et une version claire ivoire, beige, or et bordeaux.</p>
@@ -3399,13 +3438,14 @@
   async function openSettings() {
     content.innerHTML = `<div class="page"><section class="loading-state"><span class="loader"></span><p>Chargement de tes préférences…</p></section></div>`;
     try {
-      [state.settings, state.lifecycle] = await Promise.all([
+      [state.settings, state.lifecycle, state.billingCatalog] = await Promise.all([
         api('/api/members/settings'),
         api('/api/members/account-actions').catch(() => ({
           profile: { lifecycle_state: 'active' },
           action: null,
           migrationPending: true
-        }))
+        })),
+        api('/api/billing/catalog').catch(() => ({ prices: [], provider: { configured: false } }))
       ]);
       content.innerHTML = renderSettingsView(state.settings);
       bindSettings();
@@ -3422,6 +3462,37 @@
       state.theme = applyTheme(event.target.checked ? 'light' : 'dark');
       storeTheme(state.theme);
     });
+    form.querySelector('[data-promotion-redeem] button')?.addEventListener('click', async (event) => {
+      const redeem = event.currentTarget.closest('[data-promotion-redeem]');
+      const button = event.currentTarget;
+      button.disabled = true;
+      try {
+        const result = await api('/api/billing/promotion', {
+          method: 'POST',
+          body: JSON.stringify({ code: redeem.querySelector('[name=code]')?.value })
+        });
+        state.access = result.access;
+        content.innerHTML = renderSettingsView(state.settings);
+        bindSettings();
+        toast('Votre accès Velvet Signature est activé.');
+      } catch (error) {
+        toast(errorMessages[error.message] || error.message, true);
+        button.disabled = false;
+      }
+    });
+    form.querySelectorAll('[data-checkout-price]').forEach((button) => button.addEventListener('click', async () => {
+      button.disabled = true;
+      try {
+        const result = await api('/api/billing/checkout', {
+          method: 'POST',
+          body: JSON.stringify({ priceCode: button.dataset.checkoutPrice })
+        });
+        if (result.checkoutUrl) window.location.href = result.checkoutUrl;
+      } catch (error) {
+        toast(errorMessages[error.message] || error.message, true);
+        button.disabled = false;
+      }
+    }));
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       const button = form.querySelector('[type=submit]');
@@ -4727,12 +4798,14 @@
       const result = await api('/api/members/discovery');
       const previousPresence = { ...state.presence };
       applyDiscoveryState(result);
-      list(state.following).forEach((profileId) => {
-        if (previousPresence[profileId] && previousPresence[profileId] !== 'online' && state.presence[profileId] === 'online') {
-          const profile = list(state.directory.profiles).find((row) => row.id === profileId);
-          if (profile) toast(`${profile.display_name} vient de se connecter.`);
-        }
-      });
+      if (state.access?.features?.followConnectionAlerts) {
+        list(state.following).forEach((profileId) => {
+          if (previousPresence[profileId] && previousPresence[profileId] !== 'online' && state.presence[profileId] === 'online') {
+            const profile = list(state.directory.profiles).find((row) => row.id === profileId);
+            if (profile) toast(`${profile.display_name} vient de se connecter.`);
+          }
+        });
+      }
       document.querySelectorAll('[data-profile-presence]').forEach((badge) => {
         const template = document.createElement('template');
         template.innerHTML = presenceBadge(badge.dataset.profilePresence);

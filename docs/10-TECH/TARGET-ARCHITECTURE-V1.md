@@ -19,7 +19,7 @@ Statut : **PROPOSED — validation technique requise avant implémentation**
 - Données : Supabase PostgreSQL avec migrations versionnées ;
 - Authentification : Supabase Auth ou prestataire équivalent validé ;
 - Stockage : buckets séparés public, privé et quarantaine ;
-- Paiement : Stripe Connect ou prestataire compatible avec le modèle juridique retenu ;
+- Paiement : adaptateur indépendant et page hébergée chez un prestataire acceptant explicitement l'activité et les contenus de Velvet ; aucun fournisseur n'est activé sans accord écrit ;
 - Emails : Brevo ou Resend ;
 - Recherche : PostgreSQL en V1, moteur dédié seulement si les métriques le justifient ;
 - Analytics : PostHog avec collecte minimisée ;

@@ -25,10 +25,11 @@ const controlAuditActor = await readFile('infra/supabase/migrations/0022_control
 const memberDiscoveryPreferences = await readFile('infra/supabase/migrations/0023_member_discovery_preferences.sql', 'utf8');
 const memberSocialPlansLifecycle = await readFile('infra/supabase/migrations/0024_member_social_plans_lifecycle.sql', 'utf8');
 const controlAiMediaModeration = await readFile('infra/supabase/migrations/0025_control_ai_media_moderation.sql', 'utf8');
+const monetizationAccessPromotions = await readFile('infra/supabase/migrations/0026_monetization_access_promotions.sql', 'utf8');
 
-const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}\n${memberSocialPlansLifecycle}\n${controlAiMediaModeration}`;
+const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}\n${memberSocialPlansLifecycle}\n${controlAiMediaModeration}\n${monetizationAccessPromotions}`;
 const tables = [...migrationBundle.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}\n${memberSocialPlansLifecycle}\n${controlAiMediaModeration}`;
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}\n${memberSocialPlansLifecycle}\n${controlAiMediaModeration}\n${monetizationAccessPromotions}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -136,6 +137,14 @@ const requirements = [
   [controlAiMediaModeration.includes('control_decide_media') && controlAiMediaModeration.includes('can_moderate_media'), 'La modération humaine doit couvrir les médias publics et privés sans élargir les rôles autorisés'],
   [controlAiMediaModeration.includes("moderation_status='pending'") && controlAiMediaModeration.includes("'media_' || target_decision"), 'Velvet Control doit traiter uniquement la file ambiguë et auditer sa décision'],
   [controlAiMediaModeration.includes("'video/mp4'") && controlAiMediaModeration.includes('file_size_limit=52428800'), 'Le bucket privé doit accepter les vidéos prévues par les parcours média'],
+  [monetizationAccessPromotions.includes("'member_discovery','Velvet Découverte'") && monetizationAccessPromotions.includes("'member_signature','Velvet Signature'"), 'Les deux niveaux Membres doivent être versionnés en base'],
+  [monetizationAccessPromotions.includes("'signature_monthly_eur','EUR',1490") && monetizationAccessPromotions.includes("'signature_annual_eur','EUR',9990"), 'Les tarifs Signature validés doivent être seedés'],
+  [monetizationAccessPromotions.includes("'pro_monthly_eur','EUR',3990") && monetizationAccessPromotions.includes("'pro_annual_eur','EUR',39900"), 'Les tarifs Velvet Pro validés doivent être seedés'],
+  [monetizationAccessPromotions.includes("person.gender_identity='Femme'") && monetizationAccessPromotions.includes("profile.verification_status='verified'"), 'La gratuité complète Femme seule doit exiger le profil vérifié exact'],
+  [monetizationAccessPromotions.includes('signature_conversation_limit') && monetizationAccessPromotions.includes('signature_follow_limit') && monetizationAccessPromotions.includes('signature_profile_ai_limit'), 'Les quotas Découverte doivent être transactionnels côté serveur'],
+  [monetizationAccessPromotions.includes('control_create_promotion') && monetizationAccessPromotions.includes('control_grant_campaign') && monetizationAccessPromotions.includes('control_manage_account'), 'Velvet Control doit piloter promotions, cohortes et comptes'],
+  [monetizationAccessPromotions.includes("'Fondateurs couples · lancement'") && monetizationAccessPromotions.includes("'Fondateurs Velvet Pro · lancement'"), 'Les cohortes fondatrices doivent être préparées sans activation automatique'],
+  [monetizationAccessPromotions.includes('provider_subscription_reference') && !monetizationAccessPromotions.toLowerCase().includes('card_number'), 'Le schéma de paiement doit rester indépendant et ne stocker aucune carte'],
   [!migrationBundle.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 

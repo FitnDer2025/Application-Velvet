@@ -115,6 +115,9 @@ import {
   onRequestGet as controlWorkspaceGet,
   onRequestPost as controlWorkspacePost
 } from '../../../functions/api/control/workspace.js';
+import { onRequestGet as billingCatalogGet } from '../../../functions/api/billing/catalog.js';
+import { onRequestPost as billingCheckoutPost } from '../../../functions/api/billing/checkout.js';
+import { onRequestPost as billingPromotionPost } from '../../../functions/api/billing/promotion.js';
 import { velvetIconResponse } from './velvet-icons.js';
 
 const API_ROUTES = new Map([
@@ -187,7 +190,10 @@ const API_ROUTES = new Map([
   ['GET /api/pro/workspace', proWorkspaceGet],
   ['POST /api/pro/workspace', proWorkspacePost],
   ['GET /api/control/workspace', controlWorkspaceGet],
-  ['POST /api/control/workspace', controlWorkspacePost]
+  ['POST /api/control/workspace', controlWorkspacePost],
+  ['GET /api/billing/catalog', billingCatalogGet],
+  ['POST /api/billing/checkout', billingCheckoutPost],
+  ['POST /api/billing/promotion', billingPromotionPost]
 ]);
 
 const PROTECTED_PREFIXES = ['/membres', '/pro', '/control'];

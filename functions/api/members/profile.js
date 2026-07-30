@@ -2,6 +2,7 @@ import { json, readJson } from '../auth/_shared.js';
 import {
   cleanList,
   cleanText,
+  memberAccessState,
   memberSession,
   restJson,
   withSession
@@ -125,6 +126,9 @@ export async function onRequestGet({ request, env }) {
     const access = await memberSession(request, env);
     if (access.response) return access.response;
     const profile = await enrichProfileMedia(env, access.session, await myProfile(env, access.session));
+    const memberAccess = profile?.id && profile.admission_status === 'approved'
+      ? await memberAccessState(env, access)
+      : null;
     const membership = profile?.profile_members?.[0] || null;
     const personalProfileComplete = Boolean(
       profile?.individual_profiles?.some((person) => person.linked_user_id === access.account.userId)
@@ -133,7 +137,8 @@ export async function onRequestGet({ request, env }) {
       profile,
       membership,
       personalProfileComplete,
-      account: access.account
+      account: access.account,
+      access: memberAccess
     }, access.session);
   } catch (error) {
     return json({ error: error.message || 'profile_read_failed' }, 400);

@@ -2,6 +2,7 @@ import { json, readJson } from '../auth/_shared.js';
 import {
   cleanText,
   memberSession,
+  monetizationMigrationMissing,
   requireAdmittedMember,
   restJson,
   withSession
@@ -71,19 +72,30 @@ export async function onRequestPost({ request, env }) {
     }
 
     if (body.action === 'favorite') {
-      if (body.enabled) {
-        await restJson(env, '/rest/v1/favorites?on_conflict=owner_user_id,profile_id', access.session, {
+      try {
+        await restJson(env, '/rest/v1/rpc/set_my_profile_favorite', access.session, {
           method: 'POST',
-          headers: { prefer: 'resolution=merge-duplicates,return=minimal' },
-          body: JSON.stringify({ owner_user_id: access.account.userId, profile_id: profileId })
+          body: JSON.stringify({
+            target_profile_id: profileId,
+            target_enabled: Boolean(body.enabled)
+          })
         });
-      } else {
-        await restJson(
-          env,
-          `/rest/v1/favorites?owner_user_id=eq.${encodeURIComponent(access.account.userId)}&profile_id=eq.${encodeURIComponent(profileId)}`,
-          access.session,
-          { method: 'DELETE', headers: { prefer: 'return=minimal' } }
-        );
+      } catch (error) {
+        if (!monetizationMigrationMissing(error)) throw error;
+        if (body.enabled) {
+          await restJson(env, '/rest/v1/favorites?on_conflict=owner_user_id,profile_id', access.session, {
+            method: 'POST',
+            headers: { prefer: 'resolution=merge-duplicates,return=minimal' },
+            body: JSON.stringify({ owner_user_id: access.account.userId, profile_id: profileId })
+          });
+        } else {
+          await restJson(
+            env,
+            `/rest/v1/favorites?owner_user_id=eq.${encodeURIComponent(access.account.userId)}&profile_id=eq.${encodeURIComponent(profileId)}`,
+            access.session,
+            { method: 'DELETE', headers: { prefer: 'return=minimal' } }
+          );
+        }
       }
     } else if (body.action === 'block') {
       const users = await targetUsers(env, access, profileId);

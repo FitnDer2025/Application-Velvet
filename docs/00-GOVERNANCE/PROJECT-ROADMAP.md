@@ -2,7 +2,7 @@
 
 **Statut :** source officielle de pilotage du projet Velvet.
 
-**Dernière mise à jour :** 29 juillet 2026
+**Dernière mise à jour :** 30 juillet 2026
 
 ## Règles de gouvernance
 
@@ -34,9 +34,9 @@
 | Clubs | 🟡 | 70 % | Intégrés à la carte, aux événements et au socle professionnel ; détails opérationnels restants. |
 | Professionnels | 🟢 | 90 % | Interface dédiée, CRM modulaire, IA métier et outils organisateur définis. |
 | Voyages Velvet | 🟢 | 90 % | Espace communautaire complet avant, pendant et après le voyage. |
-| Administration / back-office | 🟡 | 40 % | Workflows, rôles, journaux et dashboards à détailler. |
+| Administration / back-office | 🟡 | 65 % | Accès commerciaux, campagnes, suspensions, blocages, suppression différée et audit intégrés à Control. |
 | IA Velvet | 🟡 | 75 % | Recommandation, Alchimie et assistants professionnels définis ; gouvernance technique restante. |
-| Monétisation | 🟡 | 70 % | Freemium, essais, promotions, codes et parrainage déjà arbitrés. |
+| Monétisation | 🟢 | 95 % | Offres, prix, quotas, promotions, cohortes et adaptateur définis ; prestataire et validation juridique encore requis avant encaissement. |
 | Gamification | 🟡 | 70 % | Philosophie positive et distinctions évolutives verrouillées ; règles détaillées restantes. |
 | Mobile avancé | ⚪ | 50 % | Web-first et notifications validés ; fonctions natives à prioriser. |
 | Analytics | ⚪ | 20 % | KPI et gouvernance des données à définir. |
@@ -58,6 +58,7 @@ Cet indicateur mesure les arbitrages structurants et non le développement logic
 - ADR-038 à ADR-041 : outils professionnels, IA métier et Velvet Trips.
 - ADR-043 à ADR-044 : gamification positive et distinctions évolutives.
 - ADR-GOV-003 : autonomie complète de livraison Codex et frontière SQL Supabase.
+- ADR-MON-057 : Découverte, Signature, Pro, cohortes fondatrices et moteur de droits piloté par Control.
 
 ADR-037 et ADR-042 ne sont pas des décisions manquantes : leurs propositions ont été abandonnées car les sujets étaient déjà arbitrés.
 
@@ -66,7 +67,7 @@ ADR-037 et ADR-042 ne sont pas des décisions manquantes : leurs propositions on
 1. Finaliser la Gamification
 2. Administration / Back-office
 3. IA Velvet — gouvernance et contrôles
-4. Monétisation avancée — détail des offres
+4. Paiement — validation prestataire spécialisé et revue juridique
 5. Clubs — modèle opérationnel détaillé
 6. Mobile avancé
 7. Analytics
