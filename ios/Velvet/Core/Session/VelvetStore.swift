@@ -5,6 +5,14 @@ import Foundation
 final class VelvetStore: ObservableObject {
     @Published private(set) var directory: DirectoryResponse?
     @Published private(set) var notificationFeed = NotificationFeed(notifications: [], unreadCount: 0)
+    @Published private(set) var discoveryState = DiscoveryStateResponse(
+        presence: [],
+        following: [],
+        access: nil,
+        persistenceAvailable: false,
+        presenceAvailable: false
+    )
+    @Published private(set) var mapData: MemberMapResponse?
     @Published private(set) var messages: [UUID: [DirectoryMessage]] = [:]
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
@@ -21,11 +29,21 @@ final class VelvetStore: ObservableObject {
         do {
             async let directoryRequest = service.directory()
             async let notificationRequest = service.notifications()
+            async let discoveryRequest = service.discoveryState()
+            async let mapRequest = service.memberMap()
             directory = try await directoryRequest
             notificationFeed = (try? await notificationRequest) ?? NotificationFeed(
                 notifications: [],
                 unreadCount: 0
             )
+            discoveryState = (try? await discoveryRequest) ?? DiscoveryStateResponse(
+                presence: [],
+                following: [],
+                access: nil,
+                persistenceAvailable: false,
+                presenceAvailable: false
+            )
+            mapData = try? await mapRequest
         } catch {
             errorMessage = ErrorMessage.text(for: error)
         }
