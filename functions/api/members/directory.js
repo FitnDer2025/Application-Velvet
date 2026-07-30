@@ -1,6 +1,7 @@
 import { json } from '../auth/_shared.js';
 import { memberAdmission, memberSession, restJson, withSession } from './_shared.js';
 import { enrichProfilesMedia } from './media.js';
+import { seededVenueCoordinates } from './venue-geocoding.js';
 
 const PROFILE_SELECT = [
   'id',
@@ -23,6 +24,20 @@ const PROFILE_SELECT = [
   'media_assets(id,individual_profile_id,owner_user_id,media_role,is_primary,storage_path,moderation_status,created_at)',
   'albums(id,name,confidentiality,expires_at,created_at,media_assets(id,owner_user_id,media_type,storage_path,moderation_status,created_at))'
 ].join(',');
+
+export function enrichVenueCoordinates(venue) {
+  const latitude = Number(venue.latitude);
+  const longitude = Number(venue.longitude);
+  if (venue.latitude !== null && venue.latitude !== ''
+    && venue.longitude !== null && venue.longitude !== ''
+    && Number.isFinite(latitude) && Number.isFinite(longitude)) {
+    return { ...venue, latitude, longitude, coordinate_source: 'directory' };
+  }
+  const seeded = seededVenueCoordinates(venue);
+  return seeded
+    ? { ...venue, latitude: seeded.latitude, longitude: seeded.longitude, coordinate_source: seeded.source }
+    : venue;
+}
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -56,7 +71,7 @@ export async function onRequestGet({ request, env }) {
     return withSession({
       profiles: await enrichProfilesMedia(env, token, profiles),
       establishments,
-      venueDirectory,
+      venueDirectory: (venueDirectory || []).map(enrichVenueCoordinates),
       venueRelationships,
       events,
       conversations,

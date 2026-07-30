@@ -29,6 +29,12 @@ export function venueAddressQuery(venue) {
   return [address, ...supplements].join(', ').slice(0, 300);
 }
 
+export function seededVenueCoordinates(venue) {
+  const key = venueAddressKey(venueAddressQuery(venue));
+  const coordinates = VENUE_ADDRESS_COORDINATES[key];
+  return coordinates ? { ...coordinates, source: 'address_seed' } : null;
+}
+
 function coordinatesFromFeature(feature) {
   const coordinates = feature?.geometry?.coordinates;
   if (!Array.isArray(coordinates) || coordinates.length < 2) return null;
@@ -131,8 +137,8 @@ export async function geocodeVenueAddress(venue) {
   const query = venueAddressQuery(venue);
   const key = venueAddressKey(query);
   if (!key || ['france', 'belgique', 'belgique belgique'].includes(key)) return null;
-  const seeded = VENUE_ADDRESS_COORDINATES[key];
-  if (seeded) return { ...seeded, source: 'address_seed' };
+  const seeded = seededVenueCoordinates(venue);
+  if (seeded) return seeded;
   if (venueGeocodeCache.has(key)) return venueGeocodeCache.get(key);
 
   const task = (venue.country_code === 'FR'
