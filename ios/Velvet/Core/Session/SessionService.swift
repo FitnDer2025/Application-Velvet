@@ -133,6 +133,10 @@ final class SessionService: Sendable {
         try await api.get("/api/members/map", as: MemberMapResponse.self)
     }
 
+    func discoveryState() async throws -> DiscoveryStateResponse {
+        try await api.get("/api/members/discovery", as: DiscoveryStateResponse.self)
+    }
+
     func notifications() async throws -> NotificationFeed {
         try await api.get("/api/members/notifications", as: NotificationFeed.self)
     }
