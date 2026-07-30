@@ -58,10 +58,10 @@ enum ErrorMessage {
 
 extension APIError {
     static func from(data: Data, status: Int, decoder: JSONDecoder) -> APIError {
-        if status == 401 {
+        let code = (try? decoder.decode(ServerError.self, from: data).error) ?? "server_error"
+        if status == 401 && code == "authentication_required" {
             return .unauthorized
         }
-        let code = (try? decoder.decode(ServerError.self, from: data).error) ?? "server_error"
         return .server(code: code, status: status)
     }
 }
