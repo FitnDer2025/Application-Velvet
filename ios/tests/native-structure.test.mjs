@@ -18,6 +18,7 @@ test('les écrans natifs utilisent les contrats backend existants', async () => 
     '/api/members/photos',
     '/api/members/verification',
     '/api/members/directory',
+    '/api/members/map',
     '/api/members/event-registrations',
     '/api/members/conversations',
     '/api/members/messages',
