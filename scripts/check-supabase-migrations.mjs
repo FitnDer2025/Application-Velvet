@@ -24,10 +24,11 @@ const profilePhotoModeration = await readFile('infra/supabase/migrations/0021_pr
 const controlAuditActor = await readFile('infra/supabase/migrations/0022_control_audit_actor.sql', 'utf8');
 const memberDiscoveryPreferences = await readFile('infra/supabase/migrations/0023_member_discovery_preferences.sql', 'utf8');
 const memberSocialPlansLifecycle = await readFile('infra/supabase/migrations/0024_member_social_plans_lifecycle.sql', 'utf8');
+const controlAiMediaModeration = await readFile('infra/supabase/migrations/0025_control_ai_media_moderation.sql', 'utf8');
 
-const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}\n${memberSocialPlansLifecycle}`;
+const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}\n${memberSocialPlansLifecycle}\n${controlAiMediaModeration}`;
 const tables = [...migrationBundle.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}\n${memberSocialPlansLifecycle}`;
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}\n${memberSocialPlansLifecycle}\n${controlAiMediaModeration}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -132,6 +133,9 @@ const requirements = [
   [memberSocialPlansLifecycle.includes('precise_location_consent') && memberSocialPlansLifecycle.includes('destination_type') && memberSocialPlansLifecycle.includes('cap_dagde_village'), 'Les séjours doivent distinguer le consentement précis et le Village naturiste'],
   [memberSocialPlansLifecycle.includes('profile_lifecycle_confirmations') && memberSocialPlansLifecycle.includes('remaining=0'), 'Une fiche couple doit attendre toutes les confirmations de cycle de vie'],
   [memberSocialPlansLifecycle.includes("now()+interval '30 days'") && memberSocialPlansLifecycle.includes('purge_expired_profile_deletions'), 'La suppression définitive doit respecter le délai de récupération de 30 jours'],
+  [controlAiMediaModeration.includes('control_decide_media') && controlAiMediaModeration.includes('can_moderate_media'), 'La modération humaine doit couvrir les médias publics et privés sans élargir les rôles autorisés'],
+  [controlAiMediaModeration.includes("moderation_status='pending'") && controlAiMediaModeration.includes("'media_' || target_decision"), 'Velvet Control doit traiter uniquement la file ambiguë et auditer sa décision'],
+  [controlAiMediaModeration.includes("'video/mp4'") && controlAiMediaModeration.includes('file_size_limit=52428800'), 'Le bucket privé doit accepter les vidéos prévues par les parcours média'],
   [!migrationBundle.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 

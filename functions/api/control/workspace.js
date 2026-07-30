@@ -3,6 +3,7 @@ import { cleanText, memberSession, restJson, withSession } from '../members/_sha
 import { signedMediaUrl } from '../members/media.js';
 
 const CONTROL_ROLES = new Set(['admin', 'direction', 'moderator', 'support', 'auditor']);
+const MEDIA_REVIEW_ROLES = new Set(['admin', 'direction', 'moderator']);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 async function controlAccess(request, env) {
@@ -15,6 +16,7 @@ async function controlAccess(request, env) {
 }
 
 async function workspace(env, access) {
+  const canReviewMedia = access.account.roles.some((role) => MEDIA_REVIEW_ROLES.has(role));
   const [accounts, profiles, establishments, venueDirectory, staff, events, registrations, organizers, reports, audits, releaseChecks, pendingMediaRows] = await Promise.all([
     restJson(env, '/rest/v1/rpc/control_accounts', access.session, { method: 'POST', body: '{}' }),
     restJson(env, '/rest/v1/member_profiles?select=id,profile_type,display_name,admission_status,verification_status,visibility,created_at&order=created_at.desc&limit=500', access.session),
@@ -27,13 +29,29 @@ async function workspace(env, access) {
     restJson(env, '/rest/v1/reports?select=id,reporter_user_id,subject_type,subject_id,category,description,status,created_at&order=created_at.desc&limit=500', access.session),
     restJson(env, '/rest/v1/audit_events?select=sequence_number,actor_user_id,action,entity_type,entity_id,occurred_at&order=sequence_number.desc&limit=100', access.session),
     restJson(env, '/rest/v1/rpc/control_beta_release_checks', access.session, { method: 'POST', body: '{}' }),
-    restJson(env, '/rest/v1/media_assets?select=id,profile_id,individual_profile_id,owner_user_id,media_role,storage_path,moderation_status,ai_assessment,rejection_reason,ai_reviewed_at,created_at,member_profiles(display_name,profile_type)&album_id=is.null&moderation_status=eq.pending&order=created_at.asc&limit=250', access.session)
+    canReviewMedia
+      ? restJson(env, '/rest/v1/media_assets?select=id,profile_id,album_id,individual_profile_id,owner_user_id,media_role,media_type,visibility,storage_path,moderation_status,ai_assessment,rejection_reason,ai_reviewed_at,created_at,member_profiles(display_name,profile_type),albums(name,confidentiality)&moderation_status=eq.pending&order=created_at.asc&limit=250', access.session)
+      : Promise.resolve([])
   ]);
   const pendingMedia = await Promise.all((pendingMediaRows || []).map(async (media) => ({
     ...media,
-    previewUrl: await signedMediaUrl(env, access.session, media.storage_path)
+    previewUrl: await signedMediaUrl(env, access.session, media.storage_path, 300)
   })));
-  return { accounts, profiles, establishments, venueDirectory, staff, events, registrations, organizers, reports, audits, releaseChecks, pendingMedia };
+  return {
+    accounts,
+    profiles,
+    establishments,
+    venueDirectory,
+    staff,
+    events,
+    registrations,
+    organizers,
+    reports,
+    audits,
+    releaseChecks,
+    pendingMedia,
+    mediaReviewAllowed: canReviewMedia
+  };
 }
 
 export async function onRequestGet({ request, env }) {
@@ -93,15 +111,15 @@ export async function onRequestPost({ request, env }) {
         method: 'POST',
         body: JSON.stringify({ target_establishment: body.venueId, target_status: body.status })
       });
-    } else if (body.action === 'decide_profile_photo') {
+    } else if (body.action === 'decide_media' || body.action === 'decide_profile_photo') {
       if (!UUID.test(body.mediaId || '') || !['approved','rejected'].includes(body.decision)) {
-        return withSession({ error: 'invalid_photo_moderation_decision' }, access.session, 400);
+        return withSession({ error: 'invalid_media_moderation_decision' }, access.session, 400);
       }
       const reason = cleanText(body.reason, 500);
       if (body.decision === 'rejected' && !reason) {
-        return withSession({ error: 'photo_rejection_reason_required' }, access.session, 400);
+        return withSession({ error: 'media_rejection_reason_required' }, access.session, 400);
       }
-      await restJson(env, '/rest/v1/rpc/control_decide_profile_photo', access.session, {
+      await restJson(env, '/rest/v1/rpc/control_decide_media', access.session, {
         method: 'POST',
         body: JSON.stringify({
           target_media: body.mediaId,

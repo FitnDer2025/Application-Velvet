@@ -24,10 +24,39 @@ async function ownedProfile(env, access) {
 }
 
 function parseAiJson(value) {
-  const text = String(value?.response || value || '').trim();
+  const text = String(value?.answer || value?.response || value || '').trim();
   const match = text.match(/\{[\s\S]*\}/);
   if (!match) throw new Error('ai_response_invalid');
   return JSON.parse(match[0]);
+}
+
+function imageDataUrl(bytes) {
+  let mime = 'image/jpeg';
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
+    mime = 'image/png';
+  } else if (
+    bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46
+    && bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50
+  ) {
+    mime = 'image/webp';
+  }
+  let binary = '';
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+  }
+  return `data:${mime};base64,${btoa(binary)}`;
+}
+
+async function runVisionAssessment(env, bytes, question, maxTokens) {
+  if (!env.AI) throw new Error('workers_ai_not_configured');
+  return env.AI.run('@cf/moondream/moondream3.1-9B-A2B', {
+    task: 'query',
+    image: imageDataUrl(bytes),
+    question,
+    max_tokens: maxTokens,
+    temperature: 0,
+    stream: false
+  });
 }
 
 function normalizeAssessment(raw, expectedPeople) {
@@ -43,6 +72,8 @@ function normalizeAssessment(raw, expectedPeople) {
     confidence,
     summary: String(raw.summary || '').slice(0, 500),
     model: '@cf/moondream/moondream3.1-9B-A2B',
+    criteria_version: 'velvet-media-v2',
+    moderation_scope: 'public_profile',
     biometric_recognition: false
   };
   const criteriaPassed = peopleCount === expectedPeople
@@ -50,18 +81,19 @@ function normalizeAssessment(raw, expectedPeople) {
     && assessment.half_body_visible_for_all
     && !assessment.blur_excessive
     && assessment.public_safe;
-  const decision = confidence < 0.72
+  const decision = confidence < 0.78
     ? 'review'
-    : criteriaPassed && confidence >= 0.82
+    : criteriaPassed && confidence >= 0.86
       ? 'approved'
-      : criteriaPassed
-        ? 'review'
-        : 'rejected';
+      : !criteriaPassed && confidence >= 0.86
+        ? 'rejected'
+        : 'review';
+  assessment.automatic_decision = decision !== 'review';
+  assessment.human_review_required = decision === 'review';
   return { assessment, decision };
 }
 
 async function analyzePhoto(env, bytes, expectedPeople, mediaRole) {
-  if (!env.AI) throw new Error('workers_ai_not_configured');
   const prompt = `Analyse cette photo publique de profil Velvet. Ne reconnais et n'identifie jamais les personnes. Vérifie seulement :
 - nombre exact de personnes clairement visibles : ${expectedPeople} ;
 - visage visible pour chaque personne ;
@@ -70,24 +102,13 @@ async function analyzePhoto(env, bytes, expectedPeople, mediaRole) {
 - contenu adapté à une galerie publique, sans nudité explicite ni acte sexuel.
 Le rôle demandé est ${mediaRole}. Réponds uniquement en JSON :
 {"people_count":0,"faces_visible":false,"half_body_visible_for_all":false,"blur_excessive":false,"public_safe":false,"confidence":0.0,"summary":"raison concise en français"}`;
-  const result = await env.AI.run('@cf/moondream/moondream3.1-9B-A2B', {
-    image: Array.from(bytes),
-    prompt,
-    max_tokens: 300,
-    temperature: 0
-  });
+  const result = await runVisionAssessment(env, bytes, prompt, 300);
   return normalizeAssessment(parseAiJson(result), expectedPeople);
 }
 
 export async function analyzePublicAlbumPhoto(env, bytes) {
-  if (!env.AI) throw new Error('workers_ai_not_configured');
-  const result = await env.AI.run('@cf/moondream/moondream3.1-9B-A2B', {
-    image: Array.from(bytes),
-    prompt: `Analyse cette photo destinée à un album public Velvet. Ne reconnais et n'identifie jamais les personnes. Vérifie uniquement que l'image est suffisamment nette et qu'elle ne montre ni nudité explicite, ni acte sexuel, ni personne paraissant mineure. Réponds uniquement en JSON :
-{"blur_excessive":false,"public_safe":false,"confidence":0.0,"summary":"raison concise en français"}`,
-    max_tokens: 220,
-    temperature: 0
-  });
+  const result = await runVisionAssessment(env, bytes, `Analyse cette photo destinée à un album public Velvet. Ne reconnais et n'identifie jamais les personnes. Vérifie uniquement que l'image est suffisamment nette et qu'elle ne montre ni nudité explicite, ni acte sexuel, ni personne paraissant mineure. Réponds uniquement en JSON :
+{"blur_excessive":false,"public_safe":false,"confidence":0.0,"summary":"raison concise en français"}`, 220);
   const raw = parseAiJson(result);
   const confidence = Math.max(0, Math.min(1, Number(raw.confidence) || 0));
   const assessment = {
@@ -96,22 +117,26 @@ export async function analyzePublicAlbumPhoto(env, bytes) {
     confidence,
     summary: String(raw.summary || '').slice(0, 500),
     model: '@cf/moondream/moondream3.1-9B-A2B',
+    criteria_version: 'velvet-media-v2',
+    moderation_scope: 'public_album',
     biometric_recognition: false
   };
   const passed = !assessment.blur_excessive && assessment.public_safe;
-  const decision = confidence < 0.72 ? 'review' : passed && confidence >= 0.82 ? 'approved' : passed ? 'review' : 'rejected';
+  const decision = confidence < 0.78
+    ? 'review'
+    : passed && confidence >= 0.86
+      ? 'approved'
+      : !passed && confidence >= 0.86
+        ? 'rejected'
+        : 'review';
+  assessment.automatic_decision = decision !== 'review';
+  assessment.human_review_required = decision === 'review';
   return { assessment, decision };
 }
 
 export async function analyzePrivateAlbumPhoto(env, bytes) {
-  if (!env.AI) throw new Error('workers_ai_not_configured');
-  const result = await env.AI.run('@cf/moondream/moondream3.1-9B-A2B', {
-    image: Array.from(bytes),
-    prompt: `Analyse cette image d'album privé Velvet sans reconnaître ni identifier les personnes. La nudité adulte consensuelle n'est pas un motif de refus. Signale comme "prohibited" toute image montrant une personne pouvant être mineure, une violence manifeste, une contrainte apparente ou un contenu manifestement illégal. Si l'âge adulte ou la situation sont incertains, indique "uncertain": true. Réponds uniquement en JSON :
-{"prohibited":false,"uncertain":false,"confidence":0.0,"summary":"raison concise en français"}`,
-    max_tokens: 220,
-    temperature: 0
-  });
+  const result = await runVisionAssessment(env, bytes, `Analyse cette image d'album privé Velvet sans reconnaître ni identifier les personnes. La nudité adulte consensuelle n'est pas un motif de refus. Signale comme "prohibited" toute image montrant une personne pouvant être mineure, une violence manifeste, une contrainte apparente ou un contenu manifestement illégal. Si l'âge adulte ou la situation sont incertains, indique "uncertain": true. Réponds uniquement en JSON :
+{"prohibited":false,"uncertain":false,"confidence":0.0,"summary":"raison concise en français"}`, 220);
   const raw = parseAiJson(result);
   const confidence = Math.max(0, Math.min(1, Number(raw.confidence) || 0));
   const assessment = {
@@ -120,14 +145,18 @@ export async function analyzePrivateAlbumPhoto(env, bytes) {
     confidence,
     summary: String(raw.summary || '').slice(0, 500),
     model: '@cf/moondream/moondream3.1-9B-A2B',
+    criteria_version: 'velvet-media-v2',
+    moderation_scope: 'private_album',
     private_album_safety_review: true,
     biometric_recognition: false
   };
-  const decision = assessment.uncertain || confidence < 0.82
+  const decision = assessment.uncertain || confidence < 0.86
     ? 'review'
     : assessment.prohibited
       ? 'rejected'
       : 'approved';
+  assessment.automatic_decision = decision !== 'review';
+  assessment.human_review_required = decision === 'review';
   return { assessment, decision };
 }
 
@@ -147,6 +176,45 @@ export async function signDecision(secretHex, mediaId, decision, signedAt) {
   const message = new TextEncoder().encode(`${mediaId}|${decision}|${signedAt}`);
   const signature = await crypto.subtle.sign('HMAC', key, message);
   return [...new Uint8Array(signature)].map((value) => value.toString(16).padStart(2, '0')).join('');
+}
+
+export async function recordAiDecision(env, session, mediaId, analyzed) {
+  const signedAt = Math.floor(Date.now() / 1000);
+  const signature = await signDecision(
+    String(env.PHOTO_MODERATION_HMAC_KEY || ''),
+    mediaId,
+    analyzed.decision,
+    signedAt
+  );
+  return restJson(
+    env,
+    '/rest/v1/rpc/record_photo_ai_decision',
+    session,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        target_media_id: mediaId,
+        decision: analyzed.decision,
+        assessment: analyzed.assessment,
+        signed_at: signedAt,
+        signature
+      })
+    }
+  );
+}
+
+export async function recordTechnicalReview(env, session, mediaId, error, scope) {
+  const assessment = {
+    summary: 'Analyse automatique indisponible ou indécise. Contrôle humain requis.',
+    technical_error: String(error?.message || error || 'ai_review_unavailable').slice(0, 200),
+    criteria_version: 'velvet-media-v2',
+    moderation_scope: scope,
+    automatic_decision: false,
+    human_review_required: true,
+    biometric_recognition: false
+  };
+  await recordAiDecision(env, session, mediaId, { decision: 'review', assessment });
+  return assessment;
 }
 
 export async function onRequestGet({ request, env }) {
@@ -268,34 +336,24 @@ export async function onRequestPost({ request, env }) {
       );
       aiDecision = analyzed.decision;
       aiAssessment = analyzed.assessment;
-      const signedAt = Math.floor(Date.now() / 1000);
-      const signature = await signDecision(
-        String(env.PHOTO_MODERATION_HMAC_KEY || ''),
-        photo.id,
-        aiDecision,
-        signedAt
-      );
-      await restJson(
-        env,
-        '/rest/v1/rpc/record_photo_ai_decision',
-        access.session,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            target_media_id: photo.id,
-            decision: aiDecision,
-            assessment: aiAssessment,
-            signed_at: signedAt,
-            signature
-          })
-        }
-      );
+      await recordAiDecision(env, access.session, photo.id, analyzed);
     } catch (error) {
-      aiAssessment = {
+      aiDecision = 'review';
+      aiAssessment = await recordTechnicalReview(
+        env,
+        access.session,
+        photo.id,
+        error,
+        'public_profile'
+      ).catch(() => ({
         summary: 'La photo est conservée en attente de contrôle.',
         technical_error: error.message,
+        criteria_version: 'velvet-media-v2',
+        moderation_scope: 'public_profile',
+        automatic_decision: false,
+        human_review_required: true,
         biometric_recognition: false
-      };
+      }));
     }
 
     return withSession({
@@ -356,31 +414,22 @@ export async function onRequestPatch({ request, env }) {
           photo.media_role === 'couple_gallery' ? 2 : 1,
           photo.media_role
         );
-        const signedAt = Math.floor(Date.now() / 1000);
-        const signature = await signDecision(
-          String(env.PHOTO_MODERATION_HMAC_KEY || ''),
-          photo.id,
-          analyzed.decision,
-          signedAt
-        );
-        const status = await restJson(
-          env,
-          '/rest/v1/rpc/record_photo_ai_decision',
-          access.session,
-          {
-            method: 'POST',
-            body: JSON.stringify({
-              target_media_id: photo.id,
-              decision: analyzed.decision,
-              assessment: analyzed.assessment,
-              signed_at: signedAt,
-              signature
-            })
-          }
-        );
+        const status = await recordAiDecision(env, access.session, photo.id, analyzed);
         results.push({ id: photo.id, ok: true, decision: analyzed.decision, status });
       } catch (error) {
-        results.push({ id: photo.id, ok: false, error: error.message || 'photo_ai_retry_failed' });
+        const assessment = await recordTechnicalReview(
+          env,
+          access.session,
+          photo.id,
+          error,
+          'public_profile'
+        ).catch(() => null);
+        results.push({
+          id: photo.id,
+          ok: Boolean(assessment),
+          decision: 'review',
+          error: assessment ? null : (error.message || 'photo_ai_retry_failed')
+        });
       }
     }
 

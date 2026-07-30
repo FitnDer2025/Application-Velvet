@@ -21,7 +21,7 @@ const PROFILE_SELECT = [
   'updated_at',
   'individual_profiles(*)',
   'media_assets(id,individual_profile_id,owner_user_id,media_role,is_primary,storage_path,moderation_status,created_at)',
-  'albums(id,name,confidentiality,expires_at,created_at,media_assets(id,owner_user_id,storage_path,moderation_status,created_at))'
+  'albums(id,name,confidentiality,expires_at,created_at,media_assets(id,owner_user_id,media_type,storage_path,moderation_status,created_at))'
 ].join(',');
 
 export async function onRequestGet({ request, env }) {

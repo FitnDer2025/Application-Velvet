@@ -1,6 +1,35 @@
 (() => {
   let data = null;
+  let mediaViewer = null;
   const api = (options = {}) => controlApi('/api/control/workspace', options);
+  const styles = document.createElement('style');
+  styles.textContent = `
+    .control-media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:14px}
+    .control-media-review{min-width:0;overflow:hidden;border:1px solid #ffffff18;border-radius:20px;background:linear-gradient(145deg,#ffffff08,#ffffff025)}
+    .control-media-preview{position:relative;display:grid;width:100%;height:230px;padding:0;border:0;background:#09090b;overflow:hidden;color:var(--muted)}
+    .control-media-preview img,.control-media-preview video{width:100%;height:100%;object-fit:contain;background:#09090b}
+    .control-media-preview:after{content:"Ouvrir";position:absolute;right:10px;bottom:10px;padding:7px 10px;border:1px solid #c6a96a66;border-radius:999px;background:#0d0d0de8;color:var(--gold);font-size:10px;font-weight:700}
+    .control-media-preview.unavailable:after{display:none}
+    .control-media-copy{display:grid;gap:9px;padding:15px}
+    .control-media-copy h3{margin:0;font-size:18px}
+    .control-media-copy p{min-height:42px;margin:0;color:var(--muted);font-size:11px;line-height:1.55}
+    .control-media-meta{display:flex;flex-wrap:wrap;gap:6px}
+    .control-media-copy input{width:100%;border:1px solid var(--line);border-radius:12px;background:#0c0c0f;color:white;padding:10px}
+    .control-media-actions{display:flex;justify-content:flex-end;gap:8px}
+    .control-media-viewer{position:fixed;z-index:10020;inset:0;display:grid;place-items:center;padding:22px;background:#050507eb;backdrop-filter:blur(18px)}
+    .control-media-viewer[hidden]{display:none}
+    .control-media-viewer-dialog{position:relative;display:grid;grid-template-rows:minmax(0,1fr) auto;width:min(1100px,96vw);height:min(820px,92vh);overflow:hidden;border:1px solid #c6a96a55;border-radius:24px;background:#101013;box-shadow:0 30px 100px #000}
+    .control-media-viewer-stage{display:grid;place-items:center;min-height:0;background:#050507}
+    .control-media-viewer-stage img,.control-media-viewer-stage video{max-width:100%;max-height:100%;object-fit:contain}
+    .control-media-viewer-caption{padding:14px 58px 14px 16px;color:var(--muted);font-size:12px}
+    .control-media-viewer-caption strong{display:block;color:var(--txt);margin-bottom:4px}
+    .control-media-viewer-close{position:absolute;z-index:2;right:12px;top:12px;width:40px;height:40px;border:1px solid #ffffff24;border-radius:50%;background:#0d0d0de8;color:white;font-size:24px}
+    @media(max-width:700px){.control-media-grid{grid-template-columns:1fr}.control-media-preview{height:260px}.control-media-viewer{padding:8px}.control-media-viewer-dialog{width:100%;height:94vh}}
+  `;
+  document.head.append(styles);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && mediaViewer) closeMediaViewer();
+  });
   const root = document.createElement('section');
   root.id = 'operationsView';
   root.className = 'view';
@@ -37,6 +66,66 @@
       ).join('');
   }
 
+  function mediaContext(media) {
+    if (!media.album_id) return 'Photo de profil publique';
+    return media.albums?.confidentiality === 'public'
+      ? `Album public · ${media.albums?.name || 'Sans nom'}`
+      : `Album privé · ${media.albums?.name || 'Sans nom'}`;
+  }
+
+  function mediaRole(media) {
+    if (media.media_type === 'video') return 'Vidéo';
+    if (media.media_role === 'couple_gallery') return 'Carrousel couple';
+    if (media.media_role === 'individual_portrait') return 'Portrait individuel';
+    if (media.media_role === 'individual_gallery') return 'Carrousel individuel';
+    return 'Photo d’album';
+  }
+
+  function mediaPreview(media, profile) {
+    if (!media.previewUrl) {
+      return '<span class="control-media-preview unavailable">Aperçu temporaire indisponible</span>';
+    }
+    const label = `${mediaRole(media)} de ${profile.display_name || 'ce profil'}`;
+    if (media.media_type === 'video') {
+      return `<button class="control-media-preview" type="button" data-open-media="${safe(media.id)}" aria-label="Ouvrir ${safe(label)}"><video src="${safe(media.previewUrl)}" muted playsinline preload="metadata"></video></button>`;
+    }
+    return `<button class="control-media-preview" type="button" data-open-media="${safe(media.id)}" aria-label="Ouvrir ${safe(label)}"><img src="${safe(media.previewUrl)}" alt="${safe(label)}"></button>`;
+  }
+
+  function closeMediaViewer() {
+    mediaViewer?.remove();
+    mediaViewer = null;
+  }
+
+  function openMediaViewer(mediaId) {
+    const media = (data.pendingMedia || []).find((item) => item.id === mediaId);
+    if (!media?.previewUrl) {
+      toastMsg('Aperçu temporaire indisponible. Actualisez la file de contrôle.');
+      return;
+    }
+    const profile = media.member_profiles || data.profiles.find((item) => item.id === media.profile_id) || {};
+    closeMediaViewer();
+    mediaViewer = document.createElement('section');
+    mediaViewer.className = 'control-media-viewer';
+    mediaViewer.setAttribute('role', 'dialog');
+    mediaViewer.setAttribute('aria-modal', 'true');
+    mediaViewer.setAttribute('aria-label', 'Visionneuse de modération');
+    const content = media.media_type === 'video'
+      ? `<video controls autoplay playsinline preload="metadata" src="${safe(media.previewUrl)}"></video>`
+      : `<img src="${safe(media.previewUrl)}" alt="${safe(mediaRole(media))} de ${safe(profile.display_name || 'Profil membre')}">`;
+    mediaViewer.innerHTML = `<div class="control-media-viewer-dialog">
+      <button class="control-media-viewer-close" type="button" aria-label="Fermer">×</button>
+      <div class="control-media-viewer-stage">${content}</div>
+      <div class="control-media-viewer-caption"><strong>${safe(profile.display_name || 'Profil membre')} · ${safe(mediaContext(media))}</strong>Lien signé temporaire réservé à Velvet Contrôle.</div>
+    </div>`;
+    mediaViewer.querySelector('.control-media-viewer-close')?.addEventListener('click', closeMediaViewer);
+    mediaViewer.addEventListener('click', (event) => {
+      if (event.target === mediaViewer) closeMediaViewer();
+    });
+    document.body.append(mediaViewer);
+    mediaViewer.querySelector('.control-media-viewer-close')?.focus();
+  }
+
   function render() {
     const pendingOrganizers = (data.organizers || []).filter((item) => item.status === 'pending');
     const openReports = (data.reports || []).filter((item) => ['open', 'assigned'].includes(item.status));
@@ -53,17 +142,26 @@
       <div class="kpis"><div class="kpi"><small>Comptes actifs</small><b>${data.accounts.filter((item) => item.status === 'active').length}</b></div><div class="kpi"><small>Profils membres</small><b>${data.profiles.length}</b></div><div class="kpi"><small>Lieux recensés</small><b>${catalogCount}</b></div><div class="kpi"><small>Fiches à attribuer</small><b>${unclaimedCount}</b></div><div class="kpi"><small>Pro attribués</small><b>${data.establishments.length}</b></div><div class="kpi"><small>Soirées publiées</small><b>${publishedEvents.length}</b></div><div class="kpi"><small>Inscriptions</small><b>${data.registrations.length}</b></div><div class="kpi"><small>Signalements ouverts</small><b>${openReports.length}</b></div></div>
       <div class="section-head"><div><h2>Préparation BETA</h2><p>Contrôles calculés directement sur la mémoire Velvet. Une anomalie rouge doit être corrigée avant la recette.</p></div><span class="state ${releaseState}">${releaseLabel}</span></div>
       <section class="card">${releaseChecks.length ? releaseChecks.map((item) => `<div class="audit-row"><time><span class="state ${item.status === 'failed' ? 'danger' : item.status === 'warning' ? 'warn' : 'ok'}">${item.status === 'failed' ? 'À corriger' : item.status === 'warning' ? 'Attention' : 'Conforme'}</span></time><p><b>${safe(releaseCheckLabel(item.check_code))}</b><small>${safe(item.detail)}</small></p><strong>${safe(item.affected_count)}</strong></div>`).join('') : '<div class="invite-empty">Aucun contrôle de publication disponible. Appliquez la dernière migration Supabase.</div>'}</section>
-      <div class="section-head"><div><h2>Photos de profil à contrôler</h2><p>Velvet Intelligence a transmis ces photos à un humain. La décision met immédiatement à jour l’admission du membre.</p></div><span class="state ${pendingMedia.length ? 'warn' : 'ok'}">${pendingMedia.length} en attente</span></div>
-      <section class="card">${pendingMedia.length ? pendingMedia.map((media) => {
+      <div class="section-head"><div><h2>Médias à contrôler</h2><p>L’IA valide ou refuse automatiquement les cas certains. Seuls les résultats ambigus ou interrompus apparaissent ici, avec accès temporaire aux contenus publics et privés.</p></div><span class="state ${pendingMedia.length ? 'warn' : 'ok'}">${pendingMedia.length} en attente</span></div>
+      <section class="card">${data.mediaReviewAllowed === false
+        ? '<div class="invite-empty">La consultation des médias est réservée aux administrateurs, à la direction et aux modérateurs.</div>'
+        : pendingMedia.length ? `<div class="control-media-grid">${pendingMedia.map((media) => {
         const profile = media.member_profiles || data.profiles.find((item) => item.id === media.profile_id) || {};
         const assessment = media.ai_assessment || {};
-        const role = media.media_role === 'couple_gallery' ? 'Carrousel couple' : media.media_role === 'individual_portrait' ? 'Portrait individuel' : 'Carrousel individuel';
-        return `<div class="audit-row" data-media-review="${safe(media.id)}">
-          <time>${media.previewUrl ? `<img src="${safe(media.previewUrl)}" alt="Photo à contrôler" style="width:82px;height:92px;object-fit:cover;border-radius:14px">` : '<span class="state warn">Aperçu indisponible</span>'}</time>
-          <p><b>${safe(profile.display_name || 'Profil membre')} · ${safe(role)}</b><small>${safe(assessment.summary || 'Analyse automatique indécise ou interrompue. Contrôle humain nécessaire.')}</small><input data-moderation-reason maxlength="500" placeholder="Motif obligatoire en cas de refus" style="margin-top:9px;width:100%"></p>
-          <span><button class="btn secondary" data-photo-decision="rejected" data-media="${safe(media.id)}">Refuser</button> <button class="btn" data-photo-decision="approved" data-media="${safe(media.id)}">Valider</button></span>
-        </div>`;
-      }).join('') : '<div class="invite-empty">Aucune photo en attente. Les admissions automatiques sont à jour.</div>'}</section>
+        const confidence = Number.isFinite(Number(assessment.confidence))
+          ? `${Math.round(Number(assessment.confidence) * 100)} % de confiance`
+          : 'Analyse interrompue';
+        return `<article class="control-media-review" data-media-review="${safe(media.id)}">
+          ${mediaPreview(media, profile)}
+          <div class="control-media-copy">
+            <div class="control-media-meta"><span class="state info">${safe(mediaRole(media))}</span><span class="state ${media.album_id && media.albums?.confidentiality !== 'public' ? 'critical' : 'ok'}">${safe(mediaContext(media))}</span><span class="state warning">${safe(confidence)}</span></div>
+            <h3>${safe(profile.display_name || 'Profil membre')}</h3>
+            <p>${safe(assessment.summary || 'Analyse automatique indécise ou interrompue. Contrôle humain nécessaire.')}</p>
+            <input data-moderation-reason maxlength="500" aria-label="Motif de modération" placeholder="Motif obligatoire en cas de refus">
+            <div class="control-media-actions"><button class="btn secondary" data-media-decision="rejected" data-media="${safe(media.id)}">Refuser</button><button class="btn" data-media-decision="approved" data-media="${safe(media.id)}">Valider</button></div>
+          </div>
+        </article>`;
+      }).join('')}</div>` : '<div class="invite-empty">Aucun média ambigu à traiter. Les décisions automatiques sont à jour.</div>'}</section>
       <div class="grid g2">
         <section class="card"><div class="ey">Prospection Velvet Pro</div><h2>Attribuer une fiche recensée</h2><p>La fiche reste en mode référence et les outils Pro demeurent verrouillés tant que l’abonnement n’est pas activé.</p><form id="controlClaimVenueForm" class="invite-form">
           <label>Établissement<select name="venueId" required><option value="">Choisir parmi ${unclaimedCount} fiche${unclaimedCount > 1 ? 's' : ''}</option>${optionDirectoryVenues()}</select></label>
@@ -119,19 +217,22 @@
     root.querySelectorAll('[data-subscription-status]').forEach((select) => select.addEventListener('change', () =>
       mutate({ action: 'subscription_status', venueId: select.dataset.subscriptionStatus, status: select.value }, 'Statut Velvet Pro synchronisé.')
     ));
-    root.querySelectorAll('[data-photo-decision]').forEach((button) => button.addEventListener('click', () => {
+    root.querySelectorAll('[data-open-media]').forEach((button) => button.addEventListener('click', () => {
+      openMediaViewer(button.dataset.openMedia);
+    }));
+    root.querySelectorAll('[data-media-decision]').forEach((button) => button.addEventListener('click', () => {
       const row = button.closest('[data-media-review]');
       const reason = row?.querySelector('[data-moderation-reason]')?.value.trim() || '';
-      if (button.dataset.photoDecision === 'rejected' && !reason) {
+      if (button.dataset.mediaDecision === 'rejected' && !reason) {
         toastMsg('Indiquez le motif du refus avant de continuer.');
         return;
       }
       mutate({
-        action: 'decide_profile_photo',
+        action: 'decide_media',
         mediaId: button.dataset.media,
-        decision: button.dataset.photoDecision,
+        decision: button.dataset.mediaDecision,
         reason
-      }, button.dataset.photoDecision === 'approved' ? 'Photo validée et admission recalculée.' : 'Photo refusée. Le membre pourra la remplacer.');
+      }, button.dataset.mediaDecision === 'approved' ? 'Média validé.' : 'Média refusé. Le membre pourra le remplacer.');
     }));
   }
 

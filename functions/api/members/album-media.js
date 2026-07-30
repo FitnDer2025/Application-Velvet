@@ -8,15 +8,18 @@ import {
 import {
   analyzePrivateAlbumPhoto,
   analyzePublicAlbumPhoto,
-  signDecision
+  recordAiDecision,
+  recordTechnicalReview
 } from './photos.js';
 
 const ALLOWED_TYPES = new Map([
-  ['image/jpeg','jpg'],
-  ['image/png','png'],
-  ['image/webp','webp']
+  ['image/jpeg', { extension: 'jpg', mediaType: 'image', max: 4 * 1024 * 1024 }],
+  ['image/png', { extension: 'png', mediaType: 'image', max: 4 * 1024 * 1024 }],
+  ['image/webp', { extension: 'webp', mediaType: 'image', max: 4 * 1024 * 1024 }],
+  ['video/mp4', { extension: 'mp4', mediaType: 'video', max: 50 * 1024 * 1024 }],
+  ['video/webm', { extension: 'webm', mediaType: 'video', max: 50 * 1024 * 1024 }],
+  ['video/quicktime', { extension: 'mov', mediaType: 'video', max: 50 * 1024 * 1024 }]
 ]);
-const MAX_BYTES = 4 * 1024 * 1024;
 
 async function ownedAlbum(env, access, albumId, profileId) {
   const rows = await restJson(
@@ -44,15 +47,15 @@ export async function onRequestPost({ request, env }) {
     if (!(file instanceof File) || !albumId) {
       return json({ error: 'photo_and_album_required' }, 400);
     }
-    const extension = ALLOWED_TYPES.get(file.type);
-    if (!extension || file.size < 20_000 || file.size > MAX_BYTES) {
-      return json({ error: 'invalid_photo_file' }, 400);
+    const fileRule = ALLOWED_TYPES.get(file.type);
+    if (!fileRule || file.size < 20_000 || file.size > fileRule.max) {
+      return json({ error: 'invalid_album_media_file' }, 400);
     }
     const album = await ownedAlbum(env, access, albumId, admission.admission.id);
     if (!album) return json({ error: 'album_owner_required' }, 403);
 
     const bytes = new Uint8Array(await file.arrayBuffer());
-    uploadedPath = `${album.profile_id}/${access.account.userId}/${crypto.randomUUID()}.${extension}`;
+    uploadedPath = `${album.profile_id}/${access.account.userId}/${crypto.randomUUID()}.${fileRule.extension}`;
     const upload = await supabase(
       env,
       `/storage/v1/object/velvet-media/${uploadedPath}`,
@@ -70,7 +73,7 @@ export async function onRequestPost({ request, env }) {
 
     const created = await restJson(
       env,
-      '/rest/v1/media_assets?select=id,profile_id,album_id,owner_user_id,media_role,storage_path,visibility,moderation_status,created_at',
+      '/rest/v1/media_assets?select=id,profile_id,album_id,owner_user_id,media_role,media_type,storage_path,visibility,moderation_status,created_at',
       access.session,
       {
         method: 'POST',
@@ -80,7 +83,7 @@ export async function onRequestPost({ request, env }) {
           album_id: album.id,
           owner_user_id: access.account.userId,
           storage_path: uploadedPath,
-          media_type: 'image',
+          media_type: fileRule.mediaType,
           visibility: album.confidentiality === 'public' ? 'profile' : 'private',
           moderation_status: 'pending',
           media_role: 'album',
@@ -94,37 +97,36 @@ export async function onRequestPost({ request, env }) {
       throw new Error('photo_persistence_failed');
     }
 
+    let moderationStatus = 'pending';
+    let aiAssessment = null;
     try {
-        const analyzed = album.confidentiality === 'public'
+      const analyzed = fileRule.mediaType === 'video'
+        ? null
+        : album.confidentiality === 'public'
           ? await analyzePublicAlbumPhoto(env, bytes)
           : await analyzePrivateAlbumPhoto(env, bytes);
-        const signedAt = Math.floor(Date.now() / 1000);
-        const signature = await signDecision(
-          String(env.PHOTO_MODERATION_HMAC_KEY || ''),
-          photo.id,
-          analyzed.decision,
-          signedAt
-        );
-        await restJson(
-          env,
-          '/rest/v1/rpc/record_photo_ai_decision',
-          access.session,
-          {
-            method: 'POST',
-            body: JSON.stringify({
-              target_media_id: photo.id,
-              decision: analyzed.decision,
-              assessment: analyzed.assessment,
-              signed_at: signedAt,
-              signature
-            })
-          }
-        );
-    } catch {
-      // Le média reste privé et en attente si l'analyse n'aboutit pas.
+      if (!analyzed) throw new Error('video_visual_review_required');
+      await recordAiDecision(env, access.session, photo.id, analyzed);
+      moderationStatus = analyzed.decision === 'review' ? 'pending' : analyzed.decision;
+      aiAssessment = analyzed.assessment;
+    } catch (error) {
+      aiAssessment = await recordTechnicalReview(
+        env,
+        access.session,
+        photo.id,
+        error,
+        album.confidentiality === 'public' ? 'public_album' : 'private_album'
+      ).catch(() => null);
     }
 
-    return withSession({ ok: true, photo }, access.session, 201);
+    return withSession({
+      ok: true,
+      photo: {
+        ...photo,
+        moderation_status: moderationStatus,
+        ai_assessment: aiAssessment
+      }
+    }, access.session, 201);
   } catch (error) {
     if (createdMediaId && cleanupSession) {
       await restJson(
