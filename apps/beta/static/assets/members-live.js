@@ -465,8 +465,8 @@
     if (!registration) return false;
     await registration.showNotification(title, {
       body,
-      icon: '/assets/velvet-icon.svg',
-      badge: '/assets/velvet-icon.svg',
+      icon: '/assets/velvet-icon-192.png',
+      badge: '/assets/velvet-icon-192.png',
       tag: 'velvet-settings-test',
       data: { url }
     });
@@ -3924,6 +3924,7 @@
     state.editing = false;
     navButtons.forEach((button) => button.classList.toggle('active', button.dataset.route === name));
     document.querySelector('.sidebar')?.classList.remove('open');
+    document.body.classList.remove('nav-open');
     document.querySelector('#mobileMenuButton')?.setAttribute('aria-expanded', 'false');
     if (name === 'home') content.innerHTML = renderHome();
     if (name === 'discover') content.innerHTML = renderDiscover();

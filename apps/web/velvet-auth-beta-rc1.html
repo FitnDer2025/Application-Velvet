@@ -3,7 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0D0D0D">
   <title>Velvet — Connexion & création de profil</title>
+  <link rel="icon" href="/assets/velvet-icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/velvet-icon-180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;1,500&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -54,6 +57,7 @@
     @media(max-width:950px){.auth-shell{grid-template-columns:1fr}.brand-side{min-height:42vh}.auth-panel{min-height:58vh}.onboarding.active{grid-template-columns:1fr}.steps{display:none}.step-actions{left:0}.choices{grid-template-columns:1fr 1fr}.summary-grid{grid-template-columns:1fr}}
     @media(max-width:620px){.brand-copy{left:20px;right:20px;bottom:25px}.brand-copy h1{font-size:43px}.brand-copy p{font-size:14px}.auth-panel{padding:28px 16px}.social,.form,.g2,.g3,.linked,.uploads{grid-template-columns:1fr}.field.wide{grid-column:auto}.auth-box h2{font-size:36px}.step-top{padding:0 15px}.step-main{padding:27px 14px 110px}.choices{grid-template-columns:1fr}.step-actions{padding:11px 14px}.link-line{height:30px}.uploads{grid-template-columns:1fr 1fr}.summary-copy h2{font-size:35px}.success h1{font-size:43px}}
   </style>
+  <link rel="stylesheet" href="/assets/velvet-premium-ui.css">
 </head>
 <body>
 <div id="intro" class="intro" aria-label="Animation du logo Velvet">
@@ -109,6 +113,7 @@
 
 <section id="success" class="success"><div class="success-box"><div class="success-v">V</div><div class="ey">Profil publié · Bienvenue dans Velvet</div><h1 id="successName">Votre univers est prêt.</h1><p class="lead">Vos informations, vos préférences de confidentialité et vos deux accès ont été enregistrés. Vous pouvez maintenant découvrir la communauté.</p><div class="value-row"><span class="value">Profil complet ✓</span><span class="value">E-mail enregistré ✓</span><span class="value">Téléphone validé en BETA ✓</span><span class="value">Majorité confirmée ✓</span></div><div style="margin-top:25px"><a class="btn" href="./velvet-members-v6-beta-rc2.html">Entrer dans Velvet</a><button class="btn secondary" onclick="restartDemo()">Recommencer la démonstration</button></div></div></section>
 <div id="toast" class="toast"></div>
+<script src="/assets/velvet-premium-ui.js" defer></script>
 
 <script>
 const PHOTO={couple:'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1200&q=82',woman:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=82',man:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=82'};

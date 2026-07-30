@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-title" content="Velvet">
   <title>Velvet Membres — BETA privée</title>
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/assets/velvet-icon.svg" type="image/svg+xml">
+  <link rel="icon" href="/assets/velvet-icon-192.png" type="image/png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/velvet-icon-180.png">
   <script>
     try {
@@ -21,6 +21,7 @@
   </script>
   <link rel="stylesheet" href="/assets/members-live.css">
   <link rel="stylesheet" href="/assets/members-onboarding-v2.css">
+  <link rel="stylesheet" href="/assets/velvet-premium-ui.css">
 </head>
 <body>
   <div class="app-shell">
@@ -61,13 +62,13 @@
     <nav class="bottom-nav" aria-label="Navigation mobile">
       <button data-route="home"><span>⌂</span><small>Accueil</small></button>
       <button data-route="discover"><span>◇</span><small>Recherche</small></button>
-      <button data-route="events"><span>✦</span><small>Sorties</small></button>
+      <button data-route="maps"><span>⌖</span><small>Maps</small></button>
       <button data-route="conversations"><span>◌</span><small>Messages</small></button>
       <button data-route="me"><span>♡</span><small>Profil</small></button>
-      <button data-route="settings"><span>⚙</span><small>Réglages</small></button>
     </nav>
   </div>
   <div id="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/velvet-premium-ui.js" defer></script>
   <script src="/assets/pwa-ios.js" defer></script>
   <script src="/assets/photo-protection.js" defer></script>
   <script src="/assets/location-verification.js" defer></script>

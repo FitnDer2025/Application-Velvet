@@ -118,7 +118,6 @@ import {
 import { onRequestGet as billingCatalogGet } from '../../../functions/api/billing/catalog.js';
 import { onRequestPost as billingCheckoutPost } from '../../../functions/api/billing/checkout.js';
 import { onRequestPost as billingPromotionPost } from '../../../functions/api/billing/promotion.js';
-import { velvetIconResponse } from './velvet-icons.js';
 
 const API_ROUTES = new Map([
   ['POST /api/auth/signup', signup],
@@ -218,9 +217,6 @@ function securityHeaders(response) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    const iconResponse = velvetIconResponse(url.pathname);
-    if (iconResponse) return securityHeaders(iconResponse);
-
     const apiHandler = API_ROUTES.get(`${request.method} ${url.pathname}`);
     if (apiHandler) {
       return securityHeaders(await apiHandler({ request, env }));

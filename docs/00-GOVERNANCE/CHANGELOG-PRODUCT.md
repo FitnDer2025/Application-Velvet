@@ -4,6 +4,15 @@ Ce document retrace les décisions produit validées. Il ne remplace ni les ADR 
 
 ## 30 juillet 2026
 
+### Qualité perçue et navigation applicative
+
+- La connexion, Community, Velvet Pro et Velvet Contrôle partagent désormais les mêmes surfaces translucides, rayons, ombres, rythmes et retours tactiles.
+- Les symboles typographiques de navigation sont remplacés par une iconographie vectorielle fine, cohérente et lisible.
+- Sur mobile, Community utilise cinq destinations principales et une feuille dédiée aux accès secondaires afin de préserver des zones tactiles confortables.
+- Velvet Pro et Velvet Contrôle adoptent la même barre de navigation applicative, les zones sûres des appareils et des vues adaptées aux petits écrans.
+- Le V ruban bordeaux/rose devient l’icône visible du site, de la PWA et des en-têtes, en remplacement du V doré générique.
+- Le thème clair Community conserve ses tons ivoire, beige, pastel, or et bordeaux dans le nouveau système.
+
 ### ADR-MON-057 — Découverte, Signature et Velvet Pro
 
 - Velvet Découverte conserve la recherche essentielle, trois nouvelles conversations par semaine, dix suivis, un essai IA et toutes les fonctions essentielles de sécurité.

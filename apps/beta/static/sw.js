@@ -1,16 +1,18 @@
-const CACHE = 'velvet-beta-shell-v5';
+const CACHE = 'velvet-beta-shell-v6';
 const APP_SHELL = [
   '/membres/',
   '/assets/members-live.css',
   '/assets/members-live.js',
   '/assets/members-onboarding-v2.css',
   '/assets/members-onboarding-v2.js',
+  '/assets/velvet-premium-ui.css',
+  '/assets/velvet-premium-ui.js',
   '/assets/pwa-ios.js',
   '/assets/photo-protection.js',
   '/assets/location-verification.js',
-  '/assets/velvet-icon.svg',
   '/assets/velvet-icon-180.png',
   '/assets/velvet-icon-192.png',
+  '/assets/velvet-icon-512.png',
   '/manifest.webmanifest'
 ];
 

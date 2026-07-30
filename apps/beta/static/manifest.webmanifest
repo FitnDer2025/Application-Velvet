@@ -7,8 +7,8 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#0b080a",
-  "theme_color": "#7e2045",
+  "background_color": "#0D0D0D",
+  "theme_color": "#0D0D0D",
   "icons": [
     {
       "src": "/assets/velvet-icon-192.png",
@@ -17,9 +17,9 @@
       "purpose": "any"
     },
     {
-      "src": "/assets/velvet-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/assets/velvet-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]

@@ -1,0 +1,959 @@
+:root {
+  --velvet-black: #0D0D0D;
+  --velvet-anthracite: #1B1B1D;
+  --velvet-gray: #2D2D30;
+  --velvet-ivory: #F4F4F2;
+  --velvet-burgundy: #641B36;
+  --velvet-gold: #C6A96A;
+  --velvet-border: rgba(244, 244, 242, .11);
+  --velvet-glass: rgba(27, 27, 29, .72);
+  --velvet-shadow: 0 22px 70px rgba(0, 0, 0, .28);
+  --velvet-ease: cubic-bezier(.2, .8, .2, 1);
+}
+
+.velvet-ui-icon {
+  display: block;
+  width: 1.35rem;
+  height: 1.35rem;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+.velvet-brand-lockup {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.velvet-brand-lockup img,
+.velvet-mobile-mark {
+  display: block;
+  object-fit: cover;
+  border: 1px solid rgba(244, 244, 242, .12);
+  border-radius: 14px;
+  box-shadow: 0 10px 32px rgba(100, 27, 54, .3);
+}
+
+.velvet-brand-lockup > span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.velvet-brand-lockup b {
+  color: var(--velvet-gold);
+  font-family: Poppins, Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: .27em;
+}
+
+.velvet-brand-lockup small {
+  color: rgba(244, 244, 242, .54);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .18em;
+}
+
+.velvet-member-ui button,
+.velvet-pro-ui button,
+.velvet-control-ui button,
+.velvet-auth-ui button,
+.velvet-member-ui a,
+.velvet-pro-ui a,
+.velvet-control-ui a,
+.velvet-auth-ui a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.velvet-member-ui button:focus-visible,
+.velvet-pro-ui button:focus-visible,
+.velvet-control-ui button:focus-visible,
+.velvet-member-ui a:focus-visible,
+.velvet-pro-ui a:focus-visible,
+.velvet-control-ui a:focus-visible {
+  outline: 2px solid var(--velvet-gold);
+  outline-offset: 3px;
+}
+
+.velvet-member-ui .card,
+.velvet-pro-ui .card,
+.velvet-control-ui .card,
+.velvet-auth-ui .card {
+  border-color: var(--velvet-border);
+  background:
+    linear-gradient(145deg, rgba(244, 244, 242, .072), rgba(244, 244, 242, .018)),
+    rgba(27, 27, 29, .64);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .035), var(--velvet-shadow);
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+}
+
+.velvet-member-ui .primary,
+.velvet-pro-ui .btn:not(.secondary):not(.ghost),
+.velvet-control-ui .btn:not(.secondary):not(.ghost) {
+  border: 1px solid rgba(244, 244, 242, .08);
+  background: linear-gradient(145deg, #7B2846, var(--velvet-burgundy));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .12), 0 12px 30px rgba(100, 27, 54, .26);
+  transition: transform 140ms var(--velvet-ease), filter 140ms var(--velvet-ease), box-shadow 140ms var(--velvet-ease);
+}
+
+.velvet-member-ui .primary:active,
+.velvet-pro-ui .btn:active,
+.velvet-control-ui .btn:active {
+  transform: scale(.975);
+  filter: brightness(.94);
+}
+
+.velvet-member-ui input,
+.velvet-member-ui select,
+.velvet-member-ui textarea,
+.velvet-pro-ui input,
+.velvet-pro-ui select,
+.velvet-pro-ui textarea,
+.velvet-control-ui input,
+.velvet-control-ui select {
+  border-color: var(--velvet-border);
+  background: rgba(13, 13, 13, .66);
+  box-shadow: inset 0 1px 8px rgba(0, 0, 0, .18);
+}
+
+/* Membres */
+.velvet-member-ui {
+  --bg: var(--velvet-black);
+  --panel: var(--velvet-anthracite);
+  --panel-2: var(--velvet-gray);
+  --wine: var(--velvet-burgundy);
+  --wine-light: #8D3153;
+  --gold: var(--velvet-gold);
+  --cream: var(--velvet-ivory);
+  --line: var(--velvet-border);
+  font-family: Poppins, Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.velvet-member-ui .sidebar {
+  width: 272px;
+  padding: 21px 15px;
+  border-right-color: var(--velvet-border);
+  background:
+    radial-gradient(circle at 20% 0, rgba(100, 27, 54, .18), transparent 24rem),
+    rgba(13, 13, 13, .83);
+  box-shadow: 18px 0 60px rgba(0, 0, 0, .16);
+  backdrop-filter: blur(32px) saturate(130%);
+  -webkit-backdrop-filter: blur(32px) saturate(130%);
+}
+
+.velvet-member-ui main {
+  margin-left: 272px;
+}
+
+.velvet-member-ui .brand {
+  gap: 11px;
+  padding: 2px 8px 25px;
+}
+
+.velvet-member-ui .brand-mark {
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  border: 1px solid rgba(244, 244, 242, .12);
+  border-radius: 15px;
+  background: var(--velvet-black);
+  box-shadow: 0 12px 35px rgba(100, 27, 54, .25);
+}
+
+.velvet-member-ui .brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.velvet-member-ui .brand strong {
+  color: var(--velvet-gold);
+  font-family: Poppins, Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+
+.velvet-member-ui .sidebar nav {
+  gap: 5px;
+}
+
+.velvet-member-ui .sidebar nav button {
+  min-height: 48px;
+  gap: 13px;
+  padding: 11px 13px;
+  border: 1px solid transparent;
+  border-radius: 15px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 140ms var(--velvet-ease), background 140ms var(--velvet-ease), border-color 140ms var(--velvet-ease), transform 140ms var(--velvet-ease);
+}
+
+.velvet-member-ui .sidebar nav button > span {
+  width: 24px;
+  color: #B691A0;
+}
+
+.velvet-member-ui .sidebar nav button:hover {
+  transform: translateX(2px);
+  border-color: rgba(244, 244, 242, .07);
+}
+
+.velvet-member-ui .sidebar nav button.active {
+  border-color: rgba(198, 169, 106, .17);
+  background: linear-gradient(110deg, rgba(100, 27, 54, .46), rgba(244, 244, 242, .035));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .05);
+}
+
+.velvet-member-ui .sidebar nav button.active > span {
+  color: var(--velvet-gold);
+}
+
+.velvet-member-ui .page {
+  animation: velvetPageIn 220ms var(--velvet-ease);
+}
+
+html[data-theme="light"] .velvet-member-ui {
+  --bg: #F4F4F2;
+  --panel: #FFFAF5;
+  --panel-2: #E8DDD3;
+  --cream: #341923;
+  --muted: #756970;
+  --line: rgba(100, 27, 54, .13);
+  --velvet-border: rgba(100, 27, 54, .13);
+  --velvet-glass: rgba(255, 250, 245, .78);
+  color: #341923;
+}
+
+html[data-theme="light"] .velvet-member-ui .sidebar {
+  background:
+    radial-gradient(circle at 18% 0, rgba(228, 202, 211, .55), transparent 24rem),
+    rgba(255, 250, 245, .9);
+  box-shadow: 18px 0 60px rgba(52, 25, 35, .08);
+}
+
+html[data-theme="light"] .velvet-member-ui .sidebar nav button {
+  color: #756970;
+}
+
+html[data-theme="light"] .velvet-member-ui .sidebar nav button.active {
+  border-color: rgba(100, 27, 54, .13);
+  background: linear-gradient(110deg, rgba(228, 202, 211, .75), rgba(255, 250, 245, .6));
+  color: #341923;
+}
+
+html[data-theme="light"] .velvet-member-ui .card {
+  border-color: rgba(100, 27, 54, .12);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, .78), rgba(232, 221, 211, .2)),
+    rgba(255, 250, 245, .84);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .85), 0 18px 50px rgba(52, 25, 35, .09);
+}
+
+html[data-theme="light"] .velvet-member-ui input,
+html[data-theme="light"] .velvet-member-ui select,
+html[data-theme="light"] .velvet-member-ui textarea {
+  border-color: rgba(100, 27, 54, .14);
+  background: rgba(255, 250, 245, .84);
+  color: #341923;
+}
+
+.nav-scrim {
+  display: none;
+}
+
+@keyframes velvetPageIn {
+  from { opacity: 0; transform: translateY(8px) scale(.996); }
+  to { opacity: 1; transform: none; }
+}
+
+/* PRO */
+.velvet-pro-ui {
+  --bg: var(--velvet-black);
+  --panel: var(--velvet-anthracite);
+  --panel2: var(--velvet-gray);
+  --line: var(--velvet-border);
+  --txt: var(--velvet-ivory);
+  --gold: var(--velvet-gold);
+  --wine: var(--velvet-burgundy);
+  --wine2: #421224;
+  font-family: Poppins, Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.velvet-pro-ui .shell {
+  grid-template-columns: 276px minmax(0, 1fr);
+}
+
+.velvet-pro-ui .sidebar {
+  padding: 21px 15px;
+  border-right-color: var(--velvet-border);
+  background:
+    radial-gradient(circle at 20% 0, rgba(100, 27, 54, .2), transparent 24rem),
+    rgba(13, 13, 13, .88);
+  box-shadow: 18px 0 60px rgba(0, 0, 0, .16);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+}
+
+.velvet-pro-ui .sidebar > .brand {
+  padding: 1px 7px 20px;
+}
+
+.velvet-pro-ui .sidebar > .brand .velvet-brand-lockup img {
+  width: 44px;
+  height: 44px;
+}
+
+.velvet-pro-ui .sidebar-foot .account {
+  grid-template-columns: 1fr;
+  padding: 13px 14px;
+}
+
+.velvet-pro-ui .sidebar-foot .account b,
+.velvet-pro-ui .sidebar-foot .account small {
+  display: block;
+}
+
+.velvet-pro-ui .sidebar-foot .account small {
+  margin-top: 4px;
+}
+
+.velvet-pro-ui .nav {
+  gap: 5px;
+}
+
+.velvet-pro-ui .nav button {
+  min-height: 48px;
+  gap: 13px;
+  border: 1px solid transparent;
+  border-radius: 15px;
+  font-size: 13px;
+  transition: .14s var(--velvet-ease);
+}
+
+.velvet-pro-ui .nav button:hover {
+  transform: translateX(2px);
+}
+
+.velvet-pro-ui .nav button.active {
+  border-color: rgba(198, 169, 106, .17);
+  background: linear-gradient(110deg, rgba(100, 27, 54, .46), rgba(244, 244, 242, .035));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .05);
+}
+
+.velvet-pro-ui .nav i {
+  display: grid;
+  place-items: center;
+  width: 24px;
+}
+
+.velvet-pro-ui .topbar {
+  border-bottom-color: var(--velvet-border);
+  background: rgba(13, 13, 13, .72);
+  backdrop-filter: blur(28px) saturate(125%);
+  -webkit-backdrop-filter: blur(28px) saturate(125%);
+}
+
+.velvet-mobile-mark {
+  display: none;
+}
+
+/* Contrôle */
+.velvet-control-ui {
+  --bg: var(--velvet-black);
+  --panel: var(--velvet-anthracite);
+  --panel2: var(--velvet-gray);
+  --line: var(--velvet-border);
+  --txt: var(--velvet-ivory);
+  --gold: var(--velvet-gold);
+  --wine: var(--velvet-burgundy);
+  font-family: Poppins, Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.velvet-control-ui .top {
+  height: 76px;
+  padding: 0 18px;
+  border-bottom-color: var(--velvet-border);
+  background:
+    linear-gradient(90deg, rgba(100, 27, 54, .11), transparent 28%),
+    rgba(13, 13, 13, .78);
+  box-shadow: 0 16px 50px rgba(0, 0, 0, .16);
+  backdrop-filter: blur(28px) saturate(125%);
+  -webkit-backdrop-filter: blur(28px) saturate(125%);
+}
+
+.velvet-control-ui .top > .brand {
+  display: flex;
+  min-width: 190px;
+  letter-spacing: 0;
+}
+
+.velvet-control-ui .top > .brand img {
+  width: 42px;
+  height: 42px;
+}
+
+.velvet-control-ui .tabs {
+  gap: 6px;
+}
+
+.velvet-control-ui .tab {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  transition: .14s var(--velvet-ease);
+}
+
+.velvet-control-ui .tab .velvet-ui-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.velvet-control-ui .tab.active {
+  border-color: rgba(198, 169, 106, .17);
+  background: linear-gradient(110deg, rgba(100, 27, 54, .4), rgba(244, 244, 242, .035));
+}
+
+.control-mobile-nav {
+  display: none;
+}
+
+/* Accès et onboarding */
+.velvet-auth-ui .brand-copy > .brand,
+.velvet-auth-ui .steps > .brand {
+  display: inline-flex;
+}
+
+.velvet-auth-ui .brand-copy .velvet-brand-lockup img,
+.velvet-auth-ui .steps .velvet-brand-lockup img {
+  width: 46px;
+  height: 46px;
+}
+
+.velvet-auth-ui .auth-box,
+.velvet-auth-ui .step-main {
+  animation: velvetPageIn 220ms var(--velvet-ease);
+}
+
+.velvet-auth-ui .auth-panel {
+  background:
+    radial-gradient(circle at 100% 0, rgba(100, 27, 54, .1), transparent 22rem),
+    rgba(13, 13, 13, .72);
+}
+
+.velvet-auth-ui .auth-box .mode {
+  border-radius: 19px;
+  background: rgba(27, 27, 29, .68);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .04), 0 16px 45px rgba(0, 0, 0, .16);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.velvet-auth-ui .auth-box .mode button {
+  min-height: 44px;
+  border-radius: 14px;
+}
+
+.velvet-auth-ui .auth-box .mode button.active {
+  border: 1px solid rgba(198, 169, 106, .14);
+  background: linear-gradient(145deg, rgba(100, 27, 54, .5), rgba(100, 27, 54, .2));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .055);
+}
+
+.velvet-auth-ui .success-v img {
+  display: block;
+  margin: 0 auto 16px;
+  overflow: hidden;
+  border: 1px solid rgba(244, 244, 242, .12);
+  border-radius: 29px;
+  box-shadow: 0 22px 60px rgba(100, 27, 54, .3);
+}
+
+@media (max-width: 800px) {
+  nav[aria-label="Informations légales"] {
+    display: none !important;
+  }
+
+  .velvet-member-ui {
+    min-height: 100dvh;
+    overscroll-behavior-y: none;
+  }
+
+  .velvet-member-ui .sidebar {
+    inset: auto 9px calc(86px + env(safe-area-inset-bottom)) 9px;
+    width: auto;
+    height: min(620px, calc(100dvh - 158px - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
+    padding: 15px;
+    overflow: auto;
+    border: 1px solid rgba(244, 244, 242, .13);
+    border-radius: 28px;
+    background:
+      radial-gradient(circle at 18% 0, rgba(100, 27, 54, .36), transparent 22rem),
+      rgba(18, 16, 17, .94);
+    box-shadow: 0 30px 100px rgba(0, 0, 0, .62), inset 0 1px rgba(255, 255, 255, .06);
+    backdrop-filter: blur(34px) saturate(135%);
+    -webkit-backdrop-filter: blur(34px) saturate(135%);
+    transform: translateY(18px) scale(.985);
+    opacity: 0;
+    transition: transform 220ms var(--velvet-ease), opacity 180ms ease;
+  }
+
+  .velvet-member-ui .sidebar.open {
+    display: flex;
+    transform: none;
+    opacity: 1;
+  }
+
+  .velvet-member-ui .sidebar nav {
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+
+  .velvet-member-ui .sidebar nav button {
+    min-height: 52px;
+    border-color: rgba(244, 244, 242, .055);
+    background: rgba(244, 244, 242, .025);
+  }
+
+  .velvet-member-ui .sidebar-foot {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .velvet-member-ui .sidebar-foot p {
+    margin: 0;
+  }
+
+  .velvet-member-ui .nav-scrim {
+    position: fixed;
+    z-index: 33;
+    inset: 0;
+    display: block;
+    visibility: hidden;
+    border: 0;
+    background: rgba(3, 3, 4, .58);
+    opacity: 0;
+    transition: opacity 180ms ease, visibility 180ms;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+
+  .velvet-member-ui.nav-open {
+    overflow: hidden;
+  }
+
+  .velvet-member-ui.nav-open .nav-scrim {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .velvet-member-ui .mobile-head {
+    height: calc(62px + env(safe-area-inset-top));
+    padding: calc(8px + env(safe-area-inset-top)) 13px 7px;
+    border-bottom-color: rgba(244, 244, 242, .085);
+    background: rgba(13, 13, 13, .74);
+    box-shadow: 0 10px 35px rgba(0, 0, 0, .16);
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+  }
+
+  .velvet-member-ui .brand.compact {
+    gap: 8px;
+  }
+
+  .velvet-member-ui .brand.compact .brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+  }
+
+  .velvet-member-ui .brand.compact strong {
+    font-size: 14px;
+    letter-spacing: .2em;
+  }
+
+  .mobile-head-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .velvet-member-ui .mobile-head .mobile-head-action {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid rgba(244, 244, 242, .095);
+    border-radius: 15px;
+    background: rgba(244, 244, 242, .045);
+    color: rgba(244, 244, 242, .82);
+    box-shadow: inset 0 1px rgba(255, 255, 255, .04);
+  }
+
+  .velvet-member-ui .mobile-head .mobile-head-action:active {
+    transform: scale(.96);
+  }
+
+  .velvet-member-ui main {
+    margin: 0;
+    min-height: 100dvh;
+    padding: calc(78px + env(safe-area-inset-top)) 12px calc(100px + env(safe-area-inset-bottom));
+  }
+
+  .velvet-member-ui .bottom-nav {
+    z-index: 36;
+    left: 9px;
+    right: 9px;
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    grid-template-columns: repeat(5, 1fr);
+    min-height: 70px;
+    padding: 6px;
+    border: 1px solid rgba(244, 244, 242, .13);
+    border-radius: 24px;
+    background: rgba(24, 21, 22, .86);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .52), inset 0 1px rgba(255, 255, 255, .055);
+    backdrop-filter: blur(30px) saturate(145%);
+    -webkit-backdrop-filter: blur(30px) saturate(145%);
+  }
+
+  .velvet-member-ui .bottom-nav button {
+    position: relative;
+    min-width: 0;
+    min-height: 56px;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 3px;
+    padding: 5px 2px;
+    border: 1px solid transparent;
+    border-radius: 18px;
+    transition: color 140ms var(--velvet-ease), background 140ms var(--velvet-ease), transform 140ms var(--velvet-ease);
+  }
+
+  .velvet-member-ui .bottom-nav button > span {
+    width: auto;
+    display: grid;
+    place-items: center;
+    font-size: 0;
+  }
+
+  .velvet-member-ui .bottom-nav .velvet-ui-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .velvet-member-ui .bottom-nav button small {
+    margin: 0;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .01em;
+  }
+
+  .velvet-member-ui .bottom-nav button.active {
+    border-color: rgba(198, 169, 106, .17);
+    background: linear-gradient(145deg, rgba(100, 27, 54, .58), rgba(100, 27, 54, .25));
+    color: var(--velvet-ivory);
+    box-shadow: inset 0 1px rgba(255, 255, 255, .065), 0 8px 20px rgba(100, 27, 54, .16);
+  }
+
+  .velvet-member-ui .bottom-nav button.active .velvet-ui-icon {
+    color: var(--velvet-gold);
+  }
+
+  html[data-theme="light"] .velvet-member-ui .mobile-head,
+  html[data-theme="light"] .velvet-member-ui .bottom-nav {
+    border-color: rgba(100, 27, 54, .12);
+    background: rgba(255, 250, 245, .88);
+    box-shadow: 0 22px 60px rgba(52, 25, 35, .14), inset 0 1px rgba(255, 255, 255, .8);
+  }
+
+  html[data-theme="light"] .velvet-member-ui .mobile-head .mobile-head-action {
+    border-color: rgba(100, 27, 54, .1);
+    background: rgba(232, 221, 211, .58);
+    color: #641B36;
+  }
+
+  html[data-theme="light"] .velvet-member-ui .bottom-nav button.active {
+    border-color: rgba(100, 27, 54, .13);
+    background: linear-gradient(145deg, rgba(228, 202, 211, .88), rgba(232, 221, 211, .64));
+    color: #341923;
+  }
+
+  html[data-theme="light"] .velvet-member-ui .sidebar {
+    background:
+      radial-gradient(circle at 18% 0, rgba(228, 202, 211, .72), transparent 22rem),
+      rgba(255, 250, 245, .96);
+  }
+
+  html[data-theme="light"] .velvet-member-ui .sidebar nav button {
+    border-color: rgba(100, 27, 54, .075);
+    background: rgba(232, 221, 211, .2);
+  }
+
+  .velvet-member-ui .card {
+    border-radius: 22px;
+    box-shadow: inset 0 1px rgba(255, 255, 255, .035), 0 16px 45px rgba(0, 0, 0, .2);
+  }
+
+  .velvet-pro-ui .shell {
+    grid-template-columns: 1fr;
+    min-height: 100dvh;
+  }
+
+  .velvet-pro-ui .topbar {
+    height: calc(64px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 13px 0;
+    gap: 10px;
+  }
+
+  .velvet-pro-ui .velvet-mobile-mark {
+    display: block;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    border-radius: 13px;
+  }
+
+  .velvet-pro-ui .topbar h2 {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 17px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .velvet-pro-ui .top-actions {
+    margin-left: auto;
+  }
+
+  .velvet-pro-ui .top-actions .btn {
+    min-height: 42px;
+    padding: 9px 12px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .velvet-pro-ui .content {
+    padding: 16px 12px calc(100px + env(safe-area-inset-bottom));
+  }
+
+  .velvet-pro-ui .mobile-nav {
+    left: 9px;
+    right: 9px;
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    min-height: 70px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+    padding: 6px;
+    border: 1px solid rgba(244, 244, 242, .13);
+    border-radius: 24px;
+    background: rgba(24, 21, 22, .88);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .52), inset 0 1px rgba(255, 255, 255, .055);
+    backdrop-filter: blur(30px) saturate(145%);
+    -webkit-backdrop-filter: blur(30px) saturate(145%);
+  }
+
+  .velvet-pro-ui .mobile-nav button {
+    min-width: 0;
+    min-height: 56px;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 3px;
+    padding: 5px 2px;
+    border: 1px solid transparent;
+    border-radius: 18px;
+    background: transparent;
+    color: rgba(244, 244, 242, .55);
+  }
+
+  .velvet-pro-ui .mobile-nav button.active {
+    border-color: rgba(198, 169, 106, .17);
+    background: linear-gradient(145deg, rgba(100, 27, 54, .58), rgba(100, 27, 54, .25));
+    color: var(--velvet-gold);
+  }
+
+  .velvet-pro-ui .mobile-nav .velvet-ui-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .velvet-pro-ui .mobile-nav small {
+    max-width: 100%;
+    overflow: hidden;
+    color: inherit;
+    font-size: 9px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .velvet-pro-ui .kpis,
+  .velvet-pro-ui .g2,
+  .velvet-pro-ui .g3,
+  .velvet-pro-ui .g4 {
+    grid-template-columns: 1fr;
+  }
+
+  .velvet-control-ui .shell {
+    min-height: 100dvh;
+    grid-template-rows: calc(64px + env(safe-area-inset-top)) 1fr;
+  }
+
+  .velvet-control-ui .top {
+    height: calc(64px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 13px 0;
+  }
+
+  .velvet-control-ui .top > .brand {
+    min-width: 0;
+  }
+
+  .velvet-control-ui .top > .brand img {
+    width: 38px;
+    height: 38px;
+    border-radius: 13px;
+  }
+
+  .velvet-control-ui .top > .brand .velvet-brand-lockup > span,
+  .velvet-control-ui .top > .tag,
+  .velvet-control-ui .top > .tabs,
+  .velvet-control-ui .top > .release {
+    display: none;
+  }
+
+  .velvet-control-ui .top:after {
+    content: "VELVET CONTRÔLE";
+    color: var(--velvet-gold);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .17em;
+  }
+
+  .velvet-control-ui .page {
+    padding: 16px 12px calc(100px + env(safe-area-inset-bottom));
+  }
+
+  .velvet-control-ui .control-mobile-nav {
+    position: fixed;
+    z-index: 80;
+    left: 9px;
+    right: 9px;
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    min-height: 70px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 3px;
+    padding: 6px;
+    border: 1px solid rgba(244, 244, 242, .13);
+    border-radius: 24px;
+    background: rgba(24, 21, 22, .9);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .52), inset 0 1px rgba(255, 255, 255, .055);
+    backdrop-filter: blur(30px) saturate(145%);
+    -webkit-backdrop-filter: blur(30px) saturate(145%);
+  }
+
+  .velvet-control-ui .control-mobile-nav button {
+    min-height: 56px;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 3px;
+    border: 1px solid transparent;
+    border-radius: 18px;
+    background: transparent;
+    color: rgba(244, 244, 242, .55);
+  }
+
+  .velvet-control-ui .control-mobile-nav button.active {
+    border-color: rgba(198, 169, 106, .17);
+    background: linear-gradient(145deg, rgba(100, 27, 54, .58), rgba(100, 27, 54, .25));
+    color: var(--velvet-gold);
+  }
+
+  .velvet-control-ui .control-mobile-nav .velvet-ui-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .velvet-control-ui .control-mobile-nav small {
+    color: inherit;
+    font-size: 9px;
+    font-weight: 600;
+  }
+
+  .velvet-control-ui .head h1,
+  .velvet-control-ui .road-hero h1 {
+    font-size: clamp(34px, 10vw, 48px);
+  }
+
+  .velvet-auth-ui .brand-side {
+    min-height: 390px;
+  }
+
+  .velvet-auth-ui .brand-copy {
+    top: 27px;
+    bottom: auto;
+  }
+
+  .velvet-auth-ui .brand-copy h1 {
+    margin: 16px 0 12px;
+    font-size: clamp(36px, 10.8vw, 44px);
+    line-height: 1;
+  }
+
+  .velvet-auth-ui .brand-copy p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .velvet-auth-ui .brand-copy .value-row {
+    margin-top: 15px;
+  }
+
+  .velvet-auth-ui .auth-panel {
+    min-height: calc(100dvh - 390px);
+    padding-bottom: calc(28px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 420px) {
+  .velvet-member-ui .sidebar nav {
+    grid-template-columns: 1fr;
+  }
+
+  .velvet-member-ui .sidebar {
+    height: min(650px, calc(100dvh - 146px - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
+  }
+
+  .velvet-pro-ui .top-actions .btn {
+    max-width: 132px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .velvet-member-ui .page,
+  .velvet-member-ui .sidebar,
+  .velvet-member-ui .nav-scrim,
+  .velvet-member-ui button,
+  .velvet-pro-ui button,
+  .velvet-control-ui button {
+    animation: none !important;
+    transition: none !important;
+  }
+}

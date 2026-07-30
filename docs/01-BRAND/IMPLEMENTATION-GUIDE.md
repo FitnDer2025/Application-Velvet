@@ -73,6 +73,17 @@ Déclinaisons : Femme, Homme, Couple, autre identité, événement, club, voyage
 - Bibliothèque standard en lignes fines pour les actions courantes.
 - Icônes Velvet spécifiques pour les concepts différenciants.
 - Traits élégants, peu détaillés, cohérents à petite taille.
+- Une même grille de 24 × 24, une épaisseur de trait stable et des extrémités arrondies sont utilisées dans Community, Professionals et Admin & Trust.
+- Les glyphes typographiques et symboles décoratifs ne remplacent pas une icône fonctionnelle dans la navigation.
+
+## Navigation applicative mobile
+
+- Velvet conserve cinq destinations principales au maximum dans la barre inférieure.
+- Les destinations secondaires sont regroupées dans une feuille de navigation accessible depuis l’en-tête.
+- L’en-tête et la barre inférieure utilisent des surfaces translucides lisibles, respectent les zones sûres iOS/Android et ne masquent jamais le contenu.
+- Chaque destination change de vue sans transformer l’interface en longue page vitrine ; le défilement reste propre au contenu de la vue active.
+- Les espaces Community, Professionals et Admin & Trust utilisent le même langage de navigation, avec des destinations adaptées au rôle.
+- Le logo de navigation et l’icône PWA utilisent exclusivement le V ruban bordeaux/rose sur Noir Velvet.
 
 ## Mouvement
 
