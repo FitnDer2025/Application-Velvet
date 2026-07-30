@@ -7,101 +7,206 @@ struct PlacesEventsView: View {
     var body: some View {
         ZStack {
             VelvetBackground()
-            VStack(spacing: 0) {
-                Picker("Annuaire", selection: $selection) {
-                    Text("Événements").tag(0)
-                    Text("Clubs & pros").tag(1)
-                    Text("Lieux").tag(2)
-                }
-                .pickerStyle(.segmented)
-                .padding(VelvetSpacing.lg)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    VelvetPageHeader(
+                        "Agenda réel",
+                        title: "Sorties",
+                        subtitle: "Les événements et établissements effectivement publiés dans Velvet."
+                    )
 
-                if store.directory?.locked == true {
-                    LockedDirectoryView()
-                } else {
-                    switch selection {
-                    case 0: events
-                    case 1: establishments
-                    default: venues
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 9) {
+                            VelvetChip(title: "Événements", selected: selection == 0) { selection = 0 }
+                            VelvetChip(title: "Clubs & pros", selected: selection == 1) { selection = 1 }
+                            VelvetChip(title: "Lieux", selected: selection == 2) { selection = 2 }
+                        }
+                    }
+
+                    if store.directory?.locked == true {
+                        LockedDirectoryView()
+                    } else {
+                        content
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 24)
+                .padding(.bottom, 30)
+            }
+            .refreshable { await store.load() }
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(VelvetColor.velvetBlack.opacity(0.92), for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch selection {
+        case 0:
+            let events = store.directory?.events ?? []
+            if events.isEmpty {
+                VelvetEmptyState(
+                    symbol: "sparkles",
+                    title: "Aucune sortie publiée",
+                    message: "Les prochaines soirées apparaîtront après leur publication par un organisateur validé."
+                )
+            } else {
+                LazyVStack(spacing: 14) {
+                    ForEach(events) { event in
+                        NavigationLink {
+                            EventDetailView(event: event)
+                        } label: {
+                            EventTile(event: event)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        case 1:
+            let establishments = store.directory?.establishments ?? []
+            if establishments.isEmpty {
+                VelvetEmptyState(
+                    symbol: "building.2",
+                    title: "Aucun professionnel publié",
+                    message: "Les clubs et professionnels validés apparaîtront dans cet espace."
+                )
+            } else {
+                LazyVStack(spacing: 14) {
+                    ForEach(establishments) { place in
+                        PlaceTile(
+                            name: place.name,
+                            metadata: [place.kind, place.city].compactMap { $0 }.joined(separator: " · "),
+                            detail: place.description,
+                            verified: place.verifiedAt != nil
+                        )
+                    }
+                }
+            }
+        default:
+            let venues = store.directory?.venueDirectory ?? []
+            if venues.isEmpty {
+                VelvetEmptyState(
+                    symbol: "mappin.and.ellipse",
+                    title: "Aucun lieu référencé",
+                    message: "Modifie ta zone ou reviens lorsque le répertoire aura été enrichi."
+                )
+            } else {
+                LazyVStack(spacing: 14) {
+                    ForEach(venues) { venue in
+                        PlaceTile(
+                            name: venue.name,
+                            metadata: [venue.categoryPrimary ?? venue.kind, venue.city]
+                                .compactMap { $0 }
+                                .joined(separator: " · "),
+                            detail: venue.verificationStatus == "verified"
+                                ? "Fiche professionnelle reliée à Velvet"
+                                : "Référencé par Velvet · informations à confirmer",
+                            verified: venue.verificationStatus == "verified"
+                        )
                     }
                 }
             }
         }
-        .navigationTitle("Sorties")
-        .refreshable { await store.load() }
+    }
+}
+
+private struct EventTile: View {
+    let event: VelvetEvent
+
+    private var date: Date? {
+        ISO8601DateFormatter().date(from: event.startsAt)
     }
 
-    private var events: some View {
-        List(store.directory?.events ?? []) { event in
-            NavigationLink {
-                EventDetailView(event: event)
-            } label: {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(event.title)
-                        .font(VelvetTypography.body(size: 16, weight: .semibold))
-                        .foregroundStyle(VelvetColor.ivory)
-                    Label(event.locationPublic ?? "Lieu communiqué aux inscrit·es", systemImage: "mappin")
-                        .font(VelvetTypography.caption())
-                        .foregroundStyle(VelvetColor.textSecondary)
-                    Text(event.startsAt.velvetDateLabel)
-                        .font(VelvetTypography.caption(size: 11, weight: .semibold))
-                        .foregroundStyle(VelvetColor.champagneGold)
-                }
-            }
-            .listRowBackground(Color.white.opacity(0.035))
-        }
-        .scrollContentBackground(.hidden)
-        .overlay {
-            if store.directory?.events.isEmpty != false {
-                ContentUnavailableView("Aucun événement publié", systemImage: "calendar")
-            }
-        }
-    }
-
-    private var establishments: some View {
-        List(store.directory?.establishments ?? []) { place in
-            VStack(alignment: .leading, spacing: 5) {
-                HStack {
-                    Text(place.name)
-                        .font(VelvetTypography.body(size: 16, weight: .semibold))
-                    if place.verifiedAt != nil {
-                        Image(systemName: "checkmark.seal.fill")
-                            .foregroundStyle(VelvetColor.success)
-                    }
-                }
-                Text([place.kind, place.city].compactMap { $0 }.joined(separator: " · "))
-                    .font(VelvetTypography.caption())
-                    .foregroundStyle(VelvetColor.textSecondary)
-                if let description = place.description {
-                    Text(description)
-                        .font(VelvetTypography.caption(size: 12))
-                        .foregroundStyle(VelvetColor.ivory)
-                        .lineLimit(3)
-                }
-            }
-            .listRowBackground(Color.white.opacity(0.035))
-        }
-        .scrollContentBackground(.hidden)
-    }
-
-    private var venues: some View {
-        List(store.directory?.venueDirectory ?? []) { venue in
-            VStack(alignment: .leading, spacing: 5) {
-                Text(venue.name)
-                    .font(VelvetTypography.body(size: 16, weight: .semibold))
+    var body: some View {
+        HStack(spacing: 16) {
+            VStack(spacing: 1) {
+                Text(date?.formatted(.dateTime.day(.twoDigits)) ?? "—")
+                    .font(VelvetTypography.title(size: 28))
                     .foregroundStyle(VelvetColor.ivory)
-                Text([venue.categoryPrimary ?? venue.kind, venue.city].compactMap { $0 }.joined(separator: " · "))
-                    .font(VelvetTypography.caption())
+                Text(date?.formatted(.dateTime.month(.abbreviated).locale(Locale(identifier: "fr_FR"))).uppercased() ?? "")
+                    .font(VelvetTypography.caption(size: 9, weight: .semibold))
+                    .tracking(1.1)
+                    .foregroundStyle(VelvetColor.champagneGold)
+            }
+            .frame(width: 56, height: 68)
+            .background(VelvetColor.velvetBurgundy.opacity(0.20))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(event.startsAt.velvetDateLabel.uppercased())
+                    .font(VelvetTypography.caption(size: 9, weight: .semibold))
+                    .tracking(1)
+                    .foregroundStyle(VelvetColor.champagneGold)
+                Text(event.title)
+                    .font(VelvetTypography.body(size: 15, weight: .semibold))
+                    .foregroundStyle(VelvetColor.ivory)
+                Text(event.locationPublic ?? "Lieu communiqué aux inscrit·es")
+                    .font(VelvetTypography.body(size: 11))
                     .foregroundStyle(VelvetColor.textSecondary)
-                if let website = venue.website, let url = URL(string: website) {
-                    Link("Voir le site", destination: url)
-                        .font(VelvetTypography.caption(size: 12, weight: .semibold))
-                        .foregroundStyle(VelvetColor.champagneGold)
+                    .lineLimit(1)
+            }
+
+            Spacer()
+            Image(systemName: "arrow.right")
+                .font(.caption)
+                .foregroundStyle(VelvetColor.champagneGold)
+        }
+        .padding(15)
+        .background(VelvetColor.panelRaised.opacity(0.72))
+        .clipShape(RoundedRectangle(cornerRadius: VelvetRadius.large, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: VelvetRadius.large, style: .continuous)
+                .stroke(VelvetColor.borderSubtle, lineWidth: 1)
+        }
+    }
+}
+
+private struct PlaceTile: View {
+    let name: String
+    let metadata: String
+    let detail: String?
+    let verified: Bool
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: "building.2")
+                .font(.system(size: 18, weight: .light))
+                .foregroundStyle(VelvetColor.champagneGold)
+                .frame(width: 46, height: 46)
+                .background(VelvetColor.champagneGold.opacity(0.08))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(spacing: 5) {
+                    Text(name)
+                        .font(VelvetTypography.body(size: 15, weight: .semibold))
+                        .foregroundStyle(VelvetColor.ivory)
+                    if verified {
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.caption)
+                            .foregroundStyle(VelvetColor.champagneGold)
+                    }
+                }
+                Text(metadata)
+                    .font(VelvetTypography.caption(size: 10, weight: .semibold))
+                    .foregroundStyle(VelvetColor.champagneGold)
+                if let detail, !detail.isEmpty {
+                    Text(detail)
+                        .font(VelvetTypography.body(size: 11))
+                        .foregroundStyle(VelvetColor.textSecondary)
+                        .lineLimit(2)
                 }
             }
-            .listRowBackground(Color.white.opacity(0.035))
+            Spacer()
         }
-        .scrollContentBackground(.hidden)
+        .padding(16)
+        .background(VelvetColor.panelRaised.opacity(0.72))
+        .clipShape(RoundedRectangle(cornerRadius: VelvetRadius.large, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: VelvetRadius.large, style: .continuous)
+                .stroke(VelvetColor.borderSubtle, lineWidth: 1)
+        }
     }
 }
 
@@ -115,20 +220,25 @@ private struct EventDetailView: View {
         ZStack {
             VelvetBackground()
             ScrollView {
-                VStack(alignment: .leading, spacing: VelvetSpacing.xl) {
-                    VelvetSectionHeader(
+                VStack(alignment: .leading, spacing: 26) {
+                    VelvetPageHeader(
                         "Événement Velvet",
                         title: event.title,
                         subtitle: event.startsAt.velvetDateLabel
                     )
-                    Label(event.locationPublic ?? "Lieu privé", systemImage: "mappin.and.ellipse")
-                        .foregroundStyle(VelvetColor.textSecondary)
-                    Text(event.description ?? "Les détails seront communiqués par l’organisateur.")
-                        .font(VelvetTypography.body())
-                        .foregroundStyle(VelvetColor.ivory)
-                    if let dressCode = event.dressCode, !dressCode.isEmpty {
-                        Label(dressCode, systemImage: "tshirt")
-                            .foregroundStyle(VelvetColor.champagneGold)
+                    VelvetCard {
+                        VStack(alignment: .leading, spacing: 14) {
+                            Label(event.locationPublic ?? "Lieu privé", systemImage: "mappin.and.ellipse")
+                                .foregroundStyle(VelvetColor.champagneGold)
+                            Text(event.description ?? "Les détails seront communiqués par l’organisateur.")
+                                .font(VelvetTypography.body(size: 15))
+                                .foregroundStyle(VelvetColor.textSecondary)
+                                .lineSpacing(4)
+                            if let dressCode = event.dressCode, !dressCode.isEmpty {
+                                Label(dressCode, systemImage: "tshirt")
+                                    .foregroundStyle(VelvetColor.ivory)
+                            }
+                        }
                     }
                     if event.registrationOpen == true {
                         VelvetPrimaryButton(
@@ -140,7 +250,7 @@ private struct EventDetailView: View {
                         }
                     }
                 }
-                .padding(VelvetSpacing.lg)
+                .padding(20)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -159,7 +269,7 @@ private struct EventDetailView: View {
     }
 }
 
-private extension String {
+extension String {
     var velvetDateLabel: String {
         let formatter = ISO8601DateFormatter()
         guard let date = formatter.date(from: self) else { return self }
