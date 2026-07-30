@@ -6,46 +6,82 @@ struct ConversationsView: View {
     var body: some View {
         ZStack {
             VelvetBackground()
-            if store.directory?.locked == true {
-                LockedDirectoryView()
-            } else if store.directory?.conversations.isEmpty != false {
-                ContentUnavailableView(
-                    "Aucune conversation",
-                    systemImage: "bubble.left.and.bubble.right",
-                    description: Text("Écris depuis un profil ou rejoins un Salon Velvet lié à un événement.")
-                )
-                .foregroundStyle(VelvetColor.textSecondary)
-            } else {
-                List(store.directory?.conversations ?? []) { conversation in
-                    NavigationLink {
-                        ConversationView(
-                            conversationID: conversation.id,
-                            title: conversation.title
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    VelvetPageHeader(
+                        "Conversations privées et salons",
+                        title: "Messages",
+                        subtitle: "Des échanges confidentiels avec les membres et les communautés Velvet."
+                    )
+
+                    if store.directory?.locked == true {
+                        LockedDirectoryView()
+                    } else if store.directory?.conversations.isEmpty != false {
+                        VelvetEmptyState(
+                            symbol: "bubble.left.and.bubble.right",
+                            title: "Aucune conversation",
+                            message: "Écris depuis un profil ou rejoins un Salon Velvet lié à une sortie."
                         )
-                    } label: {
-                        HStack(spacing: VelvetSpacing.md) {
-                            Image(systemName: conversation.kind == "event" ? "person.3.fill" : "bubble.left.fill")
-                                .foregroundStyle(VelvetColor.champagneGold)
-                                .frame(width: 40, height: 40)
-                                .background(VelvetColor.champagneGold.opacity(0.10))
-                                .clipShape(Circle())
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(conversation.title)
-                                    .font(VelvetTypography.body(size: 15, weight: .semibold))
-                                    .foregroundStyle(VelvetColor.ivory)
-                                Text(conversation.kind == "event" ? "Salon Velvet" : "Échange privé")
-                                    .font(VelvetTypography.caption())
-                                    .foregroundStyle(VelvetColor.textSecondary)
+                    } else {
+                        LazyVStack(spacing: 12) {
+                            ForEach(store.directory?.conversations ?? []) { conversation in
+                                NavigationLink {
+                                    ConversationView(
+                                        conversationID: conversation.id,
+                                        title: conversation.title
+                                    )
+                                } label: {
+                                    ConversationTile(conversation: conversation)
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
                     }
-                    .listRowBackground(Color.white.opacity(0.035))
                 }
-                .scrollContentBackground(.hidden)
+                .padding(.horizontal, 20)
+                .padding(.top, 24)
+                .padding(.bottom, 28)
             }
+            .refreshable { await store.load() }
         }
-        .navigationTitle("Messages")
-        .refreshable { await store.load() }
+        .toolbar(.hidden, for: .navigationBar)
+    }
+}
+
+private struct ConversationTile: View {
+    let conversation: Conversation
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: conversation.kind == "event" ? "person.3.fill" : "bubble.left.fill")
+                .font(.system(size: 16))
+                .foregroundStyle(VelvetColor.champagneGold)
+                .frame(width: 48, height: 48)
+                .background(VelvetColor.velvetBurgundy.opacity(0.20))
+                .clipShape(Circle())
+                .overlay(Circle().stroke(VelvetColor.champagneGold.opacity(0.18), lineWidth: 1))
+
+            VStack(alignment: .leading, spacing: 5) {
+                Text(conversation.title)
+                    .font(VelvetTypography.body(size: 15, weight: .semibold))
+                    .foregroundStyle(VelvetColor.ivory)
+                Text(conversation.kind == "event" ? "SALON VELVET" : "ÉCHANGE PRIVÉ")
+                    .font(VelvetTypography.caption(size: 9, weight: .semibold))
+                    .tracking(1.1)
+                    .foregroundStyle(VelvetColor.champagneGold)
+            }
+            Spacer()
+            Image(systemName: "arrow.right")
+                .font(.caption)
+                .foregroundStyle(VelvetColor.textSecondary)
+        }
+        .padding(16)
+        .background(VelvetColor.panelRaised.opacity(0.72))
+        .clipShape(RoundedRectangle(cornerRadius: VelvetRadius.large, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: VelvetRadius.large, style: .continuous)
+                .stroke(VelvetColor.borderSubtle, lineWidth: 1)
+        }
     }
 }
 
@@ -104,6 +140,8 @@ struct ConversationView: View {
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(VelvetColor.velvetBlack.opacity(0.92), for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .task { await store.refreshMessages(conversationID: conversationID) }
         .refreshable { await store.refreshMessages(conversationID: conversationID) }
     }
