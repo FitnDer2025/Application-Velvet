@@ -13,14 +13,15 @@ Ce tableau permet de vérifier rapidement les domaines déjà arbitrés avant to
 | Voyages Velvet | ADR-041 | ✅ Accepté | `docs/adr/ADR-PRO-038-041-professional-ecosystem-and-trips.md` |
 | ADR-042 | Sujet déjà couvert | 🔒 Verrouillé | Modèle freemium, essai, promotions et parrainage déjà décidés |
 | Monétisation opérationnelle | ADR-MON-057 | ✅ Accepté | `docs/03-ADR/ADR-MON-057-MEMBER-PRO-MONETIZATION.md` |
+| Fondation iOS native | ADR-TECH-058 | ✅ Accepté | `docs/03-ADR/ADR-TECH-058-IOS-NATIVE-FOUNDATION.md` |
 | Gamification | ADR-043 à ADR-044 | ✅ Accepté | `docs/adr/ADR-GAM-043-044-positive-gamification.md` |
 | Gouvernance de livraison | ADR-GOV-003 | ✅ Accepté | `docs/adr/ADR-GOV-003-code-delivery-autonomy.md` |
 
 ## Domaine actif
 
-**Gamification — approfondissement restant après ADR-044.**
+**Fondation iOS native — première tranche SwiftUI.**
 
-La prochaine décision doit compléter ce domaine sans rouvrir la philosophie de gamification positive ni le principe des distinctions évolutives.
+Le chantier actif construit le client iOS sur le backend Web commun sans rouvrir les règles métier déjà validées. Android reste différé.
 
 ## Discipline
 
