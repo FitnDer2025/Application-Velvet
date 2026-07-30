@@ -67,7 +67,10 @@
     invalid_partner_email: 'L’adresse de ta moitié n’est pas valide.',
     partner_email_must_be_different: 'L’invitation doit être envoyée à une autre adresse.',
     couple_partner_already_linked: 'Ta moitié est déjà rattachée à ce profil.',
-    invalid_photo_file: 'Choisis une photo JPG, PNG ou WebP de moins de 4 Mo.'
+    invalid_photo_file: 'Choisis une photo JPG, PNG ou WebP de moins de 4 Mo.',
+    ai_source_too_short: 'Ajoute au moins trois mots-clés précis avant de solliciter Velvet IA.',
+    profile_ai_unavailable: 'Velvet IA est momentanément indisponible.',
+    profile_ai_generation_failed: 'Velvet IA n’a pas pu composer ce texte. Enrichis légèrement ton brouillon puis réessaie.'
   };
 
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
@@ -86,6 +89,82 @@
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(payload.error || 'request_failed');
     return payload;
+  }
+
+  function aiWriterField(name, label, value = '', {
+    maxLength = 4000,
+    minLength = 0,
+    required = false
+  } = {}) {
+    return `<div class="ov-field ai-writer-field">
+      <label>${escapeHtml(label)}
+        <textarea name="${escapeHtml(name)}" data-ai-writer-source="${escapeHtml(name)}" maxlength="${maxLength}"${minLength ? ` minlength="${minLength}"` : ''}${required ? ' required' : ''}>${escapeHtml(value)}</textarea>
+      </label>
+      <div class="ai-writer-tools">
+        <button type="button" class="ai-writer-button" data-ai-writer="${escapeHtml(name)}" disabled>✦ Velvet IA</button>
+        <small data-ai-writer-status>Ajoute au moins 3 mots-clés précis.</small>
+      </div>
+    </div>`;
+  }
+
+  function sufficientAiSource(value) {
+    const words = String(value || '').toLocaleLowerCase('fr').match(/[\p{L}\p{N}][\p{L}\p{N}'’-]{1,}/gu) || [];
+    return String(value || '').trim().length >= 18 && new Set(words).size >= 3;
+  }
+
+  function bindAiWriters(scope) {
+    scope.querySelectorAll('[data-ai-writer]').forEach((button) => {
+      const field = button.closest('.ai-writer-field');
+      const textarea = field?.querySelector('[data-ai-writer-source]');
+      const status = field?.querySelector('[data-ai-writer-status]');
+      const form = button.closest('form');
+      if (!textarea || !status || !form) return;
+      const refresh = () => {
+        const ready = sufficientAiSource(textarea.value);
+        button.disabled = !ready || button.dataset.loading === 'true';
+        if (button.dataset.loading !== 'true') {
+          status.textContent = ready
+            ? 'Velvet peut maintenant sublimer ce texte.'
+            : 'Ajoute au moins 3 mots-clés précis.';
+        }
+      };
+      textarea.addEventListener('input', refresh);
+      button.addEventListener('click', async () => {
+        if (!sufficientAiSource(textarea.value)) return;
+        const values = new FormData(form);
+        button.dataset.loading = 'true';
+        button.disabled = true;
+        button.textContent = '✦ Composition…';
+        status.textContent = 'Velvet compose une proposition fidèle à tes mots…';
+        try {
+          const result = await api('/api/members/profile-copy', {
+            method: 'POST',
+            body: JSON.stringify({
+              purpose: button.dataset.aiWriter.endsWith('_biography') ? 'biography' : button.dataset.aiWriter,
+              source: textarea.value,
+              profileType: values.get('profile_type') || state.draft.profile_type || 'individual',
+              relationshipSince: values.get('relationship_since') || state.draft.relationship_since || '',
+              practices: values.getAll('practices').length ? values.getAll('practices') : (state.draft.practices || []),
+              values: values.getAll('values_list').length ? values.getAll('values_list') : (state.draft.values_list || []),
+              orientation: values.get('p0_orientation') || state.draft.p0_orientation || '',
+              frequency: values.get('p0_frequency') || state.draft.p0_frequency || ''
+            })
+          });
+          textarea.value = result.text;
+          textarea.dispatchEvent(new Event('input', { bubbles: true }));
+          status.textContent = 'Proposition générée — tu gardes la main avant l’enregistrement.';
+          toast('Velvet IA a préparé une proposition. Relis-la et adapte-la librement.');
+        } catch (error) {
+          status.textContent = errors[error.message] || error.message;
+          toast(error.message, true);
+        } finally {
+          button.dataset.loading = 'false';
+          button.textContent = '✦ Velvet IA';
+          refresh();
+        }
+      });
+      refresh();
+    });
   }
 
   function toast(message, isError = false) {
@@ -220,6 +299,7 @@
       });
       input.addEventListener('blur', () => window.setTimeout(() => { results.hidden = true; }, 180));
     });
+    bindAiWriters(scope);
   }
 
   function collectForm(form) {
@@ -329,25 +409,25 @@
         audience: 'À propos du couple', kicker: 'Première impression',
         title: 'Comment présenteriez-vous votre couple en quelques phrases ?',
         guide: 'C’est le texte que les autres liront en premier. Parlez de votre énergie, de votre complicité et de votre façon de rencontrer.',
-        body: (d) => `<label class="ov-field">Présentation principale<textarea name="description" minlength="20" maxlength="4000" required>${escapeHtml(d.description)}</textarea></label>`
+        body: (d) => aiWriterField('description', 'Présentation principale', d.description, { minLength: 20, maxLength: 4000, required: true })
       },
       {
         audience: 'À propos du couple', kicker: 'Votre récit',
         title: 'Racontez-moi votre histoire.',
         guide: 'Ce qui vous unit, les étapes importantes et ce qui fait de vous un couple singulier.',
-        body: (d) => `<label class="ov-field">Votre histoire<textarea name="story" maxlength="8000">${escapeHtml(d.story)}</textarea></label>`
+        body: (d) => aiWriterField('story', 'Votre histoire', d.story, { maxLength: 8000 })
       },
       {
         audience: 'À propos du couple', kicker: 'Votre parcours',
         title: 'Comment avez-vous découvert cet univers ?',
         guide: 'Il n’est pas nécessaire d’en dire trop. Quelques repères sincères suffisent.',
-        body: (d) => `<label class="ov-field">Votre parcours<textarea name="journey" maxlength="4000">${escapeHtml(d.journey)}</textarea></label>`
+        body: (d) => aiWriterField('journey', 'Votre parcours', d.journey, { maxLength: 4000 })
       },
       {
         audience: 'À propos du couple', kicker: 'Vos rencontres',
         title: 'Qu’aimeriez-vous trouver sur Velvet ?',
         guide: 'Parlez des personnes, du rythme et surtout du type de feeling que vous recherchez.',
-        body: (d) => `<label class="ov-field">Ce que nous recherchons<textarea name="search_text" maxlength="4000">${escapeHtml(d.search_text)}</textarea></label>`
+        body: (d) => aiWriterField('search_text', 'Ce que nous recherchons', d.search_text, { maxLength: 4000 })
       },
       {
         audience: 'À propos du couple', kicker: 'Vos pratiques communes',
@@ -462,7 +542,7 @@
       title: 'Si tu devais te présenter librement…',
       guide: 'Raconte ton caractère, ta manière d’aborder les rencontres et ce que les autres devraient comprendre de toi.',
       finish: couple ? 'Enregistrer ma fiche' : 'Continuer',
-      body: (d) => `<label class="ov-field">Ta description personnelle<textarea name="p0_biography" maxlength="4000">${escapeHtml(d.p0_biography)}</textarea></label>`
+      body: (d) => aiWriterField('p0_biography', 'Ta description personnelle', d.p0_biography, { maxLength: 4000 })
     });
     return steps;
   }
@@ -492,19 +572,19 @@
         audience: 'Ton profil individuel', kicker: 'Première impression',
         title: 'Comment te présenter en quelques phrases ?',
         guide: 'Ce texte sera la première chose que les autres membres liront.',
-        body: (d) => `<label class="ov-field">Présentation principale<textarea name="description" minlength="20" maxlength="4000" required>${escapeHtml(d.description)}</textarea></label>`
+        body: (d) => aiWriterField('description', 'Présentation principale', d.description, { minLength: 20, maxLength: 4000, required: true })
       },
       {
         audience: 'Ton profil individuel', kicker: 'Ton histoire',
         title: 'Quel parcours t’a mené jusqu’ici ?',
         guide: 'Raconte ce que tu souhaites partager de ton histoire et de tes découvertes.',
-        body: (d) => `<div class="ov-grid"><label class="ov-field">Ton histoire<textarea name="story" maxlength="8000">${escapeHtml(d.story)}</textarea></label><label class="ov-field">Ton parcours<textarea name="journey" maxlength="4000">${escapeHtml(d.journey)}</textarea></label></div>`
+        body: (d) => `<div class="ov-grid">${aiWriterField('story', 'Ton histoire', d.story, { maxLength: 8000 })}${aiWriterField('journey', 'Ton parcours', d.journey, { maxLength: 4000 })}</div>`
       },
       {
         audience: 'Ton profil individuel', kicker: 'Tes rencontres',
         title: 'Qu’aimerais-tu trouver sur Velvet ?',
         guide: 'Parle des personnes, du rythme et du type de relation que tu recherches.',
-        body: (d) => `<label class="ov-field">Ce que je recherche<textarea name="search_text" maxlength="4000">${escapeHtml(d.search_text)}</textarea></label>`
+        body: (d) => aiWriterField('search_text', 'Ce que je recherche', d.search_text, { maxLength: 4000 })
       },
       {
         audience: 'Ton profil individuel', kicker: 'Tes pratiques',

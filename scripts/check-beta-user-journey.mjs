@@ -10,6 +10,7 @@ const paths = [
   'apps/beta/static/assets/control-live.js',
   'apps/beta/worker/index.js',
   'functions/api/members/profile.js',
+  'functions/api/members/profile-copy.js',
   'functions/api/members/couple-profile.js',
   'functions/api/members/couple-invite.js',
   'functions/api/members/_shared.js',
@@ -60,6 +61,13 @@ const journeys = [
     name: 'Inscription couple',
     valid: has('functions/api/members/couple-profile.js', 'create_my_couple_profile', 'couple_profile_persistence_failed')
       && has('apps/beta/static/assets/members-onboarding-v2.js', '/api/members/couple-profile', 'startCoupleCommon')
+  },
+  {
+    name: 'Plume Velvet IA',
+    valid: has('functions/api/members/profile-copy.js', 'memberSession', 'hasSufficientSource', 'messages', 'Tu n’inventes jamais', 'uniquement du contenu à reformuler')
+      && has('apps/beta/static/assets/members-onboarding-v2.js', '/api/members/profile-copy', 'data-ai-writer', 'sufficientAiSource')
+      && has('apps/beta/static/assets/members-live.js', '/api/members/profile-copy', 'data-ai-writer', 'sufficientAiSource')
+      && worker.includes("'POST /api/members/profile-copy'")
   },
   {
     name: 'Invitation de la moitié',
