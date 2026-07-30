@@ -1,16 +1,19 @@
 import SwiftUI
 
 enum VelvetColor {
-    static let velvetBlack = Color(hex: 0x0D0D0D)
-    static let anthracite = Color(hex: 0x1B1B1D)
-    static let velourGray = Color(hex: 0x2D2D30)
-    static let ivory = Color(hex: 0xF4F4F2)
-    static let velvetBurgundy = Color(hex: 0x641B36)
-    static let champagneGold = Color(hex: 0xC6A96A)
+    // Tokens partagés avec members-live.css.
+    static let velvetBlack = Color(hex: 0x0B080A)
+    static let anthracite = Color(hex: 0x151013)
+    static let panelRaised = Color(hex: 0x1B1418)
+    static let velourGray = Color(hex: 0x2A2025)
+    static let ivory = Color(hex: 0xF6EEE6)
+    static let velvetBurgundy = Color(hex: 0x7E2045)
+    static let burgundyLight = Color(hex: 0xB54570)
+    static let champagneGold = Color(hex: 0xD9B879)
     static let warmBeige = Color(hex: 0xE8DDD3)
     static let softBlush = Color(hex: 0xE4CAD3)
-    static let textSecondary = Color(hex: 0xB8B5B0)
-    static let borderSubtle = Color(hex: 0x3A3637)
+    static let textSecondary = Color(hex: 0xA99DA2)
+    static let borderSubtle = Color.white.opacity(0.085)
     static let success = Color(hex: 0x54A86B)
     static let warning = Color(hex: 0xD6A75D)
     static let danger = Color(hex: 0xC64157)
@@ -27,9 +30,10 @@ enum VelvetSpacing {
 }
 
 enum VelvetRadius {
-    static let small: CGFloat = 8
-    static let medium: CGFloat = 14
-    static let large: CGFloat = 22
+    static let small: CGFloat = 12
+    static let medium: CGFloat = 18
+    static let large: CGFloat = 24
+    static let editorial: CGFloat = 34
     static let pill: CGFloat = 999
 }
 
@@ -49,11 +53,11 @@ enum VelvetTypography {
     }
 
     static func body(size: CGFloat = 16, weight: Font.Weight = .regular) -> Font {
-        .system(size: size, weight: weight, design: .rounded)
+        .system(size: size, weight: weight, design: .default)
     }
 
     static func caption(size: CGFloat = 12, weight: Font.Weight = .medium) -> Font {
-        .system(size: size, weight: weight, design: .rounded)
+        .system(size: size, weight: weight, design: .default)
     }
 }
 
