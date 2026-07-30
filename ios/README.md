@@ -19,6 +19,20 @@ Application native SwiftUI de Velvet, connectée au même backend Cloudflare/Sup
 
 Le backend reste la source de vérité. L’app ne contourne ni l’admission, ni la visibilité, ni la modération, ni les consentements.
 
+## Parité visuelle Web / iOS
+
+La couche membre native reprend les choix éditoriaux de
+`apps/beta/static/assets/velvet-editorial-ui.css` :
+
+- fond `#0B080A`, panneaux `#151013` / `#1B1418`, bordeaux `#7E2045`,
+  or `#D9B879` et ivoire `#F6EEE6` ;
+- en-tête mobile compact et navigation
+  Accueil / Recherche / Maps / Messages / Profil ;
+- cartes verre, filets fins, titres sérif et états vides éditoriaux ;
+- cartes profils au ratio 4:5, héros de profil et tuiles sorties/lieux ;
+- carte MapKit alimentée par `/api/members/map`, sans exposer la position
+  exacte d’un membre.
+
 ## Ouvrir sur Mac
 
 1. Cloner le dépôt et sélectionner `feat/velvet-ios-foundation`.
