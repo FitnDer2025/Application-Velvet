@@ -14,7 +14,10 @@ Application native SwiftUI de Velvet, connectée au même backend Cloudflare/Sup
 - clubs, professionnels, lieux, événements et inscription ;
 - conversations privées et Salons Velvet liés aux événements ;
 - favoris côté contrat, blocage, signalement et suppression du compte ;
-- préparation des notifications APNs, de la localisation approximative et de StoreKit 2 ;
+- notifications APNs natives (autorisation, jeton, routage et préférences),
+  localisation approximative et préparation StoreKit 2 ;
+- verrou local Face ID sans conservation du mot de passe ;
+- parité Web documentée dans `WEB-IOS-PARITY.md` ;
 - manifeste de confidentialité et validation structurelle.
 
 Le backend reste la source de vérité. L’app ne contourne ni l’admission, ni la visibilité, ni la modération, ni les consentements.
@@ -58,7 +61,11 @@ L’URL de la BETA est définie dans `Config/Debug.xcconfig` et `Config/Release.
 
 ## Activation Apple nécessaire
 
-- Notifications : ajouter la capability **Push Notifications**, puis **Background Modes > Remote notifications** si le traitement silencieux est requis. Le backend doit recevoir et gérer les jetons APNs ; le contrat Web Push existant ne convient pas à APNs.
+- Notifications : la capability et l’entitlement sont préparés. Sélectionner la
+  Team Apple dans Xcode, activer **Push Notifications** sur l’App ID, appliquer la
+  migration `member_push_devices`, puis configurer la clé APNs `.p8` uniquement
+  côté serveur. Ajouter **Background Modes > Remote notifications** seulement si
+  des notifications silencieuses sont réellement nécessaires.
 - StoreKit : créer les produits dans App Store Connect et ajouter une correspondance serveur `plan Velvet ↔ product ID Apple`. Aucun identifiant de produit n’est codé en dur.
 - Confidentialité : aligner les réponses App Store Connect avec `Resources/PrivacyInfo.xcprivacy` et avec le comportement réel du backend.
 - Récupération : tester le schéma `velvet://recovery` sur un appareil.

@@ -19,7 +19,8 @@ flowchart TD
 - `SessionService` porte les contrats réseau et reste sans règle métier inventée.
 - `VelvetStore` charge l’annuaire, les notifications et les conversations.
 - `ImageCompressor` transforme localement les sélections Photos en JPEG inférieur à la limite serveur.
-- `LocationService`, `NotificationService` et `StoreKitService` isolent les API Apple.
+- `BiometricLockService`, `LocationService`, `NotificationService` et
+  `StoreKitService` isolent les API Apple.
 
 ## Vie privée
 
@@ -34,5 +35,7 @@ flowchart TD
 
 - la recherche actuelle filtre localement les 100 profils renvoyés par l’annuaire ; une recherche paginée serveur sera nécessaire à plus grande échelle ;
 - la messagerie recharge par ouverture ou geste de rafraîchissement ; le temps réel pourra utiliser un contrat WebSocket/Supabase Realtime ultérieur ;
-- APNs et StoreKit 2 sont préparés mais ne doivent pas être activés sans contrats serveur et produits App Store Connect validés ;
+- APNs possède son contrat de jeton et son routage natif ; la diffusion reste
+  désactivée tant que les secrets `.p8` ne sont pas configurés côté serveur.
+- StoreKit 2 reste désactivé sans produits App Store Connect validés ;
 - l’app iOS ne publie pas d’albums privés explicites dans cette tranche.

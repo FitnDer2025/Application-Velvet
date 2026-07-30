@@ -114,6 +114,14 @@ struct ProfileUpsertRequest: Encodable, Sendable {
         let birthYear: Int
         let professionPrivate: Bool
         let childrenStatus: String
+
+        private enum CodingKeys: String, CodingKey {
+            case firstName = "first_name"
+            case genderIdentity = "gender_identity"
+            case birthYear = "birth_year"
+            case professionPrivate = "profession_private"
+            case childrenStatus = "children_status"
+        }
     }
 
     let profileType: MemberProfile.ProfileType
@@ -126,4 +134,17 @@ struct ProfileUpsertRequest: Encodable, Sendable {
     let valuesList: [String]
     let favoritePlaces: [String]
     let person: Person
+
+    private enum CodingKeys: String, CodingKey {
+        case profileType = "profile_type"
+        case displayName = "display_name"
+        case city
+        case description
+        case story
+        case searchText = "search_text"
+        case practices
+        case valuesList = "values_list"
+        case favoritePlaces = "favorite_places"
+        case person
+    }
 }

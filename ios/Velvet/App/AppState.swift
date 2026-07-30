@@ -107,6 +107,7 @@ final class AppState: ObservableObject {
 
     func logout() async {
         await perform(showErrors: false) {
+            await NotificationService.detachCurrentDevice()
             await session.logout()
             phase = .signedOut
         }
@@ -121,6 +122,7 @@ final class AppState: ObservableObject {
         let profile = try await session.profile()
         if let memberProfile = profile.profile {
             phase = memberProfile.isAdmitted ? .home(memberProfile) : .profileSetup(memberProfile)
+            await NotificationService.registerIfAuthorized()
         } else {
             phase = .onboarding(account)
         }

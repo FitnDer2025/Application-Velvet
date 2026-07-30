@@ -150,6 +150,342 @@ final class SessionService: Sendable {
         )
     }
 
+    func memberSettings() async throws -> MemberSettingsResponse {
+        try await api.get("/api/members/settings", as: MemberSettingsResponse.self)
+    }
+
+    func saveMemberSettings(_ request: MemberSettingsRequest) async throws -> MemberSettingsResponse {
+        let events: JSONDocument = [
+            "messages": .bool(request.eventTypes.messages),
+            "likes": .bool(request.eventTypes.likes),
+            "album_access": .bool(request.eventTypes.albumAccess),
+            "profile_views": .bool(request.eventTypes.profileViews),
+            "events": .bool(request.eventTypes.events),
+            "recommendations": .bool(request.eventTypes.recommendations),
+            "security": .bool(request.eventTypes.security)
+        ]
+        let body: JSONDocument = [
+            "discoverable_by": .array(request.discoverableBy.map(JSONValue.string)),
+            "contactable_by": .array(request.contactableBy.map(JSONValue.string)),
+            "notify_from": .array(request.notifyFrom.map(JSONValue.string)),
+            "event_types": .object(events),
+            "in_app_enabled": .bool(request.inAppEnabled),
+            "browser_enabled": .bool(request.browserEnabled),
+            "email_enabled": .bool(request.emailEnabled),
+            "quiet_hours_start": request.quietHoursStart.map(JSONValue.string) ?? .null,
+            "quiet_hours_end": request.quietHoursEnd.map(JSONValue.string) ?? .null
+        ]
+        try await api.post(
+            "/api/members/settings",
+            body: body,
+            as: MemberSettingsResponse.self
+        )
+    }
+
+    func registerPushDevice(
+        token: String,
+        deviceID: String,
+        environment: String,
+        bundleID: String,
+        appVersion: String
+    ) async throws {
+        struct Request: Encodable, Sendable {
+            let token: String
+            let deviceId: String
+            let platform = "ios"
+            let environment: String
+            let bundleId: String
+            let appVersion: String
+            let locale = Locale.current.identifier
+        }
+        let _: AcknowledgementResponse = try await api.post(
+            "/api/members/push-devices",
+            body: Request(
+                token: token,
+                deviceId: deviceID,
+                environment: environment,
+                bundleId: bundleID,
+                appVersion: appVersion
+            ),
+            as: AcknowledgementResponse.self
+        )
+    }
+
+    func unregisterPushDevice(token: String) async throws {
+        let _: AcknowledgementResponse = try await api.delete(
+            "/api/members/push-devices",
+            query: [URLQueryItem(name: "token", value: token)],
+            as: AcknowledgementResponse.self
+        )
+    }
+
+    func accountLifecycle() async throws -> JSONDocument {
+        try await api.get("/api/members/account-actions", as: JSONDocument.self)
+    }
+
+    func requestAccountLifecycle(_ action: String) async throws -> JSONDocument {
+        struct Request: Encodable, Sendable { let action: String }
+        return try await api.post(
+            "/api/members/account-actions",
+            body: Request(action: action),
+            as: JSONDocument.self
+        )
+    }
+
+    func albums() async throws -> JSONDocument {
+        try await api.get("/api/members/albums", as: JSONDocument.self)
+    }
+
+    func createAlbum(name: String, confidentiality: String) async throws -> JSONDocument {
+        struct Request: Encodable, Sendable {
+            let name: String
+            let confidentiality: String
+        }
+        return try await api.post(
+            "/api/members/albums",
+            body: Request(name: name, confidentiality: confidentiality),
+            as: JSONDocument.self
+        )
+    }
+
+    func uploadAlbumMedia(data: Data, albumID: UUID) async throws -> JSONDocument {
+        try await api.upload(
+            "/api/members/album-media",
+            parts: [
+                .field("albumId", value: albumID.uuidString),
+                .file(
+                    "photo",
+                    fileName: "velvet-album-\(UUID().uuidString).jpg",
+                    mimeType: "image/jpeg",
+                    data: data
+                )
+            ],
+            as: JSONDocument.self
+        )
+    }
+
+    func deleteAlbumMedia(id: UUID) async throws -> JSONDocument {
+        try await api.delete(
+            "/api/members/album-media",
+            query: [URLQueryItem(name: "id", value: id.uuidString)],
+            as: JSONDocument.self
+        )
+    }
+
+    func grantAlbumAccess(
+        albumIDs: [UUID],
+        profileID: UUID,
+        duration: String
+    ) async throws -> JSONDocument {
+        struct Request: Encodable, Sendable {
+            let albumIds: [UUID]
+            let profileId: UUID
+            let duration: String
+        }
+        return try await api.post(
+            "/api/members/album-access",
+            body: Request(
+                albumIds: albumIDs,
+                profileId: profileID,
+                duration: duration
+            ),
+            as: JSONDocument.self
+        )
+    }
+
+    func revokeAlbumAccess(albumID: UUID, profileID: UUID) async throws -> JSONDocument {
+        try await api.delete(
+            "/api/members/album-access",
+            query: [
+                URLQueryItem(name: "albumId", value: albumID.uuidString),
+                URLQueryItem(name: "profileId", value: profileID.uuidString)
+            ],
+            as: JSONDocument.self
+        )
+    }
+
+    func engagement(profileID: UUID? = nil) async throws -> JSONDocument {
+        try await api.get(
+            "/api/members/engagement",
+            query: profileID.map {
+                [URLQueryItem(name: "profileId", value: $0.uuidString)]
+            } ?? [],
+            as: JSONDocument.self
+        )
+    }
+
+    func setEngagement(
+        profileID: UUID,
+        action: String,
+        reaction: Int? = nil
+    ) async throws -> JSONDocument {
+        struct Request: Encodable, Sendable {
+            let profileId: UUID
+            let action: String
+            let reaction: Int?
+        }
+        return try await api.post(
+            "/api/members/engagement",
+            body: Request(profileId: profileID, action: action, reaction: reaction),
+            as: JSONDocument.self
+        )
+    }
+
+    func photoReactions() async throws -> JSONDocument {
+        try await api.get("/api/members/photo-reactions", as: JSONDocument.self)
+    }
+
+    func reactToPhoto(mediaID: UUID, reaction: String?) async throws -> JSONDocument {
+        struct Request: Encodable, Sendable {
+            let mediaId: UUID
+            let reaction: String?
+        }
+        return try await api.post(
+            "/api/members/photo-reactions",
+            body: Request(mediaId: mediaID, reaction: reaction),
+            as: JSONDocument.self
+        )
+    }
+
+    func plans() async throws -> PlanStateResponse {
+        try await api.get("/api/members/plans", as: PlanStateResponse.self)
+    }
+
+    func addVenueVisit(venueID: UUID, visitDate: String) async throws -> PlanStateResponse {
+        struct Request: Encodable, Sendable {
+            let action = "venue_visit"
+            let venueId: UUID
+            let visitDate: String
+        }
+        return try await api.post(
+            "/api/members/plans",
+            body: Request(venueId: venueID, visitDate: visitDate),
+            as: PlanStateResponse.self
+        )
+    }
+
+    func addTravelPlan(
+        title: String,
+        location: String,
+        startsOn: String,
+        endsOn: String,
+        notes: String?
+    ) async throws -> PlanStateResponse {
+        struct Request: Encodable, Sendable {
+            let action = "travel_plan"
+            let title: String
+            let locationLabel: String
+            let startsOn: String
+            let endsOn: String
+            let destinationType = "general"
+            let preciseLocationConsent = false
+            let notes: String?
+        }
+        return try await api.post(
+            "/api/members/plans",
+            body: Request(
+                title: title,
+                locationLabel: location,
+                startsOn: startsOn,
+                endsOn: endsOn,
+                notes: notes
+            ),
+            as: PlanStateResponse.self
+        )
+    }
+
+    func deletePlan(id: UUID, type: String) async throws -> PlanStateResponse {
+        try await api.delete(
+            "/api/members/plans",
+            query: [
+                URLQueryItem(name: "id", value: id.uuidString),
+                URLQueryItem(name: "type", value: type)
+            ],
+            as: PlanStateResponse.self
+        )
+    }
+
+    func organizerRequest() async throws -> OrganizerRequestResponse {
+        try await api.get(
+            "/api/members/organizer-request",
+            as: OrganizerRequestResponse.self
+        )
+    }
+
+    func requestOrganizerAccess(message: String) async throws -> OrganizerRequestResponse {
+        struct Request: Encodable, Sendable { let message: String }
+        return try await api.post(
+            "/api/members/organizer-request",
+            body: Request(message: message),
+            as: OrganizerRequestResponse.self
+        )
+    }
+
+    func generateProfileCopy(
+        purpose: String,
+        source: String,
+        profileType: MemberProfile.ProfileType,
+        relationshipSince: Int?,
+        practices: [String],
+        values: [String]
+    ) async throws -> ProfileCopyResponse {
+        struct Request: Encodable, Sendable {
+            let purpose: String
+            let source: String
+            let profileType: MemberProfile.ProfileType
+            let relationshipSince: Int?
+            let practices: [String]
+            let values: [String]
+            let orientation: String?
+            let frequency: String?
+        }
+        return try await api.post(
+            "/api/members/profile-copy",
+            body: Request(
+                purpose: purpose,
+                source: source,
+                profileType: profileType,
+                relationshipSince: relationshipSince,
+                practices: practices,
+                values: values,
+                orientation: nil,
+                frequency: nil
+            ),
+            as: ProfileCopyResponse.self
+        )
+    }
+
+    func venueRelationships() async throws -> JSONDocument {
+        try await api.get(
+            "/api/members/venue-relationships",
+            as: JSONDocument.self
+        )
+    }
+
+    func setVenueRelationship(
+        venueID: UUID,
+        relation: String,
+        enabled: Bool,
+        visitDate: String? = nil
+    ) async throws -> JSONDocument {
+        struct Request: Encodable, Sendable {
+            let venueId: UUID
+            let relation: String
+            let enabled: Bool
+            let visitDate: String?
+        }
+        return try await api.post(
+            "/api/members/venue-relationships",
+            body: Request(
+                venueId: venueID,
+                relation: relation,
+                enabled: enabled,
+                visitDate: visitDate
+            ),
+            as: JSONDocument.self
+        )
+    }
+
     func messages(conversationID: UUID) async throws -> MessagesResponse {
         try await api.get(
             "/api/members/messages",
@@ -318,6 +654,10 @@ final class SessionService: Sendable {
             .filter { $0.domain.contains(host) }
             .forEach(HTTPCookieStorage.shared.deleteCookie)
     }
+}
+
+private struct AcknowledgementResponse: Decodable, Sendable {
+    let ok: Bool?
 }
 
 private extension APIClient {

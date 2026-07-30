@@ -6,11 +6,17 @@ struct MemberDetailView: View {
 
     @State private var conversationID: UUID?
     @State private var showsSafety = false
+    @State private var showsAlbumAccess = false
     @State private var isWorking = false
+    @State private var reaction: String?
+
+    private var primaryMedia: MediaAsset? {
+        profile.mediaAssets?.first(where: { $0.isPrimary == true && $0.previewUrl != nil })
+            ?? profile.mediaAssets?.first(where: { $0.previewUrl != nil })
+    }
 
     private var photo: URL? {
-        profile.mediaAssets?.first(where: { $0.isPrimary == true && $0.previewUrl != nil })?.previewUrl
-            ?? profile.mediaAssets?.first(where: { $0.previewUrl != nil })?.previewUrl
+        primaryMedia?.previewUrl
     }
 
     var body: some View {
@@ -19,6 +25,7 @@ struct MemberDetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 26) {
                     hero
+                    reactionBar
 
                     VStack(alignment: .leading, spacing: 9) {
                         Text(profile.profileType.label.uppercased())
@@ -43,6 +50,20 @@ struct MemberDetailView: View {
                     }
 
                     Button {
+                        showsAlbumAccess = true
+                    } label: {
+                        Label("Partager un album privé", systemImage: "lock.open")
+                            .font(VelvetTypography.body(size: 13, weight: .semibold))
+                            .frame(maxWidth: .infinity, minHeight: 46)
+                    }
+                    .foregroundStyle(VelvetColor.champagneGold)
+                    .buttonStyle(.plain)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: VelvetRadius.medium)
+                            .stroke(VelvetColor.champagneGold.opacity(0.28), lineWidth: 1)
+                    }
+
+                    Button {
                         showsSafety = true
                     } label: {
                         Label("Sécurité, blocage et signalement", systemImage: "shield")
@@ -62,6 +83,10 @@ struct MemberDetailView: View {
             SafetyActionsView(profile: profile)
                 .environmentObject(store)
         }
+        .sheet(isPresented: $showsAlbumAccess) {
+            AlbumAccessSheet(targetProfile: profile)
+                .environmentObject(store)
+        }
         .navigationDestination(
             isPresented: Binding(
                 get: { conversationID != nil },
@@ -72,6 +97,45 @@ struct MemberDetailView: View {
                 ConversationView(conversationID: conversationID, title: profile.displayName)
             }
         }
+        .task {
+            _ = try? await store.service.setEngagement(
+                profileID: profile.id,
+                action: "view"
+            )
+        }
+    }
+
+    private var reactionBar: some View {
+        HStack(spacing: 10) {
+            Text("RÉACTION")
+                .font(VelvetTypography.caption(size: 9, weight: .semibold))
+                .tracking(1.3)
+                .foregroundStyle(VelvetColor.textSecondary)
+            Spacer()
+            reactionButton("like", icon: "hand.thumbsup.fill")
+            reactionButton("love", icon: "heart.fill")
+            reactionButton("adore", icon: "sparkles")
+        }
+        .padding(.horizontal, 4)
+    }
+
+    private func reactionButton(_ value: String, icon: String) -> some View {
+        Button {
+            Task { await setReaction(reaction == value ? nil : value) }
+        } label: {
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(reaction == value ? VelvetColor.velvetBlack : VelvetColor.champagneGold)
+                .frame(width: 38, height: 38)
+                .background(
+                    reaction == value
+                        ? VelvetColor.champagneGold
+                        : VelvetColor.champagneGold.opacity(0.08)
+                )
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .disabled(primaryMedia == nil)
     }
 
     private var hero: some View {
@@ -129,6 +193,135 @@ struct MemberDetailView: View {
         defer { isWorking = false }
         do {
             conversationID = try await store.service.startConversation(profileID: profile.id)
+        } catch {
+            store.errorMessage = ErrorMessage.text(for: error)
+        }
+    }
+
+    @MainActor
+    private func setReaction(_ value: String?) async {
+        guard let mediaID = primaryMedia?.id else { return }
+        do {
+            _ = try await store.service.reactToPhoto(
+                mediaID: mediaID,
+                reaction: value
+            )
+            reaction = value
+        } catch {
+            store.errorMessage = ErrorMessage.text(for: error)
+        }
+    }
+}
+
+private struct AlbumAccessSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var store: VelvetStore
+    let targetProfile: MemberProfile
+
+    @State private var albums: [ProfileAlbum] = []
+    @State private var selected = Set<UUID>()
+    @State private var duration = "4"
+    @State private var isWorking = false
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                VelvetBackground()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        VelvetPageHeader(
+                            "Accès privé",
+                            title: "Partager avec \(targetProfile.displayName)",
+                            subtitle: "Choisis précisément les albums et la durée. Tu peux retirer l’accès à tout moment."
+                        )
+
+                        Picker("Durée", selection: $duration) {
+                            Text("1 h").tag("1")
+                            Text("4 h").tag("4")
+                            Text("12 h").tag("12")
+                            Text("24 h").tag("24")
+                            Text("Permanent").tag("permanent")
+                        }
+                        .pickerStyle(.segmented)
+
+                        ForEach(albums) { album in
+                            Button {
+                                if selected.contains(album.id) {
+                                    selected.remove(album.id)
+                                } else {
+                                    selected.insert(album.id)
+                                }
+                            } label: {
+                                HStack(spacing: 13) {
+                                    Image(systemName: "lock.square")
+                                        .foregroundStyle(VelvetColor.champagneGold)
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(album.name)
+                                            .font(VelvetTypography.body(size: 14, weight: .semibold))
+                                            .foregroundStyle(VelvetColor.ivory)
+                                        Text("\((album.mediaAssets ?? []).count) média(s)")
+                                            .font(VelvetTypography.caption(size: 10))
+                                            .foregroundStyle(VelvetColor.textSecondary)
+                                    }
+                                    Spacer()
+                                    Image(
+                                        systemName: selected.contains(album.id)
+                                            ? "checkmark.circle.fill"
+                                            : "circle"
+                                    )
+                                    .foregroundStyle(VelvetColor.champagneGold)
+                                }
+                                .padding(15)
+                                .background(VelvetColor.panelRaised.opacity(0.78))
+                                .clipShape(RoundedRectangle(cornerRadius: VelvetRadius.medium))
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        if albums.isEmpty {
+                            VelvetEmptyState(
+                                symbol: "lock.rectangle.stack",
+                                title: "Aucun album privé",
+                                message: "Crée un album privé depuis ta fiche avant de le partager."
+                            )
+                        }
+
+                        VelvetPrimaryButton(
+                            "Autoriser l’accès",
+                            isLoading: isWorking,
+                            isDisabled: selected.isEmpty
+                        ) {
+                            Task { await grant() }
+                        }
+                    }
+                    .padding(20)
+                }
+            }
+            .navigationTitle("Albums privés")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Fermer", action: dismiss.callAsFunction)
+                }
+            }
+            .task {
+                albums = ((try? await store.service.profile())?.profile?.albums ?? [])
+                    .filter { $0.confidentiality != "public" }
+            }
+        }
+    }
+
+    @MainActor
+    private func grant() async {
+        isWorking = true
+        defer { isWorking = false }
+        do {
+            _ = try await store.service.grantAlbumAccess(
+                albumIDs: Array(selected),
+                profileID: targetProfile.id,
+                duration: duration
+            )
+            dismiss()
         } catch {
             store.errorMessage = ErrorMessage.text(for: error)
         }

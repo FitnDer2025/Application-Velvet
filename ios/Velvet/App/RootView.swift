@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RootView: View {
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var biometrics: BiometricLockService
 
     var body: some View {
         ZStack {
@@ -30,6 +31,13 @@ struct RootView: View {
                 PasswordResetView(tokens: tokens)
                     .transition(.move(edge: .trailing).combined(with: .opacity))
             }
+
+            if requiresPrivateUnlock && biometrics.isEnabled && !biometrics.isUnlocked {
+                BiometricLockView()
+                    .environmentObject(biometrics)
+                    .transition(.opacity)
+                    .zIndex(20)
+            }
         }
         .animation(.easeInOut(duration: VelvetMotion.normal), value: appState.phase.id)
         .alert(
@@ -46,6 +54,15 @@ struct RootView: View {
             Text(appState.alertMessage ?? "")
         }
         .onOpenURL(perform: appState.handle)
+    }
+
+    private var requiresPrivateUnlock: Bool {
+        switch appState.phase {
+        case .home, .profileSetup, .onboarding, .consentRequired:
+            true
+        case .launching, .signedOut, .passwordReset:
+            false
+        }
     }
 }
 

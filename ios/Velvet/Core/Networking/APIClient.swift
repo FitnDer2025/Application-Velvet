@@ -43,7 +43,9 @@ final class APIClient: @unchecked Sendable {
         }
 
         let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
+        // Les handlers Cloudflare existants lisent les corps métier en camelCase.
+        // Les rares contrats snake_case (settings) construisent leurs clés explicitement.
+        encoder.keyEncodingStrategy = .useDefaultKeys
         self.encoder = encoder
 
         let decoder = JSONDecoder()

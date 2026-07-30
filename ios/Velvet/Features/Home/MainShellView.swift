@@ -47,7 +47,7 @@ struct MainShellView: View {
         var placesSelection: Int? {
             switch self {
             case .directory: 1
-            case .agenda: 0
+            case .agenda: 3
             case .notifications: nil
             }
         }
@@ -80,7 +80,12 @@ struct MainShellView: View {
             }
         }
         .environmentObject(store)
-        .task { await store.load() }
+        .task {
+            await store.load()
+            if let route = NotificationService.consumePendingRoute() {
+                openNotificationRoute(route)
+            }
+        }
         .sheet(isPresented: $showsNotifications) {
             NotificationsView()
                 .environmentObject(store)
@@ -128,6 +133,13 @@ struct MainShellView: View {
             Button("Fermer", role: .cancel) { store.errorMessage = nil }
         } message: {
             Text(store.errorMessage ?? "")
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: .velvetNotificationRoute)
+        ) { notification in
+            guard let route = notification.object as? String else { return }
+            _ = NotificationService.consumePendingRoute()
+            openNotificationRoute(route)
         }
     }
 
@@ -196,6 +208,22 @@ struct MainShellView: View {
             } else {
                 showsNotifications = true
             }
+        }
+    }
+
+    private func openNotificationRoute(_ route: String) {
+        switch route {
+        case "messages", "message", "conversations":
+            selectedTab = .messages
+        case "events", "event":
+            placesSelection = 0
+            showsPlacesEvents = true
+        case "maps", "location":
+            selectedTab = .maps
+        case "profile", "likes", "recommendations":
+            selectedTab = .profile
+        default:
+            showsNotifications = true
         }
     }
 }

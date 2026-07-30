@@ -16,6 +16,10 @@
 - [ ] Push Notifications et clé APNs.
 - [ ] Contrat backend pour enregistrer, renouveler et révoquer les jetons APNs.
 - [ ] Produits StoreKit créés et reliés au catalogue backend.
+- [ ] Capability Push Notifications active sur l’App ID et la target.
+- [ ] Migration `member_push_devices` appliquée.
+- [ ] Clé APNs `.p8`, Key ID et Team ID configurés côté serveur uniquement.
+- [ ] Face ID testé sur iPhone physique, avec code appareil en secours.
 - [ ] Restauration d’achats et validation serveur des transactions.
 - [ ] Texte de permission localisation relu.
 
@@ -40,4 +44,5 @@
 - [ ] Recherche, profil, message, blocage et signalement.
 - [ ] Inscription à un événement.
 - [ ] Refus de localisation et de notifications sans régression.
+- [ ] Réception APNs sandbox et routage Messages, Sorties, Maps et Profil.
 - [ ] Suppression du compte puis échec de reconnexion.

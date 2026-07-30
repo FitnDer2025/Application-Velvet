@@ -8,6 +8,8 @@ struct ProfileSummaryView: View {
     @State private var selectedSection = "overview"
     @State private var selectedPhoto = 0
     @State private var showsPrivacy = false
+    @State private var showsMemberTools = false
+    @State private var showsAlbumManager = false
 
     private var photos: [MediaAsset] {
         profile.approvedPhotos
@@ -39,6 +41,20 @@ struct ProfileSummaryView: View {
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showsPrivacy) {
             PrivacySettingsView()
+        }
+        .sheet(isPresented: $showsMemberTools) {
+            NavigationStack {
+                MemberToolsView()
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Fermer") { showsMemberTools = false }
+                                .foregroundStyle(VelvetColor.champagneGold)
+                        }
+                    }
+            }
+        }
+        .sheet(isPresented: $showsAlbumManager) {
+            AlbumManagerView()
         }
     }
 
@@ -359,9 +375,19 @@ struct ProfileSummaryView: View {
     private var albumsContent: some View {
         VStack(spacing: 15) {
             ProfileSectionCard(eyebrow: "Bibliothèque organisée", title: "Albums publics & privés") {
-                Text("Les albums privés restent invisibles sans autorisation explicite.")
-                    .font(VelvetTypography.body(size: 12))
-                    .foregroundStyle(VelvetColor.textSecondary)
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Les albums privés restent invisibles sans autorisation explicite.")
+                        .font(VelvetTypography.body(size: 12))
+                        .foregroundStyle(VelvetColor.textSecondary)
+                    Button {
+                        showsAlbumManager = true
+                    } label: {
+                        Label("Gérer mes albums", systemImage: "photo.stack")
+                            .font(VelvetTypography.body(size: 13, weight: .semibold))
+                            .foregroundStyle(VelvetColor.champagneGold)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
 
             if !photos.isEmpty {
@@ -394,6 +420,18 @@ struct ProfileSummaryView: View {
 
     private var accountActions: some View {
         VStack(spacing: 12) {
+            Button {
+                showsMemberTools = true
+            } label: {
+                actionRow(
+                    "Studio du profil",
+                    detail: "Rédaction, organisateur et gestion du cycle",
+                    icon: "wand.and.stars",
+                    color: VelvetColor.softBlush
+                )
+            }
+            .buttonStyle(.plain)
+
             Button {
                 showsPrivacy = true
             } label: {

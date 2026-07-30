@@ -24,6 +24,7 @@ struct PlacesEventsView: View {
                             VelvetChip(title: "Événements", selected: selection == 0) { selection = 0 }
                             VelvetChip(title: "Clubs & pros", selected: selection == 1) { selection = 1 }
                             VelvetChip(title: "Lieux", selected: selection == 2) { selection = 2 }
+                            VelvetChip(title: "Mon agenda", selected: selection == 3) { selection = 3 }
                         }
                     }
 
@@ -87,7 +88,7 @@ struct PlacesEventsView: View {
                     }
                 }
             }
-        default:
+        case 2:
             let venues = store.directory?.venueDirectory ?? []
             if venues.isEmpty {
                 VelvetEmptyState(
@@ -98,19 +99,26 @@ struct PlacesEventsView: View {
             } else {
                 LazyVStack(spacing: 14) {
                     ForEach(venues) { venue in
-                        PlaceTile(
-                            name: venue.name,
-                            metadata: [venue.categoryPrimary ?? venue.kind, venue.city]
-                                .compactMap { $0 }
-                                .joined(separator: " · "),
-                            detail: venue.verificationStatus == "verified"
-                                ? "Fiche professionnelle reliée à Velvet"
-                                : "Référencé par Velvet · informations à confirmer",
-                            verified: venue.verificationStatus == "verified"
-                        )
+                        NavigationLink {
+                            VenueDetailView(venue: venue)
+                        } label: {
+                            PlaceTile(
+                                name: venue.name,
+                                metadata: [venue.categoryPrimary ?? venue.kind, venue.city]
+                                    .compactMap { $0 }
+                                    .joined(separator: " · "),
+                                detail: venue.verificationStatus == "verified"
+                                    ? "Fiche professionnelle reliée à Velvet"
+                                    : "Référencé par Velvet · informations à confirmer",
+                                verified: venue.verificationStatus == "verified"
+                            )
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }
+        default:
+            AgendaView()
         }
     }
 }

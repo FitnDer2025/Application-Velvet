@@ -25,7 +25,15 @@ const requiredFiles = [
   'Velvet/Features/Safety/SafetyActionsView.swift',
   'Velvet/Core/System/StoreKitService.swift',
   'Velvet/Core/System/LocationService.swift',
+  'Velvet/Core/System/BiometricLockService.swift',
+  'Velvet/Core/System/NotificationService.swift',
+  'Velvet/Core/Models/ParityModels.swift',
+  'Velvet/Features/Profile/MemberToolsView.swift',
+  'Velvet/Features/Profile/AlbumManagerView.swift',
+  'Velvet/Features/Places/AgendaView.swift',
+  'Velvet/Features/Places/VenueDetailView.swift',
   'Velvet/Resources/Info.plist',
+  'Velvet/Resources/Velvet.entitlements',
   'Velvet/Resources/PrivacyInfo.xcprivacy',
   'Velvet/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json'
 ];
@@ -59,7 +67,19 @@ for (const endpoint of [
   '/api/members/map',
   '/api/members/messages',
   '/api/members/social-actions',
-  '/api/members/account-deletion'
+  '/api/members/account-deletion',
+  '/api/members/account-actions',
+  '/api/members/album-access',
+  '/api/members/album-media',
+  '/api/members/albums',
+  '/api/members/engagement',
+  '/api/members/organizer-request',
+  '/api/members/photo-reactions',
+  '/api/members/plans',
+  '/api/members/profile-copy',
+  '/api/members/push-devices',
+  '/api/members/settings',
+  '/api/members/venue-relationships'
 ]) {
   assert(session.includes(endpoint), `${endpoint} doit rester relié au client natif`);
 }
@@ -67,6 +87,14 @@ for (const endpoint of [
 const plist = await readFile(resolve(root, 'Velvet/Resources/Info.plist'), 'utf8');
 assert.match(plist, /<string>velvet<\/string>/);
 assert.match(plist, /NSLocationWhenInUseUsageDescription/);
+assert.match(plist, /NSFaceIDUsageDescription/);
+
+const projectEntitlements = await readFile(
+  resolve(root, 'Velvet/Resources/Velvet.entitlements'),
+  'utf8'
+);
+assert.match(projectEntitlements, /aps-environment/);
+assert.match(project, /CODE_SIGN_ENTITLEMENTS = Velvet\/Resources\/Velvet\.entitlements/);
 
 const swiftFiles = requiredFiles.filter((file) => file.endsWith('.swift'));
 for (const file of swiftFiles) {
