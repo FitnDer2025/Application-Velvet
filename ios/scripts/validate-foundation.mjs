@@ -55,6 +55,7 @@ for (const endpoint of [
   '/api/auth/recovery-request',
   '/api/members/photos',
   '/api/members/directory',
+  '/api/members/discovery',
   '/api/members/map',
   '/api/members/messages',
   '/api/members/social-actions',
