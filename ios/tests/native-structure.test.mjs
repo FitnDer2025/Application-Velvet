@@ -18,6 +18,7 @@ test('les écrans natifs utilisent les contrats backend existants', async () => 
     '/api/members/photos',
     '/api/members/verification',
     '/api/members/directory',
+    '/api/members/discovery',
     '/api/members/map',
     '/api/members/event-registrations',
     '/api/members/conversations',
@@ -53,4 +54,39 @@ test('les usages Apple sensibles sont documentés', async () => {
   assert.match(info, /<string>velvet<\/string>/);
   assert.match(privacy, /NSPrivacyCollectedDataTypeSensitiveInfo/);
   assert.match(privacy, /NSPrivacyTracking[\s\S]*?<false\/>/);
+});
+
+test('la navigation, les filtres et la fiche profil restent alignés sur le Web', async () => {
+  const shell = await readFile(
+    resolve(root, 'Velvet/Features/Home/MainShellView.swift'),
+    'utf8'
+  );
+  const discovery = await readFile(
+    resolve(root, 'Velvet/Features/Discovery/DiscoveryView.swift'),
+    'utf8'
+  );
+  const profile = await readFile(
+    resolve(root, 'Velvet/Features/Home/ProfileSummaryView.swift'),
+    'utf8'
+  );
+
+  assert.match(shell, /magnifyingglass\.circle\.fill/);
+  assert.match(shell, /case directory[\s\S]*case agenda/);
+  for (const filter of [
+    'Qui recherchent',
+    'Pratiques',
+    'Physique',
+    'Avec photos publiques',
+    'Avec recommandation'
+  ]) {
+    assert(discovery.includes(filter), `filtre manquant : ${filter}`);
+  }
+  for (const section of [
+    'Notre histoire',
+    'Ce que nous recherchons',
+    'Pratiques & expériences',
+    'Albums publics & privés'
+  ]) {
+    assert(profile.includes(section), `section profil manquante : ${section}`);
+  }
 });
