@@ -2,7 +2,11 @@ import SwiftUI
 
 struct PlacesEventsView: View {
     @EnvironmentObject private var store: VelvetStore
-    @State private var selection = 0
+    @State private var selection: Int
+
+    init(initialSelection: Int = 0) {
+        _selection = State(initialValue: initialSelection)
+    }
 
     var body: some View {
         ZStack {
