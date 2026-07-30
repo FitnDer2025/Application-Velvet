@@ -30,6 +30,10 @@ La couche membre native reprend les choix éditoriaux de
   Accueil / Recherche / Maps / Messages / Profil ;
 - cartes verre, filets fins, titres sérif et états vides éditoriaux ;
 - cartes profils au ratio 4:5, héros de profil et tuiles sorties/lieux ;
+- recherche avancée native (types, attentes, zone, âges, pratiques,
+  morphologies, présence, photos et recommandations) ;
+- fiche profil complète avec carrousel, personnes, récit, envies,
+  disponibilités, recommandations et albums ;
 - carte MapKit alimentée par `/api/members/map`, sans exposer la position
   exacte d’un membre.
 
