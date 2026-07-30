@@ -166,7 +166,6 @@
       });
       toast('Ta zone approximative est active. Les coordonnées exactes n’ont pas été conservées.');
       refreshLocationCard();
-      refreshNearbyVenues(true);
     } catch (error) {
       toast(error?.code ? geolocationError(error) : (error.message || geolocationError(error)), true);
       button.disabled = false;
@@ -180,7 +179,6 @@
       cache.location = await api('/api/members/location', { method: 'DELETE' });
       toast('La localisation Velvet est désactivée et la zone enregistrée a été effacée.');
       refreshLocationCard();
-      document.querySelector('[data-velvet-nearby]')?.remove();
     } catch (error) {
       toast(error.message, true);
       button.disabled = false;
@@ -206,46 +204,6 @@
     } catch (error) {
       toast(error.message, true);
       button.disabled = false;
-    }
-  }
-
-  function nearbySection(payload) {
-    const venues = Array.isArray(payload?.nearbyVenues) ? payload.nearbyVenues : [];
-    if (!payload?.location?.enabled) {
-      return `<section class="card velvet-nearby-card" data-velvet-nearby>
-        <p class="eyebrow">Autour de toi</p><h2>Active la localisation facultative</h2>
-        <p>Depuis Paramètres, utilise ta position approximative pour classer les clubs et spas référencés autour de toi.</p>
-        <button class="secondary" type="button" data-route="settings">Ouvrir les paramètres</button>
-      </section>`;
-    }
-    return `<section class="card velvet-nearby-card" data-velvet-nearby>
-      <p class="eyebrow">Autour de toi · zone approximative</p><h2>${venues.length ? 'Les lieux les plus proches' : 'Aucun lieu référencé à proximité'}</h2>
-      <p>Les distances sont calculées depuis une zone arrondie, jamais depuis ta position GPS exacte.</p>
-      ${venues.length ? `<div class="velvet-nearby-list">${venues.slice(0, 8).map((venue) => `<article>
-        <span>${escapeHtml(venue.distance_km)} km</span><div><strong>${escapeHtml(venue.name)}</strong><small>${escapeHtml([venue.city, venue.country_code, venue.kind].filter(Boolean).join(' · '))}</small></div>
-      </article>`).join('')}</div>` : ''}
-    </section>`;
-  }
-
-  async function refreshNearbyVenues(force = false) {
-    const page = document.querySelector('#content .page');
-    const title = page?.querySelector('.page-head h1')?.textContent?.trim();
-    if (!page || title !== 'Établissements') return;
-    if (!force && page.querySelector('[data-velvet-nearby]')) return;
-    page.querySelector('[data-velvet-nearby]')?.remove();
-
-    const placeholder = document.createElement('div');
-    placeholder.innerHTML = '<section class="card velvet-nearby-card" data-velvet-nearby><p>Recherche des lieux autour de toi…</p></section>';
-    const pageHead = page.querySelector('.page-head');
-    pageHead?.after(placeholder.firstElementChild);
-    try {
-      const payload = force ? await loadLocation() : (cache.location || await loadLocation());
-      const current = page.querySelector('[data-velvet-nearby]');
-      const replacement = document.createElement('div');
-      replacement.innerHTML = nearbySection(payload);
-      current?.replaceWith(replacement.firstElementChild);
-    } catch {
-      page.querySelector('[data-velvet-nearby]')?.remove();
     }
   }
 
@@ -292,7 +250,7 @@
     if (document.querySelector('#velvetLocationVerificationStyles')) return;
     const style = document.createElement('style');
     style.id = 'velvetLocationVerificationStyles';
-    style.textContent = `.velvet-foundation-holder{display:contents}.velvet-feature-status{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:center;margin:16px 0;padding:15px;border:1px solid rgba(255,255,255,.09);border-radius:17px;background:rgba(255,255,255,.025)}.velvet-feature-status>span{display:grid;place-items:center;width:42px;height:42px;border-radius:14px;background:#21151a;color:#bdaeb4;font:500 20px Georgia}.velvet-feature-status.active,.velvet-feature-status.verified{border-color:rgba(217,184,121,.34);background:linear-gradient(125deg,rgba(126,32,69,.22),rgba(217,184,121,.045))}.velvet-feature-status.active>span,.velvet-feature-status.verified>span{background:linear-gradient(145deg,#8f274e,#431323);color:#f0d39b}.velvet-feature-status strong,.velvet-feature-status small{display:block}.velvet-feature-status small{margin-top:4px;color:#9f9297;line-height:1.45}.velvet-inline-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.velvet-foundation-note{display:block;margin-top:14px;color:#95888e;line-height:1.55}.velvet-nearby-card{margin:0 0 18px}.velvet-nearby-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:15px}.velvet-nearby-list article{display:grid;grid-template-columns:58px 1fr;gap:12px;align-items:center;padding:13px;border:1px solid rgba(255,255,255,.08);border-radius:15px;background:rgba(255,255,255,.025)}.velvet-nearby-list article>span{display:grid;place-items:center;min-height:42px;border-radius:12px;background:rgba(126,32,69,.2);color:#d9b879;font-weight:700}.velvet-nearby-list strong,.velvet-nearby-list small{display:block}.velvet-nearby-list small{margin-top:4px;color:#9f9297}.velvet-verified-pill{display:inline-flex!important;width:max-content;margin:8px 0;border-color:rgba(217,184,121,.45)!important;background:linear-gradient(120deg,rgba(126,32,69,.36),rgba(217,184,121,.12))!important;color:#f0d39b!important}@media(max-width:720px){.velvet-nearby-list{grid-template-columns:1fr}.velvet-inline-actions>*{width:100%}}`;
+    style.textContent = `.velvet-foundation-holder{display:contents}.velvet-feature-status{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:center;margin:16px 0;padding:15px;border:1px solid rgba(255,255,255,.09);border-radius:17px;background:rgba(255,255,255,.025)}.velvet-feature-status>span{display:grid;place-items:center;width:42px;height:42px;border-radius:14px;background:#21151a;color:#bdaeb4;font:500 20px Georgia}.velvet-feature-status.active,.velvet-feature-status.verified{border-color:rgba(217,184,121,.34);background:linear-gradient(125deg,rgba(126,32,69,.22),rgba(217,184,121,.045))}.velvet-feature-status.active>span,.velvet-feature-status.verified>span{background:linear-gradient(145deg,#8f274e,#431323);color:#f0d39b}.velvet-feature-status strong,.velvet-feature-status small{display:block}.velvet-feature-status small{margin-top:4px;color:#9f9297;line-height:1.45}.velvet-inline-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.velvet-foundation-note{display:block;margin-top:14px;color:#95888e;line-height:1.55}.velvet-verified-pill{display:inline-flex!important;width:max-content;margin:8px 0;border-color:rgba(217,184,121,.45)!important;background:linear-gradient(120deg,rgba(126,32,69,.36),rgba(217,184,121,.12))!important;color:#f0d39b!important}@media(max-width:720px){.velvet-inline-actions>*{width:100%}}`;
     document.head.appendChild(style);
   }
 
@@ -325,7 +283,6 @@
 
   function scan() {
     injectSettingsCards(document.querySelector('#settingsForm'));
-    refreshNearbyVenues();
     decorateVerificationBadges();
   }
 

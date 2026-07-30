@@ -27,6 +27,7 @@ const paths = [
   'functions/api/members/account-actions.js',
   'functions/api/members/event-registrations.js',
   'functions/api/members/discovery.js',
+  'functions/api/members/directory.js',
   'functions/api/members/map.js',
   'functions/api/members/venue-address-coordinates.js',
   'functions/api/members/venue-geocoding.js',
@@ -35,7 +36,8 @@ const paths = [
   'functions/api/members/verification.js',
   'functions/api/admin/invites.js',
   'functions/api/control/workspace.js',
-  'functions/api/pro/workspace.js'
+  'functions/api/pro/workspace.js',
+  'functions/api/reference/communes.js'
 ];
 
 const files = Object.fromEntries(await Promise.all(paths.map(async (path) => [
@@ -122,10 +124,19 @@ const journeys = [
       && has('apps/beta/static/assets/members-live.js', '/api/members/venue-relationships', 'data-venue-relation')
   },
   {
-    name: 'Accueil et découverte filtrés',
+    name: 'Accueil et recherche filtrée',
     valid: has('apps/beta/static/assets/members-live.js', 'profil${profilesToday.length', 'événement${nearbyEvents.length', 'lieux référencés', 'Votre actualité Velvet')
       && has('apps/beta/static/assets/members-live.js', 'maleAgeMin', 'femaleAgeMin', 'discoverChoices', 'filteredDiscoverProfiles', 'data-save-search', 'presenceBadge')
       && has('functions/api/members/discovery.js', 'member_saved_searches', 'member_presence_snapshot')
+  },
+  {
+    name: 'Catalogue établissements géographique',
+    valid: has('apps/beta/static/assets/members-live.js', 'venueCatalogCountry', 'venueCatalogRegion', 'venueCatalogLocation', 'venueCatalogRadius', 'mapDistanceKm')
+      && has('apps/beta/static/assets/members-live.js', "pageHead('Recherche sur mesure', 'Recherche'")
+      && has('functions/api/members/directory.js', 'seededVenueCoordinates', 'enrichVenueCoordinates')
+      && has('functions/api/reference/communes.js', 'FRENCH_REGIONS', 'belgianLocations', 'latitude', 'longitude')
+      && !files['apps/beta/static/assets/location-verification.js'].includes('Les lieux les plus proches')
+      && !files['apps/beta/static/assets/location-verification.js'].includes('refreshNearbyVenues')
   },
   {
     name: 'Thème clair Velvet',
@@ -137,7 +148,6 @@ const journeys = [
     valid: has('apps/beta/static/assets/members-live.js', 'mapZoom: 10', 'data-map-zoom', 'data-map-layer', 'Rayon d’environ', 'Hôtels')
       && has('apps/beta/static/assets/members-live.js', 'mapVisibleVenues', 'data-dynamic-map', 'pointermove', 'panMapByPixels', 'defaultMapZoom', 'mapWorkspace')
       && has('apps/beta/static/assets/members-live.css', '.map-visible-results', '.map-workspace', 'cursor:grab', 'touch-action:none')
-      && has('apps/beta/static/assets/location-verification.js', "title !== 'Établissements'")
       && has('functions/api/members/map.js', 'radiusKm: 50', 'private_approximate_location', 'category_primary', 'categoryTags', 'geocodeVenueAddress', 'public_address_geocoding')
       && !files['functions/api/members/map.js'].includes('address_public,latitude,longitude')
       && has('functions/api/members/venue-address-coordinates.js', '9 rue chemin vert lens france', '"precision": "address"')

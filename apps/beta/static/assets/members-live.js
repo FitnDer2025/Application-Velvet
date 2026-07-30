@@ -115,8 +115,37 @@
     ,
     venueQuery: '',
     venueKind: '',
-    venueCountry: ''
+    venueCountry: '',
+    venueRegion: '',
+    venueLocationQuery: '',
+    venueCenter: null,
+    venueRadius: 50
   };
+
+  const VENUE_REGIONS = {
+    FR: [
+      'Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Bretagne',
+      'Centre-Val de Loire', 'Corse', 'Grand Est', 'Hauts-de-France',
+      'Île-de-France', 'Normandie', 'Nouvelle-Aquitaine', 'Occitanie',
+      'Pays de la Loire', 'Provence-Alpes-Côte d’Azur'
+    ],
+    BE: ['Bruxelles-Capitale', 'Flandre', 'Wallonie']
+  };
+  const VENUE_REGION_CENTERS = [
+    ['FR', 'Auvergne-Rhône-Alpes', 45.764, 4.836],
+    ['FR', 'Bourgogne-Franche-Comté', 47.322, 5.041],
+    ['FR', 'Bretagne', 48.117, -1.677],
+    ['FR', 'Centre-Val de Loire', 47.903, 1.909],
+    ['FR', 'Corse', 41.919, 8.738],
+    ['FR', 'Grand Est', 48.573, 7.752],
+    ['FR', 'Hauts-de-France', 50.629, 3.057],
+    ['FR', 'Île-de-France', 48.857, 2.352],
+    ['FR', 'Normandie', 49.443, 1.100],
+    ['FR', 'Nouvelle-Aquitaine', 44.837, -0.579],
+    ['FR', 'Occitanie', 43.604, 1.444],
+    ['FR', 'Pays de la Loire', 47.218, -1.553],
+    ['FR', 'Provence-Alpes-Côte d’Azur', 43.297, 5.370]
+  ];
 
   const content = document.querySelector('#content');
   const toastNode = document.querySelector('#toast');
@@ -2139,7 +2168,7 @@
     const locationReady = state.mapData?.center?.source === 'private_approximate_location';
     const typeLabels = { couple: 'Tous les couples', woman: 'Toutes les femmes', man: 'Tous les hommes' };
     return `<div class="page discover-page">
-      ${pageHead('Recherche sur mesure', 'Découvrir', 'Combine librement les critères : chaque groupe accepte plusieurs sélections sans limite.')}
+      ${pageHead('Recherche sur mesure', 'Recherche', 'Combine librement les critères : chaque groupe accepte plusieurs sélections sans limite.')}
       <section class="card saved-search-bar">
         <label>Mes recherches
           <select id="savedSearchSelect">
@@ -3089,8 +3118,9 @@
   }
 
   function venueTile(venue) {
+    const distance = Number(venue._catalogDistanceKm);
     return `<button class="card venue-tile" data-open-venue="${e(venue.id)}">
-      <span class="venue-symbol">⌑</span><span><small>${e(venue.kind || 'lieu Velvet')} · ${e(venue.city || 'Localisation à confirmer')}${Number.isFinite(Number(venue.distance_km)) ? ` · ${e(Math.round(Number(venue.distance_km)))} km` : ''}</small><b>${e(venue.name)}</b><em>${e(venue.claim_status === 'claimed' ? 'Fiche professionnelle reliée à Velvet Pro' : 'Référencé par Velvet · informations à confirmer')}</em></span><i>→</i>
+      <span class="venue-symbol">⌑</span><span><small>${e(venue.kind || 'lieu Velvet')} · ${e(venue.city || 'Localisation à confirmer')}${Number.isFinite(distance) ? ` · ${e(Math.round(distance))} km` : Number.isFinite(Number(venue.distance_km)) ? ` · ${e(Math.round(Number(venue.distance_km)))} km` : ''}</small><b>${e(venue.name)}</b><em>${e(venue.claim_status === 'claimed' ? 'Fiche professionnelle reliée à Velvet Pro' : 'Référencé par Velvet · informations à confirmer')}</em></span><i>→</i>
     </button>`;
   }
 
@@ -3118,15 +3148,98 @@
     </div>`;
   }
 
+  function normalizedVenueText(value) {
+    return String(value || '')
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLocaleLowerCase('fr');
+  }
+
+  function venueRegion(venue) {
+    const explicit = String(venue.region || venue.department_or_province || '').trim();
+    if (explicit && [...VENUE_REGIONS.FR, ...VENUE_REGIONS.BE].includes(explicit)) return explicit;
+    const country = venue.country_code;
+    const latitude = Number(venue.latitude);
+    const longitude = Number(venue.longitude);
+    if (venue.latitude === null || venue.latitude === ''
+      || venue.longitude === null || venue.longitude === ''
+      || !Number.isFinite(latitude) || !Number.isFinite(longitude)) return explicit;
+    if (country === 'BE') {
+      if (latitude >= 50.75 && latitude <= 50.95 && longitude >= 4.22 && longitude <= 4.52) return 'Bruxelles-Capitale';
+      return latitude >= 50.72 ? 'Flandre' : 'Wallonie';
+    }
+    const centers = VENUE_REGION_CENTERS.filter(([code]) => code === country);
+    return centers
+      .map(([, label, centerLatitude, centerLongitude]) => ({
+        label,
+        distance: mapDistanceKm(
+          { latitude: centerLatitude, longitude: centerLongitude },
+          { latitude, longitude }
+        )
+      }))
+      .sort((left, right) => left.distance - right.distance)[0]?.label || explicit;
+  }
+
+  function venueRegionOptions() {
+    const countries = state.venueCountry ? [state.venueCountry] : ['FR', 'BE'];
+    return countries.map((country) => `<optgroup label="${country === 'FR' ? 'France' : 'Belgique'}">${
+      VENUE_REGIONS[country].map((region) => `<option value="${e(region)}"${state.venueRegion === region ? ' selected' : ''}>${e(region)}</option>`).join('')
+    }</optgroup>`).join('');
+  }
+
   function renderVenues() {
     const query = state.venueQuery.toLocaleLowerCase('fr');
-    const venues = list(state.directory.venueDirectory).filter((venue) =>
-      (!query || `${venue.name} ${venue.city || ''} ${venue.address_public || ''}`.toLocaleLowerCase('fr').includes(query))
-      && (!state.venueKind || venue.kind === state.venueKind)
-      && (!state.venueCountry || venue.country_code === state.venueCountry)
-    );
+    const locationTerm = normalizedVenueText(state.venueLocationQuery);
+    const radius = Math.max(5, Math.min(200, Number(state.venueRadius) || 50));
+    const hasCenter = Number.isFinite(Number(state.venueCenter?.latitude))
+      && Number.isFinite(Number(state.venueCenter?.longitude));
+    const venues = list(state.directory.venueDirectory)
+      .map((venue) => {
+        const latitude = Number(venue.latitude);
+        const longitude = Number(venue.longitude);
+        const hasCoordinates = venue.latitude !== null && venue.latitude !== ''
+          && venue.longitude !== null && venue.longitude !== ''
+          && Number.isFinite(latitude) && Number.isFinite(longitude);
+        return {
+          ...venue,
+          _catalogRegion: venueRegion(venue),
+          _catalogDistanceKm: hasCenter && hasCoordinates
+            ? mapDistanceKm(state.venueCenter, { latitude, longitude })
+            : null
+        };
+      })
+      .filter((venue) =>
+        (!query || `${venue.name} ${venue.city || ''} ${venue.address_public || ''}`.toLocaleLowerCase('fr').includes(query))
+        && (!state.venueKind || venue.kind === state.venueKind)
+        && (!state.venueCountry || venue.country_code === state.venueCountry)
+        && (!state.venueRegion || venue._catalogRegion === state.venueRegion)
+        && (hasCenter
+          ? Number.isFinite(venue._catalogDistanceKm) && venue._catalogDistanceKm <= radius
+          : !locationTerm || normalizedVenueText(`${venue.city || ''} ${venue.postal_code || ''} ${venue.address_public || ''}`).includes(locationTerm))
+      )
+      .sort((left, right) => hasCenter
+        ? left._catalogDistanceKm - right._catalogDistanceKm
+        : String(left.name).localeCompare(String(right.name), 'fr'));
+    const radiusHelp = hasCenter
+      ? `Dans un rayon de ${radius} km autour de ${e(state.venueCenter.label || state.venueLocationQuery)}.`
+      : 'Choisis une ville ou un code postal dans les suggestions pour activer le périmètre.';
     return `<div class="page">${pageHead('Référentiel France & Belgique', 'Établissements', 'Les fiches non revendiquées sont proposées à titre informatif et clairement distinguées des professionnels abonnés à Velvet Pro.')}
-      <section class="card venue-catalog-filters"><div class="form-grid"><label>Rechercher<input id="venueCatalogSearch" value="${e(state.venueQuery)}" placeholder="Nom, ville ou adresse"></label><label>Type<select id="venueCatalogKind"><option value="">Tous les types</option>${[['club','Club'],['spa','Spa / sauna'],['bar','Bar'],['love_room','Love room'],['other','Autre professionnel']].map(([value,label]) => `<option value="${value}"${state.venueKind === value ? ' selected' : ''}>${label}</option>`).join('')}</select></label><label>Pays<select id="venueCatalogCountry"><option value="">France et Belgique</option><option value="FR"${state.venueCountry === 'FR' ? ' selected' : ''}>France</option><option value="BE"${state.venueCountry === 'BE' ? ' selected' : ''}>Belgique</option></select></label></div><p class="muted">${venues.length} résultat${venues.length > 1 ? 's' : ''} · les données marquées « à confirmer » ne constituent pas une validation professionnelle.</p></section>
+      <section class="card venue-catalog-filters">
+        <div class="venue-catalog-grid">
+          <label>Nom ou mot-clé<input id="venueCatalogSearch" value="${e(state.venueQuery)}" placeholder="Nom ou adresse"></label>
+          <label>Type<select id="venueCatalogKind"><option value="">Tous les types</option>${[['club','Club'],['spa','Spa / sauna'],['bar','Bar'],['love_room','Love room'],['other','Autre professionnel']].map(([value,label]) => `<option value="${value}"${state.venueKind === value ? ' selected' : ''}>${label}</option>`).join('')}</select></label>
+          <label>Pays<select id="venueCatalogCountry"><option value="">France et Belgique</option><option value="FR"${state.venueCountry === 'FR' ? ' selected' : ''}>France</option><option value="BE"${state.venueCountry === 'BE' ? ' selected' : ''}>Belgique</option></select></label>
+          <label>Région<select id="venueCatalogRegion"><option value="">Toutes les régions</option>${venueRegionOptions()}</select></label>
+          <label class="venue-location-filter">Ville ou code postal
+            <span class="commune-input"><input id="venueCatalogLocation" value="${e(state.venueLocationQuery)}" autocomplete="off" placeholder="Exemple : 62400 ou Béthune"><span class="commune-results" data-venue-location-results hidden></span></span>
+          </label>
+          <label class="venue-radius-filter">Périmètre <strong data-venue-radius-label>${radius} km</strong>
+            <input id="venueCatalogRadius" type="range" min="5" max="200" step="5" value="${radius}"${hasCenter ? '' : ' disabled'}>
+            <small>${radiusHelp}</small>
+          </label>
+        </div>
+        <div class="venue-filter-footer"><p class="muted">${venues.length} résultat${venues.length > 1 ? 's' : ''} · les données marquées « à confirmer » ne constituent pas une validation professionnelle.</p>${state.venueLocationQuery ? '<button class="text-button" type="button" data-clear-venue-location>Effacer la zone</button>' : ''}</div>
+      </section>
       ${venues.length ? `<section class="grid three">${venues.map(venueTile).join('')}</section>` : emptyState('Aucun établissement correspondant', 'Modifie les filtres pour élargir la recherche.', '⌑')}
     </div>`;
   }
@@ -3230,7 +3343,7 @@
         </section>
         <section class="card settings-card">
           <p class="eyebrow">Visibilité</p><h2>Qui peut voir votre profil ?</h2>
-          <p>Les catégories décochées ne verront plus votre fiche dans Découvrir et ne pourront pas l’ouvrir directement.</p>
+          <p>Les catégories décochées ne verront plus votre fiche dans Recherche et ne pourront pas l’ouvrir directement.</p>
           ${settingsChecks('discoverable_by', AUDIENCE_OPTIONS, privacy.discoverable_by)}
         </section>
         <section class="card settings-card">
@@ -3894,6 +4007,100 @@
       });
       document.querySelector('#venueCatalogCountry')?.addEventListener('change', (event) => {
         state.venueCountry = event.target.value;
+        state.venueRegion = '';
+        state.venueLocationQuery = '';
+        state.venueCenter = null;
+        content.innerHTML = renderVenues();
+        bindDynamicForms();
+      });
+      document.querySelector('#venueCatalogRegion')?.addEventListener('change', (event) => {
+        state.venueRegion = event.target.value;
+        content.innerHTML = renderVenues();
+        bindDynamicForms();
+      });
+      const locationInput = document.querySelector('#venueCatalogLocation');
+      const locationResults = document.querySelector('[data-venue-location-results]');
+      if (locationInput && locationResults) {
+        let locationTimer;
+        let locationRequest = 0;
+        let availableLocations = [];
+        const chooseLocation = (row) => {
+          if (!row || !Number.isFinite(Number(row.latitude)) || !Number.isFinite(Number(row.longitude))) return;
+          state.venueLocationQuery = row.label;
+          state.venueCenter = {
+            latitude: Number(row.latitude),
+            longitude: Number(row.longitude),
+            label: row.label
+          };
+          content.innerHTML = renderVenues();
+          bindDynamicForms();
+        };
+        locationInput.addEventListener('input', () => {
+          window.clearTimeout(locationTimer);
+          const query = locationInput.value.trim();
+          state.venueLocationQuery = query;
+          if (query !== state.venueCenter?.label) state.venueCenter = null;
+          if (!query) {
+            locationResults.hidden = true;
+            content.innerHTML = renderVenues();
+            bindDynamicForms();
+            return;
+          }
+          if (query.length < 2) {
+            locationResults.hidden = true;
+            return;
+          }
+          const currentRequest = ++locationRequest;
+          locationTimer = window.setTimeout(async () => {
+            try {
+              const countries = state.venueCountry ? [state.venueCountry] : ['FR', 'BE'];
+              const payloads = await Promise.all(countries.map((country) =>
+                api(`/api/reference/communes?q=${encodeURIComponent(query)}&country=${country}`).catch(() => ({ results: [] }))
+              ));
+              if (currentRequest !== locationRequest) return;
+              availableLocations = [...new Map(payloads
+                .flatMap((payload) => list(payload.results))
+                .map((row) => [`${row.countryCode}:${row.label}:${row.latitude}:${row.longitude}`, row]))
+                .values()].slice(0, 12);
+              locationResults.innerHTML = availableLocations.length
+                ? availableLocations.map((row, index) => `<button type="button" data-venue-location-index="${index}"><strong>${e(row.postalCode || row.countryCode || '')}</strong><span>${e(row.city)}</span><small>${e(row.region || row.departmentCode || '')}</small></button>`).join('')
+                : '<p>Aucune ville trouvée.</p>';
+              locationResults.hidden = false;
+              locationResults.querySelectorAll('[data-venue-location-index]').forEach((button) => {
+                button.addEventListener('click', () => chooseLocation(availableLocations[Number(button.dataset.venueLocationIndex)]));
+              });
+            } catch {
+              locationResults.innerHTML = '<p>Recherche géographique momentanément indisponible.</p>';
+              locationResults.hidden = false;
+            }
+          }, 280);
+        });
+        locationInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' && availableLocations.length) {
+            event.preventDefault();
+            chooseLocation(availableLocations[0]);
+          }
+        });
+        locationInput.addEventListener('blur', () => window.setTimeout(() => {
+          locationResults.hidden = true;
+          if (!state.venueCenter && state.venueLocationQuery) {
+            content.innerHTML = renderVenues();
+            bindDynamicForms();
+          }
+        }, 180));
+      }
+      const radiusInput = document.querySelector('#venueCatalogRadius');
+      radiusInput?.addEventListener('input', () => {
+        document.querySelector('[data-venue-radius-label]')?.replaceChildren(document.createTextNode(`${radiusInput.value} km`));
+      });
+      radiusInput?.addEventListener('change', () => {
+        state.venueRadius = Number(radiusInput.value);
+        content.innerHTML = renderVenues();
+        bindDynamicForms();
+      });
+      document.querySelector('[data-clear-venue-location]')?.addEventListener('click', () => {
+        state.venueLocationQuery = '';
+        state.venueCenter = null;
         content.innerHTML = renderVenues();
         bindDynamicForms();
       });
