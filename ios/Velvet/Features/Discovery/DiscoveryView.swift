@@ -4,12 +4,13 @@ struct DiscoveryView: View {
     @EnvironmentObject private var store: VelvetStore
     let currentProfile: MemberProfile
     @State private var query = ""
-    @State private var type: MemberProfile.ProfileType?
+    @State private var filters = DiscoveryFilters()
+    @State private var showsFilters = false
 
     private var profiles: [MemberProfile] {
         (store.directory?.profiles ?? [])
             .filter { $0.id != currentProfile.id }
-            .filter { type == nil || $0.profileType == type }
+            .filter(matchesFilters)
             .filter {
                 query.isEmpty
                     || $0.displayName.localizedCaseInsensitiveContains(query)
@@ -31,12 +32,47 @@ struct DiscoveryView: View {
 
                     VelvetSearchField(prompt: "Nom, ville, univers…", text: $query)
 
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("\(profiles.count)")
+                                .font(VelvetTypography.title(size: 26))
+                                .foregroundStyle(VelvetColor.ivory)
+                            Text("PROFIL\(profiles.count > 1 ? "S" : "") CORRESPONDANT\(profiles.count > 1 ? "S" : "")")
+                                .font(VelvetTypography.caption(size: 8, weight: .semibold))
+                                .tracking(1.1)
+                                .foregroundStyle(VelvetColor.textSecondary)
+                        }
+                        Spacer()
+                        Button {
+                            showsFilters = true
+                        } label: {
+                            Label(
+                                filters.activeCount > 0 ? "Filtres · \(filters.activeCount)" : "Filtres",
+                                systemImage: "slider.horizontal.3"
+                            )
+                            .font(VelvetTypography.caption(size: 12, weight: .semibold))
+                            .foregroundStyle(VelvetColor.velvetBlack)
+                            .padding(.horizontal, 15)
+                            .frame(height: 40)
+                            .background(VelvetColor.champagneGold)
+                            .clipShape(Capsule())
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 9) {
-                            VelvetChip(title: "Tous", selected: type == nil) { type = nil }
-                            VelvetChip(title: "Couples", selected: type == .couple) { type = .couple }
-                            VelvetChip(title: "Individuels", selected: type == .individual) {
-                                type = .individual
+                            VelvetChip(title: "Tous", selected: filters.types.isEmpty) {
+                                filters.types.removeAll()
+                            }
+                            VelvetChip(title: "Couples", selected: filters.types == ["couple"]) {
+                                filters.types = filters.types == ["couple"] ? [] : ["couple"]
+                            }
+                            VelvetChip(title: "Femmes", selected: filters.types == ["woman"]) {
+                                filters.types = filters.types == ["woman"] ? [] : ["woman"]
+                            }
+                            VelvetChip(title: "Hommes", selected: filters.types == ["man"]) {
+                                filters.types = filters.types == ["man"] ? [] : ["man"]
                             }
                         }
                     }
@@ -75,6 +111,349 @@ struct DiscoveryView: View {
             .refreshable { await store.load() }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showsFilters) {
+            DiscoveryFiltersView(
+                filters: $filters,
+                locationReady: store.mapData?.center.source == "private_approximate_location",
+                presenceReady: store.discoveryState.presenceAvailable == true
+            )
+        }
+    }
+
+    private func matchesFilters(_ profile: MemberProfile) -> Bool {
+        if !filters.types.isEmpty {
+            guard let audience = profile.discoveryAudience, filters.types.contains(audience) else {
+                return false
+            }
+        }
+        if !filters.seeking.isEmpty {
+            let seeking = Set((profile.individualProfiles ?? []).flatMap { $0.attractedTo ?? [] })
+            guard filters.seeking.allSatisfy(seeking.contains) else { return false }
+        }
+        if !filters.city.isEmpty {
+            guard (profile.locationZone ?? profile.city ?? "")
+                .localizedCaseInsensitiveContains(filters.city)
+            else { return false }
+        }
+        if filters.nearMe {
+            guard let distance = distanceFromCurrentZone(to: profile), distance <= 50 else {
+                return false
+            }
+        }
+        guard profile.matchesAge(
+            group: "man",
+            minimum: filters.maleAgeMin,
+            maximum: filters.maleAgeMax
+        ) else { return false }
+        guard profile.matchesAge(
+            group: "woman",
+            minimum: filters.femaleAgeMin,
+            maximum: filters.femaleAgeMax
+        ) else { return false }
+        if !filters.practices.isEmpty {
+            let profilePractices = Set(profile.practices ?? [])
+            guard filters.practices.allSatisfy({ profilePractices.contains($0) }) else {
+                return false
+            }
+        }
+        if !filters.morphologies.isEmpty {
+            let values = Set(
+                (profile.individualProfiles ?? []).compactMap { $0.morphology ?? $0.bodyType }
+            )
+            guard !filters.morphologies.isDisjoint(with: values) else { return false }
+        }
+        if filters.onlineOnly {
+            let onlineIDs = Set(
+                store.discoveryState.presence
+                    .filter { $0.presenceStatus == "online" }
+                    .map(\.profileId)
+            )
+            guard onlineIDs.contains(profile.id) else { return false }
+        }
+        if filters.withPhotos, profile.approvedPhotos.isEmpty { return false }
+        if filters.withRecommendation {
+            guard store.directory?.recommendations?.contains(where: {
+                $0.targetType == "profile" && $0.targetId == profile.id
+            }) == true else { return false }
+        }
+        if filters.createdToday {
+            guard let value = profile.createdAt,
+                  let date = ISO8601DateFormatter().date(from: value),
+                  Calendar.current.isDateInToday(date)
+            else { return false }
+        }
+        return true
+    }
+
+    private func distanceFromCurrentZone(to profile: MemberProfile) -> Double? {
+        guard
+            let data = store.mapData,
+            data.center.source == "private_approximate_location",
+            let marker = data.members.first(where: { $0.id == profile.id })
+        else { return nil }
+        let earthRadius = 6_371.0
+        let lat1 = data.center.latitude * .pi / 180
+        let lat2 = marker.latitude * .pi / 180
+        let latitudeDelta = (marker.latitude - data.center.latitude) * .pi / 180
+        let longitudeDelta = (marker.longitude - data.center.longitude) * .pi / 180
+        let value = sin(latitudeDelta / 2) * sin(latitudeDelta / 2)
+            + cos(lat1) * cos(lat2)
+            * sin(longitudeDelta / 2) * sin(longitudeDelta / 2)
+        return earthRadius * 2 * atan2(sqrt(value), sqrt(1 - value))
+    }
+}
+
+private struct DiscoveryFilters: Equatable {
+    var types: Set<String> = []
+    var seeking: Set<String> = []
+    var city = ""
+    var nearMe = false
+    var maleAgeMin = 18
+    var maleAgeMax = 99
+    var femaleAgeMin = 18
+    var femaleAgeMax = 99
+    var practices: Set<String> = []
+    var morphologies: Set<String> = []
+    var onlineOnly = false
+    var withPhotos = false
+    var withRecommendation = false
+    var createdToday = false
+
+    var activeCount: Int {
+        types.count
+            + seeking.count
+            + practices.count
+            + morphologies.count
+            + (city.isEmpty ? 0 : 1)
+            + (nearMe ? 1 : 0)
+            + (maleAgeMin == 18 && maleAgeMax == 99 ? 0 : 1)
+            + (femaleAgeMin == 18 && femaleAgeMax == 99 ? 0 : 1)
+            + (onlineOnly ? 1 : 0)
+            + (withPhotos ? 1 : 0)
+            + (withRecommendation ? 1 : 0)
+            + (createdToday ? 1 : 0)
+    }
+
+    mutating func reset() {
+        self = DiscoveryFilters()
+    }
+}
+
+private struct DiscoveryFiltersView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var filters: DiscoveryFilters
+    let locationReady: Bool
+    let presenceReady: Bool
+
+    private let practices = [
+        "Rencontres en couple", "Côte-à-côtisme", "Mélangisme", "Échangisme",
+        "Triolisme", "Sensualité et massages", "Voyeurisme", "Exhibitionnisme",
+        "Jeux de rôle", "BDSM soft", "BDSM", "Soirées privées", "Clubs et spas",
+        "À découvrir ensemble", "À discuter selon le feeling"
+    ]
+
+    private let morphologies = [
+        "Mince", "Svelte", "Athlétique", "Sportive", "Standard", "Musclée",
+        "Pulpeuse / Curvy", "Ronde", "Généreuse", "Forte", "Information privée"
+    ]
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                VelvetBackground()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        VelvetPageHeader(
+                            "Recherche avancée",
+                            title: "Tes critères",
+                            subtitle: "Combine plusieurs choix dans chaque groupe pour affiner réellement les profils."
+                        )
+
+                        filterSection("Nous recherchons", subtitle: "Plusieurs choix") {
+                            choiceGrid(
+                                [("couple", "Couples"), ("woman", "Femmes"), ("man", "Hommes")],
+                                selection: $filters.types
+                            )
+                        }
+
+                        filterSection("Qui recherchent", subtitle: "Attirances déclarées") {
+                            choiceGrid(
+                                [("Couples", "Couples"), ("Femmes", "Femmes"), ("Hommes", "Hommes")],
+                                selection: $filters.seeking
+                            )
+                        }
+
+                        filterSection("Localisation", subtitle: "Zone publique") {
+                            VelvetSearchField(prompt: "Ville ou zone publique", text: $filters.city)
+                            Toggle("Près de chez moi · 50 km", isOn: $filters.nearMe)
+                                .disabled(!locationReady)
+                                .tint(VelvetColor.champagneGold)
+                                .foregroundStyle(VelvetColor.ivory)
+                            if !locationReady {
+                                Text("Active ta zone approximative dans Maps pour utiliser la proximité.")
+                                    .font(VelvetTypography.body(size: 11))
+                                    .foregroundStyle(VelvetColor.textSecondary)
+                            }
+                        }
+
+                        filterSection("Âges", subtitle: "18 à 99 ans") {
+                            ageRow(
+                                "Pour l’homme",
+                                minimum: $filters.maleAgeMin,
+                                maximum: $filters.maleAgeMax
+                            )
+                            ageRow(
+                                "Pour la femme",
+                                minimum: $filters.femaleAgeMin,
+                                maximum: $filters.femaleAgeMax
+                            )
+                        }
+
+                        filterSection("Pratiques", subtitle: "Choix cumulables") {
+                            choiceGrid(
+                                practices.map { ($0, $0) },
+                                selection: $filters.practices
+                            )
+                        }
+
+                        filterSection("Physique", subtitle: "Plusieurs choix") {
+                            choiceGrid(
+                                morphologies.map { ($0, $0) },
+                                selection: $filters.morphologies
+                            )
+                        }
+
+                        filterSection("Divers", subtitle: nil) {
+                            Toggle("Actuellement connecté", isOn: $filters.onlineOnly)
+                                .disabled(!presenceReady)
+                            Toggle("Avec photos publiques", isOn: $filters.withPhotos)
+                            Toggle("Avec recommandation", isOn: $filters.withRecommendation)
+                            Toggle("Profil créé aujourd’hui", isOn: $filters.createdToday)
+                        }
+                        .tint(VelvetColor.champagneGold)
+                        .foregroundStyle(VelvetColor.ivory)
+
+                        Button {
+                            filters.reset()
+                        } label: {
+                            Label("Effacer tous les filtres", systemImage: "arrow.counterclockwise")
+                                .font(VelvetTypography.body(size: 13, weight: .semibold))
+                                .frame(maxWidth: .infinity, minHeight: 46)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(VelvetColor.textSecondary)
+                    }
+                    .padding(20)
+                    .padding(.bottom, 80)
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                VelvetPrimaryButton("Afficher les résultats") { dismiss() }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(.ultraThinMaterial)
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Fermer", action: dismiss.callAsFunction)
+                        .foregroundStyle(VelvetColor.champagneGold)
+                }
+            }
+            .toolbarBackground(VelvetColor.velvetBlack.opacity(0.92), for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+        }
+    }
+
+    private func filterSection<Content: View>(
+        _ title: String,
+        subtitle: String?,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VelvetCard {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(title)
+                        .font(VelvetTypography.title(size: 21))
+                        .foregroundStyle(VelvetColor.ivory)
+                    Spacer()
+                    if let subtitle {
+                        Text(subtitle.uppercased())
+                            .font(VelvetTypography.caption(size: 8, weight: .semibold))
+                            .tracking(0.9)
+                            .foregroundStyle(VelvetColor.champagneGold)
+                    }
+                }
+                content()
+            }
+        }
+    }
+
+    private func choiceGrid(
+        _ values: [(String, String)],
+        selection: Binding<Set<String>>
+    ) -> some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 116), spacing: 8)], spacing: 8) {
+            ForEach(values, id: \.0) { value, label in
+                VelvetChip(title: label, selected: selection.wrappedValue.contains(value)) {
+                    if selection.wrappedValue.contains(value) {
+                        selection.wrappedValue.remove(value)
+                    } else {
+                        selection.wrappedValue.insert(value)
+                    }
+                }
+            }
+        }
+    }
+
+    private func ageRow(
+        _ title: String,
+        minimum: Binding<Int>,
+        maximum: Binding<Int>
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title.uppercased())
+                .font(VelvetTypography.caption(size: 9, weight: .semibold))
+                .tracking(1)
+                .foregroundStyle(VelvetColor.champagneGold)
+            HStack {
+                Stepper("De \(minimum.wrappedValue)", value: minimum, in: 18...99)
+                Stepper("À \(maximum.wrappedValue)", value: maximum, in: 18...99)
+            }
+            .font(VelvetTypography.body(size: 12))
+            .foregroundStyle(VelvetColor.ivory)
+        }
+    }
+}
+
+extension MemberProfile {
+    var discoveryAudience: String? {
+        if profileType == .couple { return "couple" }
+        let identity = individualProfiles?.first?.genderIdentity?.lowercased() ?? ""
+        if identity.contains("femme") { return "woman" }
+        if identity.contains("homme") { return "man" }
+        return nil
+    }
+
+    var approvedPhotos: [MediaAsset] {
+        (mediaAssets ?? []).filter {
+            $0.previewUrl != nil && ($0.moderationStatus == nil || $0.moderationStatus == "approved")
+        }
+    }
+
+    func matchesAge(group: String, minimum: Int, maximum: Int) -> Bool {
+        guard minimum > 18 || maximum < 99 else { return true }
+        let lower = min(minimum, maximum)
+        let upper = max(minimum, maximum)
+        let currentYear = Calendar.current.component(.year, from: Date())
+        let ages = (individualProfiles ?? []).compactMap { person -> Int? in
+            let identity = person.genderIdentity?.lowercased() ?? ""
+            let matches = group == "woman"
+                ? identity.contains("femme")
+                : identity.contains("homme")
+            guard matches, let birthYear = person.birthYear else { return nil }
+            return currentYear - birthYear
+        }
+        return ages.contains { lower...upper ~= $0 }
     }
 }
 
