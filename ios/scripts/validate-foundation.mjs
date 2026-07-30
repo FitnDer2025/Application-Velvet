@@ -19,6 +19,7 @@ const requiredFiles = [
   'Velvet/Features/Onboarding/ProfileSetupView.swift',
   'Velvet/Features/Home/HomeView.swift',
   'Velvet/Features/Discovery/DiscoveryView.swift',
+  'Velvet/Features/Places/MemberMapView.swift',
   'Velvet/Features/Places/PlacesEventsView.swift',
   'Velvet/Features/Messaging/ConversationsView.swift',
   'Velvet/Features/Safety/SafetyActionsView.swift',
@@ -41,7 +42,7 @@ assert.match(project, /PRODUCT_BUNDLE_IDENTIFIER = com\.velvetapplication\.app/)
 assert.match(project, /INFOPLIST_FILE = Velvet\/Resources\/Info\.plist/);
 
 const tokens = await readFile(resolve(root, 'Velvet/DesignSystem/VelvetTokens.swift'), 'utf8');
-for (const color of ['0x0D0D0D', '0x641B36', '0xC6A96A', '0xF4F4F2']) {
+for (const color of ['0x0B080A', '0x7E2045', '0xD9B879', '0xF6EEE6']) {
   assert(tokens.includes(color), `Le token ${color} doit rester synchronisé`);
 }
 
@@ -54,6 +55,7 @@ for (const endpoint of [
   '/api/auth/recovery-request',
   '/api/members/photos',
   '/api/members/directory',
+  '/api/members/map',
   '/api/members/messages',
   '/api/members/social-actions',
   '/api/members/account-deletion'
