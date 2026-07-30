@@ -11,6 +11,7 @@ import {
   onRequestGet as memberProfileGet,
   onRequestPost as memberProfilePost
 } from '../../../functions/api/members/profile.js';
+import { onRequestPost as memberProfileCopyPost } from '../../../functions/api/members/profile-copy.js';
 import { onRequestPost as coupleProfilePost } from '../../../functions/api/members/couple-profile.js';
 import { onRequestGet as memberDirectory } from '../../../functions/api/members/directory.js';
 import {
@@ -127,6 +128,7 @@ const API_ROUTES = new Map([
   ['POST /api/auth/password-update', passwordUpdate],
   ['GET /api/members/profile', memberProfileGet],
   ['POST /api/members/profile', memberProfilePost],
+  ['POST /api/members/profile-copy', memberProfileCopyPost],
   ['POST /api/members/couple-profile', coupleProfilePost],
   ['GET /api/members/directory', memberDirectory],
   ['GET /api/members/organizer-request', organizerRequestGet],
