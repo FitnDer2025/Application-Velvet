@@ -13,6 +13,15 @@ Ce document retrace les décisions produit validées. Il ne remplace ni les ADR 
 - Le V ruban bordeaux/rose devient l’icône visible du site, de la PWA et des en-têtes, en remplacement du V doré générique.
 - Le thème clair Community conserve ses tons ivoire, beige, pastel, or et bordeaux dans le nouveau système.
 
+### Direction artistique éditoriale
+
+- Les contenus existants sont conservés, mais leur composition adopte une hiérarchie plus éditoriale : respiration, contraste, rythme vertical et surfaces silencieuses.
+- Les profils personnels et publics deviennent des pages magazine : photographie dominante, identité lisible, actions regroupées et récit continu plutôt qu'une accumulation de cartes équivalentes.
+- Les aperçus de profils utilisent un cadrage photographique vertical, une identité claire et une présence discrète dans Recherche, l'actualité, les sorties et les notifications.
+- Accueil, Recherche, Maps, Sorties, Établissements, Notifications, Paramètres et Conversations disposent chacun d'une densité et d'une organisation adaptées à leur usage.
+- Velvet Pro et Velvet Contrôle reprennent la même exigence sur les métriques, tableaux, filtres, messageries, panneaux latéraux et écrans de pilotage.
+- La composition mobile favorise les vues applicatives, les listes horizontales maîtrisées et les actions accessibles sans transformer les pages en vitrines interminables.
+
 ### ADR-MON-057 — Découverte, Signature et Velvet Pro
 
 - Velvet Découverte conserve la recherche essentielle, trois nouvelles conversations par semaine, dix suivis, un essai IA et toutes les fonctions essentielles de sécurité.

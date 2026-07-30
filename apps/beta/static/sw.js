@@ -1,4 +1,4 @@
-const CACHE = 'velvet-beta-shell-v6';
+const CACHE = 'velvet-beta-shell-v7';
 const APP_SHELL = [
   '/membres/',
   '/assets/members-live.css',
@@ -7,6 +7,7 @@ const APP_SHELL = [
   '/assets/members-onboarding-v2.js',
   '/assets/velvet-premium-ui.css',
   '/assets/velvet-premium-ui.js',
+  '/assets/velvet-editorial-ui.css',
   '/assets/pwa-ios.js',
   '/assets/photo-protection.js',
   '/assets/location-verification.js',

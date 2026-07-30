@@ -27,6 +27,7 @@ test('la navigation mobile Membres conserve cinq destinations prioritaires', asy
 
   assert.deepEqual(routes, ['home', 'discover', 'maps', 'conversations', 'me']);
   assert.match(html, /velvet-premium-ui\.css/);
+  assert.match(html, /velvet-editorial-ui\.css/);
   assert.match(html, /velvet-premium-ui\.js/);
 });
 
@@ -39,11 +40,38 @@ test('PRO et Contrôle chargent le même langage visuel et mobile', async () => 
 
   for (const html of [pro, control]) {
     assert.match(html, /velvet-premium-ui\.css/);
+    assert.match(html, /velvet-editorial-ui\.css/);
     assert.match(html, /velvet-premium-ui\.js/);
     assert.match(html, /velvet-icon-192\.png/);
   }
   assert.match(css, /\.velvet-pro-ui \.mobile-nav/);
   assert.match(css, /\.velvet-control-ui \.control-mobile-nav/);
+});
+
+test('la direction artistique éditoriale traite les profils et toutes les surfaces produit', async () => {
+  const [css, ui, auth, sw] = await Promise.all([
+    read('apps/beta/static/assets/velvet-editorial-ui.css'),
+    read('apps/beta/static/assets/velvet-premium-ui.js'),
+    read('apps/web/velvet-auth-beta-rc1.html'),
+    read('apps/beta/static/sw.js')
+  ]);
+
+  for (const selector of [
+    '.velvet-member-ui .hero',
+    '.velvet-member-ui .profile-layout',
+    '.velvet-member-ui .discover-layout',
+    '.velvet-member-ui .velvet-map',
+    '.velvet-member-ui .settings-layout',
+    '.velvet-pro-ui .content',
+    '.velvet-control-ui .page',
+    '.velvet-auth-ui .auth-box'
+  ]) {
+    assert.match(css, new RegExp(selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+  assert.match(ui, /dataset\.velvetView/);
+  assert.match(auth, /velvet-editorial-ui\.css/);
+  assert.match(sw, /velvet-beta-shell-v7/);
+  assert.match(sw, /velvet-editorial-ui\.css/);
 });
 
 test('les icônes PWA sont servies comme actifs statiques', async () => {

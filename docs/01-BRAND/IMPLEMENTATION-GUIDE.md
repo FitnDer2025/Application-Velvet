@@ -33,6 +33,24 @@ Velvet est sombre, cinématographique, chaleureux et premium. L'expérience doit
 
 ## Architecture visuelle
 
+### Composition éditoriale
+
+- Chaque écran possède un seul niveau de lecture principal ; toutes les cartes ne doivent jamais avoir le même poids.
+- Les groupes d'informations proches peuvent partager une même surface et être séparés par des filets fins plutôt que par une succession d'encadrements.
+- Les titres utilisent de grands écarts de taille et des espacements généreux, tandis que les textes fonctionnels restent compacts.
+- Les ombres indiquent la profondeur ou une surface flottante ; elles ne sont pas appliquées systématiquement à tous les blocs.
+- Les actions principales sont regroupées près de l'identité ou de l'objet auquel elles s'appliquent.
+- Sur mobile, les métriques et raccourcis peuvent défiler horizontalement par ensembles courts afin de préserver une hauteur utile immédiate.
+
+### Profils membres
+
+- La photographie occupe la majorité du premier écran et conserve un cadrage digne d'une couverture éditoriale.
+- L'identité, la zone publique, le type de profil et les âges restent immédiatement lisibles.
+- Le récit du profil forme un flux continu ; les sections sont séparées par le rythme, la typographie et des filets, sans répétition de cartes autonomes.
+- Les fiches personnelles, la localisation, les disponibilités et les lieux préférés forment une colonne contextuelle compacte sur grand écran.
+- Sur mobile, la photographie précède l'identité et les actions sans texte superposé sur les zones essentielles du visage.
+- Les commandes de sécurité restent accessibles mais visuellement secondaires tant qu'elles ne sont pas ouvertes.
+
 ### Espaces publics
 
 Découverte, événements, clubs et voyages conservent une sensation plus ouverte : images lumineuses, détails champagne, respiration importante.

@@ -80,6 +80,13 @@
   function memberUi() {
     if (!document.querySelector('.app-shell .bottom-nav')) return false;
     document.body.classList.add('velvet-member-ui');
+    const memberProfile = document.querySelector('#content .hero');
+    const activeMemberRoute = document.querySelector('.sidebar [data-route].active')?.dataset.route
+      || document.querySelector('.bottom-nav [data-route].active')?.dataset.route
+      || 'home';
+    document.body.dataset.velvetView = memberProfile
+      ? `member-profile-${memberProfile.querySelector('[data-edit-profile]') ? 'own' : 'public'}`
+      : `member-${activeMemberRoute}`;
     document.querySelectorAll('.brand-mark').forEach((mark) => {
       if (mark.querySelector('img')) return;
       mark.innerHTML = '<img src="/assets/velvet-icon-192.png" alt="" width="44" height="44">';
@@ -198,6 +205,7 @@
       button.innerHTML = `${icon(name)}<small>${mobileLabels[name] || label || 'Espace'}</small>`;
     });
     const activeRoute = document.querySelector('.nav button.active')?.getAttribute('onclick')?.match(/go\('([^']+)'\)/)?.[1];
+    document.body.dataset.velvetView = `pro-${activeRoute || 'dashboard'}`;
     document.querySelectorAll('#mobileNav button').forEach((button) => {
       const mobileRoute = button.getAttribute('onclick')?.match(/go\('([^']+)'\)/)?.[1];
       button.classList.toggle('active', Boolean(activeRoute && mobileRoute === activeRoute));
@@ -208,6 +216,7 @@
   function controlUi() {
     if (!document.querySelector('.top .tabs') || !document.querySelector('#operationsView')) return false;
     document.body.classList.add('velvet-control-ui');
+    document.body.dataset.velvetView = `control-${document.querySelector('.top .tab.active[data-view]')?.dataset.view || 'operations'}`;
     const brand = document.querySelector('.top > .brand');
     if (brand && !brand.querySelector('.velvet-brand-lockup')) brand.innerHTML = brandMarkup('CONTRÔLE');
     document.querySelectorAll('.top .tab[data-view]').forEach((button) => {
