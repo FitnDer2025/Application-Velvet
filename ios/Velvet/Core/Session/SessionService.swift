@@ -129,6 +129,10 @@ final class SessionService: Sendable {
         try await api.get("/api/members/directory", as: DirectoryResponse.self)
     }
 
+    func memberMap() async throws -> MemberMapResponse {
+        try await api.get("/api/members/map", as: MemberMapResponse.self)
+    }
+
     func notifications() async throws -> NotificationFeed {
         try await api.get("/api/members/notifications", as: NotificationFeed.self)
     }
