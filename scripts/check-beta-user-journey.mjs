@@ -70,12 +70,12 @@ const journeys = [
     name: 'Photos de profil et admission',
     valid: has('functions/api/members/photos.js', 'photo_persistence_failed', 'record_photo_ai_decision', 'admission', 'profile_members!inner(user_id,status),individual_profiles')
       && has('functions/api/members/photos.js', 'onRequestPatch', 'photo_ai_retry_failed', '/storage/v1/object/authenticated/')
-      && has('functions/api/members/media.js', '/storage/v1/', "replace(/^\\/+/, '')", 'expiresIn: 600')
+      && has('functions/api/members/media.js', '/storage/v1/', "replace(/^\\/+/, '')", 'expiresIn: ttl', "signedPath.startsWith('/storage/v1/')")
       && has('apps/beta/static/assets/members-live.js', '/api/members/photos', 'photo-upload-status')
       && has('apps/beta/static/assets/members-live.js', 'Album système public', 'Photos de profil', 'profilePhotos.length || albums.length', 'data-album-folder', 'Ouvrir le dossier')
       && has('apps/beta/static/assets/members-onboarding-v2.js', "profile.profile_type === 'individual' && galleryCount < 3", 'data-add-gallery')
-      && has('functions/api/control/workspace.js', 'decide_profile_photo', 'control_decide_profile_photo')
-      && has('apps/beta/static/assets/control-live.js', 'data-photo-decision', 'Photos de profil à contrôler')
+      && has('functions/api/control/workspace.js', 'decide_media', 'control_decide_media')
+      && has('apps/beta/static/assets/control-live.js', 'data-media-decision', 'Médias à contrôler', 'control-media-viewer')
   },
   {
     name: 'Albums publics et privés',

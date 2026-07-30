@@ -1,20 +1,29 @@
 import { supabase } from '../auth/_shared.js';
 
-export async function signedMediaUrl(env, session, path) {
+export async function signedMediaUrl(env, session, path, expiresIn = 600) {
   if (!path) return null;
+  const ttl = Math.max(60, Math.min(3600, Number(expiresIn) || 600));
   const response = await supabase(
     env,
     `/storage/v1/object/sign/velvet-media/${path}`,
     {
       method: 'POST',
-      body: JSON.stringify({ expiresIn: 600 })
+      body: JSON.stringify({ expiresIn: ttl })
     },
     session.access_token
   );
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || !payload.signedURL) return null;
-  const storageBase = `${String(env.SUPABASE_URL).replace(/\/$/, '')}/storage/v1/`;
-  return new URL(String(payload.signedURL).replace(/^\/+/, ''), storageBase).toString();
+  const supabaseBase = String(env.SUPABASE_URL).replace(/\/$/, '');
+  const signedPath = String(payload.signedURL);
+  if (/^https?:\/\//i.test(signedPath)) return signedPath;
+  if (signedPath.startsWith('/storage/v1/')) {
+    return new URL(signedPath, `${supabaseBase}/`).toString();
+  }
+  return new URL(
+    signedPath.replace(/^\/+/, ''),
+    `${supabaseBase}/storage/v1/`
+  ).toString();
 }
 
 async function enrichRows(env, session, rows = []) {

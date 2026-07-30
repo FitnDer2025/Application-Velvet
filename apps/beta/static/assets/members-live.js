@@ -141,6 +141,7 @@
     message_required: 'Écris un message avant de l’envoyer.',
     photo_admission_required: 'Les photos publiques doivent être validées avant cette action.',
     invalid_photo_file: 'Choisis une photo JPG, PNG ou WebP de moins de 4 Mo.',
+    invalid_album_media_file: 'Choisis une photo de moins de 4 Mo ou une vidéo MP4, WebM ou MOV de moins de 50 Mo.',
     personal_photo_owner_required: 'Chaque personne doit publier elle-même son portrait.',
     photo_access_denied: 'Cette photo n’est plus accessible.',
     cannot_react_to_own_photo: 'Tu peux consulter les réactions reçues, mais pas réagir à ta propre photo.',
@@ -485,6 +486,12 @@
   }
 
   function albumPhotoFigure(photo, albumKey, index, alt, ownProfile) {
+    if (photo.media_type === 'video') {
+      return `<figure class="album-photo album-video">
+        <video controls playsinline preload="metadata" src="${e(photo.previewUrl)}" aria-label="${e(alt)}"></video>
+        ${photoReactionBar(photo, ownProfile)}
+      </figure>`;
+    }
     return `<figure class="album-photo">
       <button class="album-photo-button" type="button" data-album-lightbox="${e(albumKey)}" data-lightbox-index="${index}" aria-label="Agrandir ${e(alt)}">
         <img src="${e(photo.previewUrl)}" alt="${e(alt)}">
@@ -2484,6 +2491,7 @@
         </details>` : ''}
         ${albums.map((album) => {
         const photos = list(album.media_assets).filter((photo) => photo.previewUrl);
+        const coverMedia = photos.find((photo) => photo.media_type !== 'video');
         const pendingPhotos = photos.filter((photo) => photo.moderation_status === 'pending').length;
         const isPublic = album.confidentiality === 'public';
         const canSee = own || isPublic || photos.length > 0;
@@ -2491,12 +2499,12 @@
           (grant) => !grant.revoked_at && (!grant.expires_at || new Date(grant.expires_at) > new Date())
         );
         const grantedProfiles = [...new Set(activeGrants.map((grant) => grant.grantee_profile_id).filter(Boolean))];
-        const countLabel = `${photos.length} photo${photos.length > 1 ? 's' : ''}`;
+        const countLabel = `${photos.length} média${photos.length > 1 ? 's' : ''}`;
         return `<details class="album-folder ${isPublic ? 'public' : 'private'}" data-album-folder>
           <summary class="album-folder-cover">
             <span class="album-cover-media ${canSee && photos.length ? '' : 'locked'}">
-              ${canSee && photos.length
-                ? `<img src="${e(photos[0].previewUrl)}" alt="Couverture de l’album ${e(album.name)}">`
+              ${canSee && coverMedia
+                ? `<img src="${e(coverMedia.previewUrl)}" alt="Couverture de l’album ${e(album.name)}">`
                 : `<span class="album-cover-placeholder">${isPublic ? '⌑' : '◇'}</span>`}
               <span class="album-cover-count">${canSee ? countLabel : 'Contenu privé'}</span>
             </span>
@@ -2519,9 +2527,9 @@
                 own
               )).join('')}</div>` : '<p class="muted">Aucune photo visible dans cet album.</p>')
               : '<div class="private-vault"><span>⌑</span><strong>Album privé verrouillé</strong><p>Aucune miniature ni information sur son contenu n’est révélée.</p></div>'}
-            ${own && pendingPhotos ? `<p class="status-box">${pendingPhotos} photo${pendingPhotos > 1 ? 's' : ''} visible${pendingPhotos > 1 ? 's' : ''} seulement par vous, en attente de modération.</p>` : ''}
+            ${own && pendingPhotos ? `<p class="status-box">${pendingPhotos} média${pendingPhotos > 1 ? 's' : ''} visible${pendingPhotos > 1 ? 's' : ''} seulement par vous, en attente de modération.</p>` : ''}
             ${own ? `<form class="album-photo-form" data-album-id="${e(album.id)}">
-              <label>Ajouter des photos<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required></label>
+              <label>Ajouter des photos ou vidéos<input type="file" name="photos" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" multiple required></label>
               <button class="secondary" type="submit">Ajouter à l’album</button><small class="photo-upload-status" role="status"></small>
             </form>` : ''}
             ${own && !isPublic ? `<div class="album-access-panel">
@@ -4008,7 +4016,9 @@
           for (let index = 0; index < files.length; index += 1) {
             status.textContent = `Envoi ${index + 1}/${files.length}…`;
             const body = new FormData();
-            body.set('photo', await optimizePhoto(files[index]));
+            body.set('photo', files[index].type.startsWith('image/')
+              ? await optimizePhoto(files[index])
+              : files[index]);
             body.set('albumId', form.dataset.albumId);
             await api('/api/members/album-media', { method: 'POST', body });
           }
