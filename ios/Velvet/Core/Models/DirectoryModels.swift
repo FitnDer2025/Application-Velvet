@@ -135,3 +135,59 @@ struct EventRegistrationResponse: Decodable, Sendable {
     let ok: Bool
     let status: String?
 }
+
+struct MemberMapResponse: Decodable, Sendable {
+    let center: MapCenter
+    let members: [MemberMapMarker]
+    let venues: [VenueMapMarker]
+    let events: [EventMapMarker]
+    let privacy: MapPrivacy?
+}
+
+struct MapCenter: Decodable, Sendable {
+    let latitude: Double
+    let longitude: Double
+    let zoom: Double?
+    let radiusKm: Double?
+    let source: String?
+}
+
+struct MemberMapMarker: Decodable, Identifiable, Sendable {
+    let id: UUID
+    let type: String
+    let profileType: String?
+    let name: String
+    let zone: String?
+    let latitude: Double
+    let longitude: Double
+    let photoUrl: URL?
+}
+
+struct VenueMapMarker: Decodable, Identifiable, Sendable {
+    let id: UUID
+    let type: String
+    let name: String
+    let kind: String?
+    let categoryPrimary: String?
+    let city: String?
+    let latitude: Double
+    let longitude: Double
+    let website: String?
+    let verificationStatus: String?
+}
+
+struct EventMapMarker: Decodable, Identifiable, Sendable {
+    let id: UUID
+    let type: String
+    let title: String
+    let startsAt: String?
+    let locationPublic: String?
+    let latitude: Double
+    let longitude: Double
+}
+
+struct MapPrivacy: Decodable, Sendable {
+    let exactMemberCoordinatesExposed: Bool?
+    let memberMarkerMeaning: String?
+    let venueMarkerMeaning: String?
+}
