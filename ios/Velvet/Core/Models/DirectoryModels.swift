@@ -2,10 +2,13 @@ import Foundation
 
 struct MediaAsset: Codable, Identifiable, Sendable {
     let id: UUID
+    let individualProfileId: UUID?
+    let ownerUserId: UUID?
     let mediaRole: String?
     let isPrimary: Bool?
     let moderationStatus: String?
     let previewUrl: URL?
+    let createdAt: String?
 }
 
 struct DirectoryResponse: Decodable, Sendable {
@@ -15,7 +18,36 @@ struct DirectoryResponse: Decodable, Sendable {
     let venueDirectory: [Venue]
     let events: [VelvetEvent]
     let conversations: [Conversation]
+    let recommendations: [Recommendation]?
     let currentUserId: UUID?
+}
+
+struct Recommendation: Codable, Identifiable, Sendable {
+    let id: UUID
+    let authorProfileId: UUID?
+    let targetType: String?
+    let targetId: UUID?
+    let body: String?
+    let rating: Int?
+    let createdAt: String?
+}
+
+struct ProfileAlbum: Codable, Identifiable, Sendable {
+    let id: UUID
+    let name: String
+    let confidentiality: String?
+    let expiresAt: String?
+    let createdAt: String?
+    let mediaAssets: [AlbumMediaAsset]?
+}
+
+struct AlbumMediaAsset: Codable, Identifiable, Sendable {
+    let id: UUID
+    let ownerUserId: UUID?
+    let mediaType: String?
+    let moderationStatus: String?
+    let previewUrl: URL?
+    let createdAt: String?
 }
 
 struct Establishment: Codable, Identifiable, Sendable {
@@ -190,4 +222,17 @@ struct MapPrivacy: Decodable, Sendable {
     let exactMemberCoordinatesExposed: Bool?
     let memberMarkerMeaning: String?
     let venueMarkerMeaning: String?
+}
+
+struct DiscoveryStateResponse: Decodable, Sendable {
+    let presence: [PresenceSnapshot]
+    let following: [UUID]?
+    let access: MemberAccess?
+    let persistenceAvailable: Bool?
+    let presenceAvailable: Bool?
+}
+
+struct PresenceSnapshot: Decodable, Sendable {
+    let profileId: UUID
+    let presenceStatus: String
 }
