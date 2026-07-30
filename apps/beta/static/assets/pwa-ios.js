@@ -117,7 +117,7 @@
     sheet.id = 'velvetIosGuide';
     sheet.innerHTML = `<div class="velvet-ios-card">
       <button type="button" aria-label="Fermer">×</button>
-      <span class="velvet-ios-icon">V</span>
+      <span class="velvet-ios-icon"><img src="/assets/velvet-icon-192.png" alt="" width="58" height="58"></span>
       <p>Velvet sur iPhone</p>
       <h2>Ajoute Velvet à ton écran d’accueil.</h2>
       <ol><li>Dans Safari, touche <strong>Partager</strong>.</li><li>Choisis <strong>Sur l’écran d’accueil</strong>.</li><li>Ouvre ensuite l’icône Velvet et active les notifications dans Paramètres.</li></ol>
@@ -142,7 +142,7 @@
     if (document.querySelector('#velvetPwaStyles')) return;
     const style = document.createElement('style');
     style.id = 'velvetPwaStyles';
-    style.textContent = `.velvet-ios-card{width:min(520px,calc(100vw - 28px));margin:0 auto 12px;padding:24px;border:1px solid rgba(217,184,121,.32);border-radius:26px;background:#171014;color:#f6eee6;box-shadow:0 24px 80px #0009}.velvet-ios-card>button{float:right;border:0;background:transparent;color:#cdbfc4;font-size:30px}.velvet-ios-icon{display:grid;place-items:center;width:58px;height:58px;border-radius:18px;background:linear-gradient(145deg,#8f274e,#2a0d19);color:#f0d39b;font:700 30px Georgia,serif}.velvet-ios-card p{margin:18px 0 6px;color:#d9b879;text-transform:uppercase;letter-spacing:.12em;font-size:11px}.velvet-ios-card h2{margin:0 0 16px;font:400 29px Georgia,serif}.velvet-ios-card li{margin:9px 0;color:#d7cdd0}.velvet-ios-card small{display:block;margin-top:18px;color:#9e9297;line-height:1.5}#velvetIosGuide{position:fixed;inset:0;z-index:99999;display:grid;align-items:end;padding:16px;background:#030203b8;backdrop-filter:blur(8px)}`;
+    style.textContent = `.velvet-ios-card{width:min(520px,calc(100vw - 28px));margin:0 auto 12px;padding:24px;border:1px solid rgba(217,184,121,.32);border-radius:26px;background:#171014;color:#f6eee6;box-shadow:0 24px 80px #0009}.velvet-ios-card>button{float:right;border:0;background:transparent;color:#cdbfc4;font-size:30px}.velvet-ios-icon{display:block;width:58px;height:58px;overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:#0D0D0D;box-shadow:0 14px 42px rgba(100,27,54,.38)}.velvet-ios-icon img{display:block;width:100%;height:100%;object-fit:cover}.velvet-ios-card p{margin:18px 0 6px;color:#d9b879;text-transform:uppercase;letter-spacing:.12em;font-size:11px}.velvet-ios-card h2{margin:0 0 16px;font:400 29px Georgia,serif}.velvet-ios-card li{margin:9px 0;color:#d7cdd0}.velvet-ios-card small{display:block;margin-top:18px;color:#9e9297;line-height:1.5}#velvetIosGuide{position:fixed;inset:0;z-index:99999;display:grid;align-items:end;padding:16px;background:#030203b8;backdrop-filter:blur(8px)}`;
     document.head.appendChild(style);
   }
 

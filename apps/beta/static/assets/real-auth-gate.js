@@ -33,7 +33,7 @@
 
   function shell(content) {
     return `<div class="vg-card">
-      <div class="vg-mark">V</div>
+      <div class="vg-mark"><img src="/assets/velvet-icon-192.png" alt="" width="54" height="54"></div>
       <p class="vg-kicker">BETA PRIVÉE · 18+</p>
       <h1>Velvet</h1>
       ${content}
@@ -275,7 +275,8 @@
   style.textContent = `
     #velvet-real-gate{position:fixed;inset:0;z-index:10050;display:grid;place-items:center;padding:22px;background:rgba(5,4,5,.72);backdrop-filter:blur(16px);color:#f7f2f3;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:auto}
     .vg-card{width:min(100%,440px);padding:30px;border:1px solid rgba(255,255,255,.14);border-radius:28px;background:linear-gradient(145deg,rgba(32,20,25,.97),rgba(11,9,11,.98));box-shadow:0 28px 100px rgba(0,0,0,.55)}
-    .vg-mark{width:54px;height:54px;margin:auto;display:grid;place-items:center;border-radius:17px;background:linear-gradient(145deg,#8b183c,#4f0d24);font:700 29px Georgia;color:white;box-shadow:0 10px 35px rgba(126,19,53,.42)}
+    .vg-mark{width:58px;height:58px;margin:auto;overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:19px;background:#0D0D0D;box-shadow:0 14px 42px rgba(100,27,54,.38)}
+    .vg-mark img{display:block;width:100%;height:100%;object-fit:cover}
     .vg-kicker{text-align:center;margin:17px 0 5px;color:#d3a6b4;font-size:11px;letter-spacing:.2em}.vg-card h1{text-align:center;margin:0 0 8px;font:500 36px Georgia}.vg-intro{text-align:center;color:#c8bec1;line-height:1.55;margin:0 0 22px}
     .vg-card form{display:grid;gap:14px}.vg-card label{display:grid;gap:7px;color:#d7cdd0;font-size:13px}.vg-card input:not([type=checkbox]){width:100%;box-sizing:border-box;padding:13px 14px;border:1px solid #ffffff1f;border-radius:13px;background:#ffffff0b;color:white;font:inherit;outline:none}.vg-card input:focus{border-color:#b53a61;box-shadow:0 0 0 3px #8b183c33}
     .vg-card button[type=submit]{margin-top:4px;padding:14px;border:0;border-radius:14px;background:linear-gradient(135deg,#a6204b,#68132f);color:white;font-weight:700;cursor:pointer}.vg-link{display:block;margin:16px auto 0;border:0;background:transparent;color:#d8a9b8;cursor:pointer}

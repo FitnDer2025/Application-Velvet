@@ -70,13 +70,19 @@ test('la direction artistique éditoriale traite les profils et toutes les surfa
   }
   assert.match(ui, /dataset\.velvetView/);
   assert.match(auth, /velvet-editorial-ui\.css/);
-  assert.match(sw, /velvet-beta-shell-v7/);
+  assert.match(sw, /velvet-beta-shell-v8/);
   assert.match(sw, /velvet-editorial-ui\.css/);
 });
 
 test('les icônes PWA sont servies comme actifs statiques', async () => {
-  const worker = await read('apps/beta/worker/index.js');
+  const [worker, gate, ios] = await Promise.all([
+    read('apps/beta/worker/index.js'),
+    read('apps/beta/static/assets/real-auth-gate.js'),
+    read('apps/beta/static/assets/pwa-ios.js')
+  ]);
   assert.doesNotMatch(worker, /velvetIconResponse/);
+  assert.match(gate, /vg-mark"><img src="\/assets\/velvet-icon-192\.png"/);
+  assert.match(ios, /velvet-ios-icon"><img src="\/assets\/velvet-icon-192\.png"/);
 
   for (const [path, expected] of [
     ['apps/beta/static/assets/velvet-icon-180.png', 180],
