@@ -27,6 +27,30 @@ struct MainShellView: View {
             case .profile: "person.crop.circle"
             }
         }
+
+        var selectedIcon: String {
+            switch self {
+            case .home: "house.fill"
+            case .discover: "magnifyingglass.circle.fill"
+            case .maps: "map.fill"
+            case .messages: "bubble.left.and.bubble.right.fill"
+            case .profile: "person.crop.circle.fill"
+            }
+        }
+    }
+
+    private enum MenuRoute {
+        case directory
+        case agenda
+        case notifications
+
+        var placesSelection: Int? {
+            switch self {
+            case .directory: 1
+            case .agenda: 0
+            case .notifications: nil
+            }
+        }
     }
 
     let profile: MemberProfile
@@ -34,6 +58,9 @@ struct MainShellView: View {
     @State private var selectedTab: Tab = .home
     @State private var showsNotifications = false
     @State private var showsMenu = false
+    @State private var showsPlacesEvents = false
+    @State private var pendingMenuRoute: MenuRoute?
+    @State private var placesSelection = 0
 
     var body: some View {
         ZStack {
@@ -58,22 +85,38 @@ struct MainShellView: View {
             NotificationsView()
                 .environmentObject(store)
         }
-        .sheet(isPresented: $showsMenu) {
+        .sheet(isPresented: $showsMenu, onDismiss: openPendingMenuRoute) {
             NavigationStack {
                 VelvetMenuView(
                     openPlaces: {
+                        pendingMenuRoute = .directory
                         showsMenu = false
-                        selectedTab = .maps
                     },
                     openNotifications: {
+                        pendingMenuRoute = .notifications
                         showsMenu = false
-                        showsNotifications = true
+                    },
+                    openAgenda: {
+                        pendingMenuRoute = .agenda
+                        showsMenu = false
                     }
                 )
                 .environmentObject(store)
             }
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showsPlacesEvents) {
+            NavigationStack {
+                PlacesEventsView(initialSelection: placesSelection)
+                    .environmentObject(store)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button("Fermer") { showsPlacesEvents = false }
+                                .foregroundStyle(VelvetColor.champagneGold)
+                        }
+                    }
+            }
         }
         .alert(
             "Velvet",
@@ -113,7 +156,7 @@ struct MainShellView: View {
                     }
                 } label: {
                     VStack(spacing: 5) {
-                        Image(systemName: selectedTab == tab ? "\(tab.icon).fill" : tab.icon)
+                        Image(systemName: selectedTab == tab ? tab.selectedIcon : tab.icon)
                             .font(.system(size: 17, weight: .medium))
                             .frame(height: 20)
                         Text(tab.label)
@@ -142,12 +185,26 @@ struct MainShellView: View {
                 .frame(height: 1)
         }
     }
+
+    private func openPendingMenuRoute() {
+        guard let route = pendingMenuRoute else { return }
+        pendingMenuRoute = nil
+        DispatchQueue.main.async {
+            if let selection = route.placesSelection {
+                placesSelection = selection
+                showsPlacesEvents = true
+            } else {
+                showsNotifications = true
+            }
+        }
+    }
 }
 
 private struct VelvetMenuView: View {
     @Environment(\.dismiss) private var dismiss
     let openPlaces: () -> Void
     let openNotifications: () -> Void
+    let openAgenda: () -> Void
 
     var body: some View {
         ZStack {
@@ -164,9 +221,7 @@ private struct VelvetMenuView: View {
                     menuButton("Sorties & établissements", icon: "sparkles", action: openPlaces)
                     menuButton("Notifications", icon: "bell", action: openNotifications)
 
-                    NavigationLink {
-                        PlacesEventsView()
-                    } label: {
+                    Button(action: openAgenda) {
                         menuLabel("Agenda complet", icon: "calendar")
                     }
                     .buttonStyle(.plain)
