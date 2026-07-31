@@ -23,6 +23,7 @@ struct MemberProfile: Codable, Identifiable, Sendable {
     let description: String?
     let admissionStatus: String?
     let verificationStatus: String?
+    let profilePhotoReady: Bool?
     let createdAt: String?
     let updatedAt: String?
     let story: String?
@@ -39,6 +40,10 @@ struct MemberProfile: Codable, Identifiable, Sendable {
 
     var isAdmitted: Bool {
         admissionStatus == "approved"
+    }
+
+    var isVisibleToMembers: Bool {
+        profilePhotoReady != false
     }
 }
 
