@@ -5,6 +5,10 @@ private struct ExperiencePreferencesResponse: Codable, Sendable {
     let preferences: ExperiencePreferences
 }
 
+private struct ExperienceAcknowledgementResponse: Codable, Sendable {
+    let ok: Bool
+}
+
 extension SessionService {
     func homeIntelligence() async throws -> HomeIntelligenceResponse {
         try await APIClient().get(
@@ -106,10 +110,10 @@ extension SessionService {
     }
 
     func deleteEvent(id: UUID) async throws {
-        let _: AcknowledgementResponse = try await APIClient().delete(
+        let _: ExperienceAcknowledgementResponse = try await APIClient().delete(
             "/api/members/events",
             query: [URLQueryItem(name: "id", value: id.uuidString)],
-            as: AcknowledgementResponse.self
+            as: ExperienceAcknowledgementResponse.self
         )
     }
 }
