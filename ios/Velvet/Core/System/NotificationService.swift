@@ -88,6 +88,10 @@ enum NotificationService {
         let token = data.map { String(format: "%02x", $0) }.joined()
         UserDefaults.standard.set(token, forKey: tokenKey)
 
+        #if DEBUG
+        print("Velvet APNs device token (sandbox): \(token)")
+        #endif
+
         Task {
             try? await SessionService().registerPushDevice(
                 token: token,
