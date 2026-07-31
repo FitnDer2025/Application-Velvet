@@ -38,7 +38,15 @@ struct VelvetNotificationSnapshot: Codable, Equatable, Sendable {
 }
 
 enum VelvetNotificationSnapshotStore {
-    static let appGroup = "group.com.velvetapplication.app"
+    static var appGroup: String {
+        let configured = (Bundle.main.object(forInfoDictionaryKey: "VelvetAppGroup") as? String)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !configured.isEmpty, !configured.contains("$(") else {
+            return "group.com.velvetapplication.app"
+        }
+        return configured
+    }
+
     static let storageKey = "velvet.notification.snapshot.v1"
     static let widgetKind = "VelvetNotificationWidget"
 
