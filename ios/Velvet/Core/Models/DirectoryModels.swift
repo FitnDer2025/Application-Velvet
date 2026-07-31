@@ -142,9 +142,43 @@ struct MessageAttachment: Codable, Identifiable, Sendable {
     let previewUrl: URL?
 }
 
+struct OutgoingMessageAttachment: Identifiable, Sendable {
+    let id: UUID
+    let data: Data
+    let fileName: String
+    let mimeType: String
+    let mediaType: String
+
+    init(
+        id: UUID = UUID(),
+        data: Data,
+        fileName: String,
+        mimeType: String,
+        mediaType: String
+    ) {
+        self.id = id
+        self.data = data
+        self.fileName = fileName
+        self.mimeType = mimeType
+        self.mediaType = mediaType
+    }
+}
+
+struct ConversationStreak: Codable, Identifiable, Sendable {
+    var id: UUID { conversationId }
+    let conversationId: UUID
+    let currentStreak: Int
+    let longestStreak: Int
+    let qualifiedDays: Int
+    let lastQualifiedDate: String?
+    let lastMessageAt: String?
+    let updatedAt: String?
+}
+
 struct MessagesResponse: Decodable, Sendable {
     let messages: [DirectoryMessage]
     let currentUserId: UUID?
+    let streak: ConversationStreak?
 }
 
 struct CreatedMessageResponse: Decodable, Sendable {
@@ -159,6 +193,7 @@ struct NotificationFeed: Decodable, Sendable {
 
 struct VelvetNotification: Codable, Identifiable, Sendable {
     let id: UUID
+    let actorProfileId: UUID?
     let eventType: String
     let entityType: String?
     let entityId: UUID?
@@ -166,6 +201,47 @@ struct VelvetNotification: Codable, Identifiable, Sendable {
     let body: String?
     let readAt: String?
     let createdAt: String
+}
+
+struct EngagementResponse: Decodable, Sendable {
+    let views: [ProfileViewHistory]
+    let reactions: [ProfileEngagementReaction]
+    let streaks: [ConversationStreak]
+    let currentUserId: UUID?
+    let currentProfileId: UUID?
+}
+
+struct ProfileViewHistory: Codable, Identifiable, Sendable {
+    var id: UUID { viewedProfileId }
+    let viewedProfileId: UUID
+    let firstViewedAt: String?
+    let lastViewedAt: String?
+    let viewCount: Int?
+}
+
+struct ProfileEngagementReaction: Codable, Identifiable, Sendable {
+    var id: String { "\(reactorProfileId?.uuidString ?? "unknown")-\(targetProfileId.uuidString)" }
+    let reactorUserId: UUID?
+    let reactorProfileId: UUID?
+    let targetProfileId: UUID
+    let reaction: Int
+    let reactorName: String?
+    let createdAt: String?
+    let updatedAt: String?
+}
+
+struct PhotoReactionFeed: Decodable, Sendable {
+    let reactions: [PhotoReactionSummary]
+}
+
+struct PhotoReactionSummary: Codable, Identifiable, Sendable {
+    var id: UUID { mediaId }
+    let mediaId: UUID
+    let likeCount: Int?
+    let loveCount: Int?
+    let adoreCount: Int?
+    let totalCount: Int?
+    let myReaction: String?
 }
 
 struct SocialActionState: Decodable, Sendable {

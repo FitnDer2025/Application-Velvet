@@ -26,11 +26,12 @@ test('web avatars are not covered and conversations open through the messages AP
 });
 
 test('native capture protection obscures recording and notifies both parties', async () => {
-  const [root, app, entry, premiumDetail, endpoint] = await Promise.all([
+  const [root, app, entry, premiumDetail, socialGallery, endpoint] = await Promise.all([
     read('ios/Velvet/App/RootView.swift'),
     read('ios/Velvet/VelvetApp.swift'),
     read('ios/Velvet/Features/Discovery/MemberDetailView.swift'),
     read('ios/Velvet/Features/Discovery/PremiumMemberDetailView.swift'),
+    read('ios/Velvet/Features/Discovery/SocialMediaViews.swift'),
     read('functions/api/members/media-security-events.js')
   ]);
 
@@ -42,7 +43,8 @@ test('native capture protection obscures recording and notifies both parties', a
   assert.match(entry, /PremiumMemberDetailView/);
   assert.match(premiumDetail, /screenshotProtection\.protect/);
   assert.match(premiumDetail, /screenshotProtection\.clear/);
-  assert.match(premiumDetail, /VelvetProfileGallery/);
+  assert.match(premiumDetail, /SocialProfileGallery/);
+  assert.match(socialGallery, /InteractiveMediaViewer/);
   assert.match(endpoint, /Capture d’écran détectée/);
   assert.match(endpoint, /Capture signalée/);
   assert.match(endpoint, /member_notifications/);

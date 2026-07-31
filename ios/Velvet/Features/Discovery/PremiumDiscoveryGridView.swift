@@ -206,7 +206,7 @@ struct PremiumDiscoveryGridView: View {
             )
             guard online.contains(profile.id) else { return false }
         }
-        if filters.withPhotos, profile.approvedPhotos.isEmpty { return false }
+        if filters.withPhotos, profile.profileGalleryPhotos.isEmpty { return false }
         if filters.withRecommendation {
             guard store.directory?.recommendations?.contains(where: {
                 $0.targetType == "profile" && $0.targetId == profile.id
@@ -243,17 +243,20 @@ private struct CompactMemberCard: View {
     let profile: MemberProfile
 
     private var photo: URL? {
-        profile.approvedPhotos.first(where: { $0.isPrimary == true })?.previewUrl
-            ?? profile.approvedPhotos.first?.previewUrl
+        profile.profileGalleryPhotos.first(where: { $0.isPrimary == true })?.previewUrl
+            ?? profile.profileGalleryPhotos.first?.previewUrl
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 7) {
             ZStack(alignment: .bottomLeading) {
-                VelvetRemoteImage(url: photo, symbol: profile.profileType == .couple ? "person.2.fill" : "person.fill")
-                    .frame(maxWidth: .infinity)
-                    .aspectRatio(0.78, contentMode: .fit)
-                    .clipped()
+                VelvetRemoteImage(
+                    url: photo,
+                    symbol: profile.profileType == .couple ? "person.2.fill" : "person.fill"
+                )
+                .frame(maxWidth: .infinity)
+                .aspectRatio(0.78, contentMode: .fit)
+                .clipped()
 
                 LinearGradient(
                     colors: [.clear, VelvetColor.velvetBlack.opacity(0.86)],
@@ -262,7 +265,7 @@ private struct CompactMemberCard: View {
                 )
                 .allowsHitTesting(false)
 
-                Text(profile.velvetAudienceLabel.uppercased())
+                Text(profile.velvetDemographicLabel.uppercased())
                     .font(VelvetTypography.caption(size: 7, weight: .bold))
                     .tracking(0.8)
                     .foregroundStyle(VelvetColor.champagneGold)
@@ -283,6 +286,13 @@ private struct CompactMemberCard: View {
                 .font(VelvetTypography.body(size: 12, weight: .semibold))
                 .foregroundStyle(VelvetColor.ivory)
                 .lineLimit(1)
+
+            if let age = profile.velvetAgeLabel {
+                Text(age)
+                    .font(VelvetTypography.caption(size: 9, weight: .semibold))
+                    .foregroundStyle(VelvetColor.champagneGold)
+                    .lineLimit(1)
+            }
 
             Text(profile.locationZone ?? profile.city ?? "Zone privée")
                 .font(VelvetTypography.caption(size: 9))
@@ -423,7 +433,10 @@ private struct PremiumDiscoveryFiltersView: View {
         }
     }
 
-    private func filterCard<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+    private func filterCard<Content: View>(
+        _ title: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
         VelvetCard {
             VStack(alignment: .leading, spacing: 13) {
                 Text(title)
@@ -453,7 +466,11 @@ private struct PremiumDiscoveryFiltersView: View {
         }
     }
 
-    private func ageRow(_ title: String, minimum: Binding<Int>, maximum: Binding<Int>) -> some View {
+    private func ageRow(
+        _ title: String,
+        minimum: Binding<Int>,
+        maximum: Binding<Int>
+    ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title.uppercased())
                 .font(VelvetTypography.caption(size: 9, weight: .semibold))
