@@ -6,6 +6,7 @@ import {
   restJson,
   withSession
 } from './_shared.js';
+import { deliverMessageNotifications } from './_message-notifications.js';
 import { signedMediaUrl } from './media.js';
 
 const ATTACHMENT_TYPES = new Map([
@@ -40,6 +41,36 @@ async function deleteStoredFile(env, session, path) {
   }, session.access_token).catch(() => null);
 }
 
+async function markConversationRead(env, access, conversationId) {
+  await restJson(
+    env,
+    `/rest/v1/conversation_members?conversation_id=eq.${encodeURIComponent(conversationId)}&user_id=eq.${encodeURIComponent(access.account.userId)}&left_at=is.null`,
+    access.session,
+    {
+      method: 'PATCH',
+      headers: { prefer: 'return=minimal' },
+      body: JSON.stringify({ last_read_at: new Date().toISOString() })
+    }
+  ).catch(() => null);
+}
+
+async function messageRecipients(env, access, conversationId) {
+  return restJson(
+    env,
+    `/rest/v1/conversation_members?select=user_id,display_identity&conversation_id=eq.${encodeURIComponent(conversationId)}&user_id=neq.${encodeURIComponent(access.account.userId)}&left_at=is.null`,
+    access.session
+  ).catch(() => []);
+}
+
+async function senderProfile(env, access) {
+  const rows = await restJson(
+    env,
+    `/rest/v1/member_profiles?select=id,display_name,profile_members!inner(user_id,status)&profile_members.user_id=eq.${encodeURIComponent(access.account.userId)}&profile_members.status=eq.active&limit=1`,
+    access.session
+  ).catch(() => []);
+  return rows?.[0] || null;
+}
+
 export async function onRequestGet({ request, env }) {
   try {
     const access = await memberSession(request, env);
@@ -65,6 +96,7 @@ export async function onRequestGet({ request, env }) {
         access.session
       )
     ]);
+    await markConversationRead(env, access, conversationId);
     return withSession({
       messages: await enrichAttachments(env, access.session, messages),
       streak: engagement?.[0] || {
@@ -81,7 +113,7 @@ export async function onRequestGet({ request, env }) {
   }
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   const uploadedPaths = [];
   let cleanupSession = null;
   try {
@@ -173,6 +205,33 @@ export async function onRequestPost({ request, env }) {
     } else {
       savedMessage.attachments = [];
     }
+
+    await Promise.all([
+      markConversationRead(env, access, conversationId),
+      restJson(
+        env,
+        `/rest/v1/conversations?id=eq.${encodeURIComponent(conversationId)}`,
+        access.session,
+        {
+          method: 'PATCH',
+          headers: { prefer: 'return=minimal' },
+          body: JSON.stringify({ updated_at: savedMessage.created_at })
+        }
+      ).catch(() => null)
+    ]);
+
+    const notificationTask = Promise.all([
+      messageRecipients(env, access, conversationId),
+      senderProfile(env, access)
+    ]).then(([recipients, profile]) => deliverMessageNotifications(env, {
+      recipients,
+      senderProfile: profile,
+      conversationId,
+      messageBody: message
+    })).catch(() => null);
+    if (typeof waitUntil === 'function') waitUntil(notificationTask);
+    else await notificationTask;
+
     return withSession({ ok: true, message: savedMessage }, access.session, 201);
   } catch (error) {
     if (cleanupSession) {
