@@ -6,10 +6,79 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		200000000000000000000100 /* VelvetWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 200000000000000000000001 /* VelvetWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		300000000000000000000100 /* VelvetWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 300000000000000000000001 /* VelvetWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		400000000000000000000100 /* VelvetWatchWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 400000000000000000000001 /* VelvetWatchWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		200000000000000000000200 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 100000000000000000000060 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 200000000000000000000040;
+			remoteInfo = VelvetWidget;
+		};
+		300000000000000000000200 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 100000000000000000000060 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 300000000000000000000040;
+			remoteInfo = VelvetWatch;
+		};
+		400000000000000000000200 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 100000000000000000000060 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 400000000000000000000040;
+			remoteInfo = VelvetWatchWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		100000000000000000000052 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				200000000000000000000100 /* VelvetWidget.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		100000000000000000000053 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				300000000000000000000100 /* VelvetWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		300000000000000000000052 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				400000000000000000000100 /* VelvetWatchWidget.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		100000000000000000000001 /* Velvet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Velvet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		100000000000000000000002 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		100000000000000000000003 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		200000000000000000000001 /* VelvetWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = VelvetWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		300000000000000000000001 /* VelvetWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VelvetWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		400000000000000000000001 /* VelvetWatchWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = VelvetWatchWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -17,8 +86,33 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Resources/Info.plist,
+				Resources/Velvet.entitlements,
 			);
 			target = 100000000000000000000040 /* Velvet */;
+		};
+		200000000000000000000011 /* Exceptions for "VelvetWidget" folder in "VelvetWidget" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				VelvetWidget.entitlements,
+			);
+			target = 200000000000000000000040 /* VelvetWidget */;
+		};
+		300000000000000000000011 /* Exceptions for "VelvetWatch" folder in "VelvetWatch" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				VelvetWatch.entitlements,
+			);
+			target = 300000000000000000000040 /* VelvetWatch */;
+		};
+		400000000000000000000011 /* Exceptions for "VelvetWatchWidget" folder in "VelvetWatchWidget" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				VelvetWatchWidget.entitlements,
+			);
+			target = 400000000000000000000040 /* VelvetWatchWidget */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -31,10 +125,55 @@
 			path = Velvet;
 			sourceTree = "<group>";
 		};
+		200000000000000000000010 /* VelvetWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				200000000000000000000011 /* Exceptions for "VelvetWidget" folder in "VelvetWidget" target */,
+			);
+			path = VelvetWidget;
+			sourceTree = "<group>";
+		};
+		300000000000000000000010 /* VelvetWatch */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				300000000000000000000011 /* Exceptions for "VelvetWatch" folder in "VelvetWatch" target */,
+			);
+			path = VelvetWatch;
+			sourceTree = "<group>";
+		};
+		400000000000000000000010 /* VelvetWatchWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				400000000000000000000011 /* Exceptions for "VelvetWatchWidget" folder in "VelvetWatchWidget" target */,
+			);
+			path = VelvetWatchWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		100000000000000000000020 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		200000000000000000000020 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		300000000000000000000020 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		400000000000000000000020 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -48,6 +187,9 @@
 			isa = PBXGroup;
 			children = (
 				100000000000000000000010 /* Velvet */,
+				200000000000000000000010 /* VelvetWidget */,
+				300000000000000000000010 /* VelvetWatch */,
+				400000000000000000000010 /* VelvetWatchWidget */,
 				100000000000000000000031 /* Config */,
 				100000000000000000000032 /* Products */,
 			);
@@ -66,6 +208,9 @@
 			isa = PBXGroup;
 			children = (
 				100000000000000000000001 /* Velvet.app */,
+				200000000000000000000001 /* VelvetWidget.appex */,
+				300000000000000000000001 /* VelvetWatch.app */,
+				400000000000000000000001 /* VelvetWatchWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -80,10 +225,14 @@
 				100000000000000000000050 /* Sources */,
 				100000000000000000000020 /* Frameworks */,
 				100000000000000000000051 /* Resources */,
+				100000000000000000000052 /* Embed App Extensions */,
+				100000000000000000000053 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				200000000000000000000201 /* PBXTargetDependency */,
+				300000000000000000000201 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				100000000000000000000010 /* Velvet */,
@@ -94,6 +243,74 @@
 			productName = Velvet;
 			productReference = 100000000000000000000001 /* Velvet.app */;
 			productType = "com.apple.product-type.application";
+		};
+		200000000000000000000040 /* VelvetWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 200000000000000000000041 /* Build configuration list for PBXNativeTarget "VelvetWidget" */;
+			buildPhases = (
+				200000000000000000000050 /* Sources */,
+				200000000000000000000020 /* Frameworks */,
+				200000000000000000000051 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				200000000000000000000010 /* VelvetWidget */,
+			);
+			name = VelvetWidget;
+			packageProductDependencies = (
+			);
+			productName = VelvetWidget;
+			productReference = 200000000000000000000001 /* VelvetWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		300000000000000000000040 /* VelvetWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 300000000000000000000041 /* Build configuration list for PBXNativeTarget "VelvetWatch" */;
+			buildPhases = (
+				300000000000000000000050 /* Sources */,
+				300000000000000000000020 /* Frameworks */,
+				300000000000000000000051 /* Resources */,
+				300000000000000000000052 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				400000000000000000000201 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				300000000000000000000010 /* VelvetWatch */,
+			);
+			name = VelvetWatch;
+			packageProductDependencies = (
+			);
+			productName = VelvetWatch;
+			productReference = 300000000000000000000001 /* VelvetWatch.app */;
+			productType = "com.apple.product-type.application.watchapp2";
+		};
+		400000000000000000000040 /* VelvetWatchWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 400000000000000000000041 /* Build configuration list for PBXNativeTarget "VelvetWatchWidget" */;
+			buildPhases = (
+				400000000000000000000050 /* Sources */,
+				400000000000000000000020 /* Frameworks */,
+				400000000000000000000051 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				400000000000000000000010 /* VelvetWatchWidget */,
+			);
+			name = VelvetWatchWidget;
+			packageProductDependencies = (
+			);
+			productName = VelvetWatchWidget;
+			productReference = 400000000000000000000001 /* VelvetWatchWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -106,6 +323,15 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					100000000000000000000040 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					200000000000000000000040 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					300000000000000000000040 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					400000000000000000000040 = {
 						CreatedOnToolsVersion = 16.0;
 					};
 				};
@@ -126,12 +352,36 @@
 			projectRoot = "";
 			targets = (
 				100000000000000000000040 /* Velvet */,
+				200000000000000000000040 /* VelvetWidget */,
+				300000000000000000000040 /* VelvetWatch */,
+				400000000000000000000040 /* VelvetWatchWidget */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		100000000000000000000051 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		200000000000000000000051 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		300000000000000000000051 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		400000000000000000000051 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -148,7 +398,46 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		200000000000000000000050 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		300000000000000000000050 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		400000000000000000000050 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		200000000000000000000201 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 200000000000000000000040 /* VelvetWidget */;
+			targetProxy = 200000000000000000000200 /* PBXContainerItemProxy */;
+		};
+		300000000000000000000201 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 300000000000000000000040 /* VelvetWatch */;
+			targetProxy = 300000000000000000000200 /* PBXContainerItemProxy */;
+		};
+		400000000000000000000201 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 400000000000000000000040 /* VelvetWatchWidget */;
+			targetProxy = 400000000000000000000200 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		100000000000000000000070 /* Debug */ = {
@@ -276,7 +565,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.velvetapplication.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -306,7 +595,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.velvetapplication.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -315,6 +604,174 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		200000000000000000000072 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = VelvetWidget/VelvetWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VelvetWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.velvetapplication.app.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		200000000000000000000073 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = VelvetWidget/VelvetWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VelvetWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.velvetapplication.app.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		300000000000000000000072 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = VelvetWatch/VelvetWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VelvetWatch/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.velvetapplication.app.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		300000000000000000000073 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = VelvetWatch/VelvetWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VelvetWatch/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.velvetapplication.app.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		400000000000000000000072 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = VelvetWatchWidget/VelvetWatchWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VelvetWatchWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.velvetapplication.app.watchkitapp.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		400000000000000000000073 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = VelvetWatchWidget/VelvetWatchWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VelvetWatchWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.velvetapplication.app.watchkitapp.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;
 		};
@@ -335,6 +792,33 @@
 			buildConfigurations = (
 				100000000000000000000070 /* Debug */,
 				100000000000000000000071 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		200000000000000000000041 /* Build configuration list for PBXNativeTarget "VelvetWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				200000000000000000000072 /* Debug */,
+				200000000000000000000073 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		300000000000000000000041 /* Build configuration list for PBXNativeTarget "VelvetWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				300000000000000000000072 /* Debug */,
+				300000000000000000000073 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		400000000000000000000041 /* Build configuration list for PBXNativeTarget "VelvetWatchWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				400000000000000000000072 /* Debug */,
+				400000000000000000000073 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
