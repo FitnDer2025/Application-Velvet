@@ -4,7 +4,9 @@
   const root = document.documentElement;
   const state = {
     scheduled: false,
-    wasKeyboardOpen: false
+    wasKeyboardOpen: false,
+    composerObserver: null,
+    observedComposer: null
   };
 
   function lockViewportMeta() {
@@ -21,10 +23,59 @@
     if (document.body?.scrollLeft) document.body.scrollLeft = 0;
   }
 
+  function chatElements() {
+    return {
+      page: document.querySelector('.velvet-whatsapp-layout'),
+      panel: document.querySelector('.velvet-whatsapp-layout .velvet-chat-panel'),
+      messages: document.querySelector('.velvet-whatsapp-layout .messages'),
+      composer: document.querySelector('.velvet-whatsapp-layout .composer.composer-v2'),
+      textarea: document.querySelector('.velvet-whatsapp-layout textarea[name="body"]')
+    };
+  }
+
   function scrollLatestMessage(behavior = 'auto') {
-    const messages = document.querySelector('.velvet-whatsapp-layout .messages');
+    const { messages } = chatElements();
     if (!messages) return;
     messages.scrollTo({ top: messages.scrollHeight, behavior });
+  }
+
+  function observeComposer() {
+    const { composer } = chatElements();
+    if (composer === state.observedComposer) return;
+    state.composerObserver?.disconnect();
+    state.observedComposer = composer || null;
+    if (!composer || typeof ResizeObserver !== 'function') return;
+    state.composerObserver = new ResizeObserver(() => {
+      scheduleViewport();
+      requestAnimationFrame(() => scrollLatestMessage('auto'));
+    });
+    state.composerObserver.observe(composer);
+  }
+
+  function keepInputVisible(behavior = 'auto') {
+    const { panel, messages, composer, textarea } = chatElements();
+    if (!panel || !messages || !composer) return;
+
+    const panelHeight = panel.getBoundingClientRect().height;
+    const composerHeight = composer.getBoundingClientRect().height;
+    root.style.setProperty('--velvet-composer-height', `${Math.ceil(composerHeight)}px`);
+
+    if (panelHeight > composerHeight && document.activeElement === textarea) {
+      messages.scrollTo({ top: messages.scrollHeight, behavior });
+    }
+  }
+
+  function clearChatViewport() {
+    root.style.removeProperty('--velvet-chat-height');
+    root.style.removeProperty('--velvet-chat-width');
+    root.style.removeProperty('--velvet-chat-offset-top');
+    root.style.removeProperty('--velvet-chat-offset-left');
+    root.style.removeProperty('--velvet-composer-height');
+    document.body?.classList.remove('velvet-keyboard-open');
+    state.wasKeyboardOpen = false;
+    state.composerObserver?.disconnect();
+    state.composerObserver = null;
+    state.observedComposer = null;
   }
 
   function applyViewport() {
@@ -33,18 +84,13 @@
 
     const chatOpen = document.body?.classList.contains('velvet-whatsapp-chat');
     if (!chatOpen) {
-      root.style.removeProperty('--velvet-chat-height');
-      root.style.removeProperty('--velvet-chat-width');
-      root.style.removeProperty('--velvet-chat-offset-top');
-      root.style.removeProperty('--velvet-chat-offset-left');
-      document.body?.classList.remove('velvet-keyboard-open');
-      state.wasKeyboardOpen = false;
+      clearChatViewport();
       return;
     }
 
     const viewport = window.visualViewport;
-    const height = Math.round(viewport?.height || window.innerHeight);
-    const width = Math.round(viewport?.width || window.innerWidth);
+    const height = Math.max(1, Math.round(viewport?.height || window.innerHeight));
+    const width = Math.max(1, Math.round(viewport?.width || window.innerWidth));
     const offsetTop = Math.max(0, Math.round(viewport?.offsetTop || 0));
     const offsetLeft = Math.max(0, Math.round(viewport?.offsetLeft || 0));
     const keyboardOpen = window.innerHeight - height > 120;
@@ -55,9 +101,19 @@
     root.style.setProperty('--velvet-chat-offset-left', `${offsetLeft}px`);
     document.body.classList.toggle('velvet-keyboard-open', keyboardOpen);
 
+    observeComposer();
+    requestAnimationFrame(() => keepInputVisible('auto'));
+
     if (keyboardOpen && !state.wasKeyboardOpen) {
       requestAnimationFrame(() => scrollLatestMessage('auto'));
-      window.setTimeout(() => scrollLatestMessage('smooth'), 80);
+      window.setTimeout(() => {
+        scheduleViewport();
+        keepInputVisible('auto');
+      }, 80);
+      window.setTimeout(() => {
+        scheduleViewport();
+        keepInputVisible('smooth');
+      }, 240);
     }
     state.wasKeyboardOpen = keyboardOpen;
   }
@@ -69,6 +125,7 @@
   }
 
   lockViewportMeta();
+  window.VelvetMobileViewport = { sync: scheduleViewport };
 
   window.visualViewport?.addEventListener('resize', scheduleViewport);
   window.visualViewport?.addEventListener('scroll', scheduleViewport);
@@ -81,10 +138,23 @@
   document.addEventListener('focusin', (event) => {
     if (!event.target.matches('.velvet-whatsapp-layout textarea[name="body"]')) return;
     scheduleViewport();
-    window.setTimeout(() => {
-      scheduleViewport();
-      scrollLatestMessage('smooth');
-    }, 180);
+    for (const delay of [60, 180, 360]) {
+      window.setTimeout(() => {
+        scheduleViewport();
+        keepInputVisible(delay === 360 ? 'smooth' : 'auto');
+      }, delay);
+    }
+  });
+
+  document.addEventListener('input', (event) => {
+    if (!event.target.matches('.velvet-whatsapp-layout textarea[name="body"]')) return;
+    scheduleViewport();
+    requestAnimationFrame(() => keepInputVisible('auto'));
+  });
+
+  document.addEventListener('focusout', (event) => {
+    if (!event.target.matches('.velvet-whatsapp-layout textarea[name="body"]')) return;
+    window.setTimeout(scheduleViewport, 120);
   });
 
   document.addEventListener('gesturestart', (event) => event.preventDefault(), { passive: false });
