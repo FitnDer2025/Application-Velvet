@@ -11,6 +11,7 @@ const EVENT_TYPES = [
   'recommendations',
   'security'
 ];
+const PROFILE_SORTS = new Set(['distance', 'compatibility', 'recent', 'affinity']);
 
 const DEFAULT_EVENTS = Object.fromEntries(EVENT_TYPES.map((name) => [name, true]));
 
@@ -29,6 +30,17 @@ function safeTime(value) {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(text) ? text : null;
 }
 
+function safeRadius(value) {
+  const radius = Number(value);
+  if (!Number.isFinite(radius)) return 50;
+  return Math.max(10, Math.min(200, Math.round(radius / 5) * 5));
+}
+
+function safeProfileSort(value) {
+  const sort = String(value || '');
+  return PROFILE_SORTS.has(sort) ? sort : 'distance';
+}
+
 async function ownProfile(env, session, userId) {
   const rows = await restJson(
     env,
@@ -39,7 +51,7 @@ async function ownProfile(env, session, userId) {
 }
 
 async function readSettings(env, session, userId, profile) {
-  const [privacyRows, notificationRows, locationRows, verificationRows] = await Promise.all([
+  const [privacyRows, notificationRows, locationRows, verificationRows, experienceRows] = await Promise.all([
     restJson(
       env,
       `/rest/v1/profile_privacy_settings?select=profile_id,discoverable_by,contactable_by,updated_at&profile_id=eq.${encodeURIComponent(profile.id)}&limit=1`,
@@ -59,7 +71,12 @@ async function readSettings(env, session, userId, profile) {
       env,
       `/rest/v1/account_identity_age_verifications?select=user_id,provider,status,identity_verified,majority_verified,verified_at,expires_at,last_checked_at,updated_at&user_id=eq.${encodeURIComponent(userId)}&limit=1`,
       session
-    )
+    ),
+    restJson(
+      env,
+      `/rest/v1/member_experience_preferences?select=user_id,discovery_radius_km,profile_sort,ai_personalization_enabled,updated_at&user_id=eq.${encodeURIComponent(userId)}&limit=1`,
+      session
+    ).catch(() => [])
   ]);
 
   return {
@@ -84,6 +101,13 @@ async function readSettings(env, session, userId, profile) {
       precision_km: 10,
       consented_at: null,
       last_used_at: null,
+      updated_at: null
+    },
+    experience: experienceRows?.[0] || {
+      user_id: userId,
+      discovery_radius_km: 50,
+      profile_sort: 'distance',
+      ai_personalization_enabled: true,
       updated_at: null
     },
     verification: verificationRows?.[0] || {
@@ -163,6 +187,22 @@ export async function onRequestPost({ request, env }) {
             email_enabled: body.email_enabled !== false,
             quiet_hours_start: safeTime(body.quiet_hours_start),
             quiet_hours_end: safeTime(body.quiet_hours_end)
+          })
+        }
+      ),
+      restJson(
+        env,
+        '/rest/v1/member_experience_preferences?on_conflict=user_id',
+        access.session,
+        {
+          method: 'POST',
+          headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+          body: JSON.stringify({
+            user_id: access.account.userId,
+            discovery_radius_km: safeRadius(body.discovery_radius_km),
+            profile_sort: safeProfileSort(body.profile_sort),
+            ai_personalization_enabled: body.ai_personalization_enabled !== false,
+            updated_at: new Date().toISOString()
           })
         }
       )
