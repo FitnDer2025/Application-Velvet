@@ -20,8 +20,28 @@ private struct VelvetWatchSnapshot: Codable, Equatable {
         events: 0,
         security: 0,
         other: 0,
-        updatedAt: .now
+        updatedAt: Date.now
     )
+
+    init(
+        total: Int,
+        messages: Int,
+        visits: Int,
+        likes: Int,
+        events: Int,
+        security: Int,
+        other: Int,
+        updatedAt: Date
+    ) {
+        self.total = total
+        self.messages = messages
+        self.visits = visits
+        self.likes = likes
+        self.events = events
+        self.security = security
+        self.other = other
+        self.updatedAt = updatedAt
+    }
 
     init(context: [String: Any]) {
         total = context["total"] as? Int ?? 0
