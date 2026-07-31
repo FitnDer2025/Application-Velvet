@@ -19,6 +19,7 @@ struct DirectoryResponse: Decodable, Sendable {
     let events: [VelvetEvent]
     let conversations: [Conversation]
     let recommendations: [Recommendation]?
+    let messageUnreadCount: Int?
     let currentUserId: UUID?
 }
 
@@ -99,10 +100,19 @@ struct Conversation: Codable, Identifiable, Sendable {
     let createdAt: String?
     let updatedAt: String?
     let conversationMembers: [ConversationMember]?
+    let participantProfileId: UUID?
+    let participantDisplayName: String?
+    let participantPhotoUrl: URL?
+    let lastMessageBody: String?
+    let lastMessageAt: String?
+    let unreadCount: Int?
 
     var title: String {
+        if kind != "event", let participantDisplayName, !participantDisplayName.isEmpty {
+            return participantDisplayName
+        }
         if let subject, !subject.isEmpty { return subject }
-        return kind == "event" ? "Salon Velvet" : "Conversation privée"
+        return kind == "event" ? "Salon Velvet" : "Membre Velvet"
     }
 }
 
