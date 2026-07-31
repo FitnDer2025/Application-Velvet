@@ -6,12 +6,14 @@ struct VelvetApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var appState = AppState()
     @StateObject private var biometrics = BiometricLockService()
+    @StateObject private var screenshotProtection = ScreenshotProtectionService()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(appState)
                 .environmentObject(biometrics)
+                .environmentObject(screenshotProtection)
                 .preferredColorScheme(.dark)
                 .task {
                     await appState.restoreSession()
