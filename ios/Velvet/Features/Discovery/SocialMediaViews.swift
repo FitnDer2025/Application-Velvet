@@ -38,47 +38,8 @@ struct ProfileAffinityBar: View {
             }
 
             HStack(spacing: 7) {
-                ForEach(choices, id: \.0) { value, symbol, label in
-                    Button {
-                        Task {
-                            await store.setProfileReaction(
-                                profileID: profileID,
-                                reaction: selectedValue == value ? nil : value
-                            )
-                        }
-                    } label: {
-                        VStack(spacing: 5) {
-                            Text(symbol)
-                                .font(.system(size: value == 3 ? 14 : 18))
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.65)
-                            Text(label)
-                                .font(VelvetTypography.caption(size: 8, weight: .semibold))
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.72)
-                        }
-                        .foregroundStyle(
-                            selectedValue == value ? VelvetColor.velvetBlack : VelvetColor.ivory
-                        )
-                        .frame(maxWidth: .infinity, minHeight: 60)
-                        .background(
-                            selectedValue == value
-                                ? VelvetColor.champagneGold
-                                : VelvetColor.ivory.opacity(0.04)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(
-                                    selectedValue == value
-                                        ? VelvetColor.champagneGold
-                                        : VelvetColor.borderSubtle,
-                                    lineWidth: 0.8
-                                )
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(label)
+                ForEach(choices, id: \.0) { choice in
+                    affinityButton(value: choice.0, symbol: choice.1, label: choice.2)
                 }
             }
         }
@@ -91,6 +52,45 @@ struct ProfileAffinityBar: View {
                 .stroke(VelvetColor.borderSubtle, lineWidth: 0.8)
         }
         .task { await store.refreshSocialState() }
+    }
+
+    private func affinityButton(value: Int, symbol: String, label: String) -> some View {
+        Button {
+            Task {
+                await store.setProfileReaction(
+                    profileID: profileID,
+                    reaction: selectedValue == value ? nil : value
+                )
+            }
+        } label: {
+            VStack(spacing: 5) {
+                Text(symbol)
+                    .font(.system(size: value == 3 ? 14 : 18))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.65)
+                Text(label)
+                    .font(VelvetTypography.caption(size: 8, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+            }
+            .foregroundStyle(selectedValue == value ? VelvetColor.velvetBlack : VelvetColor.ivory)
+            .frame(maxWidth: .infinity, minHeight: 60)
+            .background(
+                selectedValue == value
+                    ? VelvetColor.champagneGold
+                    : VelvetColor.ivory.opacity(0.04)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(
+                        selectedValue == value ? VelvetColor.champagneGold : VelvetColor.borderSubtle,
+                        lineWidth: 0.8
+                    )
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
     }
 }
 
@@ -144,9 +144,7 @@ struct SocialProfileGallery: View {
                     VStack {
                         HStack {
                             Spacer()
-                            Button {
-                                showsViewer = true
-                            } label: {
+                            Button { showsViewer = true } label: {
                                 Image(systemName: "arrow.up.left.and.arrow.down.right")
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundStyle(VelvetColor.ivory)
@@ -192,27 +190,8 @@ struct SocialProfileGallery: View {
             if items.count > 1 {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
-                        ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                            Button {
-                                withAnimation(.easeOut(duration: VelvetMotion.fast)) {
-                                    selectedIndex = index
-                                }
-                            } label: {
-                                VelvetRemoteImage(url: item.url)
-                                    .frame(width: selectedIndex == index ? 58 : 50, height: selectedIndex == index ? 72 : 64)
-                                    .clipped()
-                                    .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
-                                    .overlay {
-                                        RoundedRectangle(cornerRadius: 13, style: .continuous)
-                                            .stroke(
-                                                selectedIndex == index
-                                                    ? VelvetColor.champagneGold
-                                                    : VelvetColor.borderSubtle,
-                                                lineWidth: selectedIndex == index ? 2 : 1
-                                            )
-                                    }
-                            }
-                            .buttonStyle(.plain)
+                        ForEach(Array(items.enumerated()), id: \.offset) { pair in
+                            thumbnail(index: pair.offset, item: pair.element)
                         }
                     }
                 }
@@ -231,15 +210,36 @@ struct SocialProfileGallery: View {
             VelvetRemoteImage(url: nil, symbol: "person.crop.rectangle")
         } else {
             TabView(selection: $selectedIndex) {
-                ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                    VelvetRemoteImage(url: item.url)
+                ForEach(Array(items.enumerated()), id: \.offset) { pair in
+                    VelvetRemoteImage(url: pair.element.url)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .clipped()
-                        .tag(index)
+                        .tag(pair.offset)
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
+    }
+
+    private func thumbnail(index: Int, item: SocialMediaItem) -> some View {
+        Button {
+            withAnimation(.easeOut(duration: VelvetMotion.fast)) {
+                selectedIndex = index
+            }
+        } label: {
+            VelvetRemoteImage(url: item.url)
+                .frame(width: selectedIndex == index ? 58 : 50, height: selectedIndex == index ? 72 : 64)
+                .clipped()
+                .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 13, style: .continuous)
+                        .stroke(
+                            selectedIndex == index ? VelvetColor.champagneGold : VelvetColor.borderSubtle,
+                            lineWidth: selectedIndex == index ? 2 : 1
+                        )
+                }
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -279,17 +279,14 @@ struct InteractiveAlbumDetailView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         VelvetAlbumCoverCard(album: presentation)
 
-                        HStack {
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text(album.confidentiality == "public" ? "ALBUM PUBLIC" : "ACCÈS PRIVÉ")
-                                    .font(VelvetTypography.caption(size: 9, weight: .semibold))
-                                    .tracking(1.5)
-                                    .foregroundStyle(VelvetColor.champagneGold)
-                                Text("\(items.count) photo\(items.count > 1 ? "s" : "")")
-                                    .font(VelvetTypography.title(size: 25))
-                                    .foregroundStyle(VelvetColor.ivory)
-                            }
-                            Spacer()
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text(album.confidentiality == "public" ? "ALBUM PUBLIC" : "ACCÈS PRIVÉ")
+                                .font(VelvetTypography.caption(size: 9, weight: .semibold))
+                                .tracking(1.5)
+                                .foregroundStyle(VelvetColor.champagneGold)
+                            Text("\(items.count) photo\(items.count > 1 ? "s" : "")")
+                                .font(VelvetTypography.title(size: 25))
+                                .foregroundStyle(VelvetColor.ivory)
                         }
 
                         if items.isEmpty {
@@ -303,32 +300,8 @@ struct InteractiveAlbumDetailView: View {
                                 columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
                                 spacing: 8
                             ) {
-                                ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                                    Button {
-                                        selectedIndex = index
-                                        showsViewer = true
-                                    } label: {
-                                        ZStack(alignment: .bottomTrailing) {
-                                            VelvetRemoteImage(url: item.url)
-                                                .frame(maxWidth: .infinity)
-                                                .frame(height: 190)
-                                                .clipped()
-                                            if let reaction = store.photoReaction(for: item.id) {
-                                                Text(reactionSymbol(reaction))
-                                                    .font(.system(size: 16))
-                                                    .frame(width: 32, height: 32)
-                                                    .background(.ultraThinMaterial)
-                                                    .clipShape(Circle())
-                                                    .padding(8)
-                                            }
-                                        }
-                                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                                        .overlay {
-                                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                                .stroke(VelvetColor.borderSubtle, lineWidth: 0.8)
-                                        }
-                                    }
-                                    .buttonStyle(.plain)
+                                ForEach(Array(items.enumerated()), id: \.offset) { pair in
+                                    albumThumbnail(index: pair.offset, item: pair.element)
                                 }
                             }
                         }
@@ -353,6 +326,34 @@ struct InteractiveAlbumDetailView: View {
         .task { await store.refreshSocialState() }
     }
 
+    private func albumThumbnail(index: Int, item: SocialMediaItem) -> some View {
+        Button {
+            selectedIndex = index
+            showsViewer = true
+        } label: {
+            ZStack(alignment: .bottomTrailing) {
+                VelvetRemoteImage(url: item.url)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 190)
+                    .clipped()
+                if let reaction = store.photoReaction(for: item.id) {
+                    Text(reactionSymbol(reaction))
+                        .font(.system(size: 16))
+                        .frame(width: 32, height: 32)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Circle())
+                        .padding(8)
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(VelvetColor.borderSubtle, lineWidth: 0.8)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
     private func reactionSymbol(_ reaction: String) -> String {
         switch reaction {
         case "like": "👍"
@@ -374,11 +375,11 @@ private struct InteractiveMediaViewer: View {
             Color.black.ignoresSafeArea()
 
             TabView(selection: $selection) {
-                ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                    VelvetRemoteImage(url: item.url, contentMode: .fit)
+                ForEach(Array(items.enumerated()), id: \.offset) { pair in
+                    VelvetRemoteImage(url: pair.element.url, contentMode: .fit)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(.vertical, 78)
-                        .tag(index)
+                        .tag(pair.offset)
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
@@ -430,46 +431,48 @@ private struct PhotoReactionBar: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            ForEach(choices, id: \.0) { value, icon, label in
-                Button {
-                    Task {
-                        await store.setPhotoReaction(
-                            mediaID: mediaID,
-                            reaction: summary?.myReaction == value ? nil : value
-                        )
-                    }
-                } label: {
-                    HStack(spacing: 5) {
-                        Image(systemName: icon)
-                            .font(.system(size: 13, weight: .semibold))
-                        Text("\(count(for: value))")
-                            .font(.system(size: 11, weight: .bold, design: .rounded))
-                    }
-                    .foregroundStyle(
-                        summary?.myReaction == value
-                            ? VelvetColor.velvetBlack
-                            : VelvetColor.ivory
-                    )
-                    .frame(maxWidth: .infinity, minHeight: 40)
-                    .background(
-                        summary?.myReaction == value
-                            ? VelvetColor.champagneGold
-                            : VelvetColor.anthracite.opacity(0.84)
-                    )
-                    .clipShape(Capsule())
-                    .overlay {
-                        Capsule().stroke(
-                            summary?.myReaction == value
-                                ? VelvetColor.champagneGold
-                                : VelvetColor.borderSubtle,
-                            lineWidth: 0.8
-                        )
-                    }
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(label)
+            ForEach(choices, id: \.0) { choice in
+                reactionButton(value: choice.0, icon: choice.1, label: choice.2)
             }
         }
+    }
+
+    private func reactionButton(value: String, icon: String, label: String) -> some View {
+        Button {
+            Task {
+                await store.setPhotoReaction(
+                    mediaID: mediaID,
+                    reaction: summary?.myReaction == value ? nil : value
+                )
+            }
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: icon)
+                    .font(.system(size: 13, weight: .semibold))
+                Text("\(count(for: value))")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+            }
+            .foregroundStyle(
+                summary?.myReaction == value ? VelvetColor.velvetBlack : VelvetColor.ivory
+            )
+            .frame(maxWidth: .infinity, minHeight: 40)
+            .background(
+                summary?.myReaction == value
+                    ? VelvetColor.champagneGold
+                    : VelvetColor.anthracite.opacity(0.84)
+            )
+            .clipShape(Capsule())
+            .overlay {
+                Capsule().stroke(
+                    summary?.myReaction == value
+                        ? VelvetColor.champagneGold
+                        : VelvetColor.borderSubtle,
+                    lineWidth: 0.8
+                )
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
     }
 
     private func count(for value: String) -> Int {
