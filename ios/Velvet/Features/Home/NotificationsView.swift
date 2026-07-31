@@ -1,12 +1,17 @@
 import SwiftUI
 
+enum VelvetNotificationDestination {
+    case conversation(Conversation)
+    case profile(MemberProfile)
+    case events
+}
+
 struct NotificationsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var store: VelvetStore
 
-    @State private var activeConversation: Conversation?
-    @State private var activeProfile: MemberProfile?
-    @State private var showsEvents = false
+    let onDestination: (VelvetNotificationDestination) -> Void
+
     @State private var isOpening = false
 
     var body: some View {
@@ -101,30 +106,6 @@ struct NotificationsView: View {
             }
             .toolbarBackground(VelvetColor.velvetBlack.opacity(0.92), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .navigationDestination(
-                isPresented: Binding(
-                    get: { activeConversation != nil },
-                    set: { if !$0 { activeConversation = nil } }
-                )
-            ) {
-                if let activeConversation {
-                    AppleConversationView(conversation: activeConversation)
-                }
-            }
-            .navigationDestination(
-                isPresented: Binding(
-                    get: { activeProfile != nil },
-                    set: { if !$0 { activeProfile = nil } }
-                )
-            ) {
-                if let activeProfile {
-                    MemberDetailView(profile: activeProfile)
-                }
-            }
-            .navigationDestination(isPresented: $showsEvents) {
-                PlacesEventsView(initialSelection: 0)
-                    .environmentObject(store)
-            }
         }
     }
 
@@ -146,31 +127,30 @@ struct NotificationsView: View {
         switch notification.eventType {
         case "messages", "message":
             await store.refreshMessaging()
-            if let conversationID = notification.entityId {
-                if let conversation = store.directory?.conversations.first(where: { $0.id == conversationID }) {
-                    activeConversation = conversation
-                } else {
-                    let actor = actorProfile(for: notification)
-                    activeConversation = .direct(
-                        id: conversationID,
-                        title: actor?.displayName ?? sourceName(for: notification),
-                        profileID: actor?.id,
-                        photoURL: actor?.profileGalleryPhotos.first?.previewUrl
-                    )
-                }
+            guard let conversationID = notification.entityId else { return }
+            if let conversation = store.directory?.conversations.first(where: { $0.id == conversationID }) {
+                onDestination(.conversation(conversation))
+            } else {
+                let actor = actorProfile(for: notification)
+                onDestination(.conversation(.direct(
+                    id: conversationID,
+                    title: actor?.displayName ?? sourceName(for: notification),
+                    profileID: actor?.id,
+                    photoURL: actor?.profileGalleryPhotos.first?.previewUrl
+                )))
             }
 
         case "events", "event", "registrations":
-            showsEvents = true
+            onDestination(.events)
 
         case "reactions", "likes", "profile_views", "views", "security":
             if let actor = actorProfile(for: notification) {
-                activeProfile = actor
+                onDestination(.profile(actor))
             }
 
         default:
             if let actor = actorProfile(for: notification) {
-                activeProfile = actor
+                onDestination(.profile(actor))
             }
         }
     }
