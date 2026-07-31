@@ -1,179 +1,256 @@
 (() => {
-  const POLL_INTERVAL = 15000;
-  let lastUnreadCount = 0;
-  let latestDirectory = null;
-  let pollTimer = null;
+  const POLL_INTERVAL = 12000;
+  const state = {
+    directory: null,
+    lastUnread: null,
+    selectedConversationId: null,
+    patchScheduled: false
+  };
 
-  async function getJson(path) {
-    const response = await fetch(path, { headers: { accept: 'application/json' } });
-    if (!response.ok) throw new Error(`request_${response.status}`);
-    return response.json();
+  const e = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[character]);
+
+  async function api(path, options = {}) {
+    const response = await fetch(path, {
+      ...options,
+      headers: {
+        ...(options.body && !(options.body instanceof FormData) ? { 'content-type': 'application/json' } : {}),
+        ...(options.headers || {})
+      }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || 'request_failed');
+    return payload;
   }
 
-  function messageBadge(count) {
-    if (!count) return '';
-    return `<span class="velvet-message-badge" aria-label="${count} message${count > 1 ? 's' : ''} non lu${count > 1 ? 's' : ''}">${count > 99 ? '99+' : count}</span>`;
+  function initials(value) {
+    return String(value || 'V').split(/\s+/).filter(Boolean).slice(0, 2)
+      .map((part) => part[0]).join('').toUpperCase() || 'V';
   }
 
-  function updateNavigationBadges(count) {
+  function shortDate(value) {
+    const date = new Date(value || 0);
+    if (Number.isNaN(date.getTime())) return '';
+    return date.toDateString() === new Date().toDateString()
+      ? new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(date)
+      : new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short' }).format(date);
+  }
+
+  function conversations() {
+    return state.directory?.conversations || [];
+  }
+
+  function conversationById(id) {
+    return conversations().find((conversation) => String(conversation.id) === String(id));
+  }
+
+  function unreadCount() {
+    const declared = state.directory?.messageUnreadCount ?? state.directory?.message_unread_count;
+    if (Number.isFinite(Number(declared))) return Number(declared);
+    return conversations().reduce((total, conversation) => total + Number(conversation.unread_count || 0), 0);
+  }
+
+  function avatar(conversation) {
+    const name = conversation.participant_display_name || conversation.subject || 'Velvet';
+    return `<span class="conversation-avatar-v2">${conversation.participant_photo_url
+      ? `<img src="${e(conversation.participant_photo_url)}" alt="Photo de ${e(name)}">`
+      : e(conversation.kind === 'event' ? '✦' : initials(name))}</span>`;
+  }
+
+  function updateBadges() {
+    const count = unreadCount();
     document.querySelectorAll('[data-route="conversations"]').forEach((button) => {
       button.querySelector('.velvet-message-badge')?.remove();
-      if (count > 0) button.insertAdjacentHTML('beforeend', messageBadge(count));
+      if (!count) return;
+      const badge = document.createElement('span');
+      badge.className = 'velvet-message-badge';
+      badge.textContent = count > 99 ? '99+' : String(count);
+      badge.setAttribute('aria-label', `${count} messages non lus`);
+      button.appendChild(badge);
     });
   }
 
-  function profileInitials(value) {
-    return String(value || 'V')
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part[0]?.toUpperCase())
-      .join('') || 'V';
-  }
-
-  function enhanceConversationCards() {
-    if (!latestDirectory?.conversations) return;
-    document.querySelectorAll('[data-open-conversation]').forEach((card) => {
-      const conversation = latestDirectory.conversations.find(
-        (row) => row.id === card.dataset.openConversation
-      );
+  function patchConversationCards() {
+    if (!state.directory) return;
+    document.querySelectorAll('[data-open-conversation]').forEach((button) => {
+      const conversation = conversationById(button.dataset.openConversation);
       if (!conversation) return;
-      const name = conversation.participant_display_name
-        || conversation.subject
+      const count = Number(conversation.unread_count || 0);
+      const name = conversation.participant_display_name || conversation.subject
         || (conversation.kind === 'event' ? 'Salon Velvet' : 'Membre Velvet');
-      const unread = Number(conversation.unread_count || 0);
-      card.classList.toggle('has-unread', unread > 0);
-      card.querySelector('h2')?.replaceChildren(document.createTextNode(name));
-      const oldParticipant = card.querySelector('.velvet-conversation-participant');
-      if (oldParticipant) oldParticipant.remove();
-      const photo = conversation.participant_photo_url;
-      const participant = document.createElement('span');
-      participant.className = 'velvet-conversation-participant';
-      participant.innerHTML = photo
-        ? `<img src="${String(photo).replace(/"/g, '&quot;')}" alt="Profil de ${name.replace(/"/g, '&quot;')}">`
-        : `<span aria-hidden="true">${profileInitials(name)}</span>`;
-      card.prepend(participant);
-      let preview = card.querySelector('.velvet-conversation-preview');
-      if (!preview) {
-        preview = document.createElement('p');
-        preview.className = 'velvet-conversation-preview';
-        card.querySelector('h2')?.insertAdjacentElement('afterend', preview);
-      }
-      preview.textContent = conversation.last_message_body || 'Nouvelle conversation';
-      card.querySelector('.velvet-card-unread')?.remove();
-      if (unread > 0) {
-        card.insertAdjacentHTML('beforeend', `<span class="velvet-card-unread">${unread > 99 ? '99+' : unread}</span>`);
-      }
+      button.classList.add('conversation-v2');
+      button.classList.toggle('unread', count > 0);
+      button.innerHTML = `${avatar(conversation)}
+        <span class="conversation-copy-v2">
+          <span class="conversation-title-v2"><strong>${e(name)}</strong><time>${e(shortDate(conversation.last_message_at || conversation.updated_at))}</time></span>
+          <p>${e(conversation.last_message_body || 'Commencez la conversation…')}</p>
+          <small>${conversation.kind === 'event' ? 'Salon Velvet' : 'Échange privé'}</small>
+        </span>
+        ${count ? `<span class="conversation-count-v2" aria-label="${count} messages non lus">${count > 99 ? '99+' : count}</span>` : '<span class="conversation-chevron-v2">›</span>'}`;
     });
   }
 
-  function enhanceComposer() {
-    const input = document.querySelector('#messageForm input[name="body"]');
-    if (input && !document.querySelector('#messageForm textarea[name="body"]')) {
+  function patchPeerHeader(form) {
+    const id = form.querySelector('[name="conversationId"]')?.value || state.selectedConversationId;
+    const conversation = conversationById(id);
+    const page = form.closest('.page');
+    if (!conversation || !page || page.querySelector('.conversation-peer-header')) return;
+    const name = conversation.participant_display_name || conversation.subject
+      || (conversation.kind === 'event' ? 'Salon Velvet' : 'Membre Velvet');
+    const header = document.createElement('section');
+    header.className = 'conversation-peer-header';
+    header.innerHTML = `${avatar(conversation)}<span><strong>${e(name)}</strong><small>${conversation.kind === 'event' ? 'Salon Velvet' : 'Conversation privée'}</small></span>`;
+    page.querySelector('.page-head')?.insertAdjacentElement('afterend', header);
+  }
+
+  function patchComposer() {
+    const form = document.querySelector('#messageForm');
+    if (!form) return;
+    form.classList.add('composer-v2');
+    const field = form.querySelector('[name="body"]');
+    if (field?.tagName === 'INPUT') {
       const textarea = document.createElement('textarea');
       textarea.name = 'body';
-      textarea.maxLength = Number(input.maxLength || 10000);
-      textarea.placeholder = input.placeholder || 'Écrire un message…';
+      textarea.maxLength = Number(field.maxLength || 10000);
+      textarea.placeholder = field.placeholder || 'Écrire un message…';
       textarea.rows = 2;
-      textarea.className = 'velvet-message-textarea';
-      textarea.value = input.value;
-      input.replaceWith(textarea);
+      textarea.value = field.value || '';
+      textarea.autocomplete = 'off';
+      textarea.setAttribute('aria-label', 'Message');
+      textarea.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+          event.preventDefault();
+          form.requestSubmit();
+        }
+      });
+      field.replaceWith(textarea);
     }
-    const button = document.querySelector('#messageForm button[type="submit"]');
-    if (button) {
-      button.classList.add('velvet-explicit-send');
-      button.textContent = 'Envoyer';
+    const button = form.querySelector('button[type="submit"]');
+    if (button && !button.querySelector('.send-symbol')) {
+      button.innerHTML = '<span class="send-symbol" aria-hidden="true">➤</span><span class="send-label">Envoyer</span>';
       button.setAttribute('aria-label', 'Envoyer le message');
     }
+    patchPeerHeader(form);
   }
 
-  function enhanceMessages() {
-    const currentUserId = latestDirectory?.currentUserId;
-    document.querySelectorAll('.messages .message').forEach((message) => {
-      message.setAttribute('role', 'listitem');
-      if (message.classList.contains('mine')) {
-        message.setAttribute('aria-label', 'Message envoyé');
-      } else {
-        message.setAttribute('aria-label', 'Message reçu');
-      }
-    });
-    if (currentUserId) document.querySelector('.messages')?.setAttribute('role', 'list');
+  function patch() {
+    state.patchScheduled = false;
+    updateBadges();
+    patchConversationCards();
+    patchComposer();
   }
 
-  async function showIncomingNotification(directory, newCount) {
-    if (newCount <= lastUnreadCount || document.visibilityState === 'visible') return;
-    const conversation = directory.conversations
-      ?.filter((row) => Number(row.unread_count || 0) > 0)
+  function schedulePatch() {
+    if (state.patchScheduled) return;
+    state.patchScheduled = true;
+    requestAnimationFrame(patch);
+  }
+
+  async function notifyIfNeeded(previous, next) {
+    if (previous === null || next <= previous || document.visibilityState === 'visible') return;
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const conversation = conversations()
+      .filter((row) => Number(row.unread_count || 0) > 0)
       .sort((left, right) => new Date(right.last_message_at || 0) - new Date(left.last_message_at || 0))[0];
-    if (!conversation || !('Notification' in window) || Notification.permission !== 'granted') return;
-    const title = `${conversation.participant_display_name || 'Un membre Velvet'} vous a écrit`;
-    const options = {
-      body: conversation.last_message_body || 'Nouveau message Velvet',
-      icon: '/assets/velvet-icon-192.png',
-      badge: '/assets/velvet-icon-192.png',
+    if (!conversation) return;
+    const registration = await navigator.serviceWorker?.ready.catch(() => null);
+    registration?.active?.postMessage({
+      type: 'VELVET_NOTIFICATION',
+      title: `${conversation.participant_display_name || 'Un membre Velvet'} vous a écrit`,
+      body: conversation.last_message_body || 'Un nouveau message vous attend.',
       tag: `velvet-message-${conversation.id}`,
-      data: { route: 'conversations', conversationId: conversation.id }
-    };
-    try {
-      const registration = await navigator.serviceWorker?.ready;
-      if (registration) await registration.showNotification(title, options);
-      else new Notification(title, options);
-    } catch {}
+      url: '/membres/'
+    });
   }
 
   async function refreshMessaging() {
     try {
-      const directory = await getJson('/api/members/directory');
-      const count = Number(directory.messageUnreadCount ?? directory.message_unread_count ?? 0);
-      await showIncomingNotification(directory, count);
-      latestDirectory = directory;
-      updateNavigationBadges(count);
-      enhanceConversationCards();
-      lastUnreadCount = count;
-    } catch {}
+      const previous = state.lastUnread;
+      state.directory = await api('/api/members/directory');
+      const next = unreadCount();
+      state.lastUnread = next;
+      schedulePatch();
+      await notifyIfNeeded(previous, next);
+    } catch {
+      // Le parcours d’inscription ou une session expirée ne bloque pas la page.
+    }
   }
 
-  function bindMobileMenu() {
-    const button = document.querySelector('#mobileMenuButton');
+  function applicationServerKey(value) {
+    const normalized = String(value || '').replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(normalized + '='.repeat((4 - normalized.length % 4) % 4));
+    return Uint8Array.from(raw, (character) => character.charCodeAt(0));
+  }
+
+  async function enrollWebPush() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    try {
+      const configuration = await api('/api/members/push-subscriptions');
+      if (!configuration.publicKey) return;
+      const registration = await navigator.serviceWorker.ready;
+      let subscription = await registration.pushManager.getSubscription();
+      if (!subscription) {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: applicationServerKey(configuration.publicKey)
+        });
+      }
+      const serialized = subscription.toJSON();
+      await api('/api/members/push-subscriptions', {
+        method: 'POST',
+        body: JSON.stringify({
+          endpoint: subscription.endpoint,
+          keys: serialized.keys || {},
+          installationOrigin: location.origin
+        })
+      });
+    } catch {
+      // Les badges restent disponibles si le serveur Web Push n’est pas configuré.
+    }
+  }
+
+  function closeMenu() {
+    document.querySelector('.sidebar')?.classList.remove('open');
+    document.body.classList.remove('nav-open', 'velvet-mobile-menu-open');
+    document.querySelector('#mobileMenuButton')?.setAttribute('aria-expanded', 'false');
+  }
+
+  function toggleMenu(button) {
     const sidebar = document.querySelector('.sidebar');
-    if (!button || !sidebar || button.dataset.velvetMenuFixed === 'true') return;
-    button.dataset.velvetMenuFixed = 'true';
-    button.addEventListener('click', (event) => {
+    if (!sidebar) return;
+    const open = !sidebar.classList.contains('open');
+    sidebar.classList.toggle('open', open);
+    document.body.classList.toggle('nav-open', open);
+    document.body.classList.toggle('velvet-mobile-menu-open', open);
+    button.setAttribute('aria-expanded', String(open));
+  }
+
+  document.addEventListener('click', (event) => {
+    const menu = event.target.closest('#mobileMenuButton');
+    if (menu) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      const open = !document.body.classList.contains('velvet-mobile-menu-open');
-      document.body.classList.toggle('velvet-mobile-menu-open', open);
-      button.setAttribute('aria-expanded', String(open));
-    }, true);
-    sidebar.addEventListener('click', (event) => {
-      if (!event.target.closest('[data-route]')) return;
-      document.body.classList.remove('velvet-mobile-menu-open');
-      button.setAttribute('aria-expanded', 'false');
-    });
-    document.addEventListener('keydown', (event) => {
-      if (event.key !== 'Escape') return;
-      document.body.classList.remove('velvet-mobile-menu-open');
-      button.setAttribute('aria-expanded', 'false');
-    });
-  }
+      toggleMenu(menu);
+      return;
+    }
+    const conversation = event.target.closest('[data-open-conversation]');
+    if (conversation) state.selectedConversationId = conversation.dataset.openConversation;
+    if (event.target.closest('[data-route]') && matchMedia('(max-width:900px)').matches) closeMenu();
+    if (event.target.closest('[data-test-notification]')) setTimeout(enrollWebPush, 800);
+  }, true);
 
-  function enhance() {
-    bindMobileMenu();
-    enhanceComposer();
-    enhanceMessages();
-    enhanceConversationCards();
-  }
-
-  const observer = new MutationObserver(enhance);
-  observer.observe(document.body, { childList: true, subtree: true });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeMenu();
+  });
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') refreshMessaging();
+    if (!document.hidden) refreshMessaging();
   });
   window.addEventListener('focus', refreshMessaging);
 
-  bindMobileMenu();
-  enhance();
+  new MutationObserver(schedulePatch).observe(document.documentElement, { childList: true, subtree: true });
   refreshMessaging();
-  pollTimer = window.setInterval(refreshMessaging, POLL_INTERVAL);
-  window.addEventListener('beforeunload', () => window.clearInterval(pollTimer), { once: true });
+  enrollWebPush();
+  window.setInterval(refreshMessaging, POLL_INTERVAL);
 })();
