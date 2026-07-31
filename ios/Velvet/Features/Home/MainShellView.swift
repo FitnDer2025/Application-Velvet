@@ -31,7 +31,7 @@ struct MainShellView: View {
         var selectedIcon: String {
             switch self {
             case .home: "house.fill"
-            case .discover: "magnifyingglass.circle.fill"
+            case .discover: "magnifyingglass"
             case .maps: "map.fill"
             case .messages: "bubble.left.and.bubble.right.fill"
             case .profile: "person.crop.circle.fill"
@@ -43,23 +43,33 @@ struct MainShellView: View {
         case directory
         case agenda
         case notifications
+        case studio
+        case editProfile
+        case privacy
 
         var placesSelection: Int? {
             switch self {
             case .directory: 1
             case .agenda: 3
-            case .notifications: nil
+            default: nil
             }
         }
     }
 
     let profile: MemberProfile
+
+    @EnvironmentObject private var appState: AppState
     @StateObject private var store = VelvetStore()
+    @StateObject private var chrome = ShellChromeState()
     @Environment(\.scenePhase) private var scenePhase
+
     @State private var selectedTab: Tab = .home
     @State private var showsNotifications = false
     @State private var showsMenu = false
     @State private var showsPlacesEvents = false
+    @State private var showsStudio = false
+    @State private var showsProfileEditor = false
+    @State private var showsPrivacy = false
     @State private var pendingMenuRoute: MenuRoute?
     @State private var placesSelection = 0
 
@@ -68,19 +78,27 @@ struct MainShellView: View {
             VelvetBackground()
 
             VStack(spacing: 0) {
-                VelvetTopBar(
-                    unreadCount: store.notificationFeed.unreadCount,
-                    notifications: { showsNotifications = true },
-                    menu: { showsMenu = true }
-                )
+                if !chrome.isImmersive {
+                    CompactVelvetTopBar(
+                        unreadCount: store.notificationFeed.unreadCount,
+                        notifications: { showsNotifications = true },
+                        menu: { showsMenu = true }
+                    )
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
 
                 selectedContent
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                bottomNavigation
+                if !chrome.isImmersive {
+                    bottomNavigation
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
+            .animation(.easeOut(duration: VelvetMotion.fast), value: chrome.isImmersive)
         }
         .environmentObject(store)
+        .environmentObject(chrome)
         .task {
             await store.load()
             if let route = NotificationService.consumePendingRoute() {
@@ -103,18 +121,12 @@ struct MainShellView: View {
         .sheet(isPresented: $showsMenu, onDismiss: openPendingMenuRoute) {
             NavigationStack {
                 VelvetMenuView(
-                    openPlaces: {
-                        pendingMenuRoute = .directory
-                        showsMenu = false
-                    },
-                    openNotifications: {
-                        pendingMenuRoute = .notifications
-                        showsMenu = false
-                    },
-                    openAgenda: {
-                        pendingMenuRoute = .agenda
-                        showsMenu = false
-                    }
+                    openPlaces: { queue(.directory) },
+                    openNotifications: { queue(.notifications) },
+                    openAgenda: { queue(.agenda) },
+                    openStudio: { queue(.studio) },
+                    editProfile: { queue(.editProfile) },
+                    openPrivacy: { queue(.privacy) }
                 )
                 .environmentObject(store)
             }
@@ -133,6 +145,23 @@ struct MainShellView: View {
                     }
             }
         }
+        .sheet(isPresented: $showsStudio) {
+            NavigationStack {
+                MemberToolsView()
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Fermer") { showsStudio = false }
+                                .foregroundStyle(VelvetColor.champagneGold)
+                        }
+                    }
+            }
+        }
+        .sheet(isPresented: $showsProfileEditor) {
+            ProfileEditorView(profile: profile)
+        }
+        .sheet(isPresented: $showsPrivacy) {
+            PrivacySettingsView()
+        }
         .alert(
             "Velvet",
             isPresented: Binding(
@@ -144,9 +173,7 @@ struct MainShellView: View {
         } message: {
             Text(store.errorMessage ?? "")
         }
-        .onReceive(
-            NotificationCenter.default.publisher(for: .velvetNotificationRoute)
-        ) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: .velvetNotificationRoute)) { notification in
             guard let route = notification.object as? String else { return }
             _ = NotificationService.consumePendingRoute()
             openNotificationRoute(route)
@@ -159,29 +186,43 @@ struct MainShellView: View {
         case .home:
             NavigationStack { PremiumHomeView(profile: profile) }
         case .discover:
-            NavigationStack { DiscoveryView(currentProfile: profile) }
+            NavigationStack { PremiumDiscoveryGridView(currentProfile: profile) }
         case .maps:
             NavigationStack { MemberMapView() }
         case .messages:
-            NavigationStack { ConversationsView() }
+            NavigationStack { AppleConversationsView() }
         case .profile:
-            NavigationStack { PremiumProfileSummaryView(profile: profile) }
+            NavigationStack { PremiumOwnProfileView(profile: profile) }
         }
     }
 
     private var bottomNavigation: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 4) {
             ForEach(Tab.allCases, id: \.rawValue) { tab in
                 Button {
                     withAnimation(.easeOut(duration: VelvetMotion.fast)) {
                         selectedTab = tab
                     }
                 } label: {
-                    VStack(spacing: 5) {
+                    VStack(spacing: 4) {
                         ZStack(alignment: .topTrailing) {
                             Image(systemName: selectedTab == tab ? tab.selectedIcon : tab.icon)
                                 .font(.system(size: 17, weight: .medium))
-                                .frame(width: 26, height: 20)
+                                .frame(width: 36, height: 30)
+                                .background {
+                                    if selectedTab == tab {
+                                        Circle()
+                                            .fill(.ultraThinMaterial)
+                                            .background(VelvetColor.champagneGold.opacity(0.08))
+                                            .clipShape(Circle())
+                                            .overlay {
+                                                Circle().stroke(
+                                                    VelvetColor.champagneGold.opacity(0.24),
+                                                    lineWidth: 0.8
+                                                )
+                                            }
+                                    }
+                                }
 
                             if tab == .messages, store.unreadMessageCount > 0 {
                                 Text(store.unreadMessageCount > 99 ? "99+" : "\(store.unreadMessageCount)")
@@ -191,35 +232,43 @@ struct MainShellView: View {
                                     .frame(minWidth: 17, minHeight: 17)
                                     .background(VelvetColor.danger)
                                     .clipShape(Capsule())
-                                    .offset(x: 9, y: -8)
-                                    .accessibilityLabel("\(store.unreadMessageCount) messages non lus")
+                                    .offset(x: 7, y: -5)
                             }
                         }
+
                         Text(tab.label)
-                            .font(.system(size: 9, weight: .semibold))
+                            .font(.system(size: 9, weight: selectedTab == tab ? .semibold : .medium))
                             .lineLimit(1)
                     }
                     .foregroundStyle(
-                        selectedTab == tab
-                            ? VelvetColor.champagneGold
-                            : VelvetColor.textSecondary
+                        selectedTab == tab ? VelvetColor.champagneGold : VelvetColor.textSecondary
                     )
                     .frame(maxWidth: .infinity)
-                    .frame(height: 58)
+                    .frame(height: 54)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(selectedTab == tab ? .isSelected : [])
             }
         }
-        .padding(.horizontal, 5)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 4)
         .background(.ultraThinMaterial)
-        .background(VelvetColor.velvetBlack.opacity(0.78))
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(VelvetColor.borderSubtle)
-                .frame(height: 1)
+        .background(VelvetColor.velvetBlack.opacity(0.58))
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .stroke(VelvetColor.borderSubtle, lineWidth: 0.7)
         }
+        .shadow(color: .black.opacity(0.26), radius: 20, y: 8)
+        .padding(.horizontal, 12)
+        .padding(.top, 4)
+        .padding(.bottom, 6)
+    }
+
+    private func queue(_ route: MenuRoute) {
+        pendingMenuRoute = route
+        showsMenu = false
     }
 
     private func openPendingMenuRoute() {
@@ -229,8 +278,14 @@ struct MainShellView: View {
             if let selection = route.placesSelection {
                 placesSelection = selection
                 showsPlacesEvents = true
-            } else {
-                showsNotifications = true
+                return
+            }
+            switch route {
+            case .notifications: showsNotifications = true
+            case .studio: showsStudio = true
+            case .editProfile: showsProfileEditor = true
+            case .privacy: showsPrivacy = true
+            default: break
             }
         }
     }
@@ -257,26 +312,35 @@ private struct VelvetMenuView: View {
     let openPlaces: () -> Void
     let openNotifications: () -> Void
     let openAgenda: () -> Void
+    let openStudio: () -> Void
+    let editProfile: () -> Void
+    let openPrivacy: () -> Void
 
     var body: some View {
         ZStack {
             VelvetBackground()
             ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 12) {
                     VelvetPageHeader(
                         "Navigation",
                         title: "Plus de Velvet",
-                        subtitle: "Retrouve les sorties, les établissements et l’activité de ton compte."
+                        subtitle: "Toutes les fonctions secondaires et les outils de ton profil."
                     )
-                    .padding(.bottom, 12)
+                    .padding(.bottom, 8)
 
-                    menuButton("Sorties & établissements", icon: "sparkles", action: openPlaces)
-                    menuButton("Notifications", icon: "bell", action: openNotifications)
+                    menuButton("Sorties & établissements", detail: "Agenda, clubs et professionnels", icon: "sparkles", action: openPlaces)
+                    menuButton("Notifications", detail: "Messages, réactions et activité", icon: "bell", action: openNotifications)
+                    menuButton("Agenda complet", detail: "Sorties, visites et voyages", icon: "calendar", action: openAgenda)
 
-                    Button(action: openAgenda) {
-                        menuLabel("Agenda complet", icon: "calendar")
-                    }
-                    .buttonStyle(.plain)
+                    Text("MON PROFIL")
+                        .font(VelvetTypography.caption(size: 9, weight: .semibold))
+                        .tracking(1.6)
+                        .foregroundStyle(VelvetColor.champagneGold)
+                        .padding(.top, 8)
+
+                    menuButton("Studio du profil & Velvet IA", detail: "Plume, organisateur et outils avancés", icon: "wand.and.stars", action: openStudio)
+                    menuButton("Modifier mon profil", detail: "Textes, identité, pratiques et préférences", icon: "square.and.pencil", action: editProfile)
+                    menuButton("Paramètres & confidentialité", detail: "Face ID, visibilité, notifications et compte", icon: "slider.horizontal.3", action: openPrivacy)
                 }
                 .padding(20)
             }
@@ -289,34 +353,42 @@ private struct VelvetMenuView: View {
         }
     }
 
-    private func menuButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
+    private func menuButton(
+        _ title: String,
+        detail: String,
+        icon: String,
+        action: @escaping () -> Void
+    ) -> some View {
         Button(action: action) {
-            menuLabel(title, icon: icon)
+            HStack(spacing: 13) {
+                Image(systemName: icon)
+                    .foregroundStyle(VelvetColor.champagneGold)
+                    .frame(width: 38, height: 38)
+                    .background(.ultraThinMaterial)
+                    .background(VelvetColor.champagneGold.opacity(0.05))
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(VelvetColor.champagneGold.opacity(0.17), lineWidth: 0.7))
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(VelvetTypography.body(size: 14, weight: .semibold))
+                        .foregroundStyle(VelvetColor.ivory)
+                    Text(detail)
+                        .font(VelvetTypography.caption(size: 10))
+                        .foregroundStyle(VelvetColor.textSecondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(VelvetColor.textSecondary)
+            }
+            .padding(14)
+            .background(VelvetColor.ivory.opacity(0.03))
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(VelvetColor.borderSubtle, lineWidth: 0.7)
+            }
         }
         .buttonStyle(.plain)
-    }
-
-    private func menuLabel(_ title: String, icon: String) -> some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .foregroundStyle(VelvetColor.champagneGold)
-                .frame(width: 38, height: 38)
-                .background(VelvetColor.champagneGold.opacity(0.08))
-                .clipShape(Circle())
-            Text(title)
-                .font(VelvetTypography.body(size: 15, weight: .semibold))
-                .foregroundStyle(VelvetColor.ivory)
-            Spacer()
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundStyle(VelvetColor.textSecondary)
-        }
-        .padding(16)
-        .background(VelvetColor.ivory.opacity(0.035))
-        .clipShape(RoundedRectangle(cornerRadius: VelvetRadius.medium, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: VelvetRadius.medium, style: .continuous)
-                .stroke(VelvetColor.borderSubtle, lineWidth: 1)
-        }
     }
 }
