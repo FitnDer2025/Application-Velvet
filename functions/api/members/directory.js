@@ -58,6 +58,11 @@ function profilePhoto(profile) {
   return photos[0]?.previewUrl || null;
 }
 
+function publicProfile(profile) {
+  const { profile_members: _members, ...safeProfile } = profile;
+  return safeProfile;
+}
+
 function conversationSummaries(conversations, messages, profiles, currentUserId) {
   const profileByUser = new Map();
   profiles.forEach((profile) => {
@@ -163,7 +168,7 @@ export async function onRequestGet({ request, env }) {
     );
 
     return withSession({
-      profiles,
+      profiles: profiles.map(publicProfile),
       establishments,
       venueDirectory: (venueDirectory || []).map(enrichVenueCoordinates),
       venueRelationships,
