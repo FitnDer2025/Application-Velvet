@@ -4,7 +4,8 @@ struct PremiumHomeProfileCard: View {
     let profile: MemberProfile
 
     private var photo: URL? {
-        profile.approvedPhotos.first?.previewUrl
+        profile.profileGalleryPhotos.first(where: { $0.isPrimary == true })?.previewUrl
+            ?? profile.profileGalleryPhotos.first?.previewUrl
     }
 
     var body: some View {
@@ -23,7 +24,7 @@ struct PremiumHomeProfileCard: View {
             )
 
             VStack(alignment: .leading, spacing: 7) {
-                Text(profile.profileType.label.uppercased())
+                Text(profile.velvetDemographicAndAgeLabel.uppercased())
                     .font(VelvetTypography.caption(size: 9, weight: .semibold))
                     .tracking(1.5)
                     .foregroundStyle(VelvetColor.champagneGold)
