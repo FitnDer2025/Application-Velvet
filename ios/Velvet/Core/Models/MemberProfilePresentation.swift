@@ -69,5 +69,5 @@ extension MemberProfile {
     var memberSearchTitle: String { isCoupleProfile ? "Ce qu’ils recherchent" : "Ce que cette personne recherche" }
     var memberDesiresEyebrow: String { isCoupleProfile ? "Leurs envies" : "Ses envies" }
     var memberPlacesTitle: String { isCoupleProfile ? "Leurs repères" : "Ses repères" }
-    var memberAvailabilityTitle: String { isCoupleProfile ? "Quand les rencontrer" : "Quand la rencontrer" }
+    var memberAvailabilityTitle: String { isCoupleProfile ? "Quand les rencontrer" : "Quand rencontrer ce membre" }
 }
