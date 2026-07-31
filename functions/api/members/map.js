@@ -9,6 +9,7 @@ import { enrichProfilesMedia } from './media.js';
 import { geocodeVenueAddress } from './venue-geocoding.js';
 
 const DEFAULT_CENTER = { latitude: 46.603354, longitude: 1.888334, zoom: 5 };
+const DEFAULT_EXPERIENCE = { radiusKm: 50 };
 const geocodeCache = new Map();
 
 function finite(value) {
@@ -197,7 +198,10 @@ async function mapCenter(env, access, markers) {
     ).catch(() => [])
   ]);
   const location = locationRows?.[0];
-  const radiusKm = Math.max(10, Math.min(200, Number(preferenceRows?.[0]?.discovery_radius_km) || 50));
+  const radiusKm = Math.max(
+    10,
+    Math.min(200, Number(preferenceRows?.[0]?.discovery_radius_km) || DEFAULT_EXPERIENCE.radiusKm)
+  );
   if (location?.enabled) {
     const latitude = finite(location.latitude_bucket);
     const longitude = finite(location.longitude_bucket);
