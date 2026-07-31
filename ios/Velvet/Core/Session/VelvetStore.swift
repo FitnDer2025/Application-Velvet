@@ -71,7 +71,7 @@ final class VelvetStore: ObservableObject {
             if let feed = try? await photoReactionRequest {
                 photoReactions = Dictionary(uniqueKeysWithValues: feed.reactions.map { ($0.mediaId, $0) })
             }
-            await synchronizeSystemBadge()
+            await synchronizeExternalCounters()
         } catch {
             errorMessage = ErrorMessage.text(for: error)
         }
@@ -87,7 +87,7 @@ final class VelvetStore: ObservableObject {
             if let engagement = try? await engagementRequest {
                 apply(engagement)
             }
-            await synchronizeSystemBadge()
+            await synchronizeExternalCounters()
         } catch {
             // Une actualisation silencieuse ne doit pas interrompre la navigation.
         }
@@ -140,7 +140,7 @@ final class VelvetStore: ObservableObject {
     func markNotificationRead(id: UUID) async {
         do {
             notificationFeed = try await service.markNotificationRead(id: id)
-            await synchronizeSystemBadge()
+            await synchronizeExternalCounters()
         } catch {
             errorMessage = ErrorMessage.text(for: error)
         }
@@ -149,7 +149,7 @@ final class VelvetStore: ObservableObject {
     func markNotificationsRead() async {
         do {
             notificationFeed = try await service.markAllNotificationsRead()
-            await synchronizeSystemBadge()
+            await synchronizeExternalCounters()
         } catch {
             errorMessage = ErrorMessage.text(for: error)
         }
@@ -195,8 +195,12 @@ final class VelvetStore: ObservableObject {
         )
     }
 
-    private func synchronizeSystemBadge() async {
+    private func synchronizeExternalCounters() async {
         try? await UNUserNotificationCenter.current().setBadgeCount(notificationFeed.unreadCount)
+        VelvetNotificationSnapshotStore.persist(
+            feed: notificationFeed,
+            unreadMessages: unreadMessageCount
+        )
     }
 }
 

@@ -71,6 +71,9 @@ struct MainShellView: View {
     @State private var showsProfileEditor = false
     @State private var showsPrivacy = false
     @State private var pendingMenuRoute: MenuRoute?
+    @State private var pendingNotificationDestination: VelvetNotificationDestination?
+    @State private var routedConversation: Conversation?
+    @State private var routedProfile: MemberProfile?
     @State private var placesSelection = 0
 
     var body: some View {
@@ -114,9 +117,13 @@ struct MainShellView: View {
             guard phase == .active else { return }
             Task { await store.refreshMessaging() }
         }
-        .sheet(isPresented: $showsNotifications) {
-            NotificationsView()
-                .environmentObject(store)
+        .sheet(isPresented: $showsNotifications, onDismiss: openPendingNotificationDestination) {
+            NotificationsView { destination in
+                pendingNotificationDestination = destination
+                showsNotifications = false
+            }
+            .environmentObject(store)
+            .environmentObject(chrome)
         }
         .sheet(isPresented: $showsMenu, onDismiss: openPendingMenuRoute) {
             NavigationStack {
@@ -162,6 +169,20 @@ struct MainShellView: View {
         .sheet(isPresented: $showsPrivacy) {
             PrivacySettingsView()
         }
+        .sheet(item: $routedProfile) { member in
+            NavigationStack {
+                MemberDetailView(profile: member)
+                    .environmentObject(store)
+                    .environmentObject(chrome)
+            }
+        }
+        .fullScreenCover(item: $routedConversation) { conversation in
+            NavigationStack {
+                AppleConversationView(conversation: conversation)
+                    .environmentObject(store)
+                    .environmentObject(chrome)
+            }
+        }
         .alert(
             "Velvet",
             isPresented: Binding(
@@ -174,7 +195,7 @@ struct MainShellView: View {
             Text(store.errorMessage ?? "")
         }
         .onReceive(NotificationCenter.default.publisher(for: .velvetNotificationRoute)) { notification in
-            guard let route = notification.object as? String else { return }
+            guard let route = notification.object as? VelvetNotificationRoute else { return }
             _ = NotificationService.consumePendingRoute()
             openNotificationRoute(route)
         }
@@ -290,19 +311,52 @@ struct MainShellView: View {
         }
     }
 
-    private func openNotificationRoute(_ route: String) {
-        switch route {
-        case "messages", "message", "conversations":
-            selectedTab = .messages
-        case "events", "event":
+    private func openPendingNotificationDestination() {
+        guard let destination = pendingNotificationDestination else { return }
+        pendingNotificationDestination = nil
+        DispatchQueue.main.async {
+            switch destination {
+            case let .conversation(conversation):
+                routedConversation = conversation
+            case let .profile(member):
+                routedProfile = member
+            case .events:
+                placesSelection = 0
+                showsPlacesEvents = true
+            }
+        }
+    }
+
+    private func openNotificationRoute(_ route: VelvetNotificationRoute) {
+        switch route.destination {
+        case .notifications:
+            showsNotifications = true
+
+        case .messages:
+            Task { @MainActor in
+                await store.refreshMessaging()
+                if let id = route.conversationID,
+                   let conversation = store.directory?.conversations.first(where: { $0.id == id }) {
+                    routedConversation = conversation
+                } else {
+                    selectedTab = .messages
+                }
+            }
+
+        case .events:
             placesSelection = 0
             showsPlacesEvents = true
-        case "maps", "location":
+
+        case .maps:
             selectedTab = .maps
-        case "profile", "likes", "recommendations":
-            selectedTab = .profile
-        default:
-            showsNotifications = true
+
+        case .profile:
+            if let id = route.profileID,
+               let member = store.directory?.profiles.first(where: { $0.id == id }) {
+                routedProfile = member
+            } else {
+                selectedTab = .profile
+            }
         }
     }
 }
