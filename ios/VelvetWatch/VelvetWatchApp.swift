@@ -58,7 +58,15 @@ private struct VelvetWatchSnapshot: Codable, Equatable {
 }
 
 private final class VelvetWatchModel: NSObject, ObservableObject, WCSessionDelegate {
-    static let appGroup = "group.com.velvetapplication.watch"
+    static var appGroup: String {
+        let configured = (Bundle.main.object(forInfoDictionaryKey: "VelvetWatchAppGroup") as? String)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !configured.isEmpty, !configured.contains("$(") else {
+            return "group.com.velvetapplication.watch"
+        }
+        return configured
+    }
+
     static let storageKey = "velvet.watch.notification.snapshot.v1"
 
     @Published private(set) var snapshot: VelvetWatchSnapshot

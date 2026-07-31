@@ -1,3 +1,4 @@
 VELVET_API_BASE_URL = https:/$()/velvet-beta.sh96hv64dj.workers.dev
 SWIFT_COMPILATION_MODE = wholemodule
-APS_ENVIRONMENT = production
+VELVET_APP_GROUP = group.com.velvetapplication.app
+VELVET_WATCH_APP_GROUP = group.com.velvetapplication.watch

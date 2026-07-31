@@ -49,5 +49,7 @@
 	</array>
 	<key>VelvetAPIBaseURL</key>
 	<string>$(VELVET_API_BASE_URL)</string>
+	<key>VelvetAppGroup</key>
+	<string>$(VELVET_APP_GROUP)</string>
 </dict>
 </plist>
