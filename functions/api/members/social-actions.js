@@ -121,17 +121,16 @@ export async function onRequestPost({ request, env }) {
       const category = cleanText(body.category, 80);
       const description = cleanText(body.description, 2000);
       if (!category) return withSession({ error: 'report_category_required' }, access.session, 400);
-      await restJson(env, '/rest/v1/reports', access.session, {
+
+      await restJson(env, '/rest/v1/rpc/submit_member_profile_report', access.session, {
         method: 'POST',
-        headers: { prefer: 'return=minimal' },
         body: JSON.stringify({
-          reporter_user_id: access.account.userId,
-          subject_type: 'profile',
-          subject_id: profileId,
-          category,
-          description: description || null
+          target_profile: profileId,
+          target_category: category,
+          target_description: description || null
         })
       });
+
       const users = await targetUsers(env, access, profileId);
       if (users.length) {
         await restJson(env, '/rest/v1/blocks?on_conflict=blocker_user_id,blocked_user_id', access.session, {
