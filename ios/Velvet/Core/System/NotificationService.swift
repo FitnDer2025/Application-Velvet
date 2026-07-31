@@ -323,9 +323,8 @@ final class VelvetAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificati
             UNNotificationPresentationOptions
         ) -> Void
     ) {
-        NotificationService.handleNotification(
-            userInfo: notification.request.content.userInfo
-        )
+        // Une notification reçue au premier plan reste une bannière. La navigation
+        // ne se déclenche que lorsque le membre touche effectivement la notification.
         completionHandler([.banner, .list, .badge, .sound])
     }
 
