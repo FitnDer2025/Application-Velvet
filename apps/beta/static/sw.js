@@ -1,4 +1,4 @@
-const CACHE = 'velvet-beta-shell-v10';
+const CACHE = 'velvet-beta-shell-v11';
 const APP_SHELL = [
   '/membres/',
   '/assets/members-live.css',
@@ -8,12 +8,12 @@ const APP_SHELL = [
   '/assets/velvet-premium-ui.css',
   '/assets/velvet-premium-ui.js',
   '/assets/velvet-editorial-ui.css',
-  '/assets/velvet-messaging-upgrade.css',
-  '/assets/velvet-messaging-upgrade.js',
-  '/assets/velvet-mobile-feed-hotfix.css',
-  '/assets/velvet-mobile-feed-hotfix.js',
+  '/assets/velvet-messaging-upgrade.css?v=20260731-5',
+  '/assets/velvet-messaging-upgrade.js?v=20260731-5',
+  '/assets/velvet-mobile-feed-hotfix.css?v=20260731-5',
+  '/assets/velvet-mobile-feed-hotfix.js?v=20260731-5',
   '/assets/pwa-ios.js',
-  '/assets/photo-protection.js',
+  '/assets/photo-protection.js?v=20260731-5',
   '/assets/location-verification.js',
   '/assets/velvet-icon-180.png',
   '/assets/velvet-icon-192.png',
