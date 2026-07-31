@@ -1,4 +1,4 @@
-/* Correctifs mobiles ciblés : fil d'actualité et navigation Messages */
+/* Correctifs mobiles ciblés : fil d'actualité et interactions */
 .home-feed-card > header {
   grid-template-columns: 64px minmax(0, 1fr);
   gap: 15px;
@@ -70,6 +70,10 @@
   object-position: center 22%;
 }
 
+.feed-photo {
+  touch-action: manipulation;
+}
+
 .bottom-nav {
   grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
   isolation: isolate;
@@ -89,6 +93,117 @@
 
 .bottom-nav [data-route="conversations"] > * {
   pointer-events: none;
+}
+
+/*
+ * Le menu Premium était seulement transparent lorsqu'il était fermé.
+ * Il restait donc au-dessus de la page et interceptait les touchers.
+ */
+@media (max-width: 800px) {
+  .velvet-member-ui .sidebar:not(.open) {
+    visibility: hidden !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+  }
+
+  .velvet-member-ui .sidebar.open {
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  .velvet-member-ui .nav-scrim {
+    pointer-events: none !important;
+  }
+
+  .velvet-member-ui.nav-open .nav-scrim,
+  .velvet-member-ui.velvet-mobile-menu-open .nav-scrim {
+    pointer-events: auto !important;
+  }
+}
+
+#velvetPrivacyShield:not(.visible) {
+  pointer-events: none !important;
+}
+
+.velvet-photo-lightbox {
+  position: fixed;
+  z-index: 100020;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: calc(16px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));
+  background: rgba(5, 4, 5, .96);
+  opacity: 0;
+  transform: scale(.985);
+  transition: opacity 160ms ease, transform 180ms cubic-bezier(.2, .8, .2, 1);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+.velvet-photo-lightbox.visible {
+  opacity: 1;
+  transform: none;
+}
+
+.velvet-photo-lightbox-head,
+.velvet-photo-lightbox-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.velvet-photo-lightbox-head strong {
+  color: var(--cream, #f4f4f2);
+  font: 500 18px/1.2 Georgia, serif;
+}
+
+.velvet-photo-lightbox-close {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(244, 244, 242, .14);
+  border-radius: 50%;
+  background: rgba(244, 244, 242, .07);
+  color: #f4f4f2;
+  font-size: 22px;
+}
+
+.velvet-photo-lightbox-media {
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #080708;
+}
+
+.velvet-photo-lightbox-media img {
+  width: 100%;
+  height: 100%;
+  max-height: calc(100dvh - 190px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+.velvet-photo-lightbox-actions {
+  justify-content: center;
+}
+
+.velvet-photo-lightbox-actions button {
+  min-height: 48px;
+  padding: 11px 22px;
+  border-radius: 999px;
+}
+
+body.velvet-lightbox-open {
+  overflow: hidden !important;
 }
 
 @media (max-width: 760px) {
