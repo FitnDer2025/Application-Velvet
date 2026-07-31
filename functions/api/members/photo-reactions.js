@@ -57,7 +57,7 @@ async function notifyPhotoOwner(env, access, admission, mediaId, reaction) {
   const [mediaRows, actorRows] = await Promise.all([
     serviceRest(
       env,
-      `/rest/v1/media_assets?select=id,profile_id,owner_user_id&id=eq.${encodeURIComponent(mediaId)}&limit=1`
+      `/rest/v1/media_assets?select=id,profile_id,owner_user_id,media_role&id=eq.${encodeURIComponent(mediaId)}&limit=1`
     ).catch(() => []),
     serviceRest(
       env,
@@ -80,9 +80,9 @@ async function notifyPhotoOwner(env, access, admission, mediaId, reaction) {
   const actor = actorRows?.[0];
   const actorName = clean(actor?.display_name, 120) || 'Un membre Velvet';
   const wording = {
-    like: { title: `${actorName} aime votre photo`, body: `${actorName} a ajouté un J’aime à l’une de vos photos.` },
-    love: { title: `${actorName} adore votre photo`, body: `${actorName} a réagi avec un cœur à l’une de vos photos.` },
-    adore: { title: `${actorName} a eu un coup de cœur`, body: `${actorName} a ajouté un coup de cœur à l’une de vos photos.` }
+    like: { title: `${actorName} aime votre photo`, body: `${actorName} a ajouté un J’aime à cette photo.` },
+    love: { title: `${actorName} adore votre photo`, body: `${actorName} a réagi avec un cœur à cette photo.` },
+    adore: { title: `${actorName} a eu un coup de cœur`, body: `${actorName} a ajouté un coup de cœur à cette photo.` }
   }[reaction];
   if (!wording) return { notified: 0 };
 
@@ -96,7 +96,14 @@ async function notifyPhotoOwner(env, access, admission, mediaId, reaction) {
       entity_type: 'photo',
       entity_id: mediaId,
       title: wording.title,
-      body: wording.body
+      body: wording.body,
+      metadata: {
+        reaction,
+        mediaId,
+        targetProfileId: media.profile_id,
+        mediaRole: media.media_role || null,
+        actorName
+      }
     })))
   });
 
