@@ -120,6 +120,6 @@ test('iOS utilise le même état temps réel et archive les notifications', asyn
   assert.match(notifications, /Profils consultés/);
   assert.match(memberDetail, /Déjà consulté/);
   assert.match(discovery, /store\.viewHistory/);
-  assert.match(discovery, /Vu \\(history\.viewCount/);
+  assert.ok(discovery.includes('Vu \\(history.viewCount'));
   assert.match(discovery, /eye\.fill/);
 });
