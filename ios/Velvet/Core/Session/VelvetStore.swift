@@ -19,6 +19,14 @@ final class VelvetStore: ObservableObject {
 
     let service: SessionService
 
+    var unreadMessageCount: Int {
+        directory?.messageUnreadCount
+            ?? directory?.conversations.reduce(0) {
+                $0 + NumberFormatter.velvetInteger($1.unreadCount)
+            }
+            ?? 0
+    }
+
     init(service: SessionService = SessionService()) {
         self.service = service
     }
@@ -49,11 +57,22 @@ final class VelvetStore: ObservableObject {
         }
     }
 
+    func refreshMessaging() async {
+        do {
+            async let directoryRequest = service.directory()
+            async let notificationRequest = service.notifications()
+            directory = try await directoryRequest
+            notificationFeed = (try? await notificationRequest) ?? notificationFeed
+        } catch {
+            // Une actualisation silencieuse ne doit pas interrompre la navigation.
+        }
+    }
+
     func refreshMessages(conversationID: UUID) async {
         do {
-            messages[conversationID] = try await service.messages(
-                conversationID: conversationID
-            ).messages
+            let response = try await service.messages(conversationID: conversationID)
+            messages[conversationID] = response.messages
+            await refreshMessaging()
         } catch {
             errorMessage = ErrorMessage.text(for: error)
         }
@@ -63,6 +82,7 @@ final class VelvetStore: ObservableObject {
         do {
             let message = try await service.sendMessage(body, conversationID: conversationID)
             messages[conversationID, default: []].append(message)
+            await refreshMessaging()
             return true
         } catch {
             errorMessage = ErrorMessage.text(for: error)
@@ -76,5 +96,11 @@ final class VelvetStore: ObservableObject {
         } catch {
             errorMessage = ErrorMessage.text(for: error)
         }
+    }
+}
+
+private extension NumberFormatter {
+    static func velvetInteger(_ value: Int?) -> Int {
+        value ?? 0
     }
 }
