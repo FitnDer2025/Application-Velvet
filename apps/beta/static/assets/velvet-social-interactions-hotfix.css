@@ -1,0 +1,105 @@
+/* Velvet — réactions photo, liens d’actualité et conversation plus compacte */
+.home-feed-card > header strong[data-social-profile-id],
+.home-feed-card > header .feed-avatar[data-social-profile-id] {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.home-feed-card > header strong[data-social-profile-id]:hover {
+  color: var(--gold);
+}
+
+.home-feed-card > header strong[data-social-profile-id]:focus-visible,
+.home-feed-card > header .feed-avatar[data-social-profile-id]:focus-visible {
+  outline: 2px solid rgba(198, 169, 106, .62);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+
+.velvet-lightbox-reactions {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.velvet-lightbox-reactions button {
+  min-width: 58px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .055);
+  color: #f6eee6;
+  cursor: pointer;
+  transition: transform .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.velvet-lightbox-reactions button b {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.velvet-lightbox-reactions button small {
+  color: rgba(246, 238, 230, .7);
+  font-size: 11px;
+}
+
+.velvet-lightbox-reactions button.active {
+  border-color: rgba(198, 169, 106, .54);
+  background: linear-gradient(145deg, rgba(126, 32, 69, .78), rgba(87, 22, 45, .72));
+  box-shadow: 0 8px 24px rgba(126, 32, 69, .24);
+}
+
+.velvet-lightbox-reactions button:active {
+  transform: scale(.95);
+}
+
+.velvet-lightbox-reactions > span {
+  width: 100%;
+  color: rgba(246, 238, 230, .5);
+  font-size: 10px;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .velvet-chat-panel .messages {
+    display: flex !important;
+    flex-direction: column !important;
+    padding-bottom: 7px !important;
+    scroll-padding-bottom: 7px !important;
+  }
+
+  .velvet-chat-panel .messages::before {
+    content: "";
+    flex: 1 1 auto;
+    min-height: 8px;
+    pointer-events: none;
+  }
+
+  body.velvet-keyboard-open .velvet-chat-panel .messages::before {
+    min-height: 2px;
+  }
+
+  .velvet-whatsapp-layout .composer.composer-v2 {
+    padding-top: 4px !important;
+    border-top-color: rgba(255, 255, 255, .045) !important;
+    box-shadow: 0 -4px 18px rgba(0, 0, 0, .17) !important;
+  }
+
+  .velvet-photo-lightbox-actions {
+    display: grid;
+    gap: 12px;
+  }
+
+  .velvet-lightbox-reactions {
+    order: -1;
+    padding: 0 4px;
+  }
+}
