@@ -51,10 +51,11 @@ test('conversation streaks and profile affinity are restored from engagement', a
 });
 
 test('notifications identify their actor, route to their origin and clear unread state', async () => {
-  const [models, store, view, endpoint, messageNotifier, engagement] = await Promise.all([
+  const [models, store, view, shell, endpoint, messageNotifier, engagement] = await Promise.all([
     read('ios/Velvet/Core/Models/DirectoryModels.swift'),
     read('ios/Velvet/Core/Session/VelvetStore.swift'),
     read('ios/Velvet/Features/Home/NotificationsView.swift'),
+    read('ios/Velvet/Features/Home/MainShellView.swift'),
     read('functions/api/members/notifications.js'),
     read('functions/api/members/_message-notifications.js'),
     read('functions/api/members/engagement.js')
@@ -63,11 +64,15 @@ test('notifications identify their actor, route to their origin and clear unread
   assert.match(store, /markNotificationRead/);
   assert.match(store, /setBadgeCount/);
   assert.match(view, /Tout lire/);
-  assert.match(view, /activeConversation/);
-  assert.match(view, /activeProfile/);
+  assert.match(view, /onDestination/);
+  assert.match(view, /VelvetNotificationDestination/);
   assert.match(view, /actorProfile/);
   assert.match(view, /profile_views/);
   assert.match(view, /security/);
+  assert.doesNotMatch(view, /navigationDestination/);
+  assert.match(shell, /routedConversation/);
+  assert.match(shell, /routedProfile/);
+  assert.match(shell, /openPendingNotificationDestination/);
   assert.match(endpoint, /read_all/);
   assert.match(endpoint, /notificationId/);
   assert.match(messageNotifier, /senderProfileId/);
