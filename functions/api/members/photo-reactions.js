@@ -5,6 +5,7 @@ import {
   restJson,
   withSession
 } from './_shared.js';
+import { deliverBrowserActivity } from './_browser-push.js';
 
 const REACTIONS = new Set(['like', 'love', 'adore']);
 
@@ -107,7 +108,17 @@ async function notifyPhotoOwner(env, access, admission, mediaId, reaction) {
     })))
   });
 
-  return { notified: ownerUserIds.length };
+  const push = await deliverBrowserActivity(env, {
+    userIds: ownerUserIds,
+    eventType: 'reactions',
+    title: wording.title,
+    body: wording.body,
+    tag: `velvet-photo-reaction-${mediaId}`,
+    navigate: '/membres/?route=notifications',
+    profileId: admission.id
+  }).catch(() => ({ sent: 0 }));
+
+  return { notified: ownerUserIds.length, browserPush: push.sent || 0 };
 }
 
 export async function onRequestGet({ request, env }) {
