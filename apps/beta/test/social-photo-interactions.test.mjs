@@ -14,7 +14,7 @@ test('le fil ouvre les profils et les photos acceptent les réactions', async ()
   ]);
 
   assert.doesNotThrow(() => new Function(script));
-  assert.match(script, /data\.socialProfileId/);
+  assert.match(script, /dataset\.socialProfileId/);
   assert.match(script, /dispatchProfileOpen/);
   assert.match(script, /velvet-lightbox-reactions/);
   assert.match(script, /\/api\/members\/photo-reactions/);
