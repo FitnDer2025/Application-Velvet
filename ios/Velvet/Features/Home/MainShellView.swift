@@ -147,7 +147,7 @@ struct MainShellView: View {
     private var selectedContent: some View {
         switch selectedTab {
         case .home:
-            NavigationStack { HomeView(profile: profile) }
+            NavigationStack { PremiumHomeView(profile: profile) }
         case .discover:
             NavigationStack { DiscoveryView(currentProfile: profile) }
         case .maps:
@@ -155,7 +155,7 @@ struct MainShellView: View {
         case .messages:
             NavigationStack { ConversationsView() }
         case .profile:
-            NavigationStack { ProfileSummaryView(profile: profile) }
+            NavigationStack { PremiumProfileSummaryView(profile: profile) }
         }
     }
 
