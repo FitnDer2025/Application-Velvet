@@ -1,4 +1,4 @@
-const CACHE = 'velvet-beta-shell-v8';
+const CACHE = 'velvet-beta-shell-v9';
 const APP_SHELL = [
   '/membres/',
   '/assets/members-live.css',
@@ -8,6 +8,8 @@ const APP_SHELL = [
   '/assets/velvet-premium-ui.css',
   '/assets/velvet-premium-ui.js',
   '/assets/velvet-editorial-ui.css',
+  '/assets/velvet-messaging-upgrade.css',
+  '/assets/velvet-messaging-upgrade.js',
   '/assets/pwa-ios.js',
   '/assets/photo-protection.js',
   '/assets/location-verification.js',
@@ -66,12 +68,16 @@ self.addEventListener('push', (event) => {
     payload = { body: event.data?.text?.() || '' };
   }
   const declarative = payload.notification || payload;
+  const conversationId = payload.conversationId || declarative.conversationId || '';
+  const destination = conversationId
+    ? `/membres/?route=conversations&conversation=${encodeURIComponent(conversationId)}`
+    : (declarative.navigate || payload.url || '/membres/');
   event.waitUntil(self.registration.showNotification(declarative.title || 'Velvet', {
     body: declarative.body || 'Une nouvelle activité vous attend.',
     icon: declarative.icon || '/assets/velvet-icon-192.png',
     badge: declarative.badge || '/assets/velvet-icon-192.png',
     tag: declarative.tag || 'velvet-push',
-    data: { url: declarative.navigate || payload.url || '/membres/' }
+    data: { url: destination }
   }));
 });
 
