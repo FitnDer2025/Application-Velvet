@@ -1,2 +1,4 @@
 VELVET_API_BASE_URL = https:/$()/velvet-beta.sh96hv64dj.workers.dev
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG
+VELVET_APP_GROUP = group.com.velvetapplication.$(DEVELOPMENT_TEAM).app
+VELVET_WATCH_APP_GROUP = group.com.velvetapplication.$(DEVELOPMENT_TEAM).watch
