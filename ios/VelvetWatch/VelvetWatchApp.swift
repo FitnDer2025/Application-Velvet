@@ -1,5 +1,6 @@
 import SwiftUI
 import WatchConnectivity
+import WidgetKit
 
 private struct VelvetWatchSnapshot: Codable, Equatable {
     let total: Int
@@ -75,6 +76,7 @@ private final class VelvetWatchModel: NSObject, ObservableObject, WCSessionDeleg
         if let data = try? JSONEncoder().encode(value) {
             UserDefaults(suiteName: Self.appGroup)?.set(data, forKey: Self.storageKey)
         }
+        WidgetCenter.shared.reloadTimelines(ofKind: "VelvetWatchNotificationWidget")
         DispatchQueue.main.async {
             self.snapshot = value
         }
@@ -98,59 +100,60 @@ private struct VelvetWatchDashboard: View {
     private let gold = Color(red: 0.84, green: 0.70, blue: 0.43)
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                HStack(spacing: 7) {
-                    ZStack {
-                        Circle().stroke(gold.opacity(0.75), lineWidth: 1)
-                        Text("V")
-                            .font(.system(size: 14, weight: .medium, design: .serif))
-                            .foregroundStyle(gold)
-                    }
-                    .frame(width: 28, height: 28)
-
-                    Text("VELVET")
-                        .font(.system(size: 12, weight: .bold))
-                        .tracking(2)
-                    Spacer()
-                }
-
-                VStack(spacing: 1) {
-                    Text("\(snapshot.total)")
-                        .font(.system(size: 48, weight: .light, design: .rounded))
-                        .foregroundStyle(.white)
-                        .contentTransition(.numericText())
-                    Text(snapshot.total == 1 ? "activité non lue" : "activités non lues")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.vertical, 6)
-
-                counter("message.fill", "Messages", snapshot.messages)
-                counter("eye.fill", "Visites", snapshot.visits)
-                counter("heart.fill", "Likes", snapshot.likes)
-                counter("calendar", "Sorties", snapshot.events)
-
-                if snapshot.security > 0 {
-                    counter("shield.fill", "Sécurité", snapshot.security)
-                }
-
-                Text("Mis à jour \(snapshot.updatedAt, style: .relative)")
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundStyle(.tertiary)
-                    .padding(.top, 2)
-            }
-            .padding(.horizontal, 8)
-            .padding(.bottom, 12)
-        }
-        .containerBackground(
+        ZStack {
             LinearGradient(
                 colors: [Color.black, Color(red: 0.18, green: 0.05, blue: 0.10)],
                 startPoint: .top,
                 endPoint: .bottom
-            ),
-            for: .navigation
-        )
+            )
+            .ignoresSafeArea()
+
+            ScrollView {
+                VStack(spacing: 12) {
+                    HStack(spacing: 7) {
+                        ZStack {
+                            Circle().stroke(gold.opacity(0.75), lineWidth: 1)
+                            Text("V")
+                                .font(.system(size: 14, weight: .medium, design: .serif))
+                                .foregroundStyle(gold)
+                        }
+                        .frame(width: 28, height: 28)
+
+                        Text("VELVET")
+                            .font(.system(size: 12, weight: .bold))
+                            .tracking(2)
+                        Spacer()
+                    }
+
+                    VStack(spacing: 1) {
+                        Text("\(snapshot.total)")
+                            .font(.system(size: 48, weight: .light, design: .rounded))
+                            .foregroundStyle(.white)
+                            .contentTransition(.numericText())
+                        Text(snapshot.total == 1 ? "activité non lue" : "activités non lues")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 6)
+
+                    counter("message.fill", "Messages", snapshot.messages)
+                    counter("eye.fill", "Visites", snapshot.visits)
+                    counter("heart.fill", "Likes", snapshot.likes)
+                    counter("calendar", "Sorties", snapshot.events)
+
+                    if snapshot.security > 0 {
+                        counter("shield.fill", "Sécurité", snapshot.security)
+                    }
+
+                    Text("Mis à jour \(snapshot.updatedAt, style: .relative)")
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(.tertiary)
+                        .padding(.top, 2)
+                }
+                .padding(.horizontal, 8)
+                .padding(.bottom, 12)
+            }
+        }
     }
 
     private func counter(_ icon: String, _ title: String, _ value: Int) -> some View {
