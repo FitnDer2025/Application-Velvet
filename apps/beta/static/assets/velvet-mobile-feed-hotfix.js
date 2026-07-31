@@ -1,6 +1,13 @@
 (() => {
   const MOBILE_QUERY = '(max-width: 900px)';
-  const state = { profiles: [], directory: null, patchPending: false, patching: false, opening: false };
+  const state = {
+    profiles: [],
+    directory: null,
+    patchPending: false,
+    patching: false,
+    opening: false,
+    lightbox: null
+  };
 
   const e = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -114,9 +121,84 @@
     });
   }
 
+  function sidebar() {
+    return document.querySelector('.sidebar');
+  }
+
+  function syncMenuInteraction() {
+    const menu = sidebar();
+    if (!menu) return;
+    const open = menu.classList.contains('open');
+    menu.inert = !open;
+    menu.setAttribute('aria-hidden', String(!open));
+    document.body.classList.toggle('nav-open', open);
+    document.body.classList.toggle('velvet-mobile-menu-open', open);
+    document.querySelector('#mobileMenuButton')?.setAttribute('aria-expanded', String(open));
+  }
+
+  function closeMobileMenu() {
+    sidebar()?.classList.remove('open');
+    syncMenuInteraction();
+  }
+
+  function closeLightbox() {
+    const lightbox = state.lightbox || document.querySelector('.velvet-photo-lightbox');
+    if (!lightbox) return;
+    lightbox.classList.remove('visible');
+    document.body.classList.remove('velvet-lightbox-open');
+    setTimeout(() => lightbox.remove(), 180);
+    state.lightbox = null;
+  }
+
+  function dispatchProfileOpen(profileId) {
+    if (!profileId) return;
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.hidden = true;
+    trigger.dataset.openProfile = profileId;
+    document.body.appendChild(trigger);
+    trigger.click();
+    trigger.remove();
+  }
+
+  function openFeedLightbox(button) {
+    const image = button.querySelector('img');
+    if (!image?.src) return;
+    closeLightbox();
+    closeMobileMenu();
+
+    const profileId = button.dataset.openProfile || '';
+    const profile = profileById(profileId);
+    const title = profile?.display_name || image.alt || 'Photo Velvet';
+    const lightbox = document.createElement('section');
+    lightbox.className = 'velvet-photo-lightbox';
+    lightbox.setAttribute('role', 'dialog');
+    lightbox.setAttribute('aria-modal', 'true');
+    lightbox.setAttribute('aria-label', `Photo de ${title}`);
+    lightbox.innerHTML = `
+      <header class="velvet-photo-lightbox-head">
+        <strong>${e(title)}</strong>
+        <button type="button" class="velvet-photo-lightbox-close" data-close-feed-lightbox aria-label="Fermer">×</button>
+      </header>
+      <div class="velvet-photo-lightbox-media">
+        <img src="${e(image.currentSrc || image.src)}" alt="${e(image.alt || `Photo de ${title}`)}">
+      </div>
+      <footer class="velvet-photo-lightbox-actions">
+        ${profileId ? `<button type="button" class="primary" data-lightbox-open-profile="${e(profileId)}">Voir le profil</button>` : ''}
+      </footer>`;
+    document.body.appendChild(lightbox);
+    document.body.classList.add('velvet-lightbox-open');
+    state.lightbox = lightbox;
+    requestAnimationFrame(() => {
+      lightbox.classList.add('visible');
+      lightbox.querySelector('[data-close-feed-lightbox]')?.focus();
+    });
+  }
+
   async function openConversationDirect(conversationId) {
     if (!conversationId || state.opening) return;
     state.opening = true;
+    closeMobileMenu();
     const content = document.querySelector('#content');
     if (!content) {
       state.opening = false;
@@ -131,6 +213,7 @@
         state.directory ? Promise.resolve(state.directory) : api('/api/members/directory')
       ]);
       state.directory = directory;
+      state.profiles = list(directory.profiles);
       const conversation = list(directory.conversations).find((row) => String(row.id) === String(conversationId));
       const name = conversation?.participant_display_name || conversation?.subject || 'Conversation privée';
       content.innerHTML = `<div class="page velvet-direct-conversation">
@@ -152,7 +235,11 @@
       window.scrollTo({ top: 0, behavior: 'auto' });
 
       content.querySelector('[data-direct-conversation-back]')?.addEventListener('click', () => {
-        document.querySelector('.sidebar [data-route="conversations"]')?.click();
+        const canonicalButton = document.querySelector('.sidebar [data-route="conversations"]');
+        const menu = sidebar();
+        if (menu) menu.inert = false;
+        canonicalButton?.click();
+        requestAnimationFrame(syncMenuInteraction);
       });
       const fileInput = content.querySelector('#messageForm [name=attachments]');
       fileInput?.addEventListener('change', () => {
@@ -180,10 +267,15 @@
           button.disabled = false;
         }
       });
-      content.querySelector('.messages')?.scrollTo({ top: content.querySelector('.messages').scrollHeight });
+      const messages = content.querySelector('.messages');
+      messages?.scrollTo({ top: messages.scrollHeight });
     } catch (error) {
       toast('Cette conversation n’a pas pu être ouverte. Réessaie dans quelques secondes.', true);
-      document.querySelector('.sidebar [data-route="conversations"]')?.click();
+      const canonicalButton = document.querySelector('.sidebar [data-route="conversations"]');
+      const menu = sidebar();
+      if (menu) menu.inert = false;
+      canonicalButton?.click();
+      requestAnimationFrame(syncMenuInteraction);
     } finally {
       state.opening = false;
     }
@@ -194,6 +286,7 @@
     if (state.patching) return;
     state.patching = true;
     patchFeedAvatars();
+    syncMenuInteraction();
     requestAnimationFrame(() => { state.patching = false; });
   }
 
@@ -221,13 +314,46 @@
     if (!canonicalButton) return false;
     event.preventDefault();
     event.stopImmediatePropagation();
+    closeMobileMenu();
     messageButton.dataset.velvetRouteRelay = 'true';
+    const menu = sidebar();
+    if (menu) menu.inert = false;
     canonicalButton.click();
-    requestAnimationFrame(() => delete messageButton.dataset.velvetRouteRelay);
+    requestAnimationFrame(() => {
+      delete messageButton.dataset.velvetRouteRelay;
+      syncMenuInteraction();
+    });
     return true;
   }
 
   document.addEventListener('click', (event) => {
+    const close = event.target.closest('[data-close-feed-lightbox]');
+    if (close || (event.target.classList?.contains('velvet-photo-lightbox'))) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      closeLightbox();
+      return;
+    }
+
+    const lightboxProfile = event.target.closest('[data-lightbox-open-profile]');
+    if (lightboxProfile) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const profileId = lightboxProfile.dataset.lightboxOpenProfile;
+      closeLightbox();
+      setTimeout(() => dispatchProfileOpen(profileId), 0);
+      return;
+    }
+
+    const feedPhoto = event.target.closest('.feed-photo');
+    if (feedPhoto) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      openFeedLightbox(feedPhoto);
+      return;
+    }
+
     const conversation = event.target.closest('[data-open-conversation]');
     if (conversation) {
       event.preventDefault();
@@ -236,12 +362,34 @@
       openConversationDirect(conversation.dataset.openConversation);
       return;
     }
+
     relayMessagesRoute(event);
   }, true);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && state.lightbox) {
+      event.preventDefault();
+      closeLightbox();
+    }
+  });
+
+  const menu = sidebar();
+  if (menu) {
+    closeMobileMenu();
+    new MutationObserver(syncMenuInteraction).observe(menu, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+  }
 
   new MutationObserver(schedulePatch).observe(document.documentElement, { childList: true, subtree: true });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshProfiles(); });
   window.addEventListener('focus', refreshProfiles);
+  window.addEventListener('pageshow', () => {
+    closeLightbox();
+    closeMobileMenu();
+    refreshProfiles();
+  });
 
   refreshProfiles();
   schedulePatch();
