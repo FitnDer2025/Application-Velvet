@@ -1,4 +1,4 @@
-const CACHE = 'velvet-beta-shell-v9';
+const CACHE = 'velvet-beta-shell-v10';
 const APP_SHELL = [
   '/membres/',
   '/assets/members-live.css',
@@ -10,6 +10,8 @@ const APP_SHELL = [
   '/assets/velvet-editorial-ui.css',
   '/assets/velvet-messaging-upgrade.css',
   '/assets/velvet-messaging-upgrade.js',
+  '/assets/velvet-mobile-feed-hotfix.css',
+  '/assets/velvet-mobile-feed-hotfix.js',
   '/assets/pwa-ios.js',
   '/assets/photo-protection.js',
   '/assets/location-verification.js',
@@ -37,7 +39,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'no-store' })
       .then((response) => {
         if (response.ok) {
           const copy = response.clone();
