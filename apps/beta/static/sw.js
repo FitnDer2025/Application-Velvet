@@ -1,4 +1,4 @@
-const CACHE = 'velvet-beta-shell-v9';
+const CACHE = 'velvet-beta-shell-v15';
 const APP_SHELL = [
   '/membres/',
   '/assets/members-live.css',
@@ -8,10 +8,18 @@ const APP_SHELL = [
   '/assets/velvet-premium-ui.css',
   '/assets/velvet-premium-ui.js',
   '/assets/velvet-editorial-ui.css',
-  '/assets/velvet-messaging-upgrade.css',
-  '/assets/velvet-messaging-upgrade.js',
+  '/assets/velvet-messaging-upgrade.css?v=20260731-5',
+  '/assets/velvet-messaging-upgrade.js?v=20260731-5',
+  '/assets/velvet-mobile-feed-hotfix.css?v=20260731-5',
+  '/assets/velvet-mobile-feed-hotfix.js?v=20260731-5',
+  '/assets/velvet-chat-whatsapp.css?v=20260731-1',
+  '/assets/velvet-chat-whatsapp.js?v=20260731-1',
+  '/assets/velvet-mobile-viewport-guard.css?v=20260731-2',
+  '/assets/velvet-mobile-viewport-guard.js?v=20260731-2',
+  '/assets/velvet-social-interactions-hotfix.css?v=20260731-1',
+  '/assets/velvet-social-interactions-hotfix.js?v=20260731-1',
   '/assets/pwa-ios.js',
-  '/assets/photo-protection.js',
+  '/assets/photo-protection.js?v=20260731-5',
   '/assets/location-verification.js',
   '/assets/velvet-icon-180.png',
   '/assets/velvet-icon-192.png',
@@ -37,7 +45,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'no-store' })
       .then((response) => {
         if (response.ok) {
           const copy = response.clone();

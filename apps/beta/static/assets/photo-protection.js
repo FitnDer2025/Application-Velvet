@@ -1,10 +1,9 @@
 (() => {
   'use strict';
 
-  const WATERMARK_VERSION = 'velvet-v1';
+  const WATERMARK_VERSION = 'velvet-v2-subtle';
   const PHOTO_ENDPOINTS = new Set(['/api/members/photos', '/api/members/album-media']);
   const nativeFetch = window.fetch.bind(window);
-  let viewerCode = 'VX-LOCAL';
 
   function toast(message, error = false) {
     const node = document.querySelector('#toast');
@@ -16,49 +15,21 @@
     toast.timer = window.setTimeout(() => node.classList.remove('show'), 4200);
   }
 
-  async function shortViewerCode() {
-    try {
-      const response = await nativeFetch('/api/members/profile', {
-        credentials: 'same-origin',
-        headers: { accept: 'application/json' }
-      });
-      const payload = await response.json();
-      const source = String(payload?.account?.userId || payload?.account?.email || 'velvet');
-      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(source));
-      viewerCode = `VX-${[...new Uint8Array(digest)].slice(0, 3).map((value) => value.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
-    } catch {
-      viewerCode = 'VX-LOCAL';
-    }
-  }
-
   function drawWatermark(canvas, context) {
     const width = canvas.width;
     const height = canvas.height;
-    const margin = Math.max(12, Math.round(width * 0.022));
-    const markHeight = Math.max(32, Math.min(68, Math.round(width * 0.06)));
-    const markWidth = Math.round(markHeight * 2.85);
-    const x = width - markWidth - margin;
-    const y = height - markHeight - margin;
+    const margin = Math.max(14, Math.round(width * 0.025));
+    const fontSize = Math.max(18, Math.min(48, Math.round(width * 0.04)));
 
     context.save();
-    context.globalAlpha = 0.68;
-    context.fillStyle = '#0b080a';
-    context.beginPath();
-    if (context.roundRect) context.roundRect(x, y, markWidth, markHeight, markHeight / 2);
-    else context.rect(x, y, markWidth, markHeight);
-    context.fill();
-
-    context.globalAlpha = 0.94;
-    context.fillStyle = '#f0d39b';
-    context.textAlign = 'center';
-    context.textBaseline = 'middle';
-    context.font = `600 ${Math.round(markHeight * 0.5)}px Georgia,serif`;
-    context.fillText('V', x + markHeight * 0.62, y + markHeight * 0.52);
-
-    context.globalAlpha = 0.84;
-    context.textAlign = 'left';
-    context.font = `600 ${Math.max(11, Math.round(markHeight * 0.24))}px Arial,sans-serif`;
-    context.fillText('VELVET', x + markHeight * 1.08, y + markHeight * 0.52);
+    context.globalAlpha = 0.19;
+    context.textAlign = 'right';
+    context.textBaseline = 'bottom';
+    context.font = `600 ${fontSize}px Georgia,serif`;
+    context.fillStyle = '#fff8ed';
+    context.shadowColor = 'rgba(0,0,0,.55)';
+    context.shadowBlur = Math.max(2, Math.round(fontSize * 0.12));
+    context.fillText('VELVET', width - margin, height - margin);
     context.restore();
   }
 
@@ -100,9 +71,28 @@
     return nativeFetch(input, options);
   };
 
+  function isAvatarOrInterfaceImage(image) {
+    return Boolean(image.closest(
+      '.brand,.brand-mark,.velvet-brand-lockup,.feed-avatar,.conversation-avatar-v2,'
+      + '.notification-avatar,.member-map-marker,.avatar,.person-card,.mobile-head'
+    ));
+  }
+
+  function isLargeMedia(image) {
+    const rect = image.getBoundingClientRect();
+    return Math.max(rect.width, image.naturalWidth || 0) >= 180
+      && Math.max(rect.height, image.naturalHeight || 0) >= 180;
+  }
+
   function protectImage(image) {
     if (!(image instanceof HTMLImageElement) || image.dataset.velvetProtected === '1') return;
-    if (!image.src || image.closest('.brand') || image.src.includes('velvet-icon')) return;
+    if (!image.src || image.src.includes('velvet-icon') || isAvatarOrInterfaceImage(image)) return;
+    if (!image.complete) {
+      image.addEventListener('load', () => protectImage(image), { once: true });
+      return;
+    }
+    if (!isLargeMedia(image)) return;
+
     const parent = image.parentElement;
     if (!parent) return;
     image.dataset.velvetProtected = '1';
@@ -110,11 +100,13 @@
     image.setAttribute('oncontextmenu', 'return false');
     parent.classList.add('velvet-protected-frame');
 
-    const marker = document.createElement('span');
-    marker.className = 'velvet-screen-mark';
-    marker.textContent = `VELVET · ${viewerCode}`;
-    marker.setAttribute('aria-hidden', 'true');
-    parent.appendChild(marker);
+    if (!parent.querySelector(':scope > .velvet-screen-mark')) {
+      const marker = document.createElement('span');
+      marker.className = 'velvet-screen-mark';
+      marker.textContent = 'V';
+      marker.setAttribute('aria-hidden', 'true');
+      parent.appendChild(marker);
+    }
 
     image.addEventListener('contextmenu', (event) => {
       event.preventDefault();
@@ -130,16 +122,40 @@
     root.querySelectorAll?.('img').forEach(protectImage);
   }
 
+  function privacyShield() {
+    let shield = document.querySelector('#velvetPrivacyShield');
+    if (!shield) {
+      shield = document.createElement('div');
+      shield.id = 'velvetPrivacyShield';
+      shield.innerHTML = '<span>V</span><strong>Espace privé Velvet</strong>';
+      document.body.appendChild(shield);
+    }
+    return shield;
+  }
+
+  function setPrivacyShield(visible) {
+    privacyShield().classList.toggle('visible', Boolean(visible));
+  }
+
   function injectStyles() {
     if (document.querySelector('#velvetPhotoProtectionStyles')) return;
     const style = document.createElement('style');
     style.id = 'velvetPhotoProtectionStyles';
-    style.textContent = `.velvet-protected-frame{position:relative!important;overflow:hidden}.velvet-protected-frame img{user-select:none;-webkit-user-select:none;-webkit-user-drag:none}.velvet-screen-mark{position:absolute;right:8px;bottom:8px;z-index:5;padding:5px 8px;border:1px solid rgba(240,211,155,.4);border-radius:999px;background:rgba(11,8,10,.7);color:#f0d39b;font:600 9px/1 Arial,sans-serif;letter-spacing:.08em;pointer-events:none;backdrop-filter:blur(4px)}.velvet-capture-note{margin:12px 0;padding:11px 13px;border:1px solid rgba(217,184,121,.24);border-radius:14px;background:rgba(126,32,69,.09);color:#cdbfc4;font-size:12px;line-height:1.5}`;
+    style.textContent = `
+      .velvet-protected-frame{position:relative!important;overflow:hidden}
+      .velvet-protected-frame img{user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
+      .velvet-screen-mark{position:absolute;right:12px;bottom:10px;z-index:5;color:#fff8ed;font:600 22px/1 Georgia,serif;opacity:.18;text-shadow:0 2px 8px #000;pointer-events:none;mix-blend-mode:screen}
+      #velvetPrivacyShield{position:fixed;inset:0;z-index:99999;display:none;place-items:center;align-content:center;gap:12px;background:#070607;color:#f6eee6}
+      #velvetPrivacyShield.visible{display:grid}
+      #velvetPrivacyShield span{font:500 68px/1 Georgia,serif;color:#c6a96a;opacity:.75}
+      #velvetPrivacyShield strong{font:600 12px/1.4 Inter,-apple-system,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#c8bdc1}
+      .velvet-capture-note{margin:12px 0;padding:11px 13px;border:1px solid rgba(217,184,121,.24);border-radius:14px;background:rgba(126,32,69,.09);color:#cdbfc4;font-size:12px;line-height:1.5}
+    `;
     document.head.appendChild(style);
   }
 
   injectStyles();
-  shortViewerCode().finally(() => scanImages());
+  scanImages();
   new MutationObserver((mutations) => {
     mutations.forEach((mutation) => mutation.addedNodes.forEach((node) => {
       if (node.nodeType === Node.ELEMENT_NODE) {
@@ -149,9 +165,13 @@
     }));
   }).observe(document.documentElement, { childList: true, subtree: true });
 
+  document.addEventListener('visibilitychange', () => setPrivacyShield(document.hidden));
+  window.addEventListener('pagehide', () => setPrivacyShield(true));
+  window.addEventListener('pageshow', () => setPrivacyShield(false));
+
   window.VelvetPhotoProtection = {
     watermarkPhoto,
     watermarkVersion: WATERMARK_VERSION,
-    screenshotDetection: 'native_only'
+    screenshotDetection: 'native_ios_only'
   };
 })();
