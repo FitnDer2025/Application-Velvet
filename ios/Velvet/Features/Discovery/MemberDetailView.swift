@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MemberDetailView: View {
     @EnvironmentObject private var store: VelvetStore
+    @EnvironmentObject private var screenshotProtection: ScreenshotProtectionService
     let profile: MemberProfile
 
     @State private var conversationID: UUID?
@@ -97,6 +98,15 @@ struct MemberDetailView: View {
                 ConversationView(conversationID: conversationID, title: profile.displayName)
             }
         }
+        .onAppear {
+            screenshotProtection.protect(
+                ownerProfileID: profile.id,
+                mediaID: primaryMedia?.id
+            )
+        }
+        .onDisappear {
+            screenshotProtection.clear(ownerProfileID: profile.id)
+        }
         .task {
             _ = try? await store.service.setEngagement(
                 profileID: profile.id,
@@ -163,6 +173,15 @@ struct MemberDetailView: View {
                 startPoint: .center,
                 endPoint: .bottom
             )
+
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    VelvetPhotoWatermark()
+                }
+            }
+            .padding(18)
 
             VStack(alignment: .leading, spacing: 7) {
                 if profile.verificationStatus == "verified" {

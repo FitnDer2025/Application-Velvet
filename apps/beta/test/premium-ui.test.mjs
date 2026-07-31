@@ -72,7 +72,7 @@ test('la direction artistique éditoriale traite les profils et toutes les surfa
   }
   assert.match(ui, /dataset\.velvetView/);
   assert.match(auth, /velvet-editorial-ui\.css/);
-  assert.match(sw, /velvet-beta-shell-v9/);
+  assert.match(sw, /velvet-beta-shell-v10/);
   assert.match(sw, /velvet-editorial-ui\.css/);
   assert.match(sw, /velvet-messaging-upgrade\.css/);
   assert.match(sw, /velvet-messaging-upgrade\.js/);
