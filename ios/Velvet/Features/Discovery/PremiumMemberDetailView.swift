@@ -6,31 +6,24 @@ struct PremiumMemberDetailView: View {
     let profile: MemberProfile
 
     @State private var selectedSection = "overview"
-    @State private var selectedAlbum: VelvetAlbumPresentation?
+    @State private var selectedAlbum: ProfileAlbum?
     @State private var activeConversation: Conversation?
     @State private var showsSafety = false
     @State private var showsAlbumAccess = false
     @State private var isWorking = false
-    @State private var reaction: String?
 
-    private var photos: [MediaAsset] { profile.approvedPhotos }
+    private var photos: [MediaAsset] { profile.profileGalleryPhotos }
 
     private var primaryMedia: MediaAsset? {
         photos.first(where: { $0.isPrimary == true }) ?? photos.first
     }
 
-    private var albums: [VelvetAlbumPresentation] {
-        (profile.albums ?? []).map { album in
-            VelvetAlbumPresentation(
-                id: album.id,
-                title: album.name,
-                subtitle: album.confidentiality == "public"
-                    ? "Collection publique du profil"
-                    : "Collection privée ouverte pour ton compte",
-                confidentiality: album.confidentiality ?? "private",
-                expiresAt: album.expiresAt,
-                urls: (album.mediaAssets ?? []).compactMap(\.previewUrl)
-            )
+    private var albums: [ProfileAlbum] {
+        (profile.albums ?? []).sorted { left, right in
+            if left.confidentiality == right.confidentiality {
+                return left.name.localizedCaseInsensitiveCompare(right.name) == .orderedAscending
+            }
+            return left.confidentiality == "public"
         }
     }
 
@@ -45,30 +38,10 @@ struct PremiumMemberDetailView: View {
             VelvetBackground()
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    VelvetProfileGallery(
-                        urls: photos.compactMap(\.previewUrl),
-                        eyebrow: profile.velvetAudienceLabel,
-                        title: profile.displayName,
-                        subtitle: profile.locationZone ?? profile.city ?? "Zone privée"
-                    )
+                    SocialProfileGallery(profile: profile, media: photos)
 
-                    HStack(spacing: 9) {
-                        if profile.verificationStatus == "verified" {
-                            PremiumStatusPill(
-                                title: "PROFIL VÉRIFIÉ",
-                                icon: "checkmark.seal.fill",
-                                color: VelvetColor.success
-                            )
-                        }
-                        PremiumStatusPill(
-                            title: "\(photos.count) PHOTO\(photos.count > 1 ? "S" : "")",
-                            icon: "photo",
-                            color: VelvetColor.softBlush
-                        )
-                        Spacer()
-                        reactionButtons
-                    }
-
+                    statusRow
+                    ProfileAffinityBar(profileID: profile.id)
                     sectionNavigation
                     selectedContent
                     actionPanel
@@ -82,7 +55,8 @@ struct PremiumMemberDetailView: View {
         .toolbarBackground(VelvetColor.velvetBlack.opacity(0.88), for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .sheet(item: $selectedAlbum) { album in
-            VelvetAlbumDetailView(album: album)
+            InteractiveAlbumDetailView(album: album)
+                .environmentObject(store)
         }
         .sheet(isPresented: $showsSafety) {
             SafetyActionsView(profile: profile)
@@ -109,36 +83,41 @@ struct PremiumMemberDetailView: View {
             screenshotProtection.clear(ownerProfileID: profile.id)
         }
         .task {
+            await store.refreshSocialState()
             _ = try? await store.service.setEngagement(profileID: profile.id, action: "view")
+            await store.refreshMessaging()
         }
     }
 
-    private var reactionButtons: some View {
-        HStack(spacing: 6) {
-            reactionButton("like", icon: "hand.thumbsup.fill")
-            reactionButton("love", icon: "heart.fill")
-            reactionButton("adore", icon: "sparkles")
-        }
-    }
-
-    private func reactionButton(_ value: String, icon: String) -> some View {
-        Button {
-            Task { await setReaction(reaction == value ? nil : value) }
-        } label: {
-            Image(systemName: icon)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(reaction == value ? VelvetColor.velvetBlack : VelvetColor.champagneGold)
-                .frame(width: 34, height: 34)
-                .background(
-                    reaction == value
-                        ? VelvetColor.champagneGold
-                        : VelvetColor.champagneGold.opacity(0.08)
+    private var statusRow: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                PremiumStatusPill(
+                    title: profile.velvetDemographicLabel.uppercased(),
+                    icon: profile.profileType == .couple ? "person.2.fill" : "person.fill",
+                    color: VelvetColor.champagneGold
                 )
-                .clipShape(Circle())
-                .overlay(Circle().stroke(VelvetColor.champagneGold.opacity(0.18), lineWidth: 0.8))
+                if let age = profile.velvetAgeLabel {
+                    PremiumStatusPill(
+                        title: age.uppercased(),
+                        icon: "birthday.cake.fill",
+                        color: VelvetColor.softBlush
+                    )
+                }
+                if profile.verificationStatus == "verified" {
+                    PremiumStatusPill(
+                        title: "PROFIL VÉRIFIÉ",
+                        icon: "checkmark.seal.fill",
+                        color: VelvetColor.success
+                    )
+                }
+                PremiumStatusPill(
+                    title: "\(albums.count) ALBUM\(albums.count > 1 ? "S" : "")",
+                    icon: "photo.stack",
+                    color: VelvetColor.champagneGold
+                )
+            }
         }
-        .buttonStyle(.plain)
-        .disabled(primaryMedia == nil)
     }
 
     private var sectionNavigation: some View {
@@ -158,7 +137,7 @@ struct PremiumMemberDetailView: View {
                 }
 
                 PremiumProfileSegment(
-                    title: "Albums · \(albums.count)",
+                    title: "Photos & albums · \(albums.count)",
                     selected: selectedSection == "albums"
                 ) { selectedSection = "albums" }
             }
@@ -185,33 +164,86 @@ struct PremiumMemberDetailView: View {
 
     private var overviewContent: some View {
         VStack(spacing: 14) {
-            PremiumProfileSection(eyebrow: "En quelques mots", title: "Leur univers") {
+            PremiumProfileSection(eyebrow: "En quelques mots", title: profile.memberUniverseTitle) {
                 PremiumProfileText(
                     value: profile.description,
                     fallback: "Ce profil n’a pas encore publié sa présentation.",
                     quote: true
                 )
-                PremiumProfileTags(values: profile.valuesList ?? [], emptyText: "Valeurs non renseignées")
+                PremiumProfileTags(
+                    values: profile.valuesList ?? [],
+                    emptyText: "Valeurs non renseignées"
+                )
             }
 
-            PremiumProfileSection(eyebrow: "Le récit", title: "Leur histoire") {
+            PremiumProfileSection(eyebrow: "Le récit", title: profile.memberStoryTitle) {
                 PremiumProfileText(value: profile.story, fallback: "Histoire non renseignée.")
             }
 
-            PremiumProfileSection(eyebrow: "Le chemin parcouru", title: "Leur parcours") {
+            PremiumProfileSection(
+                eyebrow: "Le chemin parcouru",
+                title: profile.memberJourneyTitle
+            ) {
                 PremiumProfileText(value: profile.journey, fallback: "Parcours non renseigné.")
             }
 
-            PremiumProfileSection(eyebrow: "Les rencontres souhaitées", title: "Ce qu’ils recherchent") {
+            PremiumProfileSection(
+                eyebrow: "Les rencontres souhaitées",
+                title: profile.memberSearchTitle
+            ) {
                 PremiumProfileText(value: profile.searchText, fallback: "Recherche non renseignée.")
             }
 
-            PremiumProfileSection(eyebrow: "Leurs envies", title: "Pratiques & expériences") {
-                PremiumProfileTags(values: profile.practices ?? [], emptyText: "Pratiques non renseignées")
+            PremiumProfileSection(
+                eyebrow: profile.memberDesiresEyebrow,
+                title: "Pratiques & expériences"
+            ) {
+                PremiumProfileTags(
+                    values: profile.practices ?? [],
+                    emptyText: "Pratiques non renseignées"
+                )
+            }
+
+            if !albums.isEmpty {
+                Button {
+                    selectedSection = "albums"
+                } label: {
+                    HStack(spacing: 14) {
+                        Image(systemName: "photo.stack.fill")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundStyle(VelvetColor.champagneGold)
+                            .frame(width: 46, height: 46)
+                            .background(VelvetColor.champagneGold.opacity(0.08))
+                            .clipShape(Circle())
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Voir les albums")
+                                .font(VelvetTypography.body(size: 14, weight: .semibold))
+                                .foregroundStyle(VelvetColor.ivory)
+                            Text("\(albums.count) collection\(albums.count > 1 ? "s" : "") publique\(albums.count > 1 ? "s" : "") ou autorisée\(albums.count > 1 ? "s" : "")")
+                                .font(VelvetTypography.body(size: 11))
+                                .foregroundStyle(VelvetColor.textSecondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(VelvetColor.champagneGold)
+                    }
+                    .padding(15)
+                    .background(VelvetColor.champagneGold.opacity(0.045))
+                    .clipShape(RoundedRectangle(cornerRadius: VelvetRadius.large, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: VelvetRadius.large, style: .continuous)
+                            .stroke(VelvetColor.champagneGold.opacity(0.18), lineWidth: 0.8)
+                    }
+                }
+                .buttonStyle(.plain)
             }
 
             if !(profile.individualProfiles ?? []).isEmpty {
-                PremiumProfileSection(eyebrow: "Les personnes", title: "Derrière ce profil") {
+                PremiumProfileSection(
+                    eyebrow: profile.isCoupleProfile ? "Les personnes" : "La personne",
+                    title: profile.isCoupleProfile ? "Derrière ce profil" : "À propos de ce membre"
+                ) {
                     VStack(spacing: 10) {
                         ForEach(profile.individualProfiles ?? []) { person in
                             Button {
@@ -234,12 +266,21 @@ struct PremiumMemberDetailView: View {
                     .foregroundStyle(VelvetColor.textSecondary)
             }
 
-            PremiumProfileSection(eyebrow: "Lieux préférés", title: "Leurs repères") {
-                PremiumProfileTags(values: profile.favoritePlaces ?? [], emptyText: "Aucun lieu renseigné")
+            PremiumProfileSection(eyebrow: "Lieux préférés", title: profile.memberPlacesTitle) {
+                PremiumProfileTags(
+                    values: profile.favoritePlaces ?? [],
+                    emptyText: "Aucun lieu renseigné"
+                )
             }
 
-            PremiumProfileSection(eyebrow: "Disponibilités", title: "Quand les rencontrer") {
-                PremiumProfileText(value: profile.availabilityText, fallback: "Disponibilités non renseignées.")
+            PremiumProfileSection(
+                eyebrow: "Disponibilités",
+                title: profile.memberAvailabilityTitle
+            ) {
+                PremiumProfileText(
+                    value: profile.availabilityText,
+                    fallback: "Disponibilités non renseignées."
+                )
             }
 
             PremiumProfileSection(eyebrow: "La communauté", title: "Recommandations") {
@@ -266,14 +307,20 @@ struct PremiumMemberDetailView: View {
                 eyebrow: "Orientation et attirances",
                 title: person.orientation ?? "Attirances"
             ) {
-                PremiumProfileTags(values: person.attractedTo ?? [], emptyText: "Attirances non renseignées")
+                PremiumProfileTags(
+                    values: person.attractedTo ?? [],
+                    emptyText: "Attirances non renseignées"
+                )
             }
 
             PremiumProfileSection(
                 eyebrow: "Envies personnelles",
                 title: "Ce que \(person.firstName ?? "cette personne") souhaite vivre"
             ) {
-                PremiumProfileTags(values: person.desiredPractices ?? [], emptyText: "Envies non renseignées")
+                PremiumProfileTags(
+                    values: person.desiredPractices ?? [],
+                    emptyText: "Envies non renseignées"
+                )
             }
 
             if profile.profileType == .couple {
@@ -281,7 +328,10 @@ struct PremiumMemberDetailView: View {
                     eyebrow: "Accords du couple",
                     title: "Permissions du ou de la partenaire"
                 ) {
-                    PremiumProfileTags(values: person.partnerPermissions ?? [], emptyText: "Accords non renseignés")
+                    PremiumProfileTags(
+                        values: person.partnerPermissions ?? [],
+                        emptyText: "Accords non renseignés"
+                    )
                 }
             }
 
@@ -295,6 +345,9 @@ struct PremiumMemberDetailView: View {
                         .font(VelvetTypography.body(size: 13))
                         .foregroundStyle(VelvetColor.textSecondary)
                 } else {
+                    Text("Ces photos sont également accessibles et agrandissables dans le carrousel principal.")
+                        .font(VelvetTypography.body(size: 12))
+                        .foregroundStyle(VelvetColor.textSecondary)
                     VelvetMediaGrid(urls: personPhotos.compactMap(\.previewUrl))
                 }
             }
@@ -305,7 +358,7 @@ struct PremiumMemberDetailView: View {
         VStack(spacing: 14) {
             HStack {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("COLLECTIONS AUTORISÉES")
+                    Text("COLLECTIONS PUBLIQUES ET AUTORISÉES")
                         .font(VelvetTypography.caption(size: 9, weight: .semibold))
                         .tracking(1.5)
                         .foregroundStyle(VelvetColor.champagneGold)
@@ -323,14 +376,25 @@ struct PremiumMemberDetailView: View {
                 VelvetCompactEmptyState(
                     symbol: "lock.rectangle.stack",
                     title: "Aucun album accessible",
-                    message: "Les photos publiques restent visibles dans le carrousel principal."
+                    message: "Les photos publiques restent visibles et agrandissables dans le carrousel principal."
                 )
             } else {
                 ForEach(albums) { album in
                     Button {
                         selectedAlbum = album
                     } label: {
-                        VelvetAlbumCoverCard(album: album)
+                        VelvetAlbumCoverCard(
+                            album: VelvetAlbumPresentation(
+                                id: album.id,
+                                title: album.name,
+                                subtitle: album.confidentiality == "public"
+                                    ? "Album public · réactions disponibles"
+                                    : "Album privé autorisé · réactions disponibles",
+                                confidentiality: album.confidentiality ?? "private",
+                                expiresAt: album.expiresAt,
+                                urls: (album.mediaAssets ?? []).compactMap(\.previewUrl)
+                            )
+                        )
                     }
                     .buttonStyle(.plain)
                 }
@@ -423,17 +487,6 @@ struct PremiumMemberDetailView: View {
                 profileID: profile.id,
                 photoURL: primaryMedia?.previewUrl
             )
-        } catch {
-            store.errorMessage = ErrorMessage.text(for: error)
-        }
-    }
-
-    @MainActor
-    private func setReaction(_ value: String?) async {
-        guard let mediaID = primaryMedia?.id else { return }
-        do {
-            _ = try await store.service.reactToPhoto(mediaID: mediaID, reaction: value)
-            reaction = value
         } catch {
             store.errorMessage = ErrorMessage.text(for: error)
         }
