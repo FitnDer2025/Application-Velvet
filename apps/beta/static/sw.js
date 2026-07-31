@@ -1,4 +1,4 @@
-const CACHE = 'velvet-beta-shell-v14';
+const CACHE = 'velvet-beta-shell-v15';
 const APP_SHELL = [
   '/membres/',
   '/assets/members-live.css',
@@ -16,6 +16,8 @@ const APP_SHELL = [
   '/assets/velvet-chat-whatsapp.js?v=20260731-1',
   '/assets/velvet-mobile-viewport-guard.css?v=20260731-2',
   '/assets/velvet-mobile-viewport-guard.js?v=20260731-2',
+  '/assets/velvet-social-interactions-hotfix.css?v=20260731-1',
+  '/assets/velvet-social-interactions-hotfix.js?v=20260731-1',
   '/assets/pwa-ios.js',
   '/assets/photo-protection.js?v=20260731-5',
   '/assets/location-verification.js',

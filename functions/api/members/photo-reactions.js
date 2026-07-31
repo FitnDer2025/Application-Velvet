@@ -12,6 +12,26 @@ function validUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value || '');
 }
 
+function clean(value, max = 500) {
+  return String(value ?? '').trim().slice(0, max);
+}
+
+async function serviceRest(env, path, init = {}) {
+  const url = clean(env.SUPABASE_URL, 1000).replace(/\/$/, '');
+  const key = clean(env.SUPABASE_SERVICE_ROLE_KEY, 4000);
+  if (!url || !key) throw new Error('service_role_not_configured');
+  const headers = new Headers(init.headers || {});
+  headers.set('apikey', key);
+  headers.set('authorization', `Bearer ${key}`);
+  if (init.body && !headers.has('content-type')) headers.set('content-type', 'application/json');
+  const response = await fetch(`${url}${path}`, { ...init, headers });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(payload?.message || payload?.hint || payload?.code || 'service_request_failed');
+  }
+  return payload;
+}
+
 async function visibleSummaries(env, access) {
   const media = await restJson(
     env,
@@ -31,6 +51,58 @@ async function visibleSummaries(env, access) {
   );
 }
 
+async function notifyPhotoOwner(env, access, admission, mediaId, reaction) {
+  if (!reaction || !env.SUPABASE_SERVICE_ROLE_KEY) return { notified: 0 };
+
+  const [mediaRows, actorRows] = await Promise.all([
+    serviceRest(
+      env,
+      `/rest/v1/media_assets?select=id,profile_id,owner_user_id&id=eq.${encodeURIComponent(mediaId)}&limit=1`
+    ).catch(() => []),
+    serviceRest(
+      env,
+      `/rest/v1/member_profiles?select=id,display_name&id=eq.${encodeURIComponent(admission.id)}&limit=1`
+    ).catch(() => [])
+  ]);
+  const media = mediaRows?.[0];
+  if (!media?.profile_id) return { notified: 0 };
+
+  const profileMembers = await serviceRest(
+    env,
+    `/rest/v1/profile_members?select=user_id&profile_id=eq.${encodeURIComponent(media.profile_id)}&status=eq.active`
+  ).catch(() => []);
+  const ownerUserIds = [...new Set([
+    media.owner_user_id,
+    ...(profileMembers || []).map((row) => row.user_id)
+  ].filter((userId) => userId && userId !== access.account.userId))];
+  if (!ownerUserIds.length) return { notified: 0 };
+
+  const actor = actorRows?.[0];
+  const actorName = clean(actor?.display_name, 120) || 'Un membre Velvet';
+  const wording = {
+    like: { title: `${actorName} aime votre photo`, body: `${actorName} a ajouté un J’aime à l’une de vos photos.` },
+    love: { title: `${actorName} adore votre photo`, body: `${actorName} a réagi avec un cœur à l’une de vos photos.` },
+    adore: { title: `${actorName} a eu un coup de cœur`, body: `${actorName} a ajouté un coup de cœur à l’une de vos photos.` }
+  }[reaction];
+  if (!wording) return { notified: 0 };
+
+  await serviceRest(env, '/rest/v1/member_notifications', {
+    method: 'POST',
+    headers: { prefer: 'return=minimal' },
+    body: JSON.stringify(ownerUserIds.map((userId) => ({
+      user_id: userId,
+      actor_profile_id: admission.id,
+      event_type: 'reactions',
+      entity_type: 'photo',
+      entity_id: mediaId,
+      title: wording.title,
+      body: wording.body
+    })))
+  });
+
+  return { notified: ownerUserIds.length };
+}
+
 export async function onRequestGet({ request, env }) {
   try {
     const access = await memberSession(request, env);
@@ -45,7 +117,7 @@ export async function onRequestGet({ request, env }) {
   }
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   try {
     const access = await memberSession(request, env);
     if (access.response) return access.response;
@@ -70,6 +142,17 @@ export async function onRequestPost({ request, env }) {
         })
       }
     );
+
+    const notificationTask = notifyPhotoOwner(
+      env,
+      access,
+      admission.admission,
+      mediaId,
+      reaction
+    ).catch(() => ({ notified: 0 }));
+    if (typeof waitUntil === 'function') waitUntil(notificationTask);
+    else await notificationTask;
+
     return withSession({
       ok: true,
       summary: result?.[0] || null
