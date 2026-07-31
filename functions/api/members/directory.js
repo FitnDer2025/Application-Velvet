@@ -20,7 +20,6 @@ const PROFILE_SELECT = [
   'availability_text',
   'created_at',
   'updated_at',
-  'profile_members(user_id,status)',
   'individual_profiles(*)',
   'media_assets(id,individual_profile_id,owner_user_id,media_role,is_primary,storage_path,moderation_status,created_at)',
   'albums(id,name,confidentiality,expires_at,created_at,media_assets(id,owner_user_id,media_type,storage_path,moderation_status,created_at))'
@@ -41,14 +40,11 @@ export function enrichVenueCoordinates(venue) {
 }
 
 function profileUsers(profile) {
-  return new Set([
-    ...(profile.profile_members || [])
-      .filter((membership) => membership.status === 'active')
-      .map((membership) => membership.user_id),
-    ...(profile.individual_profiles || [])
+  return new Set(
+    (profile.individual_profiles || [])
       .map((person) => person.linked_user_id)
       .filter(Boolean)
-  ]);
+  );
 }
 
 function profilePhoto(profile) {
@@ -56,11 +52,6 @@ function profilePhoto(profile) {
     .filter((media) => media.moderation_status === 'approved' && media.previewUrl)
     .sort((left, right) => Number(Boolean(right.is_primary)) - Number(Boolean(left.is_primary)));
   return photos[0]?.previewUrl || null;
-}
-
-function publicProfile(profile) {
-  const { profile_members: _members, ...safeProfile } = profile;
-  return safeProfile;
 }
 
 function conversationSummaries(conversations, messages, profiles, currentUserId) {
@@ -168,7 +159,7 @@ export async function onRequestGet({ request, env }) {
     );
 
     return withSession({
-      profiles: profiles.map(publicProfile),
+      profiles,
       establishments,
       venueDirectory: (venueDirectory || []).map(enrichVenueCoordinates),
       venueRelationships,
