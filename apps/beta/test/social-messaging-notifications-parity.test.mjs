@@ -39,7 +39,7 @@ test('le centre d’activité enrichit les photos et archive les éléments cons
     read('functions/api/members/notifications.js'),
     read('functions/api/members/photo-reactions.js')
   ]);
-  assert.match(notifications, /archived=1/);
+  assert.match(notifications, /searchParams\.get\('archived'\) === '1'/);
   assert.match(notifications, /entityPreviewUrl/);
   assert.match(notifications, /actorPreviewUrl/);
   assert.match(notifications, /consume_entity/);
