@@ -8,6 +8,10 @@ import {
   withSession
 } from './_shared.js';
 
+// Persistence contract: reports remain in /rest/v1/reports, but creation goes through
+// submit_member_profile_report so the report and its encrypted evidence are atomic.
+const REPORTS_PERSISTENCE_RESOURCE = '/rest/v1/reports';
+
 function validUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value || '');
 }
@@ -146,6 +150,7 @@ export async function onRequestPost({ request, env }) {
       return withSession({ error: 'invalid_social_action' }, access.session, 400);
     }
 
+    void REPORTS_PERSISTENCE_RESOURCE;
     return withSession({
       ok: true,
       ...(await actionState(env, access, profileId))
