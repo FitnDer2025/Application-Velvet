@@ -22,27 +22,7 @@ struct RealtimeAppleConversationsView: View {
                         title: "Messages",
                         subtitle: "Accusés de lecture, réactions, pièces jointes et identité de chaque personne."
                     )
-
-                    if store.directory?.locked == true {
-                        LockedDirectoryView()
-                    } else if conversations.isEmpty {
-                        VelvetEmptyState(
-                            symbol: "bubble.left.and.bubble.right",
-                            title: "Aucune conversation",
-                            message: "Écris depuis un profil ou rejoins un Salon Velvet lié à une sortie."
-                        )
-                    } else {
-                        LazyVStack(spacing: 10) {
-                            ForEach(conversations) { conversation in
-                                NavigationLink {
-                                    RealtimeAppleConversationView(conversation: conversation)
-                                } label: {
-                                    RealtimeConversationTile(conversation: conversation)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                    }
+                    conversationsContent
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 18)
@@ -51,13 +31,39 @@ struct RealtimeAppleConversationsView: View {
             .refreshable { await store.refreshMessaging() }
         }
         .toolbar(.hidden, for: .navigationBar)
-        .task {
-            await store.refreshMessaging()
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(8))
-                guard !Task.isCancelled else { return }
-                await store.refreshMessaging()
+        .task { await pollConversations() }
+    }
+
+    @ViewBuilder
+    private var conversationsContent: some View {
+        if store.directory?.locked == true {
+            LockedDirectoryView()
+        } else if conversations.isEmpty {
+            VelvetEmptyState(
+                symbol: "bubble.left.and.bubble.right",
+                title: "Aucune conversation",
+                message: "Écris depuis un profil ou rejoins un Salon Velvet lié à une sortie."
+            )
+        } else {
+            LazyVStack(spacing: 10) {
+                ForEach(conversations) { conversation in
+                    NavigationLink {
+                        RealtimeAppleConversationView(conversation: conversation)
+                    } label: {
+                        RealtimeConversationTile(conversation: conversation)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
+        }
+    }
+
+    private func pollConversations() async {
+        await store.refreshMessaging()
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(8))
+            guard !Task.isCancelled else { return }
+            await store.refreshMessaging()
         }
     }
 }
@@ -77,51 +83,74 @@ private struct RealtimeConversationTile: View {
                 isEvent: conversation.kind == "event",
                 size: 54
             )
-
-            VStack(alignment: .leading, spacing: 5) {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(conversation.title)
-                        .font(.system(size: 16, weight: unread > 0 ? .bold : .semibold))
-                        .foregroundStyle(VelvetColor.ivory)
-                        .lineLimit(1)
-                    if let streak, streak.currentStreak > 0 {
-                        Label("\(streak.currentStreak)", systemImage: "flame.fill")
-                            .font(.system(size: 10, weight: .bold, design: .rounded))
-                            .foregroundStyle(VelvetColor.champagneGold)
-                    }
-                    Spacer(minLength: 8)
-                    Text(RealtimeMessageDate.short(conversation.lastMessageAt ?? conversation.updatedAt))
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(unread > 0 ? VelvetColor.champagneGold : VelvetColor.textSecondary)
-                }
-
-                HStack(spacing: 8) {
-                    Text(conversation.lastMessageBody ?? "Commencez la conversation…")
-                        .font(.system(size: 13, weight: unread > 0 ? .semibold : .regular))
-                        .foregroundStyle(unread > 0 ? VelvetColor.ivory : VelvetColor.textSecondary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-                    Spacer(minLength: 4)
-                    if unread > 0 {
-                        Text(unread > 99 ? "99+" : "\(unread)")
-                            .font(.system(size: 10, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, unread > 9 ? 7 : 0)
-                            .frame(minWidth: 23, minHeight: 23)
-                            .background(VelvetColor.burgundyLight)
-                            .clipShape(Capsule())
-                    }
-                }
-            }
+            conversationSummary
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 13)
         .background(.ultraThinMaterial)
-        .background(unread > 0 ? VelvetColor.velvetBurgundy.opacity(0.16) : VelvetColor.anthracite.opacity(0.60))
+        .background(tileBackground)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(unread > 0 ? VelvetColor.champagneGold.opacity(0.24) : VelvetColor.borderSubtle, lineWidth: 0.8)
+        .overlay(tileBorder)
+    }
+
+    private var tileBackground: Color {
+        unread > 0
+            ? VelvetColor.velvetBurgundy.opacity(0.16)
+            : VelvetColor.anthracite.opacity(0.60)
+    }
+
+    private var tileBorder: some View {
+        RoundedRectangle(cornerRadius: 22, style: .continuous)
+            .stroke(
+                unread > 0 ? VelvetColor.champagneGold.opacity(0.24) : VelvetColor.borderSubtle,
+                lineWidth: 0.8
+            )
+    }
+
+    private var conversationSummary: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(conversation.title)
+                    .font(.system(size: 16, weight: unread > 0 ? .bold : .semibold))
+                    .foregroundStyle(VelvetColor.ivory)
+                    .lineLimit(1)
+                streakLabel
+                Spacer(minLength: 8)
+                Text(RealtimeMessageDate.short(conversation.lastMessageAt ?? conversation.updatedAt))
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(unread > 0 ? VelvetColor.champagneGold : VelvetColor.textSecondary)
+            }
+            HStack(spacing: 8) {
+                Text(conversation.lastMessageBody ?? "Commencez la conversation…")
+                    .font(.system(size: 13, weight: unread > 0 ? .semibold : .regular))
+                    .foregroundStyle(unread > 0 ? VelvetColor.ivory : VelvetColor.textSecondary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                Spacer(minLength: 4)
+                unreadBadge
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var streakLabel: some View {
+        if let streak, streak.currentStreak > 0 {
+            Label("\(streak.currentStreak)", systemImage: "flame.fill")
+                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .foregroundStyle(VelvetColor.champagneGold)
+        }
+    }
+
+    @ViewBuilder
+    private var unreadBadge: some View {
+        if unread > 0 {
+            Text(unread > 99 ? "99+" : "\(unread)")
+                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+                .padding(.horizontal, unread > 9 ? 7 : 0)
+                .frame(minWidth: 23, minHeight: 23)
+                .background(VelvetColor.burgundyLight)
+                .clipShape(Capsule())
         }
     }
 }
@@ -171,98 +200,124 @@ struct RealtimeAppleConversationView: View {
         !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !outgoingAttachments.isEmpty
     }
 
+    private var fullScreenBinding: Binding<Bool> {
+        Binding(
+            get: { fullScreenImage != nil },
+            set: { visible in if !visible { fullScreenImage = nil } }
+        )
+    }
+
     var body: some View {
+        conversationScreen
+            .safeAreaInset(edge: .bottom, spacing: 0) { composer }
+            .toolbar(.hidden, for: .navigationBar)
+            .onAppear { chrome.isImmersive = true }
+            .onDisappear { leaveConversation() }
+            .task { await pollMessages() }
+            .onChange(of: draft) { _, value in updateTyping(for: value) }
+            .confirmationDialog("Ajouter une pièce jointe", isPresented: $showsAttachmentMenu) {
+                attachmentActions
+            }
+            .photosPicker(
+                isPresented: $showsPhotoPicker,
+                selection: $selectedPhotoItems,
+                maxSelectionCount: max(1, 4 - outgoingAttachments.count),
+                matching: .any(of: [.images, .videos])
+            )
+            .fileImporter(
+                isPresented: $showsDocumentPicker,
+                allowedContentTypes: [.pdf],
+                allowsMultipleSelection: true,
+                onCompletion: handleDocumentImport
+            )
+            .onChange(of: selectedPhotoItems) { _, items in
+                Task { await importPhotos(items) }
+            }
+            .fullScreenCover(isPresented: fullScreenBinding) {
+                if let fullScreenImage {
+                    RealtimeFullScreenAttachment(url: fullScreenImage)
+                }
+            }
+    }
+
+    private var conversationScreen: some View {
         ZStack {
             VelvetBackground()
             VStack(spacing: 0) {
                 header
+                messagesTimeline
+            }
+        }
+    }
 
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVStack(spacing: 7) {
-                            if messages.isEmpty {
-                                VelvetCompactEmptyState(
-                                    symbol: "bubble.left.and.bubble.right",
-                                    title: "Commencez l’échange",
-                                    message: "Les messages et pièces jointes restent privés entre les membres de cette conversation."
-                                )
-                                .padding(.top, 30)
-                            } else {
-                                ForEach(messages) { message in
-                                    RealtimeMessageBubble(
-                                        conversationID: conversation.id,
-                                        message: message,
-                                        isMine: message.senderUserId == store.directory?.currentUserId,
-                                        receipts: store.receipts(conversationID: conversation.id, messageID: message.id),
-                                        reactions: store.reactions(conversationID: conversation.id, messageID: message.id),
-                                        currentUserID: store.directory?.currentUserId,
-                                        openImage: { fullScreenImage = $0 }
-                                    )
-                                    .id(message.id)
-                                }
-                            }
-
-                            if !typing.isEmpty {
-                                RealtimeTypingBubble(participants: typing)
-                                    .id("typing-indicator")
-                            }
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.top, 12)
-                        .padding(.bottom, 16)
-                        .frame(maxWidth: .infinity, minHeight: 1, alignment: .bottom)
-                    }
-                    .scrollDismissesKeyboard(.interactively)
-                    .onChange(of: messages.count) { _, _ in scrollToLatest(proxy) }
-                    .onChange(of: typing.count) { _, _ in scrollToLatest(proxy) }
-                    .onChange(of: composerFocused) { _, focused in
-                        if focused { scrollToLatest(proxy) }
-                    }
-                    .onAppear { scrollToLatest(proxy, animated: false) }
+    private var messagesTimeline: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 7) {
+                    messagesContent
+                    typingContent
                 }
+                .padding(.horizontal, 12)
+                .padding(.top, 12)
+                .padding(.bottom, 16)
+                .frame(maxWidth: .infinity, minHeight: 1, alignment: .bottom)
+            }
+            .scrollDismissesKeyboard(.interactively)
+            .onChange(of: messages.count) { _, _ in scrollToLatest(proxy) }
+            .onChange(of: typing.count) { _, _ in scrollToLatest(proxy) }
+            .onChange(of: composerFocused) { _, focused in
+                if focused { scrollToLatest(proxy) }
+            }
+            .onAppear { scrollToLatest(proxy, animated: false) }
+        }
+    }
+
+    @ViewBuilder
+    private var messagesContent: some View {
+        if messages.isEmpty {
+            VelvetCompactEmptyState(
+                symbol: "bubble.left.and.bubble.right",
+                title: "Commencez l’échange",
+                message: "Les messages et pièces jointes restent privés entre les membres de cette conversation."
+            )
+            .padding(.top, 30)
+        } else {
+            ForEach(messages) { message in
+                messageBubble(for: message)
+                    .id(message.id)
             }
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) { composer }
-        .toolbar(.hidden, for: .navigationBar)
-        .onAppear { chrome.isImmersive = true }
-        .onDisappear {
-            chrome.isImmersive = false
-            typingTask?.cancel()
-            Task { await store.setTyping(conversationID: conversation.id, active: false) }
+    }
+
+    @ViewBuilder
+    private var typingContent: some View {
+        if !typing.isEmpty {
+            RealtimeTypingBubble(participants: typing)
+                .id("typing-indicator")
         }
-        .task {
-            await store.refreshMessages(conversationID: conversation.id)
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .milliseconds(2200))
-                guard !Task.isCancelled else { return }
-                await store.refreshMessages(conversationID: conversation.id)
-            }
-        }
-        .onChange(of: draft) { _, value in updateTyping(for: value) }
-        .confirmationDialog("Ajouter une pièce jointe", isPresented: $showsAttachmentMenu) {
-            Button("Photo ou vidéo", systemImage: "photo.on.rectangle") { showsPhotoPicker = true }
-            Button("Document PDF", systemImage: "doc.fill") { showsDocumentPicker = true }
-            Button("Annuler", role: .cancel) {}
-        }
-        .photosPicker(
-            isPresented: $showsPhotoPicker,
-            selection: $selectedPhotoItems,
-            maxSelectionCount: max(1, 4 - outgoingAttachments.count),
-            matching: .any(of: [.images, .videos])
+    }
+
+    private func messageBubble(for message: DirectoryMessage) -> some View {
+        RealtimeMessageBubble(
+            conversationID: conversation.id,
+            message: message,
+            isMine: message.senderUserId == store.directory?.currentUserId,
+            receipts: store.receipts(conversationID: conversation.id, messageID: message.id),
+            reactions: store.reactions(conversationID: conversation.id, messageID: message.id),
+            currentUserID: store.directory?.currentUserId,
+            openImage: { fullScreenImage = $0 }
         )
-        .fileImporter(
-            isPresented: $showsDocumentPicker,
-            allowedContentTypes: [.pdf],
-            allowsMultipleSelection: true
-        ) { result in
-            Task { await importDocuments(result) }
+    }
+
+    @ViewBuilder
+    private var attachmentActions: some View {
+        Button("Photo ou vidéo", systemImage: "photo.on.rectangle") {
+            showsPhotoPicker = true
         }
-        .onChange(of: selectedPhotoItems) { _, items in
-            Task { await importPhotos(items) }
+        Button("Document PDF", systemImage: "doc.fill") {
+            showsDocumentPicker = true
         }
-        .fullScreenCover(item: $fullScreenImage) { url in
-            RealtimeFullScreenAttachment(url: url)
-        }
+        Button("Annuler", role: .cancel) {}
     }
 
     private var header: some View {
@@ -278,27 +333,9 @@ struct RealtimeAppleConversationView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Retour")
-
-            if let participantProfile {
-                NavigationLink {
-                    MemberDetailView(profile: participantProfile)
-                } label: { identityLabel }
-                .buttonStyle(.plain)
-            } else {
-                identityLabel
-            }
-
+            identityDestination
             Spacer()
-
-            if let streak, streak.currentStreak > 0 {
-                Label("\(streak.currentStreak)", systemImage: "flame.fill")
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundStyle(VelvetColor.champagneGold)
-                    .padding(.horizontal, 10)
-                    .frame(height: 36)
-                    .background(VelvetColor.champagneGold.opacity(0.07))
-                    .clipShape(Capsule())
-            }
+            streakBadge
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -306,6 +343,20 @@ struct RealtimeAppleConversationView: View {
         .background(VelvetColor.velvetBlack.opacity(0.76))
         .overlay(alignment: .bottom) {
             Rectangle().fill(VelvetColor.borderSubtle).frame(height: 0.5)
+        }
+    }
+
+    @ViewBuilder
+    private var identityDestination: some View {
+        if let participantProfile {
+            NavigationLink {
+                MemberDetailView(profile: participantProfile)
+            } label: {
+                identityLabel
+            }
+            .buttonStyle(.plain)
+        } else {
+            identityLabel
         }
     }
 
@@ -322,7 +373,7 @@ struct RealtimeAppleConversationView: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(VelvetColor.ivory)
                     .lineLimit(1)
-                Text(typing.isEmpty ? (conversation.kind == "event" ? "Salon Velvet" : "Conversation privée") : typingLabel)
+                Text(typing.isEmpty ? defaultConversationSubtitle : typingLabel)
                     .font(.system(size: 10, weight: typing.isEmpty ? .medium : .semibold))
                     .foregroundStyle(typing.isEmpty ? VelvetColor.textSecondary : VelvetColor.champagneGold)
                     .lineLimit(1)
@@ -330,81 +381,32 @@ struct RealtimeAppleConversationView: View {
         }
     }
 
+    private var defaultConversationSubtitle: String {
+        conversation.kind == "event" ? "Salon Velvet" : "Conversation privée"
+    }
+
     private var typingLabel: String {
         let names = typing.map { $0.displayIdentity ?? "Un membre" }
         return "\(names.joined(separator: " et ")) \(names.count > 1 ? "écrivent" : "écrit")…"
     }
 
+    @ViewBuilder
+    private var streakBadge: some View {
+        if let streak, streak.currentStreak > 0 {
+            Label("\(streak.currentStreak)", systemImage: "flame.fill")
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .foregroundStyle(VelvetColor.champagneGold)
+                .padding(.horizontal, 10)
+                .frame(height: 36)
+                .background(VelvetColor.champagneGold.opacity(0.07))
+                .clipShape(Capsule())
+        }
+    }
+
     private var composer: some View {
         VStack(spacing: 7) {
-            if !outgoingAttachments.isEmpty || isLoadingAttachments {
-                attachmentDrafts
-            }
-
-            HStack(alignment: .bottom, spacing: 8) {
-                Button { showsAttachmentMenu = true } label: {
-                    Group {
-                        if isLoadingAttachments {
-                            ProgressView().tint(VelvetColor.champagneGold)
-                        } else {
-                            Image(systemName: "plus")
-                                .font(.system(size: 18, weight: .medium))
-                        }
-                    }
-                    .foregroundStyle(VelvetColor.champagneGold)
-                    .frame(width: 38, height: 38)
-                    .background(VelvetColor.ivory.opacity(0.04))
-                    .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .disabled(isLoadingAttachments || outgoingAttachments.count >= 4)
-
-                ZStack(alignment: .topLeading) {
-                    if draft.isEmpty {
-                        Text(outgoingAttachments.isEmpty ? "Message" : "Ajouter un message…")
-                            .font(.system(size: 15))
-                            .foregroundStyle(VelvetColor.textSecondary.opacity(0.72))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
-                            .allowsHitTesting(false)
-                    }
-
-                    TextEditor(text: $draft)
-                        .id(composerIdentity)
-                        .focused($composerFocused)
-                        .font(.system(size: 16))
-                        .foregroundStyle(VelvetColor.ivory)
-                        .scrollContentBackground(.hidden)
-                        .padding(.horizontal, 9)
-                        .padding(.vertical, 3)
-                        .frame(height: composerHeight)
-                        .background(Color.clear)
-                        .accessibilityLabel("Message")
-                }
-                .background(VelvetColor.ivory.opacity(0.055))
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .stroke(VelvetColor.borderSubtle, lineWidth: 0.8)
-                }
-
-                Button { Task { await send() } } label: {
-                    Group {
-                        if isSending {
-                            ProgressView().tint(.white)
-                        } else {
-                            Image(systemName: "arrow.up")
-                                .font(.system(size: 17, weight: .bold))
-                        }
-                    }
-                    .foregroundStyle(.white)
-                    .frame(width: 40, height: 40)
-                    .background(canSend ? VelvetColor.burgundyLight : VelvetColor.textSecondary.opacity(0.28))
-                    .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .disabled(!canSend || isSending)
-            }
+            attachmentDrafts
+            composerRow
         }
         .padding(.horizontal, 10)
         .padding(.top, 7)
@@ -416,34 +418,100 @@ struct RealtimeAppleConversationView: View {
         }
     }
 
+    @ViewBuilder
     private var attachmentDrafts: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                if isLoadingAttachments {
-                    ProgressView().tint(VelvetColor.champagneGold).frame(width: 66, height: 54)
-                }
-                ForEach(outgoingAttachments) { attachment in
-                    HStack(spacing: 7) {
-                        Image(systemName: attachment.mediaType == "image" ? "photo.fill" : attachment.mediaType == "video" ? "video.fill" : "doc.fill")
-                            .foregroundStyle(VelvetColor.champagneGold)
-                        Text(attachment.fileName)
-                            .font(.system(size: 10, weight: .semibold))
-                            .lineLimit(1)
-                        Button {
-                            outgoingAttachments.removeAll { $0.id == attachment.id }
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(VelvetColor.textSecondary)
-                        }
-                        .buttonStyle(.plain)
+        if !outgoingAttachments.isEmpty || isLoadingAttachments {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    if isLoadingAttachments {
+                        ProgressView()
+                            .tint(VelvetColor.champagneGold)
+                            .frame(width: 66, height: 54)
                     }
-                    .padding(.horizontal, 10)
-                    .frame(height: 42)
-                    .background(VelvetColor.ivory.opacity(0.055))
-                    .clipShape(Capsule())
+                    ForEach(outgoingAttachments) { attachment in
+                        RealtimeAttachmentDraftChip(attachment: attachment) {
+                            outgoingAttachments.removeAll { $0.id == attachment.id }
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private var composerRow: some View {
+        HStack(alignment: .bottom, spacing: 8) {
+            attachmentButton
+            messageEditor
+            sendButton
+        }
+    }
+
+    private var attachmentButton: some View {
+        Button { showsAttachmentMenu = true } label: {
+            Group {
+                if isLoadingAttachments {
+                    ProgressView().tint(VelvetColor.champagneGold)
+                } else {
+                    Image(systemName: "plus")
+                        .font(.system(size: 18, weight: .medium))
+                }
+            }
+            .foregroundStyle(VelvetColor.champagneGold)
+            .frame(width: 38, height: 38)
+            .background(VelvetColor.ivory.opacity(0.04))
+            .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .disabled(isLoadingAttachments || outgoingAttachments.count >= 4)
+    }
+
+    private var messageEditor: some View {
+        ZStack(alignment: .topLeading) {
+            if draft.isEmpty {
+                Text(outgoingAttachments.isEmpty ? "Message" : "Ajouter un message…")
+                    .font(.system(size: 15))
+                    .foregroundStyle(VelvetColor.textSecondary.opacity(0.72))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .allowsHitTesting(false)
+            }
+            TextEditor(text: $draft)
+                .id(composerIdentity)
+                .focused($composerFocused)
+                .font(.system(size: 16))
+                .foregroundStyle(VelvetColor.ivory)
+                .scrollContentBackground(.hidden)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 3)
+                .frame(height: composerHeight)
+                .background(Color.clear)
+                .accessibilityLabel("Message")
+        }
+        .background(VelvetColor.ivory.opacity(0.055))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(VelvetColor.borderSubtle, lineWidth: 0.8)
+        }
+    }
+
+    private var sendButton: some View {
+        Button { Task { await send() } } label: {
+            Group {
+                if isSending {
+                    ProgressView().tint(.white)
+                } else {
+                    Image(systemName: "arrow.up")
+                        .font(.system(size: 17, weight: .bold))
+                }
+            }
+            .foregroundStyle(.white)
+            .frame(width: 40, height: 40)
+            .background(canSend ? VelvetColor.burgundyLight : VelvetColor.textSecondary.opacity(0.28))
+            .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .disabled(!canSend || isSending)
     }
 
     @MainActor
@@ -484,6 +552,25 @@ struct RealtimeAppleConversationView: View {
             guard !Task.isCancelled else { return }
             await store.setTyping(conversationID: conversation.id, active: false)
         }
+    }
+
+    private func leaveConversation() {
+        chrome.isImmersive = false
+        typingTask?.cancel()
+        Task { await store.setTyping(conversationID: conversation.id, active: false) }
+    }
+
+    private func pollMessages() async {
+        await store.refreshMessages(conversationID: conversation.id)
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .milliseconds(2200))
+            guard !Task.isCancelled else { return }
+            await store.refreshMessages(conversationID: conversation.id)
+        }
+    }
+
+    private func handleDocumentImport(_ result: Result<[URL], Error>) {
+        Task { await importDocuments(result) }
     }
 
     @MainActor
@@ -557,11 +644,52 @@ struct RealtimeAppleConversationView: View {
         let target: AnyHashable? = typing.isEmpty ? messages.last?.id : "typing-indicator"
         guard let target else { return }
         if animated {
-            withAnimation(.easeOut(duration: 0.22)) { proxy.scrollTo(target, anchor: .bottom) }
+            withAnimation(.easeOut(duration: 0.22)) {
+                proxy.scrollTo(target, anchor: .bottom)
+            }
         } else {
             proxy.scrollTo(target, anchor: .bottom)
         }
     }
+}
+
+private struct RealtimeAttachmentDraftChip: View {
+    let attachment: OutgoingMessageAttachment
+    let remove: () -> Void
+
+    var body: some View {
+        HStack(spacing: 7) {
+            Image(systemName: icon)
+                .foregroundStyle(VelvetColor.champagneGold)
+            Text(attachment.fileName)
+                .font(.system(size: 10, weight: .semibold))
+                .lineLimit(1)
+            Button(action: remove) {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundStyle(VelvetColor.textSecondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 10)
+        .frame(height: 42)
+        .background(VelvetColor.ivory.opacity(0.055))
+        .clipShape(Capsule())
+    }
+
+    private var icon: String {
+        switch attachment.mediaType {
+        case "image": "photo.fill"
+        case "video": "video.fill"
+        default: "doc.fill"
+        }
+    }
+}
+
+private struct MessageReactionGroup: Identifiable {
+    let reaction: String
+    let count: Int
+    let names: [String]
+    var id: String { reaction }
 }
 
 private struct RealtimeMessageBubble: View {
@@ -574,133 +702,178 @@ private struct RealtimeMessageBubble: View {
     let currentUserID: UUID?
     let openImage: (URL) -> Void
 
-    private let reactionChoices: [(String, String)] = [
-        ("like", "👍"), ("love", "❤️"), ("laugh", "😂"),
-        ("wow", "😮"), ("sad", "😢"), ("fire", "🔥")
+    private let reactionChoices: [(key: String, emoji: String)] = [
+        ("like", "👍"),
+        ("love", "❤️"),
+        ("laugh", "😂"),
+        ("wow", "😮"),
+        ("sad", "😢"),
+        ("fire", "🔥")
     ]
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 7) {
             if isMine { Spacer(minLength: 48) }
-
-            VStack(alignment: isMine ? .trailing : .leading, spacing: 4) {
-                if let identity = message.senderIdentity, !identity.isEmpty {
-                    Text(isMine ? "Vous · \(identity)" : identity)
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(VelvetColor.champagneGold)
-                        .padding(.horizontal, 4)
-                }
-
-                VStack(alignment: isMine ? .trailing : .leading, spacing: 7) {
-                    if let body = message.body, !body.isEmpty {
-                        Text(body)
-                            .font(.system(size: 15))
-                            .foregroundStyle(isMine ? .white : VelvetColor.ivory)
-                            .multilineTextAlignment(isMine ? .trailing : .leading)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    ForEach(message.attachments ?? []) { attachment in
-                        RealtimeMessageAttachmentView(attachment: attachment, openImage: openImage)
-                    }
-
-                    HStack(spacing: 4) {
-                        Text(RealtimeMessageDate.time(message.createdAt))
-                        if isMine {
-                            Image(systemName: receiptIcon)
-                        }
-                    }
-                    .font(.system(size: 8, weight: .medium))
-                    .foregroundStyle(isMine ? .white.opacity(0.66) : VelvetColor.textSecondary)
-                }
-                .padding(.horizontal, 13)
-                .padding(.vertical, 9)
-                .background {
-                    if isMine {
-                        LinearGradient(
-                            colors: [VelvetColor.burgundyLight, VelvetColor.velvetBurgundy],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    } else {
-                        LinearGradient(
-                            colors: [VelvetColor.panelRaised, VelvetColor.anthracite],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    }
-                }
-                .clipShape(UnevenRoundedRectangle(
-                    topLeadingRadius: 19,
-                    bottomLeadingRadius: isMine ? 19 : 5,
-                    bottomTrailingRadius: isMine ? 5 : 19,
-                    topTrailingRadius: 19,
-                    style: .continuous
-                ))
-                .overlay {
-                    UnevenRoundedRectangle(
-                        topLeadingRadius: 19,
-                        bottomLeadingRadius: isMine ? 19 : 5,
-                        bottomTrailingRadius: isMine ? 5 : 19,
-                        topTrailingRadius: 19,
-                        style: .continuous
-                    )
-                    .stroke(isMine ? VelvetColor.burgundyLight.opacity(0.34) : VelvetColor.borderSubtle, lineWidth: 0.8)
-                }
-                .frame(maxWidth: 300, alignment: isMine ? .trailing : .leading)
-                .contextMenu {
-                    ForEach(reactionChoices, id: \.0) { choice in
-                        Button("\(choice.1) \(reactionName(choice.0))") {
-                            Task { await toggleReaction(choice.0) }
-                        }
-                    }
-                }
-
-                if !reactions.isEmpty {
-                    HStack(spacing: 4) {
-                        ForEach(groupedReactions, id: \.reaction) { group in
-                            Button {
-                                Task { await toggleReaction(group.reaction) }
-                            } label: {
-                                Text("\(emoji(group.reaction))\(group.count > 1 ? " \(group.count)" : "")")
-                                    .font(.system(size: 11, weight: .bold))
-                                    .padding(.horizontal, 7)
-                                    .frame(height: 24)
-                                    .background(.ultraThinMaterial)
-                                    .clipShape(Capsule())
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel(group.names.joined(separator: ", "))
-                        }
-                    }
-                    .padding(.horizontal, 4)
-                }
-
-                if isMine {
-                    ForEach(receipts) { receipt in
-                        Text(receiptLabel(receipt))
-                            .font(.system(size: 8, weight: .medium))
-                            .foregroundStyle(receipt.status == "read" ? VelvetColor.champagneGold : VelvetColor.textSecondary)
-                            .padding(.horizontal, 4)
-                    }
-                }
-            }
-
+            messageColumn
             if !isMine { Spacer(minLength: 48) }
         }
         .frame(maxWidth: .infinity)
     }
 
-    private var receiptIcon: String {
-        receipts.contains(where: { $0.status == "read" }) ? "checkmark.circle.fill"
-            : receipts.contains(where: { $0.status == "delivered" }) ? "checkmark.circle"
-            : "checkmark"
+    private var messageColumn: some View {
+        VStack(alignment: isMine ? .trailing : .leading, spacing: 4) {
+            senderIdentity
+            messageSurface
+            reactionsRow
+            receiptsList
+        }
     }
 
-    private var groupedReactions: [(reaction: String, count: Int, names: [String])] {
+    @ViewBuilder
+    private var senderIdentity: some View {
+        if let identity = message.senderIdentity, !identity.isEmpty {
+            Text(isMine ? "Vous · \(identity)" : identity)
+                .font(.system(size: 9, weight: .bold))
+                .foregroundStyle(VelvetColor.champagneGold)
+                .padding(.horizontal, 4)
+        }
+    }
+
+    private var messageSurface: some View {
+        VStack(alignment: isMine ? .trailing : .leading, spacing: 7) {
+            messageBody
+            attachmentsList
+            timestamp
+        }
+        .padding(.horizontal, 13)
+        .padding(.vertical, 9)
+        .background(messageBackground)
+        .clipShape(messageShape)
+        .overlay(messageShape.stroke(messageBorder, lineWidth: 0.8))
+        .frame(maxWidth: 300, alignment: isMine ? .trailing : .leading)
+        .contextMenu { reactionMenu }
+    }
+
+    @ViewBuilder
+    private var messageBody: some View {
+        if let body = message.body, !body.isEmpty {
+            Text(body)
+                .font(.system(size: 15))
+                .foregroundStyle(isMine ? .white : VelvetColor.ivory)
+                .multilineTextAlignment(isMine ? .trailing : .leading)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    @ViewBuilder
+    private var attachmentsList: some View {
+        ForEach(message.attachments ?? []) { attachment in
+            RealtimeMessageAttachmentView(attachment: attachment, openImage: openImage)
+        }
+    }
+
+    private var timestamp: some View {
+        HStack(spacing: 4) {
+            Text(RealtimeMessageDate.time(message.createdAt))
+            if isMine {
+                Image(systemName: receiptIcon)
+            }
+        }
+        .font(.system(size: 8, weight: .medium))
+        .foregroundStyle(isMine ? .white.opacity(0.66) : VelvetColor.textSecondary)
+    }
+
+    private var messageBackground: LinearGradient {
+        if isMine {
+            return LinearGradient(
+                colors: [VelvetColor.burgundyLight, VelvetColor.velvetBurgundy],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }
+        return LinearGradient(
+            colors: [VelvetColor.panelRaised, VelvetColor.anthracite],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    private var messageShape: UnevenRoundedRectangle {
+        UnevenRoundedRectangle(
+            topLeadingRadius: 19,
+            bottomLeadingRadius: isMine ? 19 : 5,
+            bottomTrailingRadius: isMine ? 5 : 19,
+            topTrailingRadius: 19,
+            style: .continuous
+        )
+    }
+
+    private var messageBorder: Color {
+        isMine ? VelvetColor.burgundyLight.opacity(0.34) : VelvetColor.borderSubtle
+    }
+
+    @ViewBuilder
+    private var reactionMenu: some View {
+        ForEach(reactionChoices, id: \.key) { choice in
+            Button("\(choice.emoji) \(reactionName(choice.key))") {
+                Task { await toggleReaction(choice.key) }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var reactionsRow: some View {
+        if !reactionGroups.isEmpty {
+            HStack(spacing: 4) {
+                ForEach(reactionGroups) { group in
+                    Button {
+                        Task { await toggleReaction(group.reaction) }
+                    } label: {
+                        Text("\(emoji(group.reaction))\(group.count > 1 ? " \(group.count)" : "")")
+                            .font(.system(size: 11, weight: .bold))
+                            .padding(.horizontal, 7)
+                            .frame(height: 24)
+                            .background(.ultraThinMaterial)
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(group.names.joined(separator: ", "))
+                }
+            }
+            .padding(.horizontal, 4)
+        }
+    }
+
+    @ViewBuilder
+    private var receiptsList: some View {
+        if isMine {
+            ForEach(receipts) { receipt in
+                Text(receiptLabel(receipt))
+                    .font(.system(size: 8, weight: .medium))
+                    .foregroundStyle(receipt.status == "read" ? VelvetColor.champagneGold : VelvetColor.textSecondary)
+                    .padding(.horizontal, 4)
+            }
+        }
+    }
+
+    private var receiptIcon: String {
+        if receipts.contains(where: { $0.status == "read" }) {
+            return "checkmark.circle.fill"
+        }
+        if receipts.contains(where: { $0.status == "delivered" }) {
+            return "checkmark.circle"
+        }
+        return "checkmark"
+    }
+
+    private var reactionGroups: [MessageReactionGroup] {
         Dictionary(grouping: reactions, by: \.reaction)
             .map { key, value in
-                (key, value.count, value.map { $0.displayIdentity ?? "Membre Velvet" })
+                MessageReactionGroup(
+                    reaction: key,
+                    count: value.count,
+                    names: value.map { $0.displayIdentity ?? "Membre Velvet" }
+                )
             }
             .sorted { $0.reaction < $1.reaction }
     }
@@ -708,9 +881,12 @@ private struct RealtimeMessageBubble: View {
     private func receiptLabel(_ receipt: MessageReceipt) -> String {
         switch receipt.status {
         case "read":
-            return "Lu par \(receipt.displayIdentity)\(receipt.readAt.map { " à \(RealtimeMessageDate.time($0))" } ?? "")"
-        case "delivered": return "Distribué à \(receipt.displayIdentity)"
-        default: return "Envoyé à \(receipt.displayIdentity)"
+            let time = receipt.readAt.map { " à \(RealtimeMessageDate.time($0))" } ?? ""
+            return "Lu par \(receipt.displayIdentity)\(time)"
+        case "delivered":
+            return "Distribué à \(receipt.displayIdentity)"
+        default:
+            return "Envoyé à \(receipt.displayIdentity)"
         }
     }
 
@@ -724,13 +900,17 @@ private struct RealtimeMessageBubble: View {
     }
 
     private func emoji(_ reaction: String) -> String {
-        reactionChoices.first(where: { $0.0 == reaction })?.1 ?? "♡"
+        reactionChoices.first(where: { $0.key == reaction })?.emoji ?? "♡"
     }
 
     private func reactionName(_ reaction: String) -> String {
         [
-            "like": "J’aime", "love": "J’adore", "laugh": "Drôle",
-            "wow": "Waouh", "sad": "Triste", "fire": "Flamme"
+            "like": "J’aime",
+            "love": "J’adore",
+            "laugh": "Drôle",
+            "wow": "Waouh",
+            "sad": "Triste",
+            "fire": "Flamme"
         ][reaction] ?? "Réaction"
     }
 }
@@ -747,7 +927,7 @@ private struct RealtimeTypingBubble: View {
                         .frame(width: 5, height: 5)
                         .opacity(index == 1 ? 1 : 0.52)
                 }
-                Text("\(participants.map { $0.displayIdentity ?? "Un membre" }.joined(separator: " et ")) \(participants.count > 1 ? "écrivent" : "écrit")…")
+                Text(typingText)
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(VelvetColor.textSecondary)
                     .padding(.leading, 3)
@@ -758,6 +938,11 @@ private struct RealtimeTypingBubble: View {
             .clipShape(Capsule())
             Spacer()
         }
+    }
+
+    private var typingText: String {
+        let names = participants.map { $0.displayIdentity ?? "Un membre" }
+        return "\(names.joined(separator: " et ")) \(participants.count > 1 ? "écrivent" : "écrit")…"
     }
 }
 
@@ -781,9 +966,12 @@ private struct RealtimeMessageAttachmentView: View {
                 .buttonStyle(.plain)
             } else if let url = attachment.previewUrl {
                 Link(destination: url) {
-                    Label(attachment.originalName ?? "Pièce jointe", systemImage: attachment.mediaType == "video" ? "video.fill" : "doc.fill")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(VelvetColor.champagneGold)
+                    Label(
+                        attachment.originalName ?? "Pièce jointe",
+                        systemImage: attachment.mediaType == "video" ? "video.fill" : "doc.fill"
+                    )
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(VelvetColor.champagneGold)
                 }
             }
         }
@@ -832,7 +1020,9 @@ private struct RealtimeConversationAvatar: View {
             if let url {
                 AsyncImage(url: url) { image in
                     image.resizable().scaledToFill()
-                } placeholder: { placeholder }
+                } placeholder: {
+                    placeholder
+                }
             } else {
                 placeholder
             }
@@ -856,7 +1046,12 @@ private struct RealtimeConversationAvatar: View {
     }
 
     private var initials: String {
-        name.split(separator: " ").prefix(2).compactMap(\.first).map(String.init).joined().uppercased()
+        name.split(separator: " ")
+            .prefix(2)
+            .compactMap(\.first)
+            .map(String.init)
+            .joined()
+            .uppercased()
     }
 }
 
@@ -877,7 +1072,9 @@ private enum RealtimeMessageDate {
     static func short(_ value: String?) -> String {
         let date = date(value)
         guard date != .distantPast else { return "" }
-        if Calendar.current.isDateInToday(date) { return date.formatted(date: .omitted, time: .shortened) }
+        if Calendar.current.isDateInToday(date) {
+            return date.formatted(date: .omitted, time: .shortened)
+        }
         return date.formatted(.dateTime.day().month(.abbreviated))
     }
 }
@@ -888,6 +1085,7 @@ private extension ISO8601DateFormatter {
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return formatter
     }()
+
     static let realtimeBasic: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
