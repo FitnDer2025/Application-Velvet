@@ -31,7 +31,7 @@ jobs:
       - name: Compile Velvet for iOS Simulator
         run: |
           set -o pipefail
-          xcodebuild \
+          xcodebuild -quiet \
             -project ios/Velvet.xcodeproj \
             -scheme Velvet \
             -configuration Debug \
@@ -42,7 +42,7 @@ jobs:
       - name: Compile Velvet Widget for iOS Simulator
         run: |
           set -o pipefail
-          xcodebuild \
+          xcodebuild -quiet \
             -project ios/Velvet.xcodeproj \
             -target VelvetWidget \
             -configuration Debug \
@@ -54,7 +54,7 @@ jobs:
       - name: Compile Velvet Watch for watchOS Simulator
         run: |
           set -o pipefail
-          xcodebuild \
+          xcodebuild -quiet \
             -project ios/Velvet.xcodeproj \
             -target VelvetWatch \
             -configuration Debug \
@@ -66,7 +66,7 @@ jobs:
       - name: Compile Velvet Watch Widget for watchOS Simulator
         run: |
           set -o pipefail
-          xcodebuild \
+          xcodebuild -quiet \
             -project ios/Velvet.xcodeproj \
             -target VelvetWatchWidget \
             -configuration Debug \
