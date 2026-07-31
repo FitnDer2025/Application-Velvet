@@ -1,4 +1,4 @@
-const CACHE = 'velvet-beta-shell-v15';
+const CACHE = 'velvet-beta-shell-v16';
 const APP_SHELL = [
   '/membres/',
   '/assets/members-live.css',
@@ -18,6 +18,8 @@ const APP_SHELL = [
   '/assets/velvet-mobile-viewport-guard.js?v=20260731-2',
   '/assets/velvet-social-interactions-hotfix.css?v=20260731-1',
   '/assets/velvet-social-interactions-hotfix.js?v=20260731-1',
+  '/assets/velvet-social-realtime.css?v=20260731-1',
+  '/assets/velvet-social-realtime.js?v=20260731-1',
   '/assets/pwa-ios.js',
   '/assets/photo-protection.js?v=20260731-5',
   '/assets/location-verification.js',
@@ -63,7 +65,9 @@ self.addEventListener('message', (event) => {
     body: event.data.body || 'Une nouvelle activité vous attend.',
     icon: '/assets/velvet-icon-192.png',
     badge: '/assets/velvet-icon-192.png',
+    image: event.data.image || undefined,
     tag: event.data.tag || 'velvet-update',
+    renotify: true,
     data: { url: event.data.url || '/membres/' }
   }));
 });
@@ -77,15 +81,31 @@ self.addEventListener('push', (event) => {
   }
   const declarative = payload.notification || payload;
   const conversationId = payload.conversationId || declarative.conversationId || '';
-  const destination = conversationId
-    ? `/membres/?route=conversations&conversation=${encodeURIComponent(conversationId)}`
-    : (declarative.navigate || payload.url || '/membres/');
+  const profileId = payload.profileId || declarative.profileId || '';
+  const eventId = payload.eventId || declarative.eventId || '';
+  let destination = declarative.navigate || payload.url || '/membres/';
+  if (conversationId) {
+    destination = `/membres/?route=conversations&conversation=${encodeURIComponent(conversationId)}`;
+  } else if (profileId) {
+    destination = `/membres/?route=discover&profile=${encodeURIComponent(profileId)}`;
+  } else if (eventId) {
+    destination = `/membres/?route=events&event=${encodeURIComponent(eventId)}`;
+  }
   event.waitUntil(self.registration.showNotification(declarative.title || 'Velvet', {
     body: declarative.body || 'Une nouvelle activité vous attend.',
     icon: declarative.icon || '/assets/velvet-icon-192.png',
     badge: declarative.badge || '/assets/velvet-icon-192.png',
+    image: declarative.image || undefined,
     tag: declarative.tag || 'velvet-push',
-    data: { url: destination }
+    renotify: declarative.renotify !== false,
+    requireInteraction: declarative.requireInteraction === true,
+    data: {
+      url: destination,
+      route: payload.route || null,
+      conversationId: conversationId || null,
+      profileId: profileId || null,
+      eventId: eventId || null
+    }
   }));
 });
 
@@ -93,9 +113,13 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const destination = event.notification.data?.url || '/membres/';
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (clients) => {
       const existing = clients.find((client) => client.url.startsWith(self.location.origin));
-      return existing ? existing.focus().then(() => existing.navigate(destination)) : self.clients.openWindow(destination);
+      if (existing) {
+        await existing.focus();
+        return existing.navigate(destination);
+      }
+      return self.clients.openWindow(destination);
     })
   );
 });
