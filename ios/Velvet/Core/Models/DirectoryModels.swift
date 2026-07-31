@@ -119,6 +119,7 @@ struct Conversation: Codable, Identifiable, Sendable {
 struct ConversationMember: Codable, Sendable {
     let displayIdentity: String?
     let userId: UUID?
+    let lastDeliveredAt: String?
     let lastReadAt: String?
 }
 
@@ -175,10 +176,40 @@ struct ConversationStreak: Codable, Identifiable, Sendable {
     let updatedAt: String?
 }
 
+struct MessageReceipt: Codable, Identifiable, Sendable {
+    var id: String { "\(userId.uuidString)-\(status)" }
+    let userId: UUID
+    let displayIdentity: String
+    let status: String
+    let deliveredAt: String?
+    let readAt: String?
+}
+
+struct MessageReaction: Codable, Identifiable, Sendable {
+    let id: UUID
+    let messageId: UUID
+    let userId: UUID
+    let displayIdentity: String?
+    let reaction: String
+    let createdAt: String?
+    let updatedAt: String?
+}
+
+struct TypingParticipant: Codable, Identifiable, Sendable {
+    var id: UUID { userId }
+    let userId: UUID
+    let displayIdentity: String?
+    let updatedAt: String?
+}
+
 struct MessagesResponse: Decodable, Sendable {
     let messages: [DirectoryMessage]
     let currentUserId: UUID?
     let streak: ConversationStreak?
+    let members: [ConversationMember]?
+    let receipts: [String: [MessageReceipt]]?
+    let reactions: [String: [MessageReaction]]?
+    let typing: [TypingParticipant]?
 }
 
 struct CreatedMessageResponse: Decodable, Sendable {
@@ -189,6 +220,31 @@ struct CreatedMessageResponse: Decodable, Sendable {
 struct NotificationFeed: Decodable, Sendable {
     let notifications: [VelvetNotification]
     let unreadCount: Int
+    let archiveCount: Int?
+    let archived: Bool?
+
+    init(
+        notifications: [VelvetNotification],
+        unreadCount: Int,
+        archiveCount: Int? = nil,
+        archived: Bool? = nil
+    ) {
+        self.notifications = notifications
+        self.unreadCount = unreadCount
+        self.archiveCount = archiveCount
+        self.archived = archived
+    }
+}
+
+struct NotificationMetadata: Codable, Sendable {
+    let reaction: String?
+    let mediaId: UUID?
+    let targetProfileId: UUID?
+    let mediaRole: String?
+    let actorName: String?
+    let conversationId: UUID?
+    let senderProfileId: UUID?
+    let senderIdentity: String?
 }
 
 struct VelvetNotification: Codable, Identifiable, Sendable {
@@ -199,8 +255,12 @@ struct VelvetNotification: Codable, Identifiable, Sendable {
     let entityId: UUID?
     let title: String
     let body: String?
+    let metadata: NotificationMetadata?
     let readAt: String?
+    let archivedAt: String?
     let createdAt: String
+    let entityPreviewUrl: URL?
+    let actorPreviewUrl: URL?
 }
 
 struct EngagementResponse: Decodable, Sendable {

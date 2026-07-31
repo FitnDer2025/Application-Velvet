@@ -195,7 +195,7 @@ async function sendWebPush(env, subscription, payload) {
       authorization: await vapidAuthorization(env, subscription.endpoint),
       'content-encoding': 'aes128gcm',
       'content-type': 'application/octet-stream',
-      ttl: '300',
+      ttl: '3600',
       urgency: 'high'
     },
     body
@@ -219,6 +219,7 @@ function preview(value) {
 export async function deliverMessageNotifications(env, {
   recipients,
   senderProfile,
+  senderIdentity,
   conversationId,
   messageBody
 }) {
@@ -236,8 +237,14 @@ export async function deliverMessageNotifications(env, {
   ]);
   const settingsByUser = new Map((settingsRows || []).map((row) => [row.user_id, row]));
   const eligible = userIds.filter((userId) => messagesEnabled(settingsByUser.get(userId)));
-  const title = `${senderProfile?.display_name || 'Un membre Velvet'} vous a écrit`;
+  const author = clean(senderIdentity, 120) || clean(senderProfile?.display_name, 120) || 'Un membre Velvet';
+  const title = `${author} vous a écrit`;
   const body = preview(messageBody);
+  const metadata = {
+    conversationId,
+    senderProfileId: senderProfile?.id || null,
+    senderIdentity: author
+  };
   const notificationRows = eligible
     .filter((userId) => settingsByUser.get(userId)?.in_app_enabled !== false)
     .map((userId) => ({
@@ -247,7 +254,8 @@ export async function deliverMessageNotifications(env, {
       entity_type: 'conversation',
       entity_id: conversationId,
       title,
-      body
+      body,
+      metadata
     }));
   if (notificationRows.length) {
     await serviceRest(env, '/rest/v1/member_notifications', {
@@ -259,7 +267,7 @@ export async function deliverMessageNotifications(env, {
 
   const unreadRows = await serviceRest(
     env,
-    `/rest/v1/member_notifications?select=user_id&id=not.is.null&read_at=is.null&event_type=eq.messages&user_id=in.(${filter})`
+    `/rest/v1/member_notifications?select=user_id&id=not.is.null&read_at=is.null&archived_at=is.null&user_id=in.(${filter})`
   ).catch(() => []);
   const badgeByUser = new Map();
   (unreadRows || []).forEach((row) => badgeByUser.set(
@@ -269,6 +277,7 @@ export async function deliverMessageNotifications(env, {
 
   let apnsSent = 0;
   let webPushSent = 0;
+  const destination = `/membres/?route=conversations&conversation=${encodeURIComponent(conversationId)}`;
   await Promise.all([
     ...(devices || [])
       .filter((device) => eligible.includes(device.user_id))
@@ -284,7 +293,8 @@ export async function deliverMessageNotifications(env, {
             },
             route: 'messages',
             conversationId,
-            senderProfileId: senderProfile?.id || null
+            senderProfileId: senderProfile?.id || null,
+            senderIdentity: author
           });
           apnsSent += 1;
         } catch (error) {
@@ -300,7 +310,7 @@ export async function deliverMessageNotifications(env, {
     ...(subscriptions || [])
       .filter((subscription) =>
         eligible.includes(subscription.user_id)
-        && settingsByUser.get(subscription.user_id)?.browser_enabled === true
+        && settingsByUser.get(subscription.user_id)?.browser_enabled !== false
       )
       .map(async (subscription) => {
         try {
@@ -311,10 +321,13 @@ export async function deliverMessageNotifications(env, {
               icon: '/assets/velvet-icon-192.png',
               badge: '/assets/velvet-icon-192.png',
               tag: `velvet-message-${conversationId}`,
-              navigate: '/membres/'
+              navigate: destination,
+              requireInteraction: false
             },
             route: 'messages',
-            conversationId
+            conversationId,
+            senderProfileId: senderProfile?.id || null,
+            senderIdentity: author
           });
           webPushSent += 1;
         } catch (error) {

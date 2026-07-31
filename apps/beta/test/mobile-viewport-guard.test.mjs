@@ -34,7 +34,7 @@ test('le clavier iOS conserve la conversation et la saisie dans le viewport visi
   assert.match(html, /user-scalable=no/);
   assert.match(html, /velvet-mobile-viewport-guard\.css\?v=20260731-2/);
   assert.match(html, /velvet-mobile-viewport-guard\.js\?v=20260731-2/);
-  assert.match(worker, /velvet-beta-shell-v15/);
+  assert.match(worker, /velvet-beta-shell-v16/);
   assert.match(worker, /velvet-mobile-viewport-guard\.css\?v=20260731-2/);
   assert.match(worker, /velvet-mobile-viewport-guard\.js\?v=20260731-2/);
 });

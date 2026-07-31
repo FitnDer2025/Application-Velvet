@@ -19,9 +19,16 @@ const ATTACHMENT_TYPES = new Map([
   ['video/quicktime', { type: 'video', extension: 'mov', max: 50 * 1024 * 1024 }],
   ['application/pdf', { type: 'document', extension: 'pdf', max: 10 * 1024 * 1024 }]
 ]);
+const MESSAGE_REACTIONS = new Set(['like', 'love', 'laugh', 'wow', 'sad', 'fire']);
+const TYPING_TTL_MS = 9000;
 
 function validUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value || '');
+}
+
+function dateAt(value) {
+  const time = new Date(value || 0).getTime();
+  return Number.isFinite(time) ? time : 0;
 }
 
 async function enrichAttachments(env, session, messages = []) {
@@ -41,7 +48,29 @@ async function deleteStoredFile(env, session, path) {
   }, session.access_token).catch(() => null);
 }
 
-async function markConversationRead(env, access, conversationId) {
+async function conversationMembership(env, access, conversationId) {
+  const rows = await restJson(
+    env,
+    `/rest/v1/conversation_members?select=conversation_id,user_id,display_identity,last_delivered_at,last_read_at&conversation_id=eq.${encodeURIComponent(conversationId)}&user_id=eq.${encodeURIComponent(access.account.userId)}&left_at=is.null&limit=1`,
+    access.session
+  );
+  return rows?.[0] || null;
+}
+
+async function conversationMembers(env, access, conversationId) {
+  return restJson(
+    env,
+    `/rest/v1/conversation_members?select=user_id,display_identity,last_delivered_at,last_read_at&conversation_id=eq.${encodeURIComponent(conversationId)}&left_at=is.null&order=joined_at.asc`,
+    access.session
+  ).catch(() => []);
+}
+
+async function updateConversationReceipt(env, access, conversationId, { delivered = false, read = false } = {}) {
+  const now = new Date().toISOString();
+  const patch = {};
+  if (delivered || read) patch.last_delivered_at = now;
+  if (read) patch.last_read_at = now;
+  if (!Object.keys(patch).length) return;
   await restJson(
     env,
     `/rest/v1/conversation_members?conversation_id=eq.${encodeURIComponent(conversationId)}&user_id=eq.${encodeURIComponent(access.account.userId)}&left_at=is.null`,
@@ -49,7 +78,21 @@ async function markConversationRead(env, access, conversationId) {
     {
       method: 'PATCH',
       headers: { prefer: 'return=minimal' },
-      body: JSON.stringify({ last_read_at: new Date().toISOString() })
+      body: JSON.stringify(patch)
+    }
+  ).catch(() => null);
+}
+
+async function consumeConversationNotifications(env, access, conversationId) {
+  const now = new Date().toISOString();
+  await restJson(
+    env,
+    `/rest/v1/member_notifications?user_id=eq.${encodeURIComponent(access.account.userId)}&entity_type=eq.conversation&entity_id=eq.${encodeURIComponent(conversationId)}&archived_at=is.null`,
+    access.session,
+    {
+      method: 'PATCH',
+      headers: { prefer: 'return=minimal' },
+      body: JSON.stringify({ read_at: now, archived_at: now })
     }
   ).catch(() => null);
 }
@@ -71,6 +114,145 @@ async function senderProfile(env, access) {
   return rows?.[0] || null;
 }
 
+async function messageSocialState(env, access, conversationId, messages = []) {
+  const ids = messages.map((message) => message.id).filter(validUuid);
+  const since = new Date(Date.now() - TYPING_TTL_MS).toISOString();
+  const [members, reactions, typing] = await Promise.all([
+    conversationMembers(env, access, conversationId),
+    ids.length
+      ? restJson(
+        env,
+        `/rest/v1/message_reactions?select=id,message_id,user_id,display_identity,reaction,created_at,updated_at&conversation_id=eq.${encodeURIComponent(conversationId)}&message_id=in.(${ids.join(',')})&order=updated_at.asc`,
+        access.session
+      ).catch(() => [])
+      : [],
+    restJson(
+      env,
+      `/rest/v1/conversation_typing?select=user_id,display_identity,updated_at&conversation_id=eq.${encodeURIComponent(conversationId)}&user_id=neq.${encodeURIComponent(access.account.userId)}&updated_at=gte.${encodeURIComponent(since)}&order=updated_at.desc`,
+      access.session
+    ).catch(() => [])
+  ]);
+
+  const reactionsByMessage = new Map();
+  (reactions || []).forEach((reaction) => {
+    const rows = reactionsByMessage.get(reaction.message_id) || [];
+    rows.push(reaction);
+    reactionsByMessage.set(reaction.message_id, rows);
+  });
+
+  const receiptsByMessage = {};
+  const reactionsPayload = {};
+  messages.forEach((message) => {
+    const created = dateAt(message.created_at);
+    receiptsByMessage[message.id] = (members || [])
+      .filter((member) => member.user_id !== message.sender_user_id)
+      .map((member) => {
+        const read = dateAt(member.last_read_at) >= created;
+        const delivered = read || dateAt(member.last_delivered_at) >= created;
+        return {
+          userId: member.user_id,
+          displayIdentity: member.display_identity || 'Membre Velvet',
+          status: read ? 'read' : (delivered ? 'delivered' : 'sent'),
+          deliveredAt: delivered ? member.last_delivered_at : null,
+          readAt: read ? member.last_read_at : null
+        };
+      });
+    reactionsPayload[message.id] = reactionsByMessage.get(message.id) || [];
+  });
+
+  return {
+    members: members || [],
+    receipts: receiptsByMessage,
+    reactions: reactionsPayload,
+    typing: typing || []
+  };
+}
+
+async function handleConversationAction(env, access, payload) {
+  const conversationId = String(payload.conversationId || '');
+  if (!validUuid(conversationId)) return withSession({ error: 'invalid_conversation' }, access.session, 400);
+  const membership = await conversationMembership(env, access, conversationId);
+  if (!membership) return withSession({ error: 'conversation_access_denied' }, access.session, 403);
+
+  if (payload.action === 'typing') {
+    if (payload.active === false) {
+      await restJson(
+        env,
+        `/rest/v1/conversation_typing?conversation_id=eq.${encodeURIComponent(conversationId)}&user_id=eq.${encodeURIComponent(access.account.userId)}`,
+        access.session,
+        { method: 'DELETE', headers: { prefer: 'return=minimal' } }
+      ).catch(() => null);
+    } else {
+      await restJson(
+        env,
+        '/rest/v1/conversation_typing?on_conflict=conversation_id,user_id',
+        access.session,
+        {
+          method: 'POST',
+          headers: { prefer: 'resolution=merge-duplicates,return=minimal' },
+          body: JSON.stringify({
+            conversation_id: conversationId,
+            user_id: access.account.userId,
+            display_identity: membership.display_identity || null,
+            updated_at: new Date().toISOString()
+          })
+        }
+      );
+    }
+    return withSession({ ok: true }, access.session);
+  }
+
+  if (payload.action === 'delivered' || payload.action === 'read') {
+    const read = payload.action === 'read';
+    await updateConversationReceipt(env, access, conversationId, { delivered: true, read });
+    if (read) await consumeConversationNotifications(env, access, conversationId);
+    return withSession({ ok: true }, access.session);
+  }
+
+  if (payload.action === 'reaction') {
+    const messageId = String(payload.messageId || '');
+    const reaction = payload.reaction === null ? null : String(payload.reaction || '');
+    if (!validUuid(messageId) || (reaction !== null && !MESSAGE_REACTIONS.has(reaction))) {
+      return withSession({ error: 'invalid_message_reaction' }, access.session, 400);
+    }
+    const rows = await restJson(
+      env,
+      `/rest/v1/messages?select=id,sender_user_id&conversation_id=eq.${encodeURIComponent(conversationId)}&id=eq.${encodeURIComponent(messageId)}&deleted_at=is.null&limit=1`,
+      access.session
+    );
+    if (!rows?.length) return withSession({ error: 'message_not_found' }, access.session, 404);
+    if (reaction === null) {
+      await restJson(
+        env,
+        `/rest/v1/message_reactions?message_id=eq.${encodeURIComponent(messageId)}&user_id=eq.${encodeURIComponent(access.account.userId)}`,
+        access.session,
+        { method: 'DELETE', headers: { prefer: 'return=minimal' } }
+      );
+    } else {
+      await restJson(
+        env,
+        '/rest/v1/message_reactions?on_conflict=message_id,user_id',
+        access.session,
+        {
+          method: 'POST',
+          headers: { prefer: 'resolution=merge-duplicates,return=minimal' },
+          body: JSON.stringify({
+            message_id: messageId,
+            conversation_id: conversationId,
+            user_id: access.account.userId,
+            display_identity: membership.display_identity || null,
+            reaction,
+            updated_at: new Date().toISOString()
+          })
+        }
+      );
+    }
+    return withSession({ ok: true }, access.session);
+  }
+
+  return withSession({ error: 'invalid_message_action' }, access.session, 400);
+}
+
 export async function onRequestGet({ request, env }) {
   try {
     const access = await memberSession(request, env);
@@ -79,6 +261,9 @@ export async function onRequestGet({ request, env }) {
     if (admission.response) return admission.response;
     const conversationId = new URL(request.url).searchParams.get('conversationId');
     if (!validUuid(conversationId)) return json({ error: 'invalid_conversation' }, 400);
+    const membership = await conversationMembership(env, access, conversationId);
+    if (!membership) return withSession({ error: 'conversation_access_denied' }, access.session, 403);
+
     const messagesPromise = restJson(
       env,
       `/rest/v1/messages?select=id,conversation_id,sender_user_id,sender_identity,body,created_at,edited_at,message_attachments(id,media_type,mime_type,original_name,size_bytes,storage_path,created_at)&conversation_id=eq.${conversationId}&deleted_at=is.null&order=created_at.asc&limit=500`,
@@ -96,9 +281,15 @@ export async function onRequestGet({ request, env }) {
         access.session
       )
     ]);
-    await markConversationRead(env, access, conversationId);
+    await Promise.all([
+      updateConversationReceipt(env, access, conversationId, { delivered: true, read: true }),
+      consumeConversationNotifications(env, access, conversationId)
+    ]);
+    const enrichedMessages = await enrichAttachments(env, access.session, messages);
+    const social = await messageSocialState(env, access, conversationId, messages);
     return withSession({
-      messages: await enrichAttachments(env, access.session, messages),
+      messages: enrichedMessages,
+      ...social,
       streak: engagement?.[0] || {
         conversation_id: conversationId,
         current_streak: 0,
@@ -124,6 +315,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
     if (admission.response) return admission.response;
     const isMultipart = request.headers.get('content-type')?.includes('multipart/form-data');
     const body = isMultipart ? await request.formData() : await readJson(request);
+    if (!isMultipart && body.action) return handleConversationAction(env, access, body);
+
     const conversationId = String(isMultipart ? body.get('conversationId') : body.conversationId || '');
     const message = cleanText(isMultipart ? body.get('body') : body.body, 10000) || null;
     const files = isMultipart
@@ -133,12 +326,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
       return json({ error: 'message_required' }, 400);
     }
     if (files.length > 4) return json({ error: 'too_many_message_attachments' }, 400);
-    const membership = await restJson(
-      env,
-      `/rest/v1/conversation_members?select=conversation_id&conversation_id=eq.${conversationId}&user_id=eq.${encodeURIComponent(access.account.userId)}&left_at=is.null&limit=1`,
-      access.session
-    );
-    if (!membership?.length) return json({ error: 'conversation_access_denied' }, 403);
+    const membership = await conversationMembership(env, access, conversationId);
+    if (!membership) return json({ error: 'conversation_access_denied' }, 403);
 
     const attachments = [];
     for (const file of files) {
@@ -173,6 +362,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
         body: JSON.stringify({
           conversation_id: conversationId,
           sender_user_id: access.account.userId,
+          sender_identity: membership.display_identity || null,
           body: message
         })
       }
@@ -207,7 +397,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     }
 
     await Promise.all([
-      markConversationRead(env, access, conversationId),
+      updateConversationReceipt(env, access, conversationId, { delivered: true, read: true }),
       restJson(
         env,
         `/rest/v1/conversations?id=eq.${encodeURIComponent(conversationId)}`,
@@ -217,6 +407,12 @@ export async function onRequestPost({ request, env, waitUntil }) {
           headers: { prefer: 'return=minimal' },
           body: JSON.stringify({ updated_at: savedMessage.created_at })
         }
+      ).catch(() => null),
+      restJson(
+        env,
+        `/rest/v1/conversation_typing?conversation_id=eq.${encodeURIComponent(conversationId)}&user_id=eq.${encodeURIComponent(access.account.userId)}`,
+        access.session,
+        { method: 'DELETE', headers: { prefer: 'return=minimal' } }
       ).catch(() => null)
     ]);
 
@@ -226,6 +422,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     ]).then(([recipients, profile]) => deliverMessageNotifications(env, {
       recipients,
       senderProfile: profile,
+      senderIdentity: membership.display_identity || null,
       conversationId,
       messageBody: message
     })).catch(() => null);

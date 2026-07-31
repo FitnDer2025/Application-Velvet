@@ -108,7 +108,7 @@ struct MainShellView: View {
                 openNotificationRoute(route)
             }
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(20))
+                try? await Task.sleep(for: .seconds(12))
                 guard !Task.isCancelled, scenePhase == .active else { continue }
                 await store.refreshMessaging()
             }
@@ -178,7 +178,7 @@ struct MainShellView: View {
         }
         .fullScreenCover(item: $routedConversation) { conversation in
             NavigationStack {
-                AppleConversationView(conversation: conversation)
+                RealtimeAppleConversationView(conversation: conversation)
                     .environmentObject(store)
                     .environmentObject(chrome)
             }
@@ -211,7 +211,7 @@ struct MainShellView: View {
         case .maps:
             NavigationStack { MemberMapView() }
         case .messages:
-            NavigationStack { AppleConversationsView() }
+            NavigationStack { RealtimeAppleConversationsView() }
         case .profile:
             NavigationStack { PremiumOwnProfileView(profile: profile) }
         }
