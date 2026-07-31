@@ -19,9 +19,10 @@ test('web avatars are not covered and conversations open through the messages AP
   assert.match(hotfix, /openConversationDirect/);
   assert.match(hotfix, /\/api\/members\/messages\?conversationId=/);
   assert.match(hotfix, /stopImmediatePropagation/);
-  assert.match(html, /photo-protection\.js\?v=20260731-4/);
-  assert.match(html, /velvet-mobile-feed-hotfix\.js\?v=20260731-4/);
-  assert.match(worker, /velvet-beta-shell-v10/);
+  assert.match(hotfix, /menu\.inert = !open/);
+  assert.match(html, /photo-protection\.js\?v=20260731-5/);
+  assert.match(html, /velvet-mobile-feed-hotfix\.js\?v=20260731-5/);
+  assert.match(worker, /velvet-beta-shell-v11/);
 });
 
 test('native capture protection obscures recording and notifies both parties', async () => {
