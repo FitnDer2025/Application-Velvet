@@ -55,6 +55,7 @@ struct MainShellView: View {
 
     let profile: MemberProfile
     @StateObject private var store = VelvetStore()
+    @Environment(\.scenePhase) private var scenePhase
     @State private var selectedTab: Tab = .home
     @State private var showsNotifications = false
     @State private var showsMenu = false
@@ -85,6 +86,15 @@ struct MainShellView: View {
             if let route = NotificationService.consumePendingRoute() {
                 openNotificationRoute(route)
             }
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(20))
+                guard !Task.isCancelled, scenePhase == .active else { continue }
+                await store.refreshMessaging()
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            Task { await store.refreshMessaging() }
         }
         .sheet(isPresented: $showsNotifications) {
             NotificationsView()
@@ -168,9 +178,23 @@ struct MainShellView: View {
                     }
                 } label: {
                     VStack(spacing: 5) {
-                        Image(systemName: selectedTab == tab ? tab.selectedIcon : tab.icon)
-                            .font(.system(size: 17, weight: .medium))
-                            .frame(height: 20)
+                        ZStack(alignment: .topTrailing) {
+                            Image(systemName: selectedTab == tab ? tab.selectedIcon : tab.icon)
+                                .font(.system(size: 17, weight: .medium))
+                                .frame(width: 26, height: 20)
+
+                            if tab == .messages, store.unreadMessageCount > 0 {
+                                Text(store.unreadMessageCount > 99 ? "99+" : "\(store.unreadMessageCount)")
+                                    .font(.system(size: 8, weight: .bold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, store.unreadMessageCount > 9 ? 4 : 0)
+                                    .frame(minWidth: 17, minHeight: 17)
+                                    .background(VelvetColor.danger)
+                                    .clipShape(Capsule())
+                                    .offset(x: 9, y: -8)
+                                    .accessibilityLabel("\(store.unreadMessageCount) messages non lus")
+                            }
+                        }
                         Text(tab.label)
                             .font(.system(size: 9, weight: .semibold))
                             .lineLimit(1)
