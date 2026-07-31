@@ -4,7 +4,8 @@
     directory: null,
     lastUnread: null,
     selectedConversationId: null,
-    patchScheduled: false
+    patchScheduled: false,
+    isPatching: false
   };
 
   const e = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
@@ -61,11 +62,20 @@
   function updateBadges() {
     const count = unreadCount();
     document.querySelectorAll('[data-route="conversations"]').forEach((button) => {
-      button.querySelector('.velvet-message-badge')?.remove();
-      if (!count) return;
+      const existing = button.querySelector('.velvet-message-badge');
+      if (!count) {
+        existing?.remove();
+        return;
+      }
+      const label = count > 99 ? '99+' : String(count);
+      if (existing) {
+        if (existing.textContent !== label) existing.textContent = label;
+        existing.setAttribute('aria-label', `${count} messages non lus`);
+        return;
+      }
       const badge = document.createElement('span');
       badge.className = 'velvet-message-badge';
-      badge.textContent = count > 99 ? '99+' : String(count);
+      badge.textContent = label;
       badge.setAttribute('aria-label', `${count} messages non lus`);
       button.appendChild(badge);
     });
@@ -79,12 +89,24 @@
       const count = Number(conversation.unread_count || 0);
       const name = conversation.participant_display_name || conversation.subject
         || (conversation.kind === 'event' ? 'Salon Velvet' : 'Membre Velvet');
+      const date = shortDate(conversation.last_message_at || conversation.updated_at);
+      const preview = conversation.last_message_body || 'Commencez la conversation…';
+      const signature = JSON.stringify([
+        name,
+        date,
+        preview,
+        count,
+        conversation.participant_photo_url || '',
+        conversation.kind || ''
+      ]);
+      if (button.dataset.messagingSignature === signature) return;
+      button.dataset.messagingSignature = signature;
       button.classList.add('conversation-v2');
       button.classList.toggle('unread', count > 0);
       button.innerHTML = `${avatar(conversation)}
         <span class="conversation-copy-v2">
-          <span class="conversation-title-v2"><strong>${e(name)}</strong><time>${e(shortDate(conversation.last_message_at || conversation.updated_at))}</time></span>
-          <p>${e(conversation.last_message_body || 'Commencez la conversation…')}</p>
+          <span class="conversation-title-v2"><strong>${e(name)}</strong><time>${e(date)}</time></span>
+          <p>${e(preview)}</p>
           <small>${conversation.kind === 'event' ? 'Salon Velvet' : 'Échange privé'}</small>
         </span>
         ${count ? `<span class="conversation-count-v2" aria-label="${count} messages non lus">${count > 99 ? '99+' : count}</span>` : '<span class="conversation-chevron-v2">›</span>'}`;
@@ -136,13 +158,16 @@
 
   function patch() {
     state.patchScheduled = false;
+    if (state.isPatching) return;
+    state.isPatching = true;
     updateBadges();
     patchConversationCards();
     patchComposer();
+    requestAnimationFrame(() => { state.isPatching = false; });
   }
 
   function schedulePatch() {
-    if (state.patchScheduled) return;
+    if (state.patchScheduled || state.isPatching) return;
     state.patchScheduled = true;
     requestAnimationFrame(patch);
   }
