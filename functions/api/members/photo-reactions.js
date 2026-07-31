@@ -5,6 +5,7 @@ import {
   restJson,
   withSession
 } from './_shared.js';
+import { deliverBrowserActivity } from './_browser-push.js';
 
 const REACTIONS = new Set(['like', 'love', 'adore']);
 
@@ -57,7 +58,7 @@ async function notifyPhotoOwner(env, access, admission, mediaId, reaction) {
   const [mediaRows, actorRows] = await Promise.all([
     serviceRest(
       env,
-      `/rest/v1/media_assets?select=id,profile_id,owner_user_id&id=eq.${encodeURIComponent(mediaId)}&limit=1`
+      `/rest/v1/media_assets?select=id,profile_id,owner_user_id,media_role&id=eq.${encodeURIComponent(mediaId)}&limit=1`
     ).catch(() => []),
     serviceRest(
       env,
@@ -80,9 +81,9 @@ async function notifyPhotoOwner(env, access, admission, mediaId, reaction) {
   const actor = actorRows?.[0];
   const actorName = clean(actor?.display_name, 120) || 'Un membre Velvet';
   const wording = {
-    like: { title: `${actorName} aime votre photo`, body: `${actorName} a ajouté un J’aime à l’une de vos photos.` },
-    love: { title: `${actorName} adore votre photo`, body: `${actorName} a réagi avec un cœur à l’une de vos photos.` },
-    adore: { title: `${actorName} a eu un coup de cœur`, body: `${actorName} a ajouté un coup de cœur à l’une de vos photos.` }
+    like: { title: `${actorName} aime votre photo`, body: `${actorName} a ajouté un J’aime à cette photo.` },
+    love: { title: `${actorName} adore votre photo`, body: `${actorName} a réagi avec un cœur à cette photo.` },
+    adore: { title: `${actorName} a eu un coup de cœur`, body: `${actorName} a ajouté un coup de cœur à cette photo.` }
   }[reaction];
   if (!wording) return { notified: 0 };
 
@@ -96,11 +97,28 @@ async function notifyPhotoOwner(env, access, admission, mediaId, reaction) {
       entity_type: 'photo',
       entity_id: mediaId,
       title: wording.title,
-      body: wording.body
+      body: wording.body,
+      metadata: {
+        reaction,
+        mediaId,
+        targetProfileId: media.profile_id,
+        mediaRole: media.media_role || null,
+        actorName
+      }
     })))
   });
 
-  return { notified: ownerUserIds.length };
+  const push = await deliverBrowserActivity(env, {
+    userIds: ownerUserIds,
+    eventType: 'reactions',
+    title: wording.title,
+    body: wording.body,
+    tag: `velvet-photo-reaction-${mediaId}`,
+    navigate: '/membres/?route=notifications',
+    profileId: admission.id
+  }).catch(() => ({ sent: 0 }));
+
+  return { notified: ownerUserIds.length, browserPush: push.sent || 0 };
 }
 
 export async function onRequestGet({ request, env }) {

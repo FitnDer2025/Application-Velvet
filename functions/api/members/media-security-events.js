@@ -4,6 +4,7 @@ import {
   requireAdmittedMember,
   withSession
 } from './_shared.js';
+import { deliverBrowserActivity } from './_browser-push.js';
 
 function clean(value, max = 500) {
   return String(value ?? '').trim().slice(0, max);
@@ -29,7 +30,7 @@ async function serviceRest(env, path, init = {}) {
   return payload;
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   try {
     const access = await memberSession(request, env);
     if (access.response) return access.response;
@@ -69,6 +70,9 @@ export async function onRequestPost({ request, env }) {
     }
 
     const entityId = validUuid(mediaId) ? mediaId : ownerProfileId;
+    const securityTitle = eventType === 'screen_recording'
+      ? 'Enregistrement d’écran détecté'
+      : 'Capture d’écran détectée';
     const ownerBody = eventType === 'screen_recording'
       ? `${viewerName} a tenté d’enregistrer l’écran pendant l’affichage d’une de vos photos.`
       : `${viewerName} a effectué une capture d’écran pendant l’affichage d’une de vos photos.`;
@@ -78,19 +82,30 @@ export async function onRequestPost({ request, env }) {
         user_id: userId,
         actor_profile_id: admission.admission.id,
         event_type: 'security',
-        entity_type: 'media_capture',
+        entity_type: 'security',
         entity_id: entityId,
-        title: eventType === 'screen_recording' ? 'Enregistrement d’écran détecté' : 'Capture d’écran détectée',
-        body: ownerBody
+        title: securityTitle,
+        body: ownerBody,
+        metadata: {
+          captureType: eventType,
+          mediaId: validUuid(mediaId) ? mediaId : null,
+          targetProfileId: ownerProfileId,
+          actorName: viewerName
+        }
       })),
       {
         user_id: access.account.userId,
         actor_profile_id: ownerProfileId,
         event_type: 'security',
-        entity_type: 'media_capture',
+        entity_type: 'security',
         entity_id: entityId,
         title: 'Capture signalée',
-        body: 'Le propriétaire de la photo a été prévenu par Velvet. Toute diffusion sans consentement peut entraîner la suspension du compte.'
+        body: 'Le propriétaire de la photo a été prévenu par Velvet. Toute diffusion sans consentement peut entraîner la suspension du compte.',
+        metadata: {
+          captureType: eventType,
+          mediaId: validUuid(mediaId) ? mediaId : null,
+          targetProfileId: ownerProfileId
+        }
       }
     ];
 
@@ -100,9 +115,23 @@ export async function onRequestPost({ request, env }) {
       body: JSON.stringify(rows)
     });
 
+    const pushTask = deliverBrowserActivity(env, {
+      userIds: ownerUserIds,
+      eventType: 'security',
+      title: securityTitle,
+      body: ownerBody,
+      tag: `velvet-security-${entityId}`,
+      navigate: '/membres/?route=notifications',
+      profileId: admission.admission.id
+    }).catch(() => ({ sent: 0 }));
+    let pushResult = { sent: 0 };
+    if (typeof waitUntil === 'function') waitUntil(pushTask);
+    else pushResult = await pushTask;
+
     return withSession({
       ok: true,
       ownerNotified: true,
+      browserPush: pushResult.sent || 0,
       warning: 'Le propriétaire de la photo a été prévenu.'
     }, access.session);
   } catch (error) {

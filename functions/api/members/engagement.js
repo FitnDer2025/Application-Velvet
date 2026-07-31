@@ -5,6 +5,7 @@ import {
   restJson,
   withSession
 } from './_shared.js';
+import { deliverBrowserActivity } from './_browser-push.js';
 
 function validUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value || '');
@@ -94,6 +95,8 @@ async function notifyProfileView(env, access, actorProfileId, targetProfileId) {
   if (existing?.length) return { notified: 0, deduplicated: true };
 
   const actorName = clean(actorRows?.[0]?.display_name, 120) || 'Un membre Velvet';
+  const title = `${actorName} a consulté votre profil`;
+  const body = `${actorName} vient de découvrir votre univers Velvet.`;
   await serviceRest(env, '/rest/v1/member_notifications', {
     method: 'POST',
     headers: { prefer: 'return=minimal' },
@@ -103,12 +106,27 @@ async function notifyProfileView(env, access, actorProfileId, targetProfileId) {
       event_type: 'profile_views',
       entity_type: 'profile',
       entity_id: actorProfileId,
-      title: `${actorName} a consulté votre profil`,
-      body: `${actorName} vient de découvrir votre univers Velvet.`
+      title,
+      body,
+      metadata: {
+        actorName,
+        targetProfileId,
+        actorProfileId
+      }
     })))
   });
 
-  return { notified: ownerUserIds.length };
+  const push = await deliverBrowserActivity(env, {
+    userIds: ownerUserIds,
+    eventType: 'profile_views',
+    title,
+    body,
+    tag: `velvet-profile-view-${actorProfileId}`,
+    navigate: `/membres/?route=discover&profile=${encodeURIComponent(actorProfileId)}`,
+    profileId: actorProfileId
+  }).catch(() => ({ sent: 0 }));
+
+  return { notified: ownerUserIds.length, browserPush: push.sent || 0 };
 }
 
 export async function onRequestGet({ request, env }) {

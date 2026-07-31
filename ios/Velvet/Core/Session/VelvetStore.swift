@@ -6,6 +6,12 @@ import UserNotifications
 final class VelvetStore: ObservableObject {
     @Published private(set) var directory: DirectoryResponse?
     @Published private(set) var notificationFeed = NotificationFeed(notifications: [], unreadCount: 0)
+    @Published private(set) var archivedNotificationFeed = NotificationFeed(
+        notifications: [],
+        unreadCount: 0,
+        archiveCount: 0,
+        archived: true
+    )
     @Published private(set) var discoveryState = DiscoveryStateResponse(
         presence: [],
         following: [],
@@ -23,6 +29,9 @@ final class VelvetStore: ObservableObject {
     @Published private(set) var mapData: MemberMapResponse?
     @Published private(set) var messages: [UUID: [DirectoryMessage]] = [:]
     @Published private(set) var conversationStreaks: [UUID: ConversationStreak] = [:]
+    @Published private(set) var messageReceipts: [UUID: [UUID: [MessageReceipt]]] = [:]
+    @Published private(set) var messageReactions: [UUID: [UUID: [MessageReaction]]] = [:]
+    @Published private(set) var typingParticipants: [UUID: [TypingParticipant]] = [:]
     @Published private(set) var photoReactions: [UUID: PhotoReactionSummary] = [:]
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
@@ -35,6 +44,17 @@ final class VelvetStore: ObservableObject {
                 $0 + NumberFormatter.velvetInteger($1.unreadCount)
             }
             ?? 0
+    }
+
+    var viewedProfiles: [(history: ProfileViewHistory, profile: MemberProfile?)] {
+        engagementState.views
+            .sorted { EngagementDate.date($0.lastViewedAt) > EngagementDate.date($1.lastViewedAt) }
+            .map { history in
+                (
+                    history,
+                    directory?.profiles.first(where: { $0.id == history.viewedProfileId })
+                )
+            }
     }
 
     init(service: SessionService = SessionService()) {
@@ -71,6 +91,7 @@ final class VelvetStore: ObservableObject {
             if let feed = try? await photoReactionRequest {
                 photoReactions = Dictionary(uniqueKeysWithValues: feed.reactions.map { ($0.mediaId, $0) })
             }
+            await markVisibleMessagesDelivered()
             await synchronizeExternalCounters()
         } catch {
             errorMessage = ErrorMessage.text(for: error)
@@ -87,6 +108,7 @@ final class VelvetStore: ObservableObject {
             if let engagement = try? await engagementRequest {
                 apply(engagement)
             }
+            await markVisibleMessagesDelivered()
             await synchronizeExternalCounters()
         } catch {
             // Une actualisation silencieuse ne doit pas interrompre la navigation.
@@ -111,7 +133,12 @@ final class VelvetStore: ObservableObject {
             if let streak = response.streak {
                 conversationStreaks[conversationID] = streak
             }
-            await refreshMessaging()
+            messageReceipts[conversationID] = Self.uuidDictionary(response.receipts)
+            messageReactions[conversationID] = Self.uuidDictionary(response.reactions)
+            typingParticipants[conversationID] = response.typing ?? []
+            notificationFeed = (try? await service.notifications()) ?? notificationFeed
+            await refreshDirectoryOnly()
+            await synchronizeExternalCounters()
         } catch {
             errorMessage = ErrorMessage.text(for: error)
         }
@@ -137,9 +164,46 @@ final class VelvetStore: ObservableObject {
         }
     }
 
+    func setTyping(conversationID: UUID, active: Bool) async {
+        try? await service.setConversationTyping(
+            conversationID: conversationID,
+            active: active
+        )
+    }
+
+    func setMessageReaction(
+        conversationID: UUID,
+        messageID: UUID,
+        reaction: String?
+    ) async {
+        do {
+            try await service.setMessageReaction(
+                conversationID: conversationID,
+                messageID: messageID,
+                reaction: reaction
+            )
+            await refreshMessages(conversationID: conversationID)
+        } catch {
+            errorMessage = ErrorMessage.text(for: error)
+        }
+    }
+
+    func receipts(conversationID: UUID, messageID: UUID) -> [MessageReceipt] {
+        messageReceipts[conversationID]?[messageID] ?? []
+    }
+
+    func reactions(conversationID: UUID, messageID: UUID) -> [MessageReaction] {
+        messageReactions[conversationID]?[messageID] ?? []
+    }
+
+    func typing(conversationID: UUID) -> [TypingParticipant] {
+        typingParticipants[conversationID] ?? []
+    }
+
     func markNotificationRead(id: UUID) async {
         do {
             notificationFeed = try await service.markNotificationRead(id: id)
+            await refreshArchivedNotifications()
             await synchronizeExternalCounters()
         } catch {
             errorMessage = ErrorMessage.text(for: error)
@@ -149,10 +213,34 @@ final class VelvetStore: ObservableObject {
     func markNotificationsRead() async {
         do {
             notificationFeed = try await service.markAllNotificationsRead()
+            await refreshArchivedNotifications()
             await synchronizeExternalCounters()
         } catch {
             errorMessage = ErrorMessage.text(for: error)
         }
+    }
+
+    func consumeNotifications(entityType: String, entityID: UUID) async {
+        do {
+            notificationFeed = try await service.consumeNotifications(
+                entityType: entityType,
+                entityID: entityID
+            )
+            await refreshArchivedNotifications()
+            await synchronizeExternalCounters()
+        } catch {
+            // La lecture de la destination reste prioritaire sur l’archivage visuel.
+        }
+    }
+
+    func refreshArchivedNotifications() async {
+        if let feed = try? await service.archivedNotifications() {
+            archivedNotificationFeed = feed
+        }
+    }
+
+    func viewHistory(for profileID: UUID) -> ProfileViewHistory? {
+        engagementState.views.first(where: { $0.viewedProfileId == profileID })
     }
 
     func profileReactionValue(for profileID: UUID) -> Int? {
@@ -188,6 +276,23 @@ final class VelvetStore: ObservableObject {
         }
     }
 
+    private func refreshDirectoryOnly() async {
+        if let refreshed = try? await service.directory() {
+            directory = refreshed
+        }
+    }
+
+    private func markVisibleMessagesDelivered() async {
+        let unread = (directory?.conversations ?? []).filter { ($0.unreadCount ?? 0) > 0 }
+        await withTaskGroup(of: Void.self) { group in
+            for conversation in unread {
+                group.addTask { [service] in
+                    try? await service.markConversationDelivered(conversationID: conversation.id)
+                }
+            }
+        }
+    }
+
     private func apply(_ engagement: EngagementResponse) {
         engagementState = engagement
         conversationStreaks = Dictionary(
@@ -202,6 +307,37 @@ final class VelvetStore: ObservableObject {
             unreadMessages: unreadMessageCount
         )
     }
+
+    private static func uuidDictionary<Value>(_ source: [String: Value]?) -> [UUID: Value] {
+        guard let source else { return [:] }
+        return source.reduce(into: [:]) { result, item in
+            guard let id = UUID(uuidString: item.key) else { return }
+            result[id] = item.value
+        }
+    }
+}
+
+private enum EngagementDate {
+    static func date(_ value: String?) -> Date {
+        guard let value else { return .distantPast }
+        return ISO8601DateFormatter.velvetWithFractional.date(from: value)
+            ?? ISO8601DateFormatter.velvetBasic.date(from: value)
+            ?? .distantPast
+    }
+}
+
+private extension ISO8601DateFormatter {
+    static let velvetWithFractional: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    static let velvetBasic: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
 }
 
 private extension NumberFormatter {

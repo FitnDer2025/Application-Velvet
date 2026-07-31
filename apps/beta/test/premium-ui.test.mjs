@@ -33,6 +33,9 @@ test('la navigation mobile Membres conserve cinq destinations prioritaires', asy
   assert.match(html, /velvet-messaging-upgrade\.js/);
   assert.match(html, /velvet-chat-whatsapp\.css/);
   assert.match(html, /velvet-chat-whatsapp\.js/);
+  assert.match(html, /velvet-social-realtime\.css/);
+  assert.match(html, /velvet-social-realtime\.js/);
+  assert.match(html, /velvet-realtime-reconcile\.js/);
 });
 
 test('PRO et Contrôle chargent le même langage visuel et mobile', async () => {
@@ -74,12 +77,14 @@ test('la direction artistique éditoriale traite les profils et toutes les surfa
   }
   assert.match(ui, /dataset\.velvetView/);
   assert.match(auth, /velvet-editorial-ui\.css/);
-  assert.match(sw, /velvet-beta-shell-v15/);
+  assert.match(sw, /velvet-beta-shell-v16/);
   assert.match(sw, /velvet-editorial-ui\.css/);
   assert.match(sw, /velvet-messaging-upgrade\.css/);
   assert.match(sw, /velvet-messaging-upgrade\.js/);
   assert.match(sw, /velvet-chat-whatsapp\.css/);
   assert.match(sw, /velvet-chat-whatsapp\.js/);
+  assert.match(sw, /velvet-social-realtime\.js/);
+  assert.match(sw, /velvet-realtime-reconcile\.js/);
 });
 
 test('la messagerie enrichie reste chargée et exploitable sur mobile', async () => {
@@ -98,7 +103,7 @@ test('la messagerie enrichie reste chargée et exploitable sur mobile', async ()
   assert.match(css, /\.velvet-message-badge/);
   assert.match(directory, /unread_count/);
   assert.match(directory, /participant_photo_url/);
-  assert.match(messages, /markConversationRead/);
+  assert.match(messages, /updateConversationReceipt/);
   assert.match(messages, /deliverMessageNotifications/);
 });
 

@@ -121,7 +121,10 @@ struct PremiumDiscoveryGridView: View {
                                 NavigationLink {
                                     MemberDetailView(profile: profile)
                                 } label: {
-                                    CompactMemberCard(profile: profile)
+                                    CompactMemberCard(
+                                        profile: profile,
+                                        history: store.viewHistory(for: profile.id)
+                                    )
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -241,6 +244,7 @@ struct PremiumDiscoveryGridView: View {
 
 private struct CompactMemberCard: View {
     let profile: MemberProfile
+    let history: ProfileViewHistory?
 
     private var photo: URL? {
         profile.profileGalleryPhotos.first(where: { $0.isPrimary == true })?.previewUrl
@@ -275,6 +279,25 @@ private struct CompactMemberCard: View {
                     .background(.black.opacity(0.22))
                     .clipShape(Capsule())
                     .padding(7)
+
+                if let history {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Label("\(history.viewCount ?? 1)", systemImage: "eye.fill")
+                                .font(.system(size: 8, weight: .bold, design: .rounded))
+                                .foregroundStyle(VelvetColor.champagneGold)
+                                .padding(.horizontal, 7)
+                                .frame(height: 22)
+                                .background(.ultraThinMaterial)
+                                .background(VelvetColor.velvetBlack.opacity(0.55))
+                                .clipShape(Capsule())
+                        }
+                        Spacer()
+                    }
+                    .padding(7)
+                    .allowsHitTesting(false)
+                }
             }
             .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
             .overlay {
@@ -298,8 +321,32 @@ private struct CompactMemberCard: View {
                 .font(VelvetTypography.caption(size: 9))
                 .foregroundStyle(VelvetColor.textSecondary)
                 .lineLimit(1)
+
+            if history != nil {
+                Text(viewedLabel)
+                    .font(VelvetTypography.caption(size: 8, weight: .semibold))
+                    .foregroundStyle(VelvetColor.champagneGold.opacity(0.82))
+                    .lineLimit(1)
+            }
         }
         .contentShape(Rectangle())
+    }
+
+    private var viewedLabel: String {
+        guard let history else { return "" }
+        return "Vu \(history.viewCount ?? 1)× · \(relativeDate(history.lastViewedAt))"
+    }
+
+    private func relativeDate(_ value: String?) -> String {
+        guard let value else { return "date inconnue" }
+        let fractional = ISO8601DateFormatter()
+        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        guard let date = fractional.date(from: value) ?? ISO8601DateFormatter().date(from: value) else {
+            return "date inconnue"
+        }
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter.localizedString(for: date, relativeTo: .now)
     }
 }
 

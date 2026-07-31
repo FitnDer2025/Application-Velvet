@@ -17,10 +17,11 @@ test('home and discovery expose precise audience and age', async () => {
 });
 
 test('native messaging uploads photos, videos and PDFs through multipart API', async () => {
-  const [client, service, messaging, models] = await Promise.all([
+  const [client, service, messaging, realtimeMessaging, models] = await Promise.all([
     read('ios/Velvet/Core/Networking/APIClient.swift'),
     read('ios/Velvet/Core/Session/SessionService+IOSSocial.swift'),
     read('ios/Velvet/Features/Messaging/AppleMessagingViews.swift'),
+    read('ios/Velvet/Features/Messaging/RealtimeAppleMessagingViews.swift'),
     read('ios/Velvet/Core/Models/DirectoryModels.swift')
   ]);
   assert.match(client, /func upload/);
@@ -29,16 +30,17 @@ test('native messaging uploads photos, videos and PDFs through multipart API', a
   assert.match(service, /\/api\/members\/messages/);
   assert.match(models, /OutgoingMessageAttachment/);
   assert.match(messaging, /\.photosPicker/);
-  assert.match(messaging, /\.fileImporter/);
-  assert.match(messaging, /application\/pdf/);
-  assert.match(messaging, /50 \* 1024 \* 1024/);
+  assert.match(realtimeMessaging, /\.photosPicker/);
+  assert.match(realtimeMessaging, /\.fileImporter/);
+  assert.match(realtimeMessaging, /application\/pdf/);
+  assert.match(realtimeMessaging, /50 \* 1024 \* 1024/);
 });
 
 test('conversation streaks and profile affinity are restored from engagement', async () => {
   const [models, store, messaging, social] = await Promise.all([
     read('ios/Velvet/Core/Models/DirectoryModels.swift'),
     read('ios/Velvet/Core/Session/VelvetStore.swift'),
-    read('ios/Velvet/Features/Messaging/AppleMessagingViews.swift'),
+    read('ios/Velvet/Features/Messaging/RealtimeAppleMessagingViews.swift'),
     read('ios/Velvet/Features/Discovery/SocialMediaViews.swift')
   ]);
   assert.match(models, /ConversationStreak/);
@@ -50,7 +52,7 @@ test('conversation streaks and profile affinity are restored from engagement', a
   assert.match(social, /🔥🔥🔥/);
 });
 
-test('notifications identify their actor, route to their origin and clear unread state', async () => {
+test('notifications identify their actor, route to their origin and archive consumed activity', async () => {
   const [models, store, view, shell, endpoint, messageNotifier, engagement] = await Promise.all([
     read('ios/Velvet/Core/Models/DirectoryModels.swift'),
     read('ios/Velvet/Core/Session/VelvetStore.swift'),
@@ -61,9 +63,13 @@ test('notifications identify their actor, route to their origin and clear unread
     read('functions/api/members/engagement.js')
   ]);
   assert.match(models, /actorProfileId/);
+  assert.match(models, /archivedAt/);
+  assert.match(models, /entityPreviewUrl/);
   assert.match(store, /markNotificationRead/);
   assert.match(store, /setBadgeCount/);
-  assert.match(view, /Tout lire/);
+  assert.match(store, /archivedNotificationFeed/);
+  assert.match(view, /Tout archiver/);
+  assert.match(view, /NotificationActivityTab/);
   assert.match(view, /onDestination/);
   assert.match(view, /VelvetNotificationDestination/);
   assert.match(view, /actorProfile/);
@@ -74,6 +80,7 @@ test('notifications identify their actor, route to their origin and clear unread
   assert.match(shell, /routedProfile/);
   assert.match(shell, /openPendingNotificationDestination/);
   assert.match(endpoint, /read_all/);
+  assert.match(endpoint, /archive_all/);
   assert.match(endpoint, /notificationId/);
   assert.match(messageNotifier, /senderProfileId/);
   assert.match(engagement, /a consulté votre profil/);
@@ -93,4 +100,5 @@ test('member photos and albums open full-screen with per-photo reactions', async
   assert.match(social, /setPhotoReaction/);
   assert.match(reactions, /notifyPhotoOwner/);
   assert.match(reactions, /event_type: 'reactions'/);
+  assert.match(reactions, /metadata:/);
 });

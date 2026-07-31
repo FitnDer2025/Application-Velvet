@@ -22,17 +22,19 @@ test('web avatars are not covered and conversations open through the messages AP
   assert.match(hotfix, /menu\.inert = !open/);
   assert.match(html, /photo-protection\.js\?v=20260731-5/);
   assert.match(html, /velvet-mobile-feed-hotfix\.js\?v=20260731-5/);
-  assert.match(worker, /velvet-beta-shell-v15/);
+  assert.match(worker, /velvet-beta-shell-v16/);
+  assert.match(worker, /velvet-social-realtime\.js/);
 });
 
 test('native capture protection obscures recording and notifies both parties', async () => {
-  const [root, app, entry, premiumDetail, socialGallery, endpoint] = await Promise.all([
+  const [root, app, entry, premiumDetail, socialGallery, endpoint, browserPush] = await Promise.all([
     read('ios/Velvet/App/RootView.swift'),
     read('ios/Velvet/VelvetApp.swift'),
     read('ios/Velvet/Features/Discovery/MemberDetailView.swift'),
     read('ios/Velvet/Features/Discovery/PremiumMemberDetailView.swift'),
     read('ios/Velvet/Features/Discovery/SocialMediaViews.swift'),
-    read('functions/api/members/media-security-events.js')
+    read('functions/api/members/media-security-events.js'),
+    read('functions/api/members/_browser-push.js')
   ]);
 
   assert.match(root, /UIApplication\.userDidTakeScreenshotNotification/);
@@ -48,4 +50,9 @@ test('native capture protection obscures recording and notifies both parties', a
   assert.match(endpoint, /Capture d’écran détectée/);
   assert.match(endpoint, /Capture signalée/);
   assert.match(endpoint, /member_notifications/);
+  assert.match(endpoint, /deliverBrowserActivity/);
+  assert.match(endpoint, /eventType: 'security'/);
+  assert.match(endpoint, /entity_type: 'security'/);
+  assert.match(browserPush, /VAPID_PUBLIC_KEY/);
+  assert.match(browserPush, /browser_push_subscriptions/);
 });
