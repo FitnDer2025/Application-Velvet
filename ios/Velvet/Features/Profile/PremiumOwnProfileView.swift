@@ -4,29 +4,39 @@ struct PremiumOwnProfileView: View {
     @EnvironmentObject private var store: VelvetStore
     let profile: MemberProfile
 
+    @State private var liveProfile: MemberProfile?
     @State private var selectedSection = "overview"
     @State private var selectedAlbum: VelvetAlbumPresentation?
+    @State private var isRefreshing = false
 
-    private var photos: [MediaAsset] { profile.approvedPhotos }
+    private var currentProfile: MemberProfile { liveProfile ?? profile }
+    private var photos: [MediaAsset] { currentProfile.profileGalleryPhotos }
 
     private var albums: [VelvetAlbumPresentation] {
-        (profile.albums ?? []).map { album in
-            VelvetAlbumPresentation(
-                id: album.id,
-                title: album.name,
-                subtitle: album.confidentiality == "public"
-                    ? "Collection visible par les membres autorisés"
-                    : "Collection privée sur autorisation explicite",
-                confidentiality: album.confidentiality ?? "private",
-                expiresAt: album.expiresAt,
-                urls: (album.mediaAssets ?? []).compactMap(\.previewUrl)
-            )
-        }
+        (currentProfile.albums ?? [])
+            .sorted { left, right in
+                if left.confidentiality == right.confidentiality {
+                    return left.name.localizedCaseInsensitiveCompare(right.name) == .orderedAscending
+                }
+                return left.confidentiality != "public"
+            }
+            .map { album in
+                VelvetAlbumPresentation(
+                    id: album.id,
+                    title: album.name,
+                    subtitle: album.confidentiality == "public"
+                        ? "Collection publique visible sur ta fiche"
+                        : "Collection privée, accessible uniquement sur autorisation",
+                    confidentiality: album.confidentiality ?? "private",
+                    expiresAt: album.expiresAt,
+                    urls: (album.mediaAssets ?? []).compactMap(\.previewUrl)
+                )
+            }
     }
 
     private var recommendations: [Recommendation] {
         (store.directory?.recommendations ?? []).filter {
-            $0.targetType == "profile" && $0.targetId == profile.id
+            $0.targetType == "profile" && $0.targetId == currentProfile.id
         }
     }
 
@@ -37,9 +47,9 @@ struct PremiumOwnProfileView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     VelvetProfileGallery(
                         urls: photos.compactMap(\.previewUrl),
-                        eyebrow: profile.velvetAudienceLabel,
-                        title: profile.displayName,
-                        subtitle: profile.locationZone ?? profile.city ?? "Zone privée"
+                        eyebrow: currentProfile.velvetDemographicAndAgeLabel,
+                        title: currentProfile.displayName,
+                        subtitle: currentProfile.locationZone ?? currentProfile.city ?? "Zone privée"
                     )
 
                     statusRow
@@ -58,22 +68,24 @@ struct PremiumOwnProfileView: View {
                 .padding(.top, 14)
                 .padding(.bottom, 30)
             }
+            .refreshable { await reloadProfile() }
         }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(item: $selectedAlbum) { album in
             VelvetAlbumDetailView(album: album)
         }
+        .task { await reloadProfile() }
     }
 
     private var statusRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 PremiumStatusPill(
-                    title: profile.isAdmitted ? "PROFIL ADMIS" : "ADMISSION EN ATTENTE",
-                    icon: profile.isAdmitted ? "checkmark.seal.fill" : "hourglass",
-                    color: profile.isAdmitted ? VelvetColor.success : VelvetColor.warning
+                    title: currentProfile.isAdmitted ? "PROFIL ADMIS" : "ADMISSION EN ATTENTE",
+                    icon: currentProfile.isAdmitted ? "checkmark.seal.fill" : "hourglass",
+                    color: currentProfile.isAdmitted ? VelvetColor.success : VelvetColor.warning
                 )
-                if profile.verificationStatus == "verified" {
+                if currentProfile.verificationStatus == "verified" {
                     PremiumStatusPill(
                         title: "IDENTITÉ VÉRIFIÉE",
                         icon: "checkmark.shield.fill",
@@ -81,9 +93,14 @@ struct PremiumOwnProfileView: View {
                     )
                 }
                 PremiumStatusPill(
-                    title: "\(photos.count) PHOTO\(photos.count > 1 ? "S" : "")",
+                    title: "\(photos.count) PHOTO\(photos.count > 1 ? "S" : "") PUBLIQUE\(photos.count > 1 ? "S" : "")",
                     icon: "photo",
                     color: VelvetColor.softBlush
+                )
+                PremiumStatusPill(
+                    title: "\(albums.count) ALBUM\(albums.count > 1 ? "S" : "")",
+                    icon: "photo.stack",
+                    color: VelvetColor.champagneGold
                 )
             }
         }
@@ -93,11 +110,11 @@ struct PremiumOwnProfileView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 2) {
                 PremiumProfileSegment(
-                    title: profile.profileType == .couple ? "Le couple" : "Présentation",
+                    title: currentProfile.profileType == .couple ? "Le couple" : "Présentation",
                     selected: selectedSection == "overview"
                 ) { selectedSection = "overview" }
 
-                ForEach(profile.individualProfiles ?? []) { person in
+                ForEach(currentProfile.individualProfiles ?? []) { person in
                     let value = "person-\(person.id.uuidString)"
                     PremiumProfileSegment(
                         title: person.firstName ?? "Personne",
@@ -122,7 +139,7 @@ struct PremiumOwnProfileView: View {
         if selectedSection == "albums" {
             albumsContent
         } else if selectedSection.hasPrefix("person-"),
-                  let person = (profile.individualProfiles ?? []).first(where: {
+                  let person = (currentProfile.individualProfiles ?? []).first(where: {
                       selectedSection == "person-\($0.id.uuidString)"
                   }) {
             personContent(person)
@@ -133,35 +150,65 @@ struct PremiumOwnProfileView: View {
 
     private var overviewContent: some View {
         VStack(spacing: 14) {
-            PremiumProfileSection(eyebrow: "En quelques mots", title: "Notre univers") {
+            PremiumProfileSection(
+                eyebrow: "En quelques mots",
+                title: currentProfile.ownUniverseTitle
+            ) {
                 PremiumProfileText(
-                    value: profile.description,
+                    value: currentProfile.description,
                     fallback: "La présentation de ce profil reste à compléter.",
                     quote: true
                 )
-                PremiumProfileTags(values: profile.valuesList ?? [], emptyText: "Valeurs à compléter")
+                PremiumProfileTags(
+                    values: currentProfile.valuesList ?? [],
+                    emptyText: "Valeurs à compléter"
+                )
             }
 
-            PremiumProfileSection(eyebrow: "Le récit", title: "Notre histoire") {
-                PremiumProfileText(value: profile.story, fallback: "Cette histoire reste à écrire.")
+            PremiumProfileSection(eyebrow: "Le récit", title: currentProfile.ownStoryTitle) {
+                PremiumProfileText(
+                    value: currentProfile.story,
+                    fallback: "Cette histoire reste à écrire."
+                )
             }
 
-            PremiumProfileSection(eyebrow: "Le chemin parcouru", title: "Notre parcours") {
-                PremiumProfileText(value: profile.journey, fallback: "Le parcours n’est pas encore renseigné.")
+            PremiumProfileSection(
+                eyebrow: "Le chemin parcouru",
+                title: currentProfile.ownJourneyTitle
+            ) {
+                PremiumProfileText(
+                    value: currentProfile.journey,
+                    fallback: "Le parcours n’est pas encore renseigné."
+                )
             }
 
-            PremiumProfileSection(eyebrow: "Les rencontres souhaitées", title: "Ce que nous recherchons") {
-                PremiumProfileText(value: profile.searchText, fallback: "Les envies de rencontre ne sont pas encore précisées.")
+            PremiumProfileSection(
+                eyebrow: "Les rencontres souhaitées",
+                title: currentProfile.ownSearchTitle
+            ) {
+                PremiumProfileText(
+                    value: currentProfile.searchText,
+                    fallback: "Les envies de rencontre ne sont pas encore précisées."
+                )
             }
 
-            PremiumProfileSection(eyebrow: "Nos envies", title: "Pratiques & expériences") {
-                PremiumProfileTags(values: profile.practices ?? [], emptyText: "Pratiques à compléter")
+            PremiumProfileSection(
+                eyebrow: currentProfile.ownDesiresEyebrow,
+                title: "Pratiques & expériences"
+            ) {
+                PremiumProfileTags(
+                    values: currentProfile.practices ?? [],
+                    emptyText: "Pratiques à compléter"
+                )
             }
 
-            if !(profile.individualProfiles ?? []).isEmpty {
-                PremiumProfileSection(eyebrow: "Les personnes", title: "Derrière ce profil") {
+            if !(currentProfile.individualProfiles ?? []).isEmpty {
+                PremiumProfileSection(
+                    eyebrow: currentProfile.isCoupleProfile ? "Les personnes" : "Ma fiche",
+                    title: currentProfile.isCoupleProfile ? "Derrière ce profil" : "À propos de moi"
+                ) {
                     VStack(spacing: 10) {
-                        ForEach(profile.individualProfiles ?? []) { person in
+                        ForEach(currentProfile.individualProfiles ?? []) { person in
                             Button {
                                 selectedSection = "person-\(person.id.uuidString)"
                             } label: {
@@ -175,19 +222,31 @@ struct PremiumOwnProfileView: View {
 
             PremiumProfileSection(
                 eyebrow: "Localisation publique",
-                title: profile.locationZone ?? profile.city ?? "Zone privée"
+                title: currentProfile.locationZone ?? currentProfile.city ?? "Zone privée"
             ) {
                 Text("Velvet affiche uniquement la zone choisie et jamais l’adresse exacte.")
                     .font(VelvetTypography.body(size: 12))
                     .foregroundStyle(VelvetColor.textSecondary)
             }
 
-            PremiumProfileSection(eyebrow: "Lieux préférés", title: "Nos repères") {
-                PremiumProfileTags(values: profile.favoritePlaces ?? [], emptyText: "Aucun lieu renseigné")
+            PremiumProfileSection(
+                eyebrow: "Lieux préférés",
+                title: currentProfile.ownPlacesTitle
+            ) {
+                PremiumProfileTags(
+                    values: currentProfile.favoritePlaces ?? [],
+                    emptyText: "Aucun lieu renseigné"
+                )
             }
 
-            PremiumProfileSection(eyebrow: "Disponibilités", title: "Quand nous rencontrer") {
-                PremiumProfileText(value: profile.availabilityText, fallback: "Disponibilités non renseignées.")
+            PremiumProfileSection(
+                eyebrow: "Disponibilités",
+                title: currentProfile.ownAvailabilityTitle
+            ) {
+                PremiumProfileText(
+                    value: currentProfile.availabilityText,
+                    fallback: "Disponibilités non renseignées."
+                )
             }
 
             PremiumProfileSection(eyebrow: "La communauté", title: "Recommandations") {
@@ -214,22 +273,31 @@ struct PremiumOwnProfileView: View {
                 eyebrow: "Orientation et attirances",
                 title: person.orientation ?? "Attirances"
             ) {
-                PremiumProfileTags(values: person.attractedTo ?? [], emptyText: "Attirances non renseignées")
+                PremiumProfileTags(
+                    values: person.attractedTo ?? [],
+                    emptyText: "Attirances non renseignées"
+                )
             }
 
             PremiumProfileSection(
                 eyebrow: "Envies personnelles",
                 title: "Ce que \(person.firstName ?? "cette personne") souhaite vivre"
             ) {
-                PremiumProfileTags(values: person.desiredPractices ?? [], emptyText: "Envies non renseignées")
+                PremiumProfileTags(
+                    values: person.desiredPractices ?? [],
+                    emptyText: "Envies non renseignées"
+                )
             }
 
-            if profile.profileType == .couple {
+            if currentProfile.profileType == .couple {
                 PremiumProfileSection(
                     eyebrow: "Accords du couple",
                     title: "Permissions du ou de la partenaire"
                 ) {
-                    PremiumProfileTags(values: person.partnerPermissions ?? [], emptyText: "Accords non renseignés")
+                    PremiumProfileTags(
+                        values: person.partnerPermissions ?? [],
+                        emptyText: "Accords non renseignés"
+                    )
                 }
             }
 
@@ -253,7 +321,7 @@ struct PremiumOwnProfileView: View {
         VStack(spacing: 14) {
             HStack {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("COLLECTIONS")
+                    Text("COLLECTIONS PUBLIQUES ET PRIVÉES")
                         .font(VelvetTypography.caption(size: 9, weight: .semibold))
                         .tracking(1.5)
                         .foregroundStyle(VelvetColor.champagneGold)
@@ -262,16 +330,20 @@ struct PremiumOwnProfileView: View {
                         .foregroundStyle(VelvetColor.ivory)
                 }
                 Spacer()
-                Text("\(albums.count)")
-                    .font(VelvetTypography.title(size: 26))
-                    .foregroundStyle(VelvetColor.textSecondary)
+                if isRefreshing {
+                    ProgressView().tint(VelvetColor.champagneGold)
+                } else {
+                    Text("\(albums.count)")
+                        .font(VelvetTypography.title(size: 26))
+                        .foregroundStyle(VelvetColor.textSecondary)
+                }
             }
 
             if albums.isEmpty {
                 VelvetCompactEmptyState(
                     symbol: "photo.on.rectangle.angled",
                     title: "Aucun album publié",
-                    message: "Les photos de profil restent dans le carrousel principal et ne sont plus dupliquées comme album."
+                    message: "Les photos publiques restent dans le carrousel principal. Tes albums privés apparaissent ici après leur création."
                 )
             } else {
                 ForEach(albums) { album in
@@ -323,5 +395,22 @@ struct PremiumOwnProfileView: View {
         store.directory?.profiles.first(where: {
             $0.id == recommendation.authorProfileId
         })?.displayName ?? "Membre Velvet"
+    }
+
+    @MainActor
+    private func reloadProfile() async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
+        do {
+            if let updated = try await store.service.profile().profile {
+                liveProfile = updated
+                if selectedSection == "albums", albums.isEmpty {
+                    selectedSection = "overview"
+                }
+            }
+        } catch {
+            store.errorMessage = ErrorMessage.text(for: error)
+        }
     }
 }

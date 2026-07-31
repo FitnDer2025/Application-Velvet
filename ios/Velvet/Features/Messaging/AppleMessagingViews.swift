@@ -1,4 +1,6 @@
+import PhotosUI
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct AppleConversationsView: View {
     @EnvironmentObject private var store: VelvetStore
@@ -18,7 +20,7 @@ struct AppleConversationsView: View {
                     VelvetPageHeader(
                         "Conversations et salons",
                         title: "Messages",
-                        subtitle: "Retrouve immédiatement la personne qui t’écrit et le dernier message reçu."
+                        subtitle: "Retrouve immédiatement la personne qui t’écrit, le dernier message et vos flammes."
                     )
 
                     if store.directory?.locked == true {
@@ -46,11 +48,15 @@ struct AppleConversationsView: View {
                 .padding(.top, 18)
                 .padding(.bottom, 28)
             }
-            .refreshable { await store.refreshMessaging() }
+            .refreshable {
+                await store.refreshMessaging()
+                await store.refreshSocialState()
+            }
         }
         .toolbar(.hidden, for: .navigationBar)
         .task {
             await store.refreshMessaging()
+            await store.refreshSocialState()
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(15))
                 guard !Task.isCancelled else { return }
@@ -61,9 +67,11 @@ struct AppleConversationsView: View {
 }
 
 private struct AppleConversationTile: View {
+    @EnvironmentObject private var store: VelvetStore
     let conversation: Conversation
 
     private var unread: Int { conversation.unreadCount ?? 0 }
+    private var streak: ConversationStreak? { store.conversationStreaks[conversation.id] }
 
     var body: some View {
         HStack(spacing: 13) {
@@ -80,6 +88,11 @@ private struct AppleConversationTile: View {
                         .font(.system(size: 16, weight: unread > 0 ? .bold : .semibold))
                         .foregroundStyle(VelvetColor.ivory)
                         .lineLimit(1)
+                    if let streak, streak.currentStreak > 0 {
+                        Label("\(streak.currentStreak)", systemImage: "flame.fill")
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .foregroundStyle(VelvetColor.champagneGold)
+                    }
                     Spacer(minLength: 8)
                     Text(AppleMessageDate.short(conversation.lastMessageAt ?? conversation.updatedAt))
                         .font(.system(size: 10, weight: .medium))
@@ -143,6 +156,12 @@ struct AppleConversationView: View {
 
     @State private var draft = ""
     @State private var isSending = false
+    @State private var isLoadingAttachments = false
+    @State private var showsAttachmentMenu = false
+    @State private var showsPhotoPicker = false
+    @State private var showsDocumentPicker = false
+    @State private var selectedPhotoItems: [PhotosPickerItem] = []
+    @State private var outgoingAttachments: [OutgoingMessageAttachment] = []
     @FocusState private var composerFocused: Bool
 
     private var messages: [DirectoryMessage] {
@@ -154,9 +173,18 @@ struct AppleConversationView: View {
         return store.directory?.profiles.first(where: { $0.id == id })
     }
 
+    private var streak: ConversationStreak? {
+        store.conversationStreaks[conversation.id]
+    }
+
     private var composerHeight: CGFloat {
         let lines = max(1, draft.components(separatedBy: .newlines).count)
         return min(112, max(40, CGFloat(lines) * 21 + 18))
+    }
+
+    private var canSend: Bool {
+        !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || !outgoingAttachments.isEmpty
     }
 
     var body: some View {
@@ -172,7 +200,7 @@ struct AppleConversationView: View {
                                 VelvetCompactEmptyState(
                                     symbol: "bubble.left.and.bubble.right",
                                     title: "Commencez l’échange",
-                                    message: "Les messages restent privés entre les membres de cette conversation."
+                                    message: "Les messages et pièces jointes restent privés entre les membres de cette conversation."
                                 )
                                 .padding(.top, 30)
                             } else {
@@ -191,9 +219,7 @@ struct AppleConversationView: View {
                         .frame(maxWidth: .infinity, minHeight: 1, alignment: .bottom)
                     }
                     .scrollDismissesKeyboard(.interactively)
-                    .onChange(of: messages.count) { _, _ in
-                        scrollToLatest(proxy)
-                    }
+                    .onChange(of: messages.count) { _, _ in scrollToLatest(proxy) }
                     .onChange(of: composerFocused) { _, focused in
                         if focused { scrollToLatest(proxy) }
                     }
@@ -201,9 +227,7 @@ struct AppleConversationView: View {
                 }
             }
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            composer
-        }
+        .safeAreaInset(edge: .bottom, spacing: 0) { composer }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear { chrome.isImmersive = true }
         .onDisappear { chrome.isImmersive = false }
@@ -214,6 +238,35 @@ struct AppleConversationView: View {
                 guard !Task.isCancelled else { return }
                 await store.refreshMessages(conversationID: conversation.id)
             }
+        }
+        .confirmationDialog(
+            "Ajouter une pièce jointe",
+            isPresented: $showsAttachmentMenu,
+            titleVisibility: .visible
+        ) {
+            Button("Photo ou vidéo", systemImage: "photo.on.rectangle") {
+                showsPhotoPicker = true
+            }
+            Button("Document PDF", systemImage: "doc.fill") {
+                showsDocumentPicker = true
+            }
+            Button("Annuler", role: .cancel) {}
+        }
+        .photosPicker(
+            isPresented: $showsPhotoPicker,
+            selection: $selectedPhotoItems,
+            maxSelectionCount: max(1, 4 - outgoingAttachments.count),
+            matching: .any(of: [.images, .videos])
+        )
+        .fileImporter(
+            isPresented: $showsDocumentPicker,
+            allowedContentTypes: [.pdf],
+            allowsMultipleSelection: true
+        ) { result in
+            Task { await importDocuments(result) }
+        }
+        .onChange(of: selectedPhotoItems) { _, items in
+            Task { await importPhotos(items) }
         }
     }
 
@@ -235,8 +288,23 @@ struct AppleConversationView: View {
             .accessibilityLabel("Retour")
 
             headerIdentity
-
             Spacer()
+
+            if let streak, streak.currentStreak > 0 {
+                VStack(spacing: 1) {
+                    Label("\(streak.currentStreak)", systemImage: "flame.fill")
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundStyle(VelvetColor.champagneGold)
+                    Text("FLAMMES")
+                        .font(VelvetTypography.caption(size: 6, weight: .bold))
+                        .tracking(0.8)
+                        .foregroundStyle(VelvetColor.textSecondary)
+                }
+                .padding(.horizontal, 9)
+                .frame(height: 38)
+                .background(VelvetColor.champagneGold.opacity(0.07))
+                .clipShape(Capsule())
+            }
 
             Menu {
                 if participantProfile != nil {
@@ -299,70 +367,79 @@ struct AppleConversationView: View {
     }
 
     private var composer: some View {
-        HStack(alignment: .bottom, spacing: 8) {
-            Button {
-                store.errorMessage = "L’ajout de médias dans la messagerie sera activé dès que l’API de pièces jointes native sera raccordée."
-            } label: {
-                Image(systemName: "plus")
-                    .font(.system(size: 18, weight: .medium))
+        VStack(spacing: 7) {
+            if !outgoingAttachments.isEmpty || isLoadingAttachments {
+                attachmentDrafts
+            }
+
+            HStack(alignment: .bottom, spacing: 8) {
+                Button {
+                    showsAttachmentMenu = true
+                } label: {
+                    Group {
+                        if isLoadingAttachments {
+                            ProgressView().tint(VelvetColor.champagneGold)
+                        } else {
+                            Image(systemName: "plus")
+                                .font(.system(size: 18, weight: .medium))
+                        }
+                    }
                     .foregroundStyle(VelvetColor.champagneGold)
                     .frame(width: 38, height: 38)
                     .background(VelvetColor.ivory.opacity(0.04))
                     .clipShape(Circle())
-            }
-            .buttonStyle(.plain)
-
-            ZStack(alignment: .topLeading) {
-                if draft.isEmpty {
-                    Text("iMessage Velvet")
-                        .font(.system(size: 15))
-                        .foregroundStyle(VelvetColor.textSecondary.opacity(0.72))
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .allowsHitTesting(false)
                 }
+                .buttonStyle(.plain)
+                .disabled(isLoadingAttachments || outgoingAttachments.count >= 4)
 
-                TextEditor(text: $draft)
-                    .focused($composerFocused)
-                    .font(.system(size: 16))
-                    .foregroundStyle(VelvetColor.ivory)
-                    .scrollContentBackground(.hidden)
-                    .padding(.horizontal, 9)
-                    .padding(.vertical, 3)
-                    .frame(height: composerHeight)
-                    .background(Color.clear)
-                    .accessibilityLabel("Message")
-                    .accessibilityHint("Retour crée une nouvelle ligne. Le bouton flèche envoie le message.")
-            }
-            .background(VelvetColor.ivory.opacity(0.055))
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(VelvetColor.borderSubtle, lineWidth: 0.8)
-            }
-
-            Button {
-                Task { await send() }
-            } label: {
-                Group {
-                    if isSending {
-                        ProgressView().tint(.white)
-                    } else {
-                        Image(systemName: "arrow.up")
-                            .font(.system(size: 17, weight: .bold))
+                ZStack(alignment: .topLeading) {
+                    if draft.isEmpty {
+                        Text(outgoingAttachments.isEmpty ? "iMessage Velvet" : "Ajouter un message…")
+                            .font(.system(size: 15))
+                            .foregroundStyle(VelvetColor.textSecondary.opacity(0.72))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .allowsHitTesting(false)
                     }
+
+                    TextEditor(text: $draft)
+                        .focused($composerFocused)
+                        .font(.system(size: 16))
+                        .foregroundStyle(VelvetColor.ivory)
+                        .scrollContentBackground(.hidden)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 3)
+                        .frame(height: composerHeight)
+                        .background(Color.clear)
+                        .accessibilityLabel("Message")
+                        .accessibilityHint("Retour crée une nouvelle ligne. Le bouton flèche envoie le message.")
                 }
-                .foregroundStyle(.white)
-                .frame(width: 40, height: 40)
-                .background(
-                    draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                        ? VelvetColor.textSecondary.opacity(0.28)
-                        : VelvetColor.burgundyLight
-                )
-                .clipShape(Circle())
+                .background(VelvetColor.ivory.opacity(0.055))
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(VelvetColor.borderSubtle, lineWidth: 0.8)
+                }
+
+                Button {
+                    Task { await send() }
+                } label: {
+                    Group {
+                        if isSending {
+                            ProgressView().tint(.white)
+                        } else {
+                            Image(systemName: "arrow.up")
+                                .font(.system(size: 17, weight: .bold))
+                        }
+                    }
+                    .foregroundStyle(.white)
+                    .frame(width: 40, height: 40)
+                    .background(canSend ? VelvetColor.burgundyLight : VelvetColor.textSecondary.opacity(0.28))
+                    .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .disabled(!canSend || isSending || isLoadingAttachments)
             }
-            .buttonStyle(.plain)
-            .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending)
         }
         .padding(.horizontal, 10)
         .padding(.top, 8)
@@ -371,6 +448,31 @@ struct AppleConversationView: View {
         .background(VelvetColor.velvetBlack.opacity(0.84))
         .overlay(alignment: .top) {
             Rectangle().fill(VelvetColor.borderSubtle).frame(height: 0.5)
+        }
+    }
+
+    private var attachmentDrafts: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(outgoingAttachments) { attachment in
+                    AttachmentDraftChip(attachment: attachment) {
+                        outgoingAttachments.removeAll { $0.id == attachment.id }
+                    }
+                }
+                if isLoadingAttachments {
+                    HStack(spacing: 7) {
+                        ProgressView().tint(VelvetColor.champagneGold)
+                        Text("Préparation…")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(VelvetColor.textSecondary)
+                    }
+                    .padding(.horizontal, 12)
+                    .frame(height: 42)
+                    .background(VelvetColor.ivory.opacity(0.04))
+                    .clipShape(Capsule())
+                }
+            }
+            .padding(.horizontal, 2)
         }
     }
 
@@ -390,13 +492,132 @@ struct AppleConversationView: View {
     @MainActor
     private func send() async {
         let value = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !value.isEmpty else { return }
+        guard !value.isEmpty || !outgoingAttachments.isEmpty else { return }
         isSending = true
-        if await store.send(value, conversationID: conversation.id) {
+        let sent = await store.send(
+            value,
+            conversationID: conversation.id,
+            attachments: outgoingAttachments
+        )
+        if sent {
             draft = ""
+            outgoingAttachments = []
             composerFocused = true
         }
         isSending = false
+    }
+
+    @MainActor
+    private func importPhotos(_ items: [PhotosPickerItem]) async {
+        guard !items.isEmpty else { return }
+        isLoadingAttachments = true
+        defer {
+            selectedPhotoItems = []
+            isLoadingAttachments = false
+        }
+
+        do {
+            for item in items.prefix(max(0, 4 - outgoingAttachments.count)) {
+                guard let data = try await item.loadTransferable(type: Data.self) else { continue }
+                let type = item.supportedContentTypes.first(where: {
+                    $0.conforms(to: .image) || $0.conforms(to: .movie)
+                })
+
+                if type?.conforms(to: .movie) == true {
+                    guard data.count <= 50 * 1024 * 1024 else {
+                        throw AttachmentImportError.tooLarge("La vidéo dépasse 50 Mo.")
+                    }
+                    let ext = type?.preferredFilenameExtension ?? "mov"
+                    outgoingAttachments.append(
+                        OutgoingMessageAttachment(
+                            data: data,
+                            fileName: "video-\(UUID().uuidString).\(ext)",
+                            mimeType: type?.preferredMIMEType ?? "video/quicktime",
+                            mediaType: "video"
+                        )
+                    )
+                } else {
+                    let compressed = try ImageCompressor.jpegData(from: data)
+                    guard compressed.count <= 10 * 1024 * 1024 else {
+                        throw AttachmentImportError.tooLarge("La photo dépasse 10 Mo après compression.")
+                    }
+                    outgoingAttachments.append(
+                        OutgoingMessageAttachment(
+                            data: compressed,
+                            fileName: "photo-\(UUID().uuidString).jpg",
+                            mimeType: "image/jpeg",
+                            mediaType: "image"
+                        )
+                    )
+                }
+            }
+        } catch {
+            store.errorMessage = error.localizedDescription
+        }
+    }
+
+    @MainActor
+    private func importDocuments(_ result: Result<[URL], Error>) async {
+        do {
+            let urls = try result.get()
+            isLoadingAttachments = true
+            defer { isLoadingAttachments = false }
+
+            for url in urls.prefix(max(0, 4 - outgoingAttachments.count)) {
+                let secured = url.startAccessingSecurityScopedResource()
+                defer { if secured { url.stopAccessingSecurityScopedResource() } }
+                let data = try Data(contentsOf: url)
+                guard data.count <= 10 * 1024 * 1024 else {
+                    throw AttachmentImportError.tooLarge("Le PDF dépasse 10 Mo.")
+                }
+                outgoingAttachments.append(
+                    OutgoingMessageAttachment(
+                        data: data,
+                        fileName: url.lastPathComponent.isEmpty ? "document.pdf" : url.lastPathComponent,
+                        mimeType: "application/pdf",
+                        mediaType: "document"
+                    )
+                )
+            }
+        } catch {
+            store.errorMessage = error.localizedDescription
+        }
+    }
+}
+
+private struct AttachmentDraftChip: View {
+    let attachment: OutgoingMessageAttachment
+    let remove: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(VelvetColor.champagneGold)
+            Text(attachment.fileName)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(VelvetColor.ivory)
+                .lineLimit(1)
+                .frame(maxWidth: 150)
+            Button(action: remove) {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundStyle(VelvetColor.textSecondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 11)
+        .frame(height: 42)
+        .background(VelvetColor.ivory.opacity(0.05))
+        .clipShape(Capsule())
+        .overlay(Capsule().stroke(VelvetColor.borderSubtle, lineWidth: 0.7))
+    }
+
+    private var icon: String {
+        switch attachment.mediaType {
+        case "image": "photo.fill"
+        case "video": "video.fill"
+        default: "doc.fill"
+        }
     }
 }
 
@@ -461,9 +682,13 @@ private struct AppleMessageAttachment: View {
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             } else if let url = attachment.previewUrl {
                 Link(destination: url) {
-                    Label(attachment.originalName ?? "Pièce jointe", systemImage: "doc.fill")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(VelvetColor.champagneGold)
+                    Label(
+                        attachment.originalName ?? "Pièce jointe",
+                        systemImage: attachment.mediaType == "video" ? "play.rectangle.fill" : "doc.fill"
+                    )
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(VelvetColor.champagneGold)
+                    .padding(.vertical, 4)
                 }
             }
         }
@@ -534,5 +759,15 @@ private enum AppleMessageDate {
         let date = date(value)
         guard date != .distantPast else { return "" }
         return date.formatted(date: .omitted, time: .shortened)
+    }
+}
+
+private enum AttachmentImportError: LocalizedError {
+    case tooLarge(String)
+
+    var errorDescription: String? {
+        switch self {
+        case let .tooLarge(message): message
+        }
     }
 }
