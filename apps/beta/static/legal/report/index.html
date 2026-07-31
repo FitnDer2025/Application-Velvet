@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>Velvet — Signaler un contenu illicite</title>
+  <style>
+    :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 5%,#4c1b31,#0d0d0d 48%);color:#f5f1eb;font:15px/1.6 Inter,Arial,sans-serif}main{max-width:850px;margin:auto;padding:42px 20px 80px}h1,h2{font-family:Georgia,serif;font-weight:500;color:#e1c184}h1{font-size:clamp(34px,7vw,58px);line-height:1.05}a{color:#e1c184}.card{margin:18px 0;padding:22px;border:1px solid #ffffff18;border-radius:22px;background:#171014e8}.notice{padding:15px;border-left:3px solid #a9325a;background:#a9325a16}form{display:grid;gap:15px}label{display:grid;gap:7px;color:#ddd0d4}input,select,textarea{width:100%;padding:13px 14px;border:1px solid #ffffff24;border-radius:14px;background:#0b090a;color:white;font:inherit}textarea{resize:vertical}button{padding:14px 20px;border:0;border-radius:999px;background:#9f2852;color:white;font-weight:800;cursor:pointer}button:disabled{opacity:.55}.check{display:flex;align-items:flex-start;gap:10px}.check input{width:auto;margin-top:5px}.status{min-height:24px;color:#f0bccd}.status[data-error=true]{color:#ff94b5}.turnstile{min-height:1px}
+  </style>
+</head>
+<body><main>
+  <p><a href="/">← Retour à Velvet</a></p>
+  <p style="color:#e1c184;letter-spacing:.16em;text-transform:uppercase;font-size:11px">Point de contact contenus illicites</p>
+  <h1>Signaler un contenu potentiellement illicite</h1>
+  <p class="notice">Ce formulaire est destiné aux notifications relatives à un contenu précis. Pour un danger immédiat ou une infraction en cours, contactez également les services d’urgence ou les autorités compétentes.</p>
+
+  <section class="card">
+    <h2>Notification électronique</h2>
+    <p>Indiquez précisément où se trouve le contenu, pourquoi vous le considérez comme illicite et, lorsque vous la connaissez, la règle juridique concernée. Une référence vous sera remise après l’enregistrement.</p>
+    <form id="illegalNoticeForm">
+      <label>Adresse e-mail de contact<input name="email" type="email" autocomplete="email" maxlength="320" required></label>
+      <label>Nom ou prénom, facultatif<input name="name" maxlength="160"></label>
+      <label>Organisation, facultatif<input name="organization" maxlength="200"></label>
+      <label>Adresse exacte du contenu<input name="subjectUrl" type="url" maxlength="2000" placeholder="https://…" required></label>
+      <label>Type de contenu<select name="subjectType"><option value="profile">Profil</option><option value="media">Photo ou vidéo</option><option value="message">Message</option><option value="event">Événement</option><option value="establishment">Établissement</option><option value="other">Autre</option></select></label>
+      <label>Explication détaillée<textarea name="explanation" rows="7" minlength="20" maxlength="10000" required placeholder="Décrivez les faits, le contenu concerné et les raisons du signalement."></textarea></label>
+      <label>Fondement juridique connu, facultatif<textarea name="legalBasis" rows="3" maxlength="4000" placeholder="Texte, décision ou qualification juridique si vous la connaissez."></textarea></label>
+      <label class="check"><input name="goodFaith" type="checkbox" required><span>Je déclare de bonne foi que les informations fournies sont exactes et complètes au regard de ce que je sais.</span></label>
+      <div class="turnstile" data-turnstile></div>
+      <button type="submit">Transmettre le signalement</button>
+      <p class="status" role="status"></p>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Contact opérationnel</h2>
+    <p><strong>Point de contact DSA Velvet :</strong> identité et adresse électronique à renseigner avant l’ouverture publique.</p>
+    <p><strong>Langues acceptées :</strong> français. Les demandes en anglais pourront être traitées lors de l’ouverture européenne.</p>
+  </section>
+</main>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+<script>
+(() => {
+  const form = document.querySelector('#illegalNoticeForm');
+  const status = form.querySelector('.status');
+  let turnstileWidget = null;
+  let siteKey = null;
+
+  function show(text, error = false) {
+    status.textContent = text;
+    status.dataset.error = error ? 'true' : 'false';
+  }
+
+  async function configureTurnstile() {
+    const config = await fetch('/api/auth/config').then((response) => response.json()).catch(() => ({}));
+    siteKey = config.turnstileSiteKey || null;
+    if (!siteKey) return;
+    const wait = () => new Promise((resolve) => {
+      if (window.turnstile) return resolve();
+      window.setTimeout(() => resolve(wait()), 100);
+    });
+    await wait();
+    turnstileWidget = window.turnstile.render(form.querySelector('[data-turnstile]'), {
+      sitekey: siteKey,
+      action: 'illegal_content_notice',
+      theme: 'dark'
+    });
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const button = form.querySelector('button');
+    const values = Object.fromEntries(new FormData(form));
+    button.disabled = true;
+    show('Enregistrement sécurisé du signalement…');
+    try {
+      const response = await fetch('/api/legal/illegal-content', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          ...values,
+          goodFaith: Boolean(values.goodFaith),
+          turnstileToken: siteKey && turnstileWidget !== null
+            ? window.turnstile.getResponse(turnstileWidget)
+            : null
+        })
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || 'signalement_non_enregistre');
+      form.reset();
+      show(`Signalement enregistré. Référence : ${payload.referenceCode}. Conservez-la pour vos échanges avec Velvet.`);
+      if (siteKey && turnstileWidget !== null) window.turnstile.reset(turnstileWidget);
+    } catch (error) {
+      button.disabled = false;
+      show(`Le signalement n’a pas été enregistré : ${error.message}.`, true);
+    }
+  });
+
+  configureTurnstile();
+})();
+</script>
+</body>
+</html>
