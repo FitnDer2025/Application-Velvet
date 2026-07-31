@@ -25,6 +25,8 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
+	<key>VelvetWatchAppGroup</key>
+	<string>$(VELVET_WATCH_APP_GROUP)</string>
 	<key>WKAppBundleIdentifier</key>
 	<string>com.velvetapplication.app.watchkitapp</string>
 </dict>
