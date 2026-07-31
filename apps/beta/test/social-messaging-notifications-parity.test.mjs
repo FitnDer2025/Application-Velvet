@@ -12,6 +12,8 @@ test('la migration sociale suit livraison lecture réactions saisie et archives'
   assert.match(migration, /create table if not exists public\.message_reactions/);
   assert.match(migration, /create table if not exists public\.conversation_typing/);
   assert.match(migration, /unique \(message_id, user_id\)/);
+  assert.match(migration, /conversation_members_self_receipts/);
+  assert.match(migration, /grant select, insert, update, delete/);
   assert.match(migration, /enable row level security/);
 });
 
@@ -51,15 +53,17 @@ test('le centre d’activité enrichit les photos et archive les éléments cons
 });
 
 test('le Web et la PWA affichent accusés réactions saisie historique et push hors page', async () => {
-  const [html, realtime, reconcile, styles, worker] = await Promise.all([
+  const [html, realtime, reconcile, deepLink, styles, worker] = await Promise.all([
     read('apps/web/velvet-members-beta-live.html'),
     read('apps/beta/static/assets/velvet-social-realtime.js'),
     read('apps/beta/static/assets/velvet-realtime-reconcile.js'),
+    read('apps/beta/static/assets/velvet-push-deeplink.js'),
     read('apps/beta/static/assets/velvet-social-realtime.css'),
     read('apps/beta/static/sw.js')
   ]);
   assert.match(html, /velvet-social-realtime\.js/);
   assert.match(html, /velvet-realtime-reconcile\.js/);
+  assert.match(html, /velvet-push-deeplink\.js/);
   assert.match(realtime, /Lu par/);
   assert.match(realtime, /Distribué à/);
   assert.match(realtime, /velvet-message-reaction-picker/);
@@ -70,23 +74,28 @@ test('le Web et la PWA affichent accusés réactions saisie historique et push h
   assert.match(realtime, /Profils consultés/);
   assert.match(reconcile, /reconcileConversation/);
   assert.match(reconcile, /reconcileNotifications/);
+  assert.match(deepLink, /URLSearchParams/);
+  assert.match(deepLink, /data-open-conversation/);
+  assert.match(deepLink, /data-open-profile/);
   assert.match(styles, /\.velvet-notification-entity-preview/);
   assert.match(styles, /\.velvet-view-history-v2/);
   assert.match(worker, /velvet-beta-shell-v16/);
+  assert.match(worker, /velvet-push-deeplink\.js/);
   assert.match(worker, /self\.addEventListener\('push'/);
   assert.match(worker, /notificationclick/);
   assert.match(worker, /conversationId/);
 });
 
 test('iOS utilise le même état temps réel et archive les notifications', async () => {
-  const [models, service, store, messaging, shell, notifications, memberDetail] = await Promise.all([
+  const [models, service, store, messaging, shell, notifications, memberDetail, discovery] = await Promise.all([
     read('ios/Velvet/Core/Models/DirectoryModels.swift'),
     read('ios/Velvet/Core/Session/SessionService+IOSSocial.swift'),
     read('ios/Velvet/Core/Session/VelvetStore.swift'),
     read('ios/Velvet/Features/Messaging/RealtimeAppleMessagingViews.swift'),
     read('ios/Velvet/Features/Home/MainShellView.swift'),
     read('ios/Velvet/Features/Home/NotificationsView.swift'),
-    read('ios/Velvet/Features/Discovery/MemberDetailView.swift')
+    read('ios/Velvet/Features/Discovery/MemberDetailView.swift'),
+    read('ios/Velvet/Features/Discovery/PremiumDiscoveryGridView.swift')
   ]);
   assert.match(models, /struct MessageReceipt/);
   assert.match(models, /struct MessageReaction/);
@@ -110,4 +119,7 @@ test('iOS utilise le même état temps réel et archive les notifications', asyn
   assert.match(notifications, /entityPreviewUrl/);
   assert.match(notifications, /Profils consultés/);
   assert.match(memberDetail, /Déjà consulté/);
+  assert.match(discovery, /store\.viewHistory/);
+  assert.match(discovery, /Vu \\(history\.viewCount/);
+  assert.match(discovery, /eye\.fill/);
 });
