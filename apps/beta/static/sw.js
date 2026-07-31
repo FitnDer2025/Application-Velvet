@@ -20,6 +20,7 @@ const APP_SHELL = [
   '/assets/velvet-social-interactions-hotfix.js?v=20260731-1',
   '/assets/velvet-social-realtime.css?v=20260731-1',
   '/assets/velvet-social-realtime.js?v=20260731-1',
+  '/assets/velvet-realtime-reconcile.js?v=20260731-1',
   '/assets/pwa-ios.js',
   '/assets/photo-protection.js?v=20260731-5',
   '/assets/location-verification.js',
