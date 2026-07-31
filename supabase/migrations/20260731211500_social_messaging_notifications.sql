@@ -38,8 +38,19 @@ create index if not exists member_notifications_active_idx
 create index if not exists member_notifications_entity_idx
   on public.member_notifications (user_id, entity_type, entity_id, archived_at);
 
+grant select, insert, update, delete on public.message_reactions to authenticated;
+grant select, insert, update, delete on public.conversation_typing to authenticated;
+grant update (last_delivered_at, last_read_at) on public.conversation_members to authenticated;
+
 alter table public.message_reactions enable row level security;
 alter table public.conversation_typing enable row level security;
+
+drop policy if exists conversation_members_self_receipts on public.conversation_members;
+create policy conversation_members_self_receipts
+  on public.conversation_members
+  for update
+  using (user_id = auth.uid() and left_at is null)
+  with check (user_id = auth.uid() and left_at is null);
 
 drop policy if exists message_reactions_member_select on public.message_reactions;
 create policy message_reactions_member_select
