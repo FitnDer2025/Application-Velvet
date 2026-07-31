@@ -118,7 +118,10 @@
     if (!conversationId || state.opening) return;
     state.opening = true;
     const content = document.querySelector('#content');
-    if (!content) return;
+    if (!content) {
+      state.opening = false;
+      return;
+    }
     content.innerHTML = '<div class="page"><section class="loading-state"><span class="loader"></span><p>Chargement de la conversation…</p></section></div>';
     setMessagesActive();
 
@@ -146,7 +149,7 @@
           </form>
         </section>
       </div>`;
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      window.scrollTo({ top: 0, behavior: 'auto' });
 
       content.querySelector('[data-direct-conversation-back]')?.addEventListener('click', () => {
         document.querySelector('.sidebar [data-route="conversations"]')?.click();
@@ -170,6 +173,7 @@
         try {
           await api('/api/members/messages', { method: 'POST', body: data });
           state.directory = null;
+          state.opening = false;
           await openConversationDirect(conversationId);
         } catch (error) {
           toast(error.message, true);
