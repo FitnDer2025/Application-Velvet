@@ -1,0 +1,3 @@
+VELVET_API_BASE_URL = https:/$()/velvet-beta.sh96hv64dj.workers.dev
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG
+APS_ENVIRONMENT = development

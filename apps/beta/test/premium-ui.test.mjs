@@ -29,6 +29,8 @@ test('la navigation mobile Membres conserve cinq destinations prioritaires', asy
   assert.match(html, /velvet-premium-ui\.css/);
   assert.match(html, /velvet-editorial-ui\.css/);
   assert.match(html, /velvet-premium-ui\.js/);
+  assert.match(html, /velvet-messaging-upgrade\.css/);
+  assert.match(html, /velvet-messaging-upgrade\.js/);
 });
 
 test('PRO et Contrôle chargent le même langage visuel et mobile', async () => {
@@ -70,8 +72,30 @@ test('la direction artistique éditoriale traite les profils et toutes les surfa
   }
   assert.match(ui, /dataset\.velvetView/);
   assert.match(auth, /velvet-editorial-ui\.css/);
-  assert.match(sw, /velvet-beta-shell-v8/);
+  assert.match(sw, /velvet-beta-shell-v9/);
   assert.match(sw, /velvet-editorial-ui\.css/);
+  assert.match(sw, /velvet-messaging-upgrade\.css/);
+  assert.match(sw, /velvet-messaging-upgrade\.js/);
+});
+
+test('la messagerie enrichie reste chargée et exploitable sur mobile', async () => {
+  const [script, css, directory, messages] = await Promise.all([
+    read('apps/beta/static/assets/velvet-messaging-upgrade.js'),
+    read('apps/beta/static/assets/velvet-messaging-upgrade.css'),
+    read('functions/api/members/directory.js'),
+    read('functions/api/members/messages.js')
+  ]);
+
+  assert.match(script, /messageUnreadCount/);
+  assert.match(script, /participant_display_name/);
+  assert.match(script, /velvet-mobile-menu-open/);
+  assert.match(script, /document\.createElement\('textarea'\)/);
+  assert.match(css, /\.messages \.message\.mine/);
+  assert.match(css, /\.velvet-message-badge/);
+  assert.match(directory, /unread_count/);
+  assert.match(directory, /participant_photo_url/);
+  assert.match(messages, /markConversationRead/);
+  assert.match(messages, /deliverMessageNotifications/);
 });
 
 test('les icônes PWA sont servies comme actifs statiques', async () => {
