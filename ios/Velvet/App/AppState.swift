@@ -93,8 +93,11 @@ final class AppState: ObservableObject {
     }
 
     func handle(url: URL) {
-        guard let tokens = RecoveryTokens(url: url) else { return }
-        phase = .passwordReset(tokens)
+        if let tokens = RecoveryTokens(url: url) {
+            phase = .passwordReset(tokens)
+            return
+        }
+        _ = NotificationService.handleDeepLink(url)
     }
 
     func updatePassword(_ password: String, tokens: RecoveryTokens) async {
@@ -109,6 +112,7 @@ final class AppState: ObservableObject {
         await perform(showErrors: false) {
             await NotificationService.detachCurrentDevice()
             await session.logout()
+            VelvetNotificationSnapshotStore.clear()
             phase = .signedOut
         }
     }
