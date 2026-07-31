@@ -98,17 +98,22 @@ security definer
 set search_path = public
 as $$
 begin
-  perform public.sync_profile_photo_ready(coalesce(new.profile_id, old.profile_id));
+  if tg_op = 'DELETE' then
+    perform public.sync_profile_photo_ready(old.profile_id);
+    return old;
+  end if;
+
+  perform public.sync_profile_photo_ready(new.profile_id);
   if tg_op = 'UPDATE' and old.profile_id is distinct from new.profile_id then
     perform public.sync_profile_photo_ready(old.profile_id);
   end if;
-  return coalesce(new, old);
+  return new;
 end;
 $$;
 
 drop trigger if exists media_assets_sync_profile_photo_ready on public.media_assets;
 create trigger media_assets_sync_profile_photo_ready
-  after insert or update of profile_id, album_id, media_role, media_type, moderation_status or delete
+  after insert or update or delete
   on public.media_assets
   for each row execute function public.sync_profile_photo_ready_from_media();
 
