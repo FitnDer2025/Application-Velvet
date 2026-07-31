@@ -175,7 +175,7 @@ final class SessionService: Sendable {
             "quiet_hours_start": request.quietHoursStart.map(JSONValue.string) ?? .null,
             "quiet_hours_end": request.quietHoursEnd.map(JSONValue.string) ?? .null
         ]
-        try await api.post(
+        return try await api.post(
             "/api/members/settings",
             body: body,
             as: MemberSettingsResponse.self
