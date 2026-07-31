@@ -59,18 +59,30 @@ iframe {
     height: 100% !important;
     min-height: 0 !important;
     overflow: hidden !important;
+    overscroll-behavior: none;
   }
 
+  /*
+   * members-live.css impose min-height:100vh à .app-shell. Sur Safari iOS,
+   * cette valeur empêchait la conversation de rétrécir avec le clavier et
+   * repoussait le compositeur sous la zone visible. La hauteur ci-dessous
+   * doit rester stricte, sans min-height hérité.
+   */
   body.velvet-whatsapp-chat .app-shell {
-    position: fixed;
+    position: fixed !important;
     z-index: 1;
-    top: 0;
-    left: 0;
-    width: var(--velvet-chat-width, 100vw);
-    height: var(--velvet-chat-height, 100dvh);
-    min-width: 0;
-    max-width: 100vw;
-    overflow: hidden;
+    top: 0 !important;
+    left: 0 !important;
+    width: var(--velvet-chat-width, 100vw) !important;
+    height: var(--velvet-chat-height, 100dvh) !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100vw !important;
+    max-height: var(--velvet-chat-height, 100dvh) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box;
     transform: translate3d(
       var(--velvet-chat-offset-left, 0px),
       var(--velvet-chat-offset-top, 0px),
@@ -82,27 +94,58 @@ iframe {
   body.velvet-whatsapp-chat .velvet-whatsapp-layout {
     width: 100% !important;
     height: 100% !important;
+    min-height: 0 !important;
     max-width: 100% !important;
+    max-height: 100% !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body.velvet-whatsapp-chat .velvet-whatsapp-layout {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
   }
 
   body.velvet-whatsapp-chat .velvet-chat-panel {
-    min-width: 0;
-    min-height: 0;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    display: grid !important;
+    grid-template-rows: minmax(0, 1fr) max-content !important;
+    overflow: hidden !important;
   }
 
   body.velvet-whatsapp-chat .velvet-chat-panel .messages {
+    width: 100%;
+    height: auto !important;
     min-width: 0;
     min-height: 0;
+    max-height: none !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
   }
 
   body.velvet-whatsapp-chat .composer.composer-v2 {
+    position: relative !important;
+    z-index: 20;
+    inset: auto !important;
+    align-self: end;
     width: 100%;
     min-width: 0;
+    min-height: 56px;
     max-width: 100%;
+    margin: 0 !important;
     box-sizing: border-box;
+    flex: 0 0 auto;
+    transform: none !important;
+    visibility: visible !important;
+  }
+
+  body.velvet-keyboard-open .composer.composer-v2 {
+    padding-bottom: 7px !important;
   }
 
   body.velvet-whatsapp-chat .composer.composer-v2 textarea[name="body"] {
