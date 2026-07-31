@@ -17,19 +17,26 @@ test('le clavier iOS conserve la conversation et la saisie dans le viewport visi
   assert.match(script, /--velvet-chat-offset-top/);
   assert.match(script, /--velvet-chat-offset-left/);
   assert.match(script, /scrollLatestMessage/);
+  assert.match(script, /keepInputVisible/);
+  assert.match(script, /ResizeObserver/);
   assert.match(script, /velvet-keyboard-open/);
 
   assert.match(css, /body\.velvet-whatsapp-chat \.app-shell/);
+  assert.match(css, /min-height:\s*0\s*!important/);
+  assert.match(css, /grid-template-rows:\s*minmax\(0, 1fr\) max-content/);
   assert.match(css, /position:\s*fixed/);
   assert.match(css, /translate3d/);
   assert.match(css, /overflow-x:\s*clip/);
   assert.match(css, /font-size:\s*16px/);
+  assert.match(css, /body\.velvet-keyboard-open \.composer/);
 
   assert.match(html, /maximum-scale=1/);
   assert.match(html, /user-scalable=no/);
-  assert.match(html, /velvet-mobile-viewport-guard\.css\?v=20260731-1/);
-  assert.match(html, /velvet-mobile-viewport-guard\.js\?v=20260731-1/);
-  assert.match(worker, /velvet-beta-shell-v13/);
+  assert.match(html, /velvet-mobile-viewport-guard\.css\?v=20260731-2/);
+  assert.match(html, /velvet-mobile-viewport-guard\.js\?v=20260731-2/);
+  assert.match(worker, /velvet-beta-shell-v14/);
+  assert.match(worker, /velvet-mobile-viewport-guard\.css\?v=20260731-2/);
+  assert.match(worker, /velvet-mobile-viewport-guard\.js\?v=20260731-2/);
 });
 
 test('les pages mobiles restent bornées à la largeur de l’écran', async () => {
