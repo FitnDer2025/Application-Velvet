@@ -33,10 +33,11 @@ async function emit(path, content) {
 }
 
 function legalBar() {
-  return `<nav aria-label="Informations légales" style="position:fixed;z-index:9998;right:12px;bottom:12px;display:flex;gap:8px;padding:8px 10px;border:1px solid #ffffff22;border-radius:999px;background:#0d0d0de8;backdrop-filter:blur(12px);font:11px Arial;color:#ddd">
+  return `<nav aria-label="Informations légales" style="position:fixed;z-index:9998;right:12px;bottom:12px;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;padding:8px 10px;border:1px solid #ffffff22;border-radius:20px;background:#0d0d0de8;backdrop-filter:blur(12px);font:11px Arial;color:#ddd">
     <a href="/legal/privacy/" style="color:#ddd">Confidentialité</a>
     <a href="/legal/terms/" style="color:#ddd">Conditions BETA</a>
     <a href="/legal/safety/" style="color:#ddd">Sécurité</a>
+    <a href="/legal/report/" style="color:#f0bfd0">Signaler un contenu</a>
   </nav>`;
 }
 
@@ -54,7 +55,9 @@ auth = auth
   .replace('</body>', '<script src="/assets/real-auth-gate.js"></script></body>');
 await emit(resolve(output, 'index.html'), addLegalBar(auth));
 
-await emit(resolve(output, 'membres/index.html'), addLegalBar(await required(sources.members)));
+let members = await required(sources.members);
+members = members.replace('</body>', '<script src="/assets/privacy-center.js"></script></body>');
+await emit(resolve(output, 'membres/index.html'), addLegalBar(members));
 
 let pro = await required(sources.pro);
 pro = pro
@@ -70,8 +73,9 @@ pro = pro
   .replace('<body>', '<body class="pro-live-pending"><style>.pro-live-pending .shell,.pro-live-pending .mobile-nav{visibility:hidden}.pro-live-pending:after{content:"VELVET PRO · Connexion au CRM…";position:fixed;inset:0;display:grid;place-items:center;background:#09090b;color:#d5b477;font:500 16px Georgia;letter-spacing:.14em}</style>')
   .replace('</body>', '<script src="/assets/pro-live.js"></script></body>');
 await emit(resolve(output, 'pro/index.html'), addLegalBar(pro));
+
 let control = await required(sources.control);
-control = control.replace('</body>', '<script src="/assets/control-live.js"></script></body>');
+control = control.replace('</body>', '<script src="/assets/control-mfa.js"></script></body>');
 await emit(resolve(output, 'control/index.html'), addLegalBar(control));
 await cp(sources.controlD, resolve(output, 'control/velvet-control-intelligence-d-beta.html'));
 await cp(sources.controlC, resolve(output, 'control/velvet-control-intelligence-c-beta.html'));
