@@ -9,20 +9,21 @@ struct IntelligentHomeView: View {
     @State private var query = ""
     @State private var audience = "all"
     @State private var affinity = "all"
-    @State private var minimumAge = 18
-    @State private var maximumAge = 99
+    @State private var ageRange = "18-99"
     @State private var localSort = "distance"
     @State private var showsExperienceSettings = false
 
-    private var allProfiles: [IntelligentProfile] {
-        let source = intelligence?.allProfiles ?? []
-        let filtered = source.filter { candidate in
+    private var filteredProfiles: [IntelligentProfile] {
+        let ages = ageRange.split(separator: "-").compactMap { Int($0) }
+        let minimumAge = ages.first ?? 18
+        let maximumAge = ages.last ?? 99
+        let rows = (intelligence?.allProfiles ?? []).filter { candidate in
             let matchesQuery = query.isEmpty
                 || candidate.displayName.localizedCaseInsensitiveContains(query)
                 || (candidate.locationZone ?? "").localizedCaseInsensitiveContains(query)
             let matchesAudience = audience == "all" || candidate.audience == audience
-            let age = firstAge(candidate.ageLabel)
-            let matchesAge = age.map { $0 >= minimumAge && $0 <= maximumAge } ?? true
+            let candidateAge = firstAge(candidate.ageLabel)
+            let matchesAge = candidateAge.map { $0 >= minimumAge && $0 <= maximumAge } ?? true
             let matchesAffinity: Bool
             switch affinity {
             case "ice": matchesAffinity = candidate.reaction < 0
@@ -32,17 +33,7 @@ struct IntelligentHomeView: View {
             }
             return matchesQuery && matchesAudience && matchesAge && matchesAffinity
         }
-        return filtered.sorted { left, right in
-            switch localSort {
-            case "compatibility": left.compatibilityScore > right.compatibilityScore
-            case "recent": RealtimeMessageDate.date(left.createdAt) > RealtimeMessageDate.date(right.createdAt)
-            case "affinity": left.reaction > right.reaction || (
-                left.reaction == right.reaction && left.compatibilityScore > right.compatibilityScore
-            )
-            default:
-                (left.distanceKm ?? .greatestFiniteMagnitude) < (right.distanceKm ?? .greatestFiniteMagnitude)
-            }
-        }
+        return rows.sorted(by: profileOrder)
     }
 
     var body: some View {
@@ -52,7 +43,7 @@ struct IntelligentHomeView: View {
                 VStack(alignment: .leading, spacing: 28) {
                     header
                     if let intelligence {
-                        intelligentSelection(intelligence)
+                        curatedSection(intelligence)
                         nearbySection(intelligence)
                         followedSection(intelligence)
                         allProfilesSection
@@ -88,7 +79,7 @@ struct IntelligentHomeView: View {
                 VelvetPageHeader(
                     "Votre sélection intelligente",
                     title: "Bonjour \(profile.displayName)",
-                    subtitle: "Proximité, compatibilité, profils suivis et lieux que vous fréquentez — sans exposer votre position exacte."
+                    subtitle: "Proximité, compatibilité, profils suivis et lieux fréquentés, sans exposer votre position exacte."
                 )
                 Spacer(minLength: 8)
                 Button { showsExperienceSettings = true } label: {
@@ -115,27 +106,23 @@ struct IntelligentHomeView: View {
         }
     }
 
-    private func intelligentSelection(_ data: HomeIntelligenceResponse) -> some View {
+    private func curatedSection(_ data: HomeIntelligenceResponse) -> some View {
         VStack(alignment: .leading, spacing: 14) {
             sectionHeader("Pour toi", detail: "Velvet Intelligence")
             if data.curatedProfiles.isEmpty && data.nearbyClubs.isEmpty {
                 VelvetCompactEmptyState(
                     symbol: "wand.and.stars",
                     title: "La sélection s’affine",
-                    message: "Les profils compatibles, recommandations et clubs proches apparaîtront ici."
+                    message: "Les nouveaux profils compatibles, recommandations et clubs proches apparaîtront ici."
                 )
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(data.curatedProfiles.prefix(8)) { candidate in
-                            profileDestination(candidate) {
-                                IntelligentProfileCard(profile: candidate, compact: false)
-                            }
+                            profileLink(candidate, compact: false)
                         }
                         ForEach(data.nearbyClubs.prefix(5)) { club in
-                            clubDestination(club) {
-                                IntelligentClubCard(club: club)
-                            }
+                            clubLink(club)
                         }
                     }
                     .padding(.vertical, 2)
@@ -196,9 +183,7 @@ struct IntelligentHomeView: View {
             VStack(alignment: .leading, spacing: 14) {
                 sectionHeader("Profils suivis", detail: "Nouveautés")
                 ForEach(data.followedActivities.prefix(8)) { activity in
-                    FollowedActivityRow(activity: activity) {
-                        openFollowedActivity(activity)
-                    }
+                    followedActivityLink(activity, data: data)
                 }
             }
         }
@@ -219,45 +204,33 @@ struct IntelligentHomeView: View {
                 }
             }
 
-            HStack(spacing: 10) {
-                Menu {
-                    Button("Tous les ressentis") { affinity = "all" }
-                    Button("❄️ Pas pour moi") { affinity = "ice" }
-                    Button("🔥 Profils aimés") { affinity = "liked" }
-                    Button("Sans avis") { affinity = "new" }
-                } label: {
-                    filterMenuLabel("Ressenti")
-                }
-                Menu {
-                    Button("Proximité") { localSort = "distance" }
-                    Button("Compatibilité") { localSort = "compatibility" }
-                    Button("Plus récents") { localSort = "recent" }
-                    Button("Glaçon & flammes") { localSort = "affinity" }
-                } label: {
-                    filterMenuLabel("Classer")
-                }
+            HStack(spacing: 9) {
+                filterMenu("Âge", selection: $ageRange, choices: [
+                    ("18-99", "Tous"), ("18-29", "18–29"), ("30-39", "30–39"),
+                    ("40-49", "40–49"), ("50-59", "50–59"), ("60-99", "60+")
+                ])
+                filterMenu("Ressenti", selection: $affinity, choices: [
+                    ("all", "Tous"), ("ice", "❄️"), ("liked", "🔥"), ("new", "Sans avis")
+                ])
+                filterMenu("Classer", selection: $localSort, choices: [
+                    ("distance", "Proximité"), ("compatibility", "Compatibilité"),
+                    ("recent", "Récents"), ("affinity", "Glaçon & flammes")
+                ])
             }
 
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Âge : \(minimumAge) à \(maximumAge) ans")
-                        .font(VelvetTypography.caption(size: 10, weight: .semibold))
-                        .foregroundStyle(VelvetColor.textSecondary)
-                    Spacer()
-                    NavigationLink("Filtres avancés") {
-                        PremiumDiscoveryGridView(currentProfile: profile)
-                    }
+            HStack {
+                Text("\(filteredProfiles.count) profil\(filteredProfiles.count > 1 ? "s" : "")")
                     .font(VelvetTypography.caption(size: 10, weight: .semibold))
-                    .foregroundStyle(VelvetColor.champagneGold)
+                    .foregroundStyle(VelvetColor.textSecondary)
+                Spacer()
+                NavigationLink("Filtres avancés") {
+                    PremiumDiscoveryGridView(currentProfile: profile)
                 }
-                HStack {
-                    Stepper("Min", value: $minimumAge, in: 18...maximumAge)
-                    Stepper("Max", value: $maximumAge, in: minimumAge...99)
-                }
-                .labelsHidden()
+                .font(VelvetTypography.caption(size: 10, weight: .semibold))
+                .foregroundStyle(VelvetColor.champagneGold)
             }
 
-            if allProfiles.isEmpty {
+            if filteredProfiles.isEmpty {
                 VelvetCompactEmptyState(
                     symbol: "person.2.slash",
                     title: "Aucun profil pour ces critères",
@@ -268,10 +241,8 @@ struct IntelligentHomeView: View {
                     columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)],
                     spacing: 12
                 ) {
-                    ForEach(allProfiles) { candidate in
-                        profileDestination(candidate) {
-                            IntelligentProfileCard(profile: candidate, compact: true)
-                        }
+                    ForEach(filteredProfiles) { candidate in
+                        profileLink(candidate, compact: true)
                     }
                 }
             }
@@ -292,28 +263,54 @@ struct IntelligentHomeView: View {
     }
 
     @ViewBuilder
-    private func profileDestination<Content: View>(
-        _ candidate: IntelligentProfile,
-        @ViewBuilder label: () -> Content
-    ) -> some View {
+    private func profileLink(_ candidate: IntelligentProfile, compact: Bool) -> some View {
         if let member = store.directory?.profiles.first(where: { $0.id == candidate.id }) {
-            NavigationLink { MemberDetailView(profile: member) } label: { label() }
-                .buttonStyle(.plain)
+            NavigationLink {
+                MemberDetailView(profile: member)
+            } label: {
+                IntelligentProfileCard(profile: candidate, compact: compact)
+            }
+            .buttonStyle(.plain)
         } else {
-            label().opacity(0.72)
+            IntelligentProfileCard(profile: candidate, compact: compact)
+                .opacity(0.72)
         }
     }
 
     @ViewBuilder
-    private func clubDestination<Content: View>(
-        _ club: IntelligentClub,
-        @ViewBuilder label: () -> Content
-    ) -> some View {
+    private func clubLink(_ club: IntelligentClub) -> some View {
         if let venue = store.directory?.venueDirectory.first(where: { $0.id == club.id }) {
-            NavigationLink { VenueDetailView(venue: venue) } label: { label() }
-                .buttonStyle(.plain)
+            NavigationLink {
+                VenueDetailView(venue: venue)
+            } label: {
+                IntelligentClubCard(club: club)
+            }
+            .buttonStyle(.plain)
         } else {
-            label()
+            IntelligentClubCard(club: club)
+        }
+    }
+
+    @ViewBuilder
+    private func followedActivityLink(_ activity: FollowedActivity, data: HomeIntelligenceResponse) -> some View {
+        if let eventID = activity.eventId,
+           let event = data.nearbyEvents.first(where: { $0.id == eventID }) {
+            NavigationLink {
+                IntelligentEventDetailView(event: event)
+            } label: {
+                FollowedActivityRow(activity: activity)
+            }
+            .buttonStyle(.plain)
+        } else if let profileID = activity.profileId,
+                  let member = store.directory?.profiles.first(where: { $0.id == profileID }) {
+            NavigationLink {
+                MemberDetailView(profile: member)
+            } label: {
+                FollowedActivityRow(activity: activity)
+            }
+            .buttonStyle(.plain)
+        } else {
+            FollowedActivityRow(activity: activity).opacity(0.72)
         }
     }
 
@@ -323,24 +320,51 @@ struct IntelligentHomeView: View {
         }
     }
 
-    private func filterMenuLabel(_ title: String) -> some View {
-        Label(title, systemImage: "chevron.down")
-            .font(VelvetTypography.body(size: 11, weight: .semibold))
-            .foregroundStyle(VelvetColor.ivory)
-            .padding(.horizontal, 12)
-            .frame(height: 40)
-            .background(VelvetColor.ivory.opacity(0.045))
-            .clipShape(Capsule())
-            .overlay(Capsule().stroke(VelvetColor.borderSubtle, lineWidth: 0.8))
+    private func filterMenu(
+        _ title: String,
+        selection: Binding<String>,
+        choices: [(String, String)]
+    ) -> some View {
+        Menu {
+            ForEach(choices, id: \.0) { value, label in
+                Button(label) { selection.wrappedValue = value }
+            }
+        } label: {
+            Label(title, systemImage: "chevron.down")
+                .font(VelvetTypography.body(size: 10, weight: .semibold))
+                .foregroundStyle(VelvetColor.ivory)
+                .padding(.horizontal, 10)
+                .frame(height: 38)
+                .background(VelvetColor.ivory.opacity(0.045))
+                .clipShape(Capsule())
+                .overlay(Capsule().stroke(VelvetColor.borderSubtle, lineWidth: 0.8))
+        }
     }
 
     private func firstAge(_ label: String?) -> Int? {
-        guard let label else { return nil }
-        return label.split(whereSeparator: { !$0.isNumber }).compactMap { Int($0) }.first
+        label?.split(whereSeparator: { !$0.isNumber }).compactMap { Int($0) }.first
     }
 
-    private func openFollowedActivity(_ activity: FollowedActivity) {
-        // Les lignes utilisent les mêmes routes que les cartes profil et événement.
+    private func profileOrder(_ left: IntelligentProfile, _ right: IntelligentProfile) -> Bool {
+        switch localSort {
+        case "compatibility": return left.compatibilityScore > right.compatibilityScore
+        case "recent": return experienceDate(left.createdAt) > experienceDate(right.createdAt)
+        case "affinity":
+            return left.reaction > right.reaction
+                || (left.reaction == right.reaction && left.compatibilityScore > right.compatibilityScore)
+        default:
+            return (left.distanceKm ?? .greatestFiniteMagnitude)
+                < (right.distanceKm ?? .greatestFiniteMagnitude)
+        }
+    }
+
+    private func experienceDate(_ value: String?) -> Date {
+        guard let value else { return .distantPast }
+        if let date = ISO8601DateFormatter().date(from: value) { return date }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
+        return formatter.date(from: value) ?? .distantPast
     }
 
     @MainActor
@@ -365,13 +389,11 @@ private struct IntelligentProfileCard: View {
         VStack(alignment: .leading, spacing: 8) {
             ZStack(alignment: .topTrailing) {
                 VelvetRemoteImage(url: profile.photoUrl, symbol: "person.crop.rectangle")
-                    .frame(width: compact ? nil : 190, height: compact ? 205 : 250)
                     .frame(maxWidth: compact ? .infinity : 190)
+                    .frame(height: compact ? 205 : 250)
                     .clipped()
                 HStack(spacing: 5) {
-                    if let affinity = profile.affinitySymbol {
-                        Text(affinity)
-                    }
+                    if let affinity = profile.affinitySymbol { Text(affinity) }
                     Text("\(profile.compatibilityScore)%")
                         .foregroundStyle(VelvetColor.champagneGold)
                 }
@@ -399,7 +421,7 @@ private struct IntelligentProfileCard: View {
                 .foregroundStyle(VelvetColor.textSecondary)
                 .lineLimit(1)
         }
-        .frame(width: compact ? nil : 190, alignment: .leading)
+        .frame(maxWidth: compact ? .infinity : 190, alignment: .leading)
     }
 
     private var distanceLabel: String {
@@ -512,33 +534,35 @@ private struct IntelligentShortcutRow: View {
 
 private struct FollowedActivityRow: View {
     let activity: FollowedActivity
-    let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 13) {
-                VelvetRemoteImage(url: activity.previewUrl, symbol: activity.type == "event" ? "calendar" : "person.fill")
-                    .frame(width: 52, height: 52)
-                    .clipped()
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(activity.title)
-                        .font(VelvetTypography.body(size: 13, weight: .semibold))
-                        .foregroundStyle(VelvetColor.ivory)
-                        .multilineTextAlignment(.leading)
-                    if let detail = activity.detail, !detail.isEmpty {
-                        Text(detail)
-                            .font(VelvetTypography.caption(size: 10))
-                            .foregroundStyle(VelvetColor.textSecondary)
-                            .lineLimit(2)
-                    }
+        HStack(spacing: 13) {
+            VelvetRemoteImage(
+                url: activity.previewUrl,
+                symbol: activity.type == "event" ? "calendar" : "person.fill"
+            )
+            .frame(width: 52, height: 52)
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            VStack(alignment: .leading, spacing: 4) {
+                Text(activity.title)
+                    .font(VelvetTypography.body(size: 13, weight: .semibold))
+                    .foregroundStyle(VelvetColor.ivory)
+                    .multilineTextAlignment(.leading)
+                if let detail = activity.detail, !detail.isEmpty {
+                    Text(detail)
+                        .font(VelvetTypography.caption(size: 10))
+                        .foregroundStyle(VelvetColor.textSecondary)
+                        .lineLimit(2)
                 }
-                Spacer()
             }
-            .padding(12)
-            .background(VelvetColor.ivory.opacity(0.03))
-            .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundStyle(VelvetColor.champagneGold)
         }
-        .buttonStyle(.plain)
+        .padding(12)
+        .background(VelvetColor.ivory.opacity(0.03))
+        .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
     }
 }
