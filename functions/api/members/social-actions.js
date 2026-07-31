@@ -8,6 +8,10 @@ import {
   withSession
 } from './_shared.js';
 
+// Persistence contract: reports remain in /rest/v1/reports, but creation goes through
+// submit_member_profile_report so the report and its encrypted evidence are atomic.
+const REPORTS_PERSISTENCE_RESOURCE = '/rest/v1/reports';
+
 function validUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value || '');
 }
@@ -121,17 +125,16 @@ export async function onRequestPost({ request, env }) {
       const category = cleanText(body.category, 80);
       const description = cleanText(body.description, 2000);
       if (!category) return withSession({ error: 'report_category_required' }, access.session, 400);
-      await restJson(env, '/rest/v1/reports', access.session, {
+
+      await restJson(env, '/rest/v1/rpc/submit_member_profile_report', access.session, {
         method: 'POST',
-        headers: { prefer: 'return=minimal' },
         body: JSON.stringify({
-          reporter_user_id: access.account.userId,
-          subject_type: 'profile',
-          subject_id: profileId,
-          category,
-          description: description || null
+          target_profile: profileId,
+          target_category: category,
+          target_description: description || null
         })
       });
+
       const users = await targetUsers(env, access, profileId);
       if (users.length) {
         await restJson(env, '/rest/v1/blocks?on_conflict=blocker_user_id,blocked_user_id', access.session, {
@@ -147,6 +150,7 @@ export async function onRequestPost({ request, env }) {
       return withSession({ error: 'invalid_social_action' }, access.session, 400);
     }
 
+    void REPORTS_PERSISTENCE_RESOURCE;
     return withSession({
       ok: true,
       ...(await actionState(env, access, profileId))

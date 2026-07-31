@@ -6,7 +6,10 @@ const [members, pro, control, worker] = await Promise.all([
   readFile('apps/beta/dist/control/index.html', 'utf8'),
   readFile('apps/beta/worker/index.js', 'utf8')
 ]);
-const controlLive = await readFile('apps/beta/static/assets/control-live.js', 'utf8');
+const [controlLive, controlMfa] = await Promise.all([
+  readFile('apps/beta/static/assets/control-live.js', 'utf8'),
+  readFile('apps/beta/static/assets/control-mfa.js', 'utf8')
+]);
 
 const checks = [
   [members.includes('/assets/members-onboarding-v2.js'), 'Velvet Membres doit charger son parcours Supabase'],
@@ -18,7 +21,9 @@ const checks = [
   [pro.includes('const THREADS=[];'), 'Les conversations fictives doivent être retirées du livrable Pro'],
   [!pro.includes('@demo-velvet.fr'), 'Aucune identité de démonstration ne doit rester dans le livrable Pro'],
   [pro.includes('if(!document.body.classList.contains("pro-live-pending"))render();'), 'Le prototype Pro ne doit pas s’afficher avant le chargement serveur'],
-  [control.includes('/assets/control-live.js'), 'Velvet Control doit charger ses opérations réelles'],
+  [control.includes('/assets/control-mfa.js'), 'Velvet Control doit charger son verrou MFA'],
+  [!control.includes('<script src="/assets/control-live.js"></script>'), 'Velvet Control ne doit pas charger ses opérations avant la vérification MFA'],
+  [controlMfa.includes("result.aal !== 'aal2'") && controlMfa.includes("script.src = '/assets/control-live.js'"), 'Le verrou MFA doit exiger AAL2 avant de charger les opérations réelles'],
   [controlLive.includes('originalShowView') && controlLive.includes("document.querySelectorAll('.page')"), 'La navigation Control doit permettre le retour depuis Invitations'],
   [controlLive.includes('controlClaimVenueForm') && controlLive.includes('data-subscription-status'), 'Control doit attribuer les fiches recensées et piloter les droits Pro'],
   [worker.includes("'GET /api/members/profile'"), 'Les API Membres doivent être routées'],
