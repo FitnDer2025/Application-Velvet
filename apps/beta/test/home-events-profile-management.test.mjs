@@ -84,7 +84,7 @@ test('le Web et la PWA exposent le même accueil et les mêmes outils', async ()
   assert.match(script, /Cap d’Agde/);
   assert.match(styles, /\.velvet-profile-grid/);
   assert.match(styles, /\.velvet-media-manager-grid/);
-  assert.match(worker, /velvet-beta-shell-v17/);
+  assert.match(worker, /velvet-beta-shell-v18/);
   assert.match(worker, /velvet-experience-management\.js/);
 });
 
