@@ -31,6 +31,7 @@
   <link rel="stylesheet" href="/assets/velvet-social-realtime.css?v=20260731-1">
   <link rel="stylesheet" href="/assets/velvet-experience-management.css?v=20260731-1">
   <link rel="stylesheet" href="/assets/velvet-interaction-recovery.css?v=20260801-1">
+  <link rel="stylesheet" href="/assets/velvet-community-parity.css?v=20260801-1">
 </head>
 <body>
   <div class="app-shell">
@@ -39,17 +40,16 @@
         <span class="brand-mark">V</span>
         <span><strong>Velvet</strong><small>BETA privée</small></span>
       </a>
-      <nav id="mainNav">
+      <nav id="mainNav" aria-label="Espaces principaux">
         <button data-route="home"><span>⌂</span>Accueil</button>
-        <button data-route="discover"><span>◇</span>Recherche</button>
-        <button data-route="maps"><span>⌖</span>Maps</button>
-        <button data-route="conversations"><span>◌</span>Conversations</button>
-        <button data-route="events"><span>✦</span>Sorties</button>
-        <button data-route="venues"><span>⌑</span>Établissements</button>
-        <button data-route="notifications"><span>○</span>Notifications</button>
-        <button data-route="me"><span>♡</span>Mon profil</button>
-        <button data-route="settings"><span>⚙</span>Paramètres</button>
+        <button data-unified-route="navigation"><span>◇</span>Navigation</button>
+        <button data-route="conversations"><span>◌</span>Messages</button>
+        <button data-route="me"><span>♡</span>Profil</button>
       </nav>
+      <div class="sidebar-tools" aria-label="Outils">
+        <button data-route="notifications"><span>○</span>Notifications</button>
+        <button data-route="settings"><span>⚙</span>Paramètres</button>
+      </div>
       <div class="sidebar-foot">
         <p><span class="live-dot"></span>Données réelles Supabase</p>
         <button id="logoutButton">Se déconnecter</button>
@@ -58,7 +58,10 @@
 
     <header class="mobile-head">
       <a class="brand compact" href="/membres/"><span class="brand-mark">V</span><strong>Velvet</strong></a>
-      <button id="mobileMenuButton" aria-expanded="false" aria-controls="mainNav">Menu</button>
+      <div class="mobile-head-actions">
+        <button data-route="notifications" aria-label="Notifications">○</button>
+        <button id="mobileMenuButton" aria-expanded="false" aria-controls="mainNav">Menu</button>
+      </div>
     </header>
 
     <main id="content" tabindex="-1">
@@ -70,8 +73,7 @@
 
     <nav class="bottom-nav" aria-label="Navigation mobile">
       <button data-route="home"><span>⌂</span><small>Accueil</small></button>
-      <button data-route="discover"><span>◇</span><small>Recherche</small></button>
-      <button data-route="maps"><span>⌖</span><small>Maps</small></button>
+      <button data-unified-route="navigation"><span>◇</span><small>Navigation</small></button>
       <button data-route="conversations"><span>◌</span><small>Messages</small></button>
       <button data-route="me"><span>♡</span><small>Profil</small></button>
     </nav>
@@ -92,5 +94,6 @@
   <script src="/assets/velvet-push-deeplink.js?v=20260731-1" defer></script>
   <script src="/assets/velvet-experience-management.js?v=20260731-1" defer></script>
   <script src="/assets/velvet-interaction-recovery.js?v=20260801-1" defer></script>
+  <script src="/assets/velvet-community-parity.js?v=20260801-1" defer></script>
 </body>
 </html>
