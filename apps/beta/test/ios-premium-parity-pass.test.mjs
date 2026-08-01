@@ -46,7 +46,7 @@ test('iOS discovery displays age, compact 3-column cards and nine-item paginatio
   assert.match(value, /visibleCount = 9/);
   assert.match(value, /Afficher 9 profils de plus/);
   assert.match(value, /PremiumDiscoveryMemberCard/);
-  assert.match(value, /profile\.velvetDemographicLabel/);
+  assert.match(value, /profile\.premiumDiscoveryCategory/);
   assert.match(value, /profile\.velvetAgeLabel/);
   assert.match(value, /PremiumDiscoveryFiltersView/);
 });
