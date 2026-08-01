@@ -14,6 +14,7 @@ const files = {
   iosShell: 'ios/Velvet/Features/Home/MainShellView.swift',
   iosHome: 'ios/Velvet/Features/Home/IntelligentHomeActivityView.swift',
   iosNavigation: 'ios/Velvet/Features/Home/VelvetNavigationHubView.swift',
+  iosOutings: 'ios/Velvet/Features/Places/ProfileOutingsView.swift',
   plansApi: 'functions/api/members/plans.js'
 };
 
@@ -54,12 +55,12 @@ test('Web home is a community feed aligned with iOS and not a fixed outings bloc
 });
 
 test('Navigation centralizes profile discovery, clubs, outings and attendance on all interfaces', async () => {
-  const [web, iosNavigation] = await Promise.all([read(files.web), read(files.iosNavigation)]);
+  const [web, iosNavigation, iosOutings] = await Promise.all([
+    read(files.web), read(files.iosNavigation), read(files.iosOutings)
+  ]);
   for (const contract of [
     'Recherche avancée',
     'Clubs autour de moi',
-    'J’y serai',
-    'Nous y serons',
     'Qui sera présent',
     'Carte Velvet',
     'Cap d’Agde',
@@ -68,6 +69,10 @@ test('Navigation centralizes profile discovery, clubs, outings and attendance on
     assert.match(web, new RegExp(contract));
     assert.match(iosNavigation, new RegExp(contract));
   }
+  assert.match(web, /J’y serai/);
+  assert.match(web, /Nous y serons/);
+  assert.match(iosNavigation, /profile\.attendanceFirstPersonLabel/);
+  assert.match(iosOutings, /profileType == \.couple \? "Nous y serons" : "J’y serai"/);
   assert.match(web, /Trouver un profil/);
   assert.match(iosNavigation, /Trouver les bons profils/);
   assert.match(web, /venueDirectory/);
