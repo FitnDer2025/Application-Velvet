@@ -79,7 +79,7 @@ test('le Web et la PWA affichent accusés réactions saisie historique et push h
   assert.match(deepLink, /data-open-profile/);
   assert.match(styles, /\.velvet-notification-entity-preview/);
   assert.match(styles, /\.velvet-view-history-v2/);
-  assert.match(worker, /velvet-beta-shell-v17/);
+  assert.match(worker, /velvet-beta-shell-v18/);
   assert.match(worker, /velvet-push-deeplink\.js/);
   assert.match(worker, /self\.addEventListener\('push'/);
   assert.match(worker, /notificationclick/);

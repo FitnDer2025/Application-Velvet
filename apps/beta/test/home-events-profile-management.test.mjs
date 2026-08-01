@@ -29,8 +29,10 @@ test('les médias et conversations peuvent être retirés sans supprimer les don
   assert.match(conversations, /onRequestDelete/);
   assert.match(conversations, /hidden_at/);
   assert.doesNotMatch(conversations, /\/rest\/v1\/messages\?.*DELETE/);
-  assert.match(directory, /profile_photo_ready === true/);
-  assert.match(directory, /ownMembership\.hidden_at/);
+  assert.match(directory, /hasRequiredApprovedPhotos/);
+  assert.match(directory, /approvedProfilePhotos\.length >= 3/);
+  assert.match(directory, /hiddenConversationIds/);
+  assert.match(directory, /hidden_at=not\.is\.null/);
 });
 
 test('Velvet Intelligence partage proximité compatibilité suivi et mémoire glaçon flammes', async () => {
@@ -82,7 +84,7 @@ test('le Web et la PWA exposent le même accueil et les mêmes outils', async ()
   assert.match(script, /Cap d’Agde/);
   assert.match(styles, /\.velvet-profile-grid/);
   assert.match(styles, /\.velvet-media-manager-grid/);
-  assert.match(worker, /velvet-beta-shell-v17/);
+  assert.match(worker, /velvet-beta-shell-v18/);
   assert.match(worker, /velvet-experience-management\.js/);
 });
 
