@@ -237,10 +237,6 @@ async function cleanupAgents(env) {
         env,
         `/rest/v1/media_assets?select=storage_path&profile_id=eq.${encodeURIComponent(agent.profile_id)}`
       );
-      const userId = await serviceJson(env, '/rest/v1/rpc/internal_purge_test_agent', {
-        method: 'POST',
-        body: JSON.stringify({ target_agent_id: agent.id })
-      });
       for (const item of media || []) {
         if (!item.storage_path) continue;
         const storageResponse = await serviceResponse(
@@ -252,6 +248,10 @@ async function cleanupAgents(env) {
           throw new Error('test_agent_storage_delete_failed');
         }
       }
+      const userId = await serviceJson(env, '/rest/v1/rpc/internal_purge_test_agent', {
+        method: 'POST',
+        body: JSON.stringify({ target_agent_id: agent.id })
+      });
       if (UUID.test(userId || agent.user_id || '')) {
         const response = await serviceResponse(
           env,
