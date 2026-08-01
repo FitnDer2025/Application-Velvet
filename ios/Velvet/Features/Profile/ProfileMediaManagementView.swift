@@ -10,33 +10,69 @@ struct ProfileMediaManagementView: View {
     @State private var isLoading = true
     @State private var isDeleting = false
     @State private var warning: String?
+    @State private var loadIssue: String?
 
     private var albumMedia: [ManagedMediaItem] {
-        (profile?.albums ?? []).flatMap { album in
-            (album.mediaAssets ?? []).map { media in
-                ManagedMediaItem(
-                    id: media.id,
-                    title: album.name,
-                    subtitle: album.confidentiality == "public" ? "Album public" : "Album privé",
-                    previewUrl: media.previewUrl,
-                    scope: "album",
-                    isProfileRequirement: false
-                )
+        (profile?.albums ?? [])
+            .flatMap { album in
+                (album.mediaAssets ?? []).map { media in
+                    ManagedMediaItem(
+                        id: media.id,
+                        title: album.name,
+                        subtitle: album.confidentiality == "public" ? "Album public" : "Album privé",
+                        previewUrl: media.previewUrl,
+                        mediaRole: "album",
+                        moderationStatus: media.moderationStatus ?? "pending",
+                        isProfileRequirement: false
+                    )
+                }
             }
-        }
+            .sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
     }
 
     private var publicProfileMedia: [ManagedMediaItem] {
-        profilePhotos.map { photo in
-            ManagedMediaItem(
+        var merged: [UUID: ManagedMediaItem] = [:]
+
+        // Première source : le profil complet. Elle permet de conserver l’affichage
+        // même lorsque l’endpoint spécialisé Photos répond partiellement.
+        for media in profile?.profileGalleryPhotos ?? [] {
+            let role = media.mediaRole ?? "profile"
+            merged[media.id] = ManagedMediaItem(
+                id: media.id,
+                title: role == "individual_portrait" ? "Portrait individuel" : "Photo du profil",
+                subtitle: moderationLabel(media.moderationStatus ?? "pending"),
+                previewUrl: media.previewUrl,
+                mediaRole: role,
+                moderationStatus: media.moderationStatus ?? "pending",
+                isProfileRequirement: role == "couple_gallery" || role == "individual_gallery"
+            )
+        }
+
+        // Deuxième source : la photothèque de gestion, plus précise sur la modération.
+        for photo in profilePhotos {
+            merged[photo.id] = ManagedMediaItem(
                 id: photo.id,
                 title: photo.mediaRole == "individual_portrait" ? "Portrait individuel" : "Photo du profil",
-                subtitle: photo.moderationStatus == "approved" ? "Visible après admission" : "Validation : \(photo.moderationStatus)",
+                subtitle: moderationLabel(photo.moderationStatus),
                 previewUrl: photo.previewUrl,
-                scope: "profile",
+                mediaRole: photo.mediaRole,
+                moderationStatus: photo.moderationStatus,
                 isProfileRequirement: photo.mediaRole == "couple_gallery" || photo.mediaRole == "individual_gallery"
             )
         }
+
+        return merged.values.sorted { left, right in
+            if left.isProfileRequirement != right.isProfileRequirement {
+                return left.isProfileRequirement
+            }
+            return left.title.localizedCaseInsensitiveCompare(right.title) == .orderedAscending
+        }
+    }
+
+    private var approvedProfilePhotoCount: Int {
+        publicProfileMedia.filter {
+            $0.isProfileRequirement && $0.moderationStatus == "approved"
+        }.count
     }
 
     var body: some View {
@@ -48,25 +84,34 @@ struct ProfileMediaManagementView: View {
                         VelvetPageHeader(
                             "Gestion de vos médias",
                             title: "Photos & albums",
-                            subtitle: "Supprimez vos photos de profil, publiques ou privées. Trois photos de profil validées restent obligatoires pour être visible."
+                            subtitle: "Retrouvez ici toutes les photos de votre profil et de vos albums, avec une suppression directe et sécurisée."
                         )
 
                         readinessBanner
 
+                        if let loadIssue {
+                            inlineNotice(loadIssue)
+                        }
+
                         mediaSection(
                             title: "Photos du profil",
-                            detail: "\(publicProfileMedia.count) média\(publicProfileMedia.count > 1 ? "s" : "")",
-                            items: publicProfileMedia
+                            detail: mediaCountLabel(publicProfileMedia.count),
+                            items: publicProfileMedia,
+                            emptyTitle: "Aucune photo remontée",
+                            emptyMessage: "Actualisez la photothèque. Vos photos déjà publiées doivent apparaître ici avec leur corbeille."
                         )
 
                         mediaSection(
                             title: "Albums publics et privés",
-                            detail: "\(albumMedia.count) média\(albumMedia.count > 1 ? "s" : "")",
-                            items: albumMedia
+                            detail: mediaCountLabel(albumMedia.count),
+                            items: albumMedia,
+                            emptyTitle: "Aucun média d’album",
+                            emptyMessage: "Les albums existants apparaîtront ici, y compris les collections privées."
                         )
                     }
                     .padding(20)
                 }
+                .refreshable { await load() }
 
                 if isLoading || isDeleting {
                     ProgressView(isDeleting ? "Suppression…" : "Chargement…")
@@ -107,21 +152,16 @@ struct ProfileMediaManagementView: View {
         }
     }
 
-    @ViewBuilder
     private var readinessBanner: some View {
-        let approved = profilePhotos.filter {
-            ($0.mediaRole == "couple_gallery" || $0.mediaRole == "individual_gallery")
-                && $0.moderationStatus == "approved"
-        }.count
-        let ready = approved >= 3
-        VStack(alignment: .leading, spacing: 7) {
+        let ready = approvedProfilePhotoCount >= 3
+        return VStack(alignment: .leading, spacing: 7) {
             Label(
                 ready ? "Profil visible" : "Profil masqué",
                 systemImage: ready ? "eye.fill" : "eye.slash.fill"
             )
             .font(VelvetTypography.body(size: 14, weight: .semibold))
             .foregroundStyle(ready ? VelvetColor.success : VelvetColor.warning)
-            Text(warning ?? "\(approved) photo\(approved > 1 ? "s" : "") de profil validée\(approved > 1 ? "s" : "") sur 3 obligatoires.")
+            Text(warning ?? "\(approvedProfilePhotoCount) photo\(approvedProfilePhotoCount > 1 ? "s" : "") de profil validée\(approvedProfilePhotoCount > 1 ? "s" : "") sur 3 obligatoires.")
                 .font(VelvetTypography.body(size: 12))
                 .foregroundStyle(VelvetColor.textSecondary)
         }
@@ -135,14 +175,39 @@ struct ProfileMediaManagementView: View {
         }
     }
 
+    private func inlineNotice(_ message: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "arrow.clockwise.circle")
+                .foregroundStyle(VelvetColor.champagneGold)
+            VStack(alignment: .leading, spacing: 5) {
+                Text("Photothèque partiellement actualisée")
+                    .font(VelvetTypography.body(size: 13, weight: .semibold))
+                    .foregroundStyle(VelvetColor.ivory)
+                Text(message)
+                    .font(VelvetTypography.body(size: 11))
+                    .foregroundStyle(VelvetColor.textSecondary)
+                Button("Actualiser") { Task { await load() } }
+                    .font(VelvetTypography.body(size: 11, weight: .semibold))
+                    .foregroundStyle(VelvetColor.champagneGold)
+            }
+        }
+        .padding(15)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(VelvetColor.champagneGold.opacity(0.055))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18).stroke(VelvetColor.champagneGold.opacity(0.18)))
+    }
+
     @ViewBuilder
     private func mediaSection(
         title: String,
         detail: String,
-        items: [ManagedMediaItem]
+        items: [ManagedMediaItem],
+        emptyTitle: String,
+        emptyMessage: String
     ) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
+            HStack(alignment: .lastTextBaseline) {
                 Text(title)
                     .font(VelvetTypography.title(size: 25))
                     .foregroundStyle(VelvetColor.ivory)
@@ -153,15 +218,30 @@ struct ProfileMediaManagementView: View {
             }
 
             if items.isEmpty {
-                VelvetCompactEmptyState(
-                    symbol: "photo.on.rectangle.angled",
-                    title: "Aucun média",
-                    message: "Les médias ajoutés apparaîtront ici."
-                )
+                VStack(alignment: .leading, spacing: 12) {
+                    VelvetCompactEmptyState(
+                        symbol: "photo.on.rectangle.angled",
+                        title: emptyTitle,
+                        message: emptyMessage
+                    )
+                    Button {
+                        Task { await load() }
+                    } label: {
+                        Label("Actualiser les médias", systemImage: "arrow.clockwise")
+                            .font(VelvetTypography.body(size: 12, weight: .semibold))
+                            .foregroundStyle(VelvetColor.champagneGold)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                            .background(VelvetColor.champagneGold.opacity(0.07))
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(VelvetColor.champagneGold.opacity(0.20)))
+                    }
+                    .buttonStyle(.plain)
+                }
             } else {
                 LazyVGrid(
                     columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)],
-                    spacing: 10
+                    spacing: 14
                 ) {
                     ForEach(items) { item in
                         ManagedMediaCard(item: item) {
@@ -175,16 +255,31 @@ struct ProfileMediaManagementView: View {
 
     @MainActor
     private func load() async {
+        guard !isLoading else { return }
         isLoading = true
+        loadIssue = nil
         defer { isLoading = false }
-        do {
-            async let profileResponse = appState.session.profile()
-            async let photosResponse = appState.session.photos()
-            let (profileResult, photosResult) = try await (profileResponse, photosResponse)
-            profile = profileResult.profile
-            profilePhotos = photosResult.photos
-        } catch {
-            appState.alertMessage = ErrorMessage.text(for: error)
+
+        async let profileRequest = try? await appState.session.profile()
+        async let photosRequest = try? await appState.session.photos()
+        let (profileResponse, photosResponse) = await (profileRequest, photosRequest)
+
+        if let updatedProfile = profileResponse?.profile {
+            profile = updatedProfile
+        }
+        if let updatedPhotos = photosResponse?.photos {
+            profilePhotos = updatedPhotos
+        }
+
+        switch (profileResponse, photosResponse) {
+        case (nil, nil):
+            loadIssue = "Velvet n’a pas pu joindre la photothèque. Tirez l’écran vers le bas ou touchez Actualiser."
+        case (nil, _):
+            loadIssue = "Les photos sont disponibles, mais les albums n’ont pas encore été actualisés."
+        case (_, nil):
+            loadIssue = "Le profil et les albums sont disponibles. La liste détaillée des photos est en cours de resynchronisation."
+        default:
+            loadIssue = nil
         }
     }
 
@@ -199,10 +294,24 @@ struct ProfileMediaManagementView: View {
         do {
             let result = try await appState.session.deleteProfileMedia(id: media.id)
             warning = result.warning
+            profilePhotos.removeAll { $0.id == media.id }
             await load()
         } catch {
             appState.alertMessage = ErrorMessage.text(for: error)
         }
+    }
+
+    private func moderationLabel(_ status: String) -> String {
+        switch status {
+        case "approved": "Validée et visible"
+        case "rejected": "Refusée · à remplacer"
+        case "review": "Contrôle Velvet en cours"
+        default: "Validation en attente"
+        }
+    }
+
+    private func mediaCountLabel(_ count: Int) -> String {
+        "\(count) média\(count > 1 ? "s" : "")"
     }
 }
 
@@ -211,7 +320,8 @@ private struct ManagedMediaItem: Identifiable {
     let title: String
     let subtitle: String
     let previewUrl: URL?
-    let scope: String
+    let mediaRole: String
+    let moderationStatus: String
     let isProfileRequirement: Bool
 }
 
@@ -224,28 +334,40 @@ private struct ManagedMediaCard: View {
             ZStack(alignment: .topTrailing) {
                 VelvetRemoteImage(url: item.previewUrl)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 180)
+                    .frame(height: 205)
                     .clipped()
+
+                LinearGradient(
+                    colors: [.clear, .black.opacity(0.30)],
+                    startPoint: .center,
+                    endPoint: .topTrailing
+                )
+                .allowsHitTesting(false)
+
                 Button(role: .destructive, action: delete) {
                     Image(systemName: "trash.fill")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.white)
-                        .frame(width: 36, height: 36)
-                        .background(Color.red.opacity(0.84))
+                        .frame(width: 40, height: 40)
+                        .background(.ultraThinMaterial)
+                        .background(Color.red.opacity(0.72))
                         .clipShape(Circle())
+                        .overlay(Circle().stroke(.white.opacity(0.18), lineWidth: 0.8))
                 }
                 .buttonStyle(.plain)
-                .padding(8)
+                .padding(9)
+                .accessibilityLabel("Supprimer \(item.title)")
             }
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 18).stroke(VelvetColor.borderSubtle, lineWidth: 0.8))
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(VelvetColor.borderSubtle, lineWidth: 0.8))
+
             Text(item.title)
                 .font(VelvetTypography.body(size: 12, weight: .semibold))
                 .foregroundStyle(VelvetColor.ivory)
                 .lineLimit(1)
             Text(item.subtitle)
                 .font(VelvetTypography.caption(size: 9))
-                .foregroundStyle(VelvetColor.textSecondary)
+                .foregroundStyle(item.moderationStatus == "approved" ? VelvetColor.champagneGold : VelvetColor.textSecondary)
                 .lineLimit(2)
         }
     }
