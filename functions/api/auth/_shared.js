@@ -1,4 +1,5 @@
-const COOKIE_NAME = 'velvet_beta_refresh';
+const REFRESH_COOKIE_NAME = 'velvet_beta_refresh';
+const ACCESS_COOKIE_NAME = 'velvet_beta_access';
 
 export function json(payload, status = 200, headers = {}) {
   return new Response(JSON.stringify(payload), {
@@ -28,11 +29,19 @@ function parseCookies(request) {
 }
 
 export function refreshCookie(token, maxAge = 60 * 60 * 24 * 30) {
-  return `${COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Strict`;
+  return `${REFRESH_COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`;
+}
+
+export function accessCookie(token, maxAge = 60 * 50) {
+  return `${ACCESS_COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`;
 }
 
 export function clearRefreshCookie() {
-  return `${COOKIE_NAME}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict`;
+  return `${REFRESH_COOKIE_NAME}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`;
+}
+
+export function clearAccessCookie() {
+  return `${ACCESS_COOKIE_NAME}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`;
 }
 
 function configuration(env) {
@@ -94,8 +103,21 @@ export async function verifyTurnstile(request, env, token, expectedAction) {
   return { ok: true, configured: true };
 }
 
+async function sessionFromAccessCookie(request, env) {
+  const token = parseCookies(request)[ACCESS_COOKIE_NAME];
+  if (!token) return null;
+  const response = await supabase(env, '/auth/v1/user', {}, token);
+  if (!response.ok) return null;
+  const user = await response.json().catch(() => null);
+  if (!user?.id) return null;
+  return { access_token: token, refresh_token: null, user };
+}
+
 export async function refreshSession(request, env) {
-  const token = parseCookies(request)[COOKIE_NAME];
+  const accessSession = await sessionFromAccessCookie(request, env).catch(() => null);
+  if (accessSession) return accessSession;
+
+  const token = parseCookies(request)[REFRESH_COOKIE_NAME];
   if (!token) return null;
 
   const response = await supabase(env, '/auth/v1/token?grant_type=refresh_token', {
@@ -108,7 +130,13 @@ export async function refreshSession(request, env) {
 }
 
 export async function accountContext(env, session) {
-  const userId = session.user?.id;
+  let user = session.user;
+  if (!user?.id && session.access_token) {
+    const userResponse = await supabase(env, '/auth/v1/user', {}, session.access_token);
+    if (!userResponse.ok) return null;
+    user = await userResponse.json().catch(() => null);
+  }
+  const userId = user?.id;
   if (!userId) return null;
 
   await supabase(
@@ -139,14 +167,18 @@ export async function accountContext(env, session) {
   if (!accounts[0]) return null;
   return {
     userId,
-    email: session.user?.email || '',
+    email: user?.email || '',
     status: accounts[0].status,
     roles: roleRows.map((row) => row.role_code)
   };
 }
 
 export function sessionResponse(payload, session, status = 200) {
-  return json(payload, status, {
-    'set-cookie': refreshCookie(session.refresh_token)
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
   });
+  if (session.refresh_token) headers.append('set-cookie', refreshCookie(session.refresh_token));
+  if (session.access_token) headers.append('set-cookie', accessCookie(session.access_token));
+  return new Response(JSON.stringify(payload), { status, headers });
 }
