@@ -1,0 +1,38 @@
+/* Garde-fou d'interaction : aucune couche fermée ne doit intercepter les clics. */
+.velvet-member-ui:not(.nav-open) .nav-scrim,
+.velvet-member-ui:not(.velvet-mobile-menu-open) .nav-scrim,
+.velvet-photo-lightbox:not(.visible),
+#velvetPrivacyShield:not(.visible) {
+  pointer-events: none !important;
+}
+
+@media (min-width: 901px) {
+  .velvet-member-ui .sidebar {
+    display: flex !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  .velvet-member-ui .sidebar[aria-hidden="true"] {
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  .velvet-member-ui .nav-scrim {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .velvet-member-ui .sidebar:not(.open) {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  .velvet-member-ui .sidebar.open {
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+}

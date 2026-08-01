@@ -1,6 +1,5 @@
-const CACHE = 'velvet-beta-shell-v17';
+const CACHE = 'velvet-beta-shell-v18';
 const APP_SHELL = [
-  '/membres/',
   '/assets/members-live.css',
   '/assets/members-live.js',
   '/assets/members-onboarding-v2.css',
@@ -24,6 +23,8 @@ const APP_SHELL = [
   '/assets/velvet-push-deeplink.js?v=20260731-1',
   '/assets/velvet-experience-management.css?v=20260731-1',
   '/assets/velvet-experience-management.js?v=20260731-1',
+  '/assets/velvet-interaction-recovery.css?v=20260801-1',
+  '/assets/velvet-interaction-recovery.js?v=20260801-1',
   '/assets/pwa-ios.js',
   '/assets/photo-protection.js?v=20260731-5',
   '/assets/location-verification.js',
@@ -46,24 +47,53 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+function offlineDocument() {
+  return new Response(`<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Velvet hors connexion</title><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#0b080a;color:#f6eee6;font-family:-apple-system,BlinkMacSystemFont,sans-serif"><main style="max-width:420px;padding:28px;text-align:center"><h1 style="font-family:Georgia,serif;font-weight:500">Velvet est hors connexion.</h1><p style="color:#b9adb1;line-height:1.6">Rétablis ta connexion puis rouvre l’application. Aucune page de connexion ancienne n’est conservée sur cet appareil.</p></main></body></html>`, {
+    status: 503,
+    headers: {
+      'content-type': 'text/html; charset=utf-8',
+      'cache-control': 'no-store'
+    }
+  });
+}
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
+
+  const isDocument = event.request.mode === 'navigate'
+    || event.request.destination === 'document'
+    || event.request.headers.get('accept')?.includes('text/html');
+
+  if (isDocument) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store', credentials: 'same-origin', redirect: 'follow' })
+        .catch(offlineDocument)
+    );
+    return;
+  }
+
   event.respondWith(
-    fetch(event.request, { cache: 'no-store' })
+    fetch(event.request, { cache: 'no-store', credentials: 'same-origin' })
       .then((response) => {
-        if (response.ok) {
+        if (response.ok && !response.redirected) {
           const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put(event.request, copy));
+          event.waitUntil(caches.open(CACHE).then((cache) => cache.put(event.request, copy)));
         }
         return response;
       })
-      .catch(() => caches.match(event.request).then((cached) => cached || caches.match('/membres/')))
+      .catch(() => caches.match(event.request).then((cached) => cached || Response.error()))
   );
 });
 
 self.addEventListener('message', (event) => {
+  if (event.data?.type === 'VELVET_CLEAR_CACHES') {
+    event.waitUntil(
+      caches.keys().then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+    );
+    return;
+  }
   if (event.data?.type !== 'VELVET_NOTIFICATION') return;
   event.waitUntil(self.registration.showNotification(event.data.title || 'Velvet', {
     body: event.data.body || 'Une nouvelle activité vous attend.',
