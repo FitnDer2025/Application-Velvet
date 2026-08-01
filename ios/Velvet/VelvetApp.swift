@@ -7,6 +7,8 @@ struct VelvetApp: App {
     @StateObject private var appState = AppState()
     @StateObject private var biometrics = BiometricLockService()
     @StateObject private var screenshotProtection = ScreenshotProtectionService()
+    @StateObject private var location = LocationService()
+    @State private var locationConfiguredForSession = false
 
     var body: some Scene {
         WindowGroup {
@@ -14,10 +16,20 @@ struct VelvetApp: App {
                 .environmentObject(appState)
                 .environmentObject(biometrics)
                 .environmentObject(screenshotProtection)
+                .environmentObject(location)
                 .preferredColorScheme(.dark)
                 .task {
                     await appState.restoreSession()
                     await biometrics.unlockIfNeeded()
+                    configureLocationIfNeeded()
+                }
+                .onChange(of: appState.phase.id) { _, phaseID in
+                    if phaseID == "home" {
+                        configureLocationIfNeeded()
+                    } else if phaseID == "signedOut" {
+                        locationConfiguredForSession = false
+                        location.onLocation = nil
+                    }
                 }
         }
         .onChange(of: scenePhase) { _, phase in
@@ -30,5 +42,23 @@ struct VelvetApp: App {
                 break
             }
         }
+    }
+
+    @MainActor
+    private func configureLocationIfNeeded() {
+        guard !locationConfiguredForSession else { return }
+        guard case .home = appState.phase else { return }
+
+        locationConfiguredForSession = true
+        location.onLocation = { coordinate in
+            location.onLocation = nil
+            Task {
+                _ = try? await appState.session.saveLocation(
+                    latitude: coordinate.latitude,
+                    longitude: coordinate.longitude
+                )
+            }
+        }
+        location.requestOneShotLocation()
     }
 }
