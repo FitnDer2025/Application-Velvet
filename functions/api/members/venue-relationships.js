@@ -7,12 +7,13 @@ import {
 } from './_shared.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const RELATIONS = new Set(['favorite', 'visited', 'planning']);
 
 async function relationships(env, access, profileId) {
   return restJson(
     env,
-    `/rest/v1/profile_venue_relationships?select=profile_id,venue_id,relation_type,occurred_on,created_at,updated_at&profile_id=eq.${encodeURIComponent(profileId)}&order=updated_at.desc`,
+    `/rest/v1/profile_venue_relationships?select=profile_id,venue_id,relation_type,occurred_on,created_at,updated_at&profile_id=eq.${encodeURIComponent(profileId)}&order=occurred_on.asc.nullslast,updated_at.desc`,
     access.session
   );
 }
@@ -40,8 +41,12 @@ export async function onRequestPost({ request, env }) {
     const body = await readJson(request);
     const venueId = String(body.venueId || '');
     const relation = String(body.relation || '');
+    const visitDate = body.visitDate ? String(body.visitDate) : null;
     if (!UUID.test(venueId) || !RELATIONS.has(relation)) {
       return withSession({ error: 'invalid_venue_relationship' }, access.session, 400);
+    }
+    if (visitDate && !DATE.test(visitDate)) {
+      return withSession({ error: 'invalid_venue_relationship_date' }, access.session, 400);
     }
     await restJson(env, '/rest/v1/rpc/set_my_venue_relationship', access.session, {
       method: 'POST',
@@ -50,7 +55,7 @@ export async function onRequestPost({ request, env }) {
         target_venue: venueId,
         target_relation: relation,
         enabled: body.enabled !== false,
-        visit_date: relation === 'visited' && body.visitDate ? body.visitDate : null
+        visit_date: ['visited', 'planning'].includes(relation) ? visitDate : null
       })
     });
     return withSession({
