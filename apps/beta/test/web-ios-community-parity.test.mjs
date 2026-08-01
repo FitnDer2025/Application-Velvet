@@ -56,7 +56,7 @@ test('Web home is a community feed aligned with iOS and not a fixed outings bloc
 test('Navigation centralizes profile discovery, clubs, outings and attendance on all interfaces', async () => {
   const [web, iosNavigation] = await Promise.all([read(files.web), read(files.iosNavigation)]);
   for (const contract of [
-    'Trouver un profil',
+    'Recherche avancée',
     'Clubs autour de moi',
     'J’y serai',
     'Nous y serons',
@@ -68,6 +68,8 @@ test('Navigation centralizes profile discovery, clubs, outings and attendance on
     assert.match(web, new RegExp(contract));
     assert.match(iosNavigation, new RegExp(contract));
   }
+  assert.match(web, /Trouver un profil/);
+  assert.match(iosNavigation, /Trouver les bons profils/);
   assert.match(web, /venueDirectory/);
   assert.match(web, /venueSearchText/);
   assert.match(web, /addressPublic/);
