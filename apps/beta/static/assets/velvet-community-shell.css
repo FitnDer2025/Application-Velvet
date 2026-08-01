@@ -1,0 +1,14 @@
+.sidebar-tools{display:grid;gap:4px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.sidebar-tools button{position:relative;display:flex;align-items:center;gap:12px;width:100%;padding:11px 13px;border:0;border-radius:14px;background:transparent;color:#94898e;text-align:left;cursor:pointer}
+.sidebar-tools button span{width:22px;color:#a17d8d;font-size:17px;text-align:center}
+.sidebar-tools button:hover,.sidebar-tools button.active{background:rgba(255,255,255,.035);color:#e8dfe2}
+.mobile-head-actions{display:flex;align-items:center;gap:8px}
+.mobile-head-actions button{min-width:42px;min-height:42px;border:1px solid var(--line);border-radius:50%;background:rgba(255,255,255,.04);color:var(--gold);cursor:pointer}
+.mobile-head-actions #mobileMenuButton{min-width:auto;padding:0 15px;border-radius:999px}
+[data-unified-route="navigation"]{position:relative}
+.sidebar nav [data-unified-route="navigation"]{display:flex;align-items:center;gap:12px}
+.sidebar nav [data-unified-route="navigation"] span{width:22px;color:#b88da0;font-size:19px;text-align:center}
+.sidebar nav [data-unified-route="navigation"].active{background:linear-gradient(120deg,rgba(126,32,69,.28),rgba(255,255,255,.04));color:#fff}
+.sidebar nav [data-unified-route="navigation"].active span{color:var(--gold)}
+.bottom-nav [data-unified-route="navigation"].active{color:var(--gold)}
+@media(max-width:760px){.sidebar-tools{display:none}.mobile-head-actions [data-route="notifications"]{display:grid;place-items:center}.bottom-nav button{min-width:0}}
