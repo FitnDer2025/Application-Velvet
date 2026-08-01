@@ -1,6 +1,7 @@
 import { json, readJson } from '../auth/_shared.js';
 import { memberSession, restJson, withSession } from '../members/_shared.js';
 import { DEFAULT_AGENTS } from './_test-agent-personas.js';
+import { portraitPng } from './_test-agent-portraits.js';
 
 const CONTROL_ROLES = new Set(['admin', 'direction']);
 const INTERNAL_ENVIRONMENTS = new Set(['development', 'dev', 'staging', 'preview', 'internal', 'test']);
@@ -60,57 +61,18 @@ function randomToken(length = 24) {
   return [...bytes].map((byte) => alphabet[byte % alphabet.length]).join('');
 }
 
-function escapeXml(value) {
-  return String(value || '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&apos;');
-}
-
-function portraitSvg(agent, index) {
-  const name = escapeXml(agent.persona.display_name);
-  const initials = escapeXml(agent.persona.people.map((person) => person.first_name?.[0] || '').join(''));
-  const couple = agent.persona.profile_type === 'couple';
-  const palettes = [
-    ['#641B36', '#1B1B1D', '#C6A96A'],
-    ['#40212D', '#0D0D0D', '#D7B87A'],
-    ['#5A233C', '#242126', '#C9A66B']
-  ];
-  const [from, to, accent] = palettes[index % palettes.length];
-  const secondFigure = couple
-    ? '<circle cx="650" cy="425" r="118" fill="rgba(244,244,242,.36)"/><path d="M475 830c20-170 108-265 220-265s203 95 224 265" fill="rgba(244,244,242,.24)"/>'
-    : '';
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${from}"/><stop offset="1" stop-color="${to}"/></linearGradient>
-    <filter id="blur"><feGaussianBlur stdDeviation="42"/></filter>
-  </defs>
-  <rect width="1024" height="1024" rx="72" fill="url(#g)"/>
-  <circle cx="180" cy="150" r="180" fill="${accent}" opacity=".18" filter="url(#blur)"/>
-  <circle cx="840" cy="820" r="240" fill="#A33C64" opacity=".16" filter="url(#blur)"/>
-  <circle cx="410" cy="405" r="132" fill="rgba(244,244,242,.46)"/>
-  <path d="M205 850c24-193 125-300 253-300s232 107 256 300" fill="rgba(244,244,242,.30)"/>
-  ${secondFigure}
-  <rect x="82" y="792" width="860" height="150" rx="44" fill="rgba(13,13,13,.52)"/>
-  <text x="128" y="858" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="46" font-weight="650" fill="#F4F4F2">${name}</text>
-  <text x="128" y="910" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="28" letter-spacing="6" fill="${accent}">${initials || 'V'}</text>
-</svg>`;
-}
-
 async function uploadPortraits(env, agent, userId, profileId) {
   const role = agent.persona.profile_type === 'couple' ? 'couple_gallery' : 'individual_gallery';
   const rows = [];
   for (let index = 0; index < 3; index += 1) {
-    const storagePath = `internal-test-agents/${agent.slug}/portrait-${index + 1}.svg`;
+    const storagePath = `internal-test-agents/${agent.slug}/portrait-${index + 1}.png`;
     const upload = await serviceResponse(env, `/storage/v1/object/velvet-media/${storagePath}`, {
       method: 'POST',
       headers: {
-        'content-type': 'image/svg+xml; charset=utf-8',
+        'content-type': 'image/png',
         'x-upsert': 'true'
       },
-      body: portraitSvg(agent, index)
+      body: portraitPng(agent, index)
     });
     if (!upload.ok) {
       const detail = await upload.text().catch(() => '');
@@ -128,7 +90,7 @@ async function uploadPortraits(env, agent, userId, profileId) {
       ai_assessment: {
         synthetic: true,
         internal_test_only: true,
-        generator: 'velvet-svg-fixture'
+        generator: 'velvet-png-fixture'
       },
       ai_reviewed_at: new Date().toISOString()
     });
@@ -233,10 +195,12 @@ async function cleanupAgents(env) {
   const results = [];
   for (const agent of agents || []) {
     try {
-      const media = await serviceJson(
-        env,
-        `/rest/v1/media_assets?select=storage_path&profile_id=eq.${encodeURIComponent(agent.profile_id)}`
-      );
+      const media = agent.profile_id
+        ? await serviceJson(
+            env,
+            `/rest/v1/media_assets?select=storage_path&profile_id=eq.${encodeURIComponent(agent.profile_id)}`
+          )
+        : [];
       for (const item of media || []) {
         if (!item.storage_path) continue;
         const storageResponse = await serviceResponse(
@@ -265,7 +229,12 @@ async function cleanupAgents(env) {
       }
       results.push({ slug: agent.slug, status: 'deleted' });
     } catch (error) {
-      results.push({ slug: agent.slug, status: 'failed', error: error.message });
+      results.push({
+        slug: agent.slug,
+        userId: agent.user_id,
+        status: 'failed',
+        error: error.message
+      });
     }
   }
   return results;
