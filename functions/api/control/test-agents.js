@@ -1,9 +1,8 @@
 import { json, readJson } from '../auth/_shared.js';
-import { memberSession, restJson, withSession } from '../members/_shared.js';
+import { memberSession, withSession } from '../members/_shared.js';
 import { DEFAULT_AGENTS } from './_test-agent-personas.js';
 import { portraitPng } from './_test-agent-portraits.js';
 
-const CONTROL_ROLES = new Set(['admin', 'direction']);
 const INTERNAL_ENVIRONMENTS = new Set(['development', 'dev', 'staging', 'preview', 'internal', 'test']);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -20,13 +19,8 @@ function assertInternalEnvironment(env) {
   return name;
 }
 
-async function controlAccess(request, env) {
-  const access = await memberSession(request, env);
-  if (access.response) return access;
-  if (!access.account.roles.some((role) => CONTROL_ROLES.has(role))) {
-    return { response: json({ error: 'internal_test_agent_control_required' }, 403) };
-  }
-  return access;
+async function internalAccess(request, env) {
+  return memberSession(request, env);
 }
 
 function serviceConfiguration(env) {
@@ -111,6 +105,52 @@ async function findAccountByEmail(env, email) {
   return rows?.[0] || null;
 }
 
+async function addViewer(env, userId, actorId = userId) {
+  await serviceJson(env, '/rest/v1/internal_test_agent_viewers?on_conflict=user_id', {
+    method: 'POST',
+    headers: { prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({
+      user_id: userId,
+      enabled: true,
+      added_by: actorId,
+      updated_at: new Date().toISOString()
+    })
+  });
+}
+
+async function removeViewer(env, userId) {
+  await serviceJson(env, `/rest/v1/internal_test_agent_viewers?user_id=eq.${encodeURIComponent(userId)}`, {
+    method: 'PATCH',
+    headers: { prefer: 'return=minimal' },
+    body: JSON.stringify({ enabled: false, updated_at: new Date().toISOString() })
+  });
+}
+
+async function setGlobalEnabled(env, enabled, actorId) {
+  const now = new Date().toISOString();
+  await serviceJson(env, '/rest/v1/internal_test_agent_settings?singleton=eq.true', {
+    method: 'PATCH',
+    headers: { prefer: 'return=minimal' },
+    body: JSON.stringify({
+      enabled: Boolean(enabled),
+      environment_label: environmentName(env),
+      updated_by: actorId,
+      updated_at: now
+    })
+  });
+  await serviceJson(env, '/rest/v1/audit_events', {
+    method: 'POST',
+    headers: { prefer: 'return=minimal' },
+    body: JSON.stringify({
+      actor_user_id: actorId,
+      actor_type: 'user',
+      action: enabled ? 'internal_test_agents_enabled' : 'internal_test_agents_disabled',
+      entity_type: 'internal_test_agent_settings',
+      metadata: { enabled: Boolean(enabled), internal_environment: environmentName(env) }
+    })
+  }).catch(() => null);
+}
+
 async function seedAgent(env, access, agent) {
   const existing = await serviceJson(
     env,
@@ -169,19 +209,38 @@ async function seedAgent(env, access, agent) {
   };
 }
 
-async function statusPayload(env, access) {
-  const state = await restJson(env, '/rest/v1/rpc/control_internal_test_agent_status', access.session, {
-    method: 'POST',
-    body: '{}'
-  });
+async function statusPayload(env) {
+  const [settingsRows, viewerRows, agentRows] = await Promise.all([
+    serviceJson(env, '/rest/v1/internal_test_agent_settings?select=enabled,environment_label,updated_at&singleton=eq.true&limit=1'),
+    serviceJson(env, '/rest/v1/internal_test_agent_viewers?select=user_id&enabled=eq.true'),
+    serviceJson(env, '/rest/v1/internal_test_agents?select=id,slug,display_name,status,next_run_at,last_run_at,last_error_code,profile_id,user_id,created_at&order=created_at.asc')
+  ]);
+  const settings = settingsRows?.[0] || {};
+  const agents = (agentRows || []).map((agent) => ({
+    id: agent.id,
+    slug: agent.slug,
+    displayName: agent.display_name,
+    status: agent.status,
+    nextRunAt: agent.next_run_at,
+    lastRunAt: agent.last_run_at,
+    lastErrorCode: agent.last_error_code,
+    profileId: agent.profile_id,
+    userId: agent.user_id
+  }));
   return {
-    ...state,
+    enabled: Boolean(settings.enabled),
+    environmentLabel: settings.environment_label || 'internal',
+    viewerCount: viewerRows?.length || 0,
+    agentCount: agents.length,
+    activeAgentCount: agents.filter((agent) => agent.status === 'active').length,
+    agents,
     runtime: {
       environment: environmentName(env),
       environmentEnabled: INTERNAL_ENVIRONMENTS.has(environmentName(env))
         && String(env.VELVET_INTERNAL_TEST_AGENTS || '') === 'enabled',
       serviceRoleConfigured: Boolean(env.SUPABASE_SERVICE_ROLE_KEY),
       openAiConfigured: Boolean(env.OPENAI_API_KEY && env.VELVET_TEST_AGENT_MODEL),
+      accessMode: 'authenticated_internal',
       workerRequired: true
     }
   };
@@ -243,9 +302,9 @@ async function cleanupAgents(env) {
 export async function onRequestGet({ request, env }) {
   try {
     assertInternalEnvironment(env);
-    const access = await controlAccess(request, env);
+    const access = await internalAccess(request, env);
     if (access.response) return access.response;
-    return withSession(await statusPayload(env, access), access.session);
+    return withSession(await statusPayload(env), access.session);
   } catch (error) {
     return json({ error: error.message || 'internal_test_agents_read_failed' }, 400);
   }
@@ -254,32 +313,34 @@ export async function onRequestGet({ request, env }) {
 export async function onRequestPost({ request, env }) {
   try {
     assertInternalEnvironment(env);
-    const access = await controlAccess(request, env);
+    const access = await internalAccess(request, env);
     if (access.response) return access.response;
     const body = await readJson(request);
     let result = null;
 
     if (body.action === 'seed') {
-      await restJson(env, '/rest/v1/rpc/control_add_internal_test_viewer', access.session, {
-        method: 'POST', body: JSON.stringify({ target_user_id: access.account.userId })
-      });
+      await addViewer(env, access.account.userId, access.account.userId);
       const selected = Array.isArray(body.slugs) && body.slugs.length
         ? DEFAULT_AGENTS.filter((agent) => body.slugs.includes(agent.slug))
         : DEFAULT_AGENTS;
       result = [];
       for (const agent of selected) result.push(await seedAgent(env, access, agent));
     } else if (body.action === 'set_enabled') {
-      await restJson(env, '/rest/v1/rpc/control_set_internal_test_agents_enabled', access.session, {
-        method: 'POST', body: JSON.stringify({ target_enabled: Boolean(body.enabled) })
-      });
+      await setGlobalEnabled(env, Boolean(body.enabled), access.account.userId);
       result = { enabled: Boolean(body.enabled) };
     } else if (body.action === 'set_agent_status') {
       if (!UUID.test(body.agentId || '') || !['active', 'paused', 'retired'].includes(body.status)) {
         return withSession({ error: 'invalid_test_agent_status' }, access.session, 400);
       }
-      await restJson(env, '/rest/v1/rpc/control_set_internal_test_agent_status', access.session, {
-        method: 'POST',
-        body: JSON.stringify({ target_agent_id: body.agentId, target_status: body.status })
+      const statusUpdate = {
+        status: body.status,
+        updated_at: new Date().toISOString()
+      };
+      if (body.status === 'active') statusUpdate.next_run_at = new Date().toISOString();
+      await serviceJson(env, `/rest/v1/internal_test_agents?id=eq.${encodeURIComponent(body.agentId)}`, {
+        method: 'PATCH',
+        headers: { prefer: 'return=minimal' },
+        body: JSON.stringify(statusUpdate)
       });
       result = { agentId: body.agentId, status: body.status };
     } else if (body.action === 'add_viewer' || body.action === 'remove_viewer') {
@@ -287,12 +348,11 @@ export async function onRequestPost({ request, env }) {
       if (!UUID.test(targetUserId || '')) {
         return withSession({ error: 'invalid_test_viewer' }, access.session, 400);
       }
-      const rpc = body.action === 'add_viewer'
-        ? 'control_add_internal_test_viewer'
-        : 'control_remove_internal_test_viewer';
-      await restJson(env, `/rest/v1/rpc/${rpc}`, access.session, {
-        method: 'POST', body: JSON.stringify({ target_user_id: targetUserId })
-      });
+      if (body.action === 'add_viewer') {
+        await addViewer(env, targetUserId, access.account.userId);
+      } else {
+        await removeViewer(env, targetUserId);
+      }
       result = { userId: targetUserId, enabled: body.action === 'add_viewer' };
     } else if (body.action === 'run_now') {
       await serviceJson(env, '/rest/v1/internal_test_agents?status=eq.active', {
@@ -302,9 +362,7 @@ export async function onRequestPost({ request, env }) {
       });
       result = { queued: true };
     } else if (body.action === 'cleanup') {
-      await restJson(env, '/rest/v1/rpc/control_set_internal_test_agents_enabled', access.session, {
-        method: 'POST', body: JSON.stringify({ target_enabled: false })
-      });
+      await setGlobalEnabled(env, false, access.account.userId);
       result = await cleanupAgents(env);
     } else {
       return withSession({ error: 'invalid_test_agent_action' }, access.session, 400);
@@ -313,7 +371,7 @@ export async function onRequestPost({ request, env }) {
     return withSession({
       ok: true,
       result,
-      state: await statusPayload(env, access)
+      state: await statusPayload(env)
     }, access.session);
   } catch (error) {
     return json({ error: error.message || 'internal_test_agents_write_failed' }, 400);
