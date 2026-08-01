@@ -4,12 +4,14 @@
 
 Ce dispositif est réservé au projet Supabase et au déploiement Cloudflare de développement ou staging. Il est interdit sur une base utilisée par des bêta-testeurs externes ou en production.
 
-## 1. Appliquer la migration
+## 1. Appliquer les migrations
 
-Exécuter dans le projet Supabase interne :
+Exécuter dans le projet Supabase interne, dans cet ordre :
 
 ```text
-infra/supabase/migrations/0027_internal_ai_test_agents.sql
+infra/supabase/migrations/0027_internal_ai_test_agents_core.sql
+infra/supabase/migrations/0028_internal_ai_test_agents_operations.sql
+infra/supabase/migrations/0029_internal_ai_test_agents_release_guard.sql
 ```
 
 Cyril ou un administrateur autorisé conserve l’exécution distante des migrations Supabase.
@@ -125,7 +127,7 @@ Content-Type: application/json
 {"action":"cleanup"}
 ```
 
-Cette action désactive le moteur, supprime les données métier et les médias synthétiques, puis supprime les comptes Supabase Auth.
+Cette action désactive le moteur, supprime d’abord les médias synthétiques, puis les données métier et les comptes Supabase Auth. L’ordre permet de relancer proprement le nettoyage en cas d’échec de stockage.
 
 ## 5. Contrôle avant ouverture externe
 
