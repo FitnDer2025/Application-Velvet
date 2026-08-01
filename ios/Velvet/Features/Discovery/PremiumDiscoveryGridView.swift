@@ -10,12 +10,16 @@ struct PremiumDiscoveryGridView: View {
     @State private var visibleCount = 9
 
     private let columns = Array(
-        repeating: GridItem(.flexible(minimum: 88), spacing: 10, alignment: .top),
+        repeating: GridItem(
+            .flexible(minimum: 0, maximum: .infinity),
+            spacing: 8,
+            alignment: .top
+        ),
         count: 3
     )
 
     private var profiles: [MemberProfile] {
-        (store.directory?.profiles ?? [])
+        let filtered = (store.directory?.profiles ?? [])
             .filter { $0.id != currentProfile.id }
             .filter(matchesFilters)
             .filter {
@@ -24,6 +28,7 @@ struct PremiumDiscoveryGridView: View {
                     || ($0.locationZone ?? $0.city ?? "").localizedCaseInsensitiveContains(query)
                     || ($0.searchText ?? "").localizedCaseInsensitiveContains(query)
             }
+        return balancedProfiles(filtered)
     }
 
     private var visibleProfiles: ArraySlice<MemberProfile> {
@@ -116,7 +121,7 @@ struct PremiumDiscoveryGridView: View {
                                 : "Essaie une autre ville, un autre nom ou élargis tes critères."
                         )
                     } else {
-                        LazyVGrid(columns: columns, alignment: .leading, spacing: 14) {
+                        LazyVGrid(columns: columns, alignment: .center, spacing: 14) {
                             ForEach(visibleProfiles) { profile in
                                 NavigationLink {
                                     MemberDetailView(profile: profile)
@@ -125,10 +130,13 @@ struct PremiumDiscoveryGridView: View {
                                         profile: profile,
                                         history: store.viewHistory(for: profile.id)
                                     )
+                                    .frame(maxWidth: .infinity, alignment: .topLeading)
                                 }
                                 .buttonStyle(.plain)
+                                .frame(maxWidth: .infinity, alignment: .top)
                             }
                         }
+                        .frame(maxWidth: .infinity)
 
                         if visibleCount < profiles.count {
                             Button {
@@ -169,9 +177,29 @@ struct PremiumDiscoveryGridView: View {
         .onChange(of: filters) { _, _ in visibleCount = 9 }
     }
 
+    private func balancedProfiles(_ source: [MemberProfile]) -> [MemberProfile] {
+        var couples = source.filter { $0.profileType == .couple }
+        var individuals = source.filter { $0.profileType != .couple }
+        var result: [MemberProfile] = []
+        result.reserveCapacity(source.count)
+
+        while !couples.isEmpty || !individuals.isEmpty {
+            if !couples.isEmpty {
+                result.append(couples.removeFirst())
+            }
+            if !individuals.isEmpty {
+                result.append(individuals.removeFirst())
+            }
+        }
+        return result
+    }
+
     private func matchesFilters(_ profile: MemberProfile) -> Bool {
         if !filters.types.isEmpty {
-            guard let audience = profile.discoveryAudience, filters.types.contains(audience) else {
+            let audience = profile.profileType == .couple
+                ? "couple"
+                : profile.discoveryAudience
+            guard let audience, filters.types.contains(audience) else {
                 return false
             }
         }
@@ -258,8 +286,7 @@ private struct CompactMemberCard: View {
                     url: photo,
                     symbol: profile.profileType == .couple ? "person.2.fill" : "person.fill"
                 )
-                .frame(maxWidth: .infinity)
-                .aspectRatio(0.78, contentMode: .fit)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .clipped()
 
                 LinearGradient(
@@ -299,6 +326,8 @@ private struct CompactMemberCard: View {
                     .allowsHitTesting(false)
                 }
             }
+            .frame(maxWidth: .infinity)
+            .aspectRatio(0.78, contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 17, style: .continuous)
@@ -309,26 +338,31 @@ private struct CompactMemberCard: View {
                 .font(VelvetTypography.body(size: 12, weight: .semibold))
                 .foregroundStyle(VelvetColor.ivory)
                 .lineLimit(1)
+                .minimumScaleFactor(0.72)
 
             if let age = profile.velvetAgeLabel {
                 Text(age)
                     .font(VelvetTypography.caption(size: 9, weight: .semibold))
                     .foregroundStyle(VelvetColor.champagneGold)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.72)
             }
 
             Text(profile.locationZone ?? profile.city ?? "Zone privée")
                 .font(VelvetTypography.caption(size: 9))
                 .foregroundStyle(VelvetColor.textSecondary)
                 .lineLimit(1)
+                .minimumScaleFactor(0.72)
 
             if history != nil {
                 Text(viewedLabel)
                     .font(VelvetTypography.caption(size: 8, weight: .semibold))
                     .foregroundStyle(VelvetColor.champagneGold.opacity(0.82))
                     .lineLimit(1)
+                    .minimumScaleFactor(0.70)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .contentShape(Rectangle())
     }
 
