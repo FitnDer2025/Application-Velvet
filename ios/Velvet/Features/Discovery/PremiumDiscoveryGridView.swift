@@ -9,14 +9,16 @@ struct PremiumDiscoveryGridView: View {
     @State private var showsFilters = false
     @State private var visibleCount = 9
 
-    private let columns = Array(
-        repeating: GridItem(
-            .flexible(minimum: 0, maximum: .infinity),
-            spacing: 8,
-            alignment: .top
-        ),
-        count: 3
-    )
+    private var columns: [GridItem] {
+        Array(
+            repeating: GridItem(
+                .flexible(minimum: 0, maximum: .infinity),
+                spacing: 12,
+                alignment: .top
+            ),
+            count: 3
+        )
+    }
 
     private var profiles: [MemberProfile] {
         let filtered = (store.directory?.profiles ?? [])
@@ -43,7 +45,7 @@ struct PremiumDiscoveryGridView: View {
                     VelvetPageHeader(
                         "Recherche sur mesure",
                         title: "Recherche",
-                        subtitle: "Des profils plus compacts pour parcourir rapidement six à neuf univers à l’écran."
+                        subtitle: "Une sélection élégante et lisible pour découvrir rapidement les univers Velvet."
                     )
 
                     VelvetSearchField(prompt: "Nom, ville, univers…", text: $query)
@@ -100,7 +102,7 @@ struct PremiumDiscoveryGridView: View {
                             .font(VelvetTypography.body(size: 13, weight: .semibold))
                             .foregroundStyle(VelvetColor.ivory)
                         Spacer()
-                        Text("AFFICHAGE 3 COLONNES")
+                        Text("SÉLECTION VELVET")
                             .font(VelvetTypography.caption(size: 8, weight: .semibold))
                             .tracking(1.1)
                             .foregroundStyle(VelvetColor.champagneGold)
@@ -121,16 +123,15 @@ struct PremiumDiscoveryGridView: View {
                                 : "Essaie une autre ville, un autre nom ou élargis tes critères."
                         )
                     } else {
-                        LazyVGrid(columns: columns, alignment: .center, spacing: 14) {
+                        LazyVGrid(columns: columns, alignment: .center, spacing: 16) {
                             ForEach(visibleProfiles) { profile in
                                 NavigationLink {
                                     MemberDetailView(profile: profile)
                                 } label: {
-                                    CompactMemberCard(
+                                    PremiumDiscoveryMemberCard(
                                         profile: profile,
                                         history: store.viewHistory(for: profile.id)
                                     )
-                                    .frame(maxWidth: .infinity, alignment: .topLeading)
                                 }
                                 .buttonStyle(.plain)
                                 .frame(maxWidth: .infinity, alignment: .top)
@@ -217,10 +218,20 @@ struct PremiumDiscoveryGridView: View {
                 return false
             }
         }
-        guard profile.matchesAge(group: "man", minimum: filters.maleAgeMin, maximum: filters.maleAgeMax)
-        else { return false }
-        guard profile.matchesAge(group: "woman", minimum: filters.femaleAgeMin, maximum: filters.femaleAgeMax)
-        else { return false }
+        if filters.maleAgeMin != 18 || filters.maleAgeMax != 99 {
+            guard profile.matchesAge(
+                group: "man",
+                minimum: filters.maleAgeMin,
+                maximum: filters.maleAgeMax
+            ) else { return false }
+        }
+        if filters.femaleAgeMin != 18 || filters.femaleAgeMax != 99 {
+            guard profile.matchesAge(
+                group: "woman",
+                minimum: filters.femaleAgeMin,
+                maximum: filters.femaleAgeMax
+            ) else { return false }
+        }
         if !filters.practices.isEmpty {
             let values = Set(profile.practices ?? [])
             guard filters.practices.allSatisfy(values.contains) else { return false }
@@ -270,7 +281,7 @@ struct PremiumDiscoveryGridView: View {
     }
 }
 
-private struct CompactMemberCard: View {
+private struct PremiumDiscoveryMemberCard: View {
     let profile: MemberProfile
     let history: ProfileViewHistory?
 
@@ -279,108 +290,186 @@ private struct CompactMemberCard: View {
             ?? profile.profileGalleryPhotos.first?.previewUrl
     }
 
+    private var visitLabel: String {
+        guard let history else { return "À découvrir" }
+        return "Vu \(history.viewCount ?? 1)×"
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 7) {
-            ZStack(alignment: .bottomLeading) {
-                VelvetRemoteImage(
-                    url: photo,
-                    symbol: profile.profileType == .couple ? "person.2.fill" : "person.fill"
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .clipped()
+        VStack(alignment: .leading, spacing: 0) {
+            imageArea
+            informationArea
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 236, alignment: .top)
+        .background {
+            LinearGradient(
+                colors: [
+                    VelvetColor.panelRaised.opacity(0.98),
+                    VelvetColor.anthracite.opacity(0.94)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 19, style: .continuous)
+                .stroke(VelvetColor.champagneGold.opacity(0.16), lineWidth: 0.8)
+        }
+        .shadow(color: .black.opacity(0.28), radius: 14, y: 8)
+        .contentShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
+    }
 
-                LinearGradient(
-                    colors: [.clear, VelvetColor.velvetBlack.opacity(0.86)],
-                    startPoint: .center,
-                    endPoint: .bottom
-                )
-                .allowsHitTesting(false)
+    private var imageArea: some View {
+        ZStack {
+            VelvetRemoteImage(
+                url: photo,
+                symbol: profile.profileType == .couple ? "person.2.fill" : "person.fill"
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
 
-                Text(profile.velvetDemographicLabel.uppercased())
-                    .font(VelvetTypography.caption(size: 7, weight: .bold))
-                    .tracking(0.8)
-                    .foregroundStyle(VelvetColor.champagneGold)
-                    .padding(.horizontal, 8)
-                    .frame(height: 22)
-                    .background(.ultraThinMaterial)
-                    .background(.black.opacity(0.22))
-                    .clipShape(Capsule())
-                    .padding(7)
+            LinearGradient(
+                colors: [
+                    .clear,
+                    VelvetColor.velvetBlack.opacity(0.14),
+                    VelvetColor.velvetBlack.opacity(0.84)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .allowsHitTesting(false)
 
-                if let history {
-                    VStack {
-                        HStack {
-                            Spacer()
-                            Label("\(history.viewCount ?? 1)", systemImage: "eye.fill")
-                                .font(.system(size: 8, weight: .bold, design: .rounded))
-                                .foregroundStyle(VelvetColor.champagneGold)
-                                .padding(.horizontal, 7)
-                                .frame(height: 22)
-                                .background(.ultraThinMaterial)
-                                .background(VelvetColor.velvetBlack.opacity(0.55))
-                                .clipShape(Capsule())
-                        }
-                        Spacer()
+            VStack(spacing: 0) {
+                HStack {
+                    Spacer()
+                    if let history {
+                        Label("\(history.viewCount ?? 1)", systemImage: "eye.fill")
+                            .font(.system(size: 7, weight: .bold, design: .rounded))
+                            .foregroundStyle(VelvetColor.champagneGold)
+                            .padding(.horizontal, 7)
+                            .frame(height: 21)
+                            .background(.ultraThinMaterial)
+                            .background(VelvetColor.velvetBlack.opacity(0.48))
+                            .clipShape(Capsule())
                     }
-                    .padding(7)
-                    .allowsHitTesting(false)
+                }
+
+                Spacer()
+
+                HStack {
+                    Text(profile.premiumDiscoveryCategory.uppercased())
+                        .font(.system(size: 6.5, weight: .bold, design: .rounded))
+                        .tracking(0.55)
+                        .foregroundStyle(VelvetColor.champagneGold)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.70)
+                        .padding(.horizontal, 7)
+                        .frame(height: 21)
+                        .background(.ultraThinMaterial)
+                        .background(VelvetColor.velvetBlack.opacity(0.42))
+                        .clipShape(Capsule())
+                    Spacer(minLength: 0)
                 }
             }
-            .frame(maxWidth: .infinity)
-            .aspectRatio(0.78, contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 17, style: .continuous)
-                    .stroke(VelvetColor.borderSubtle, lineWidth: 0.8)
-            }
+            .padding(7)
+            .allowsHitTesting(false)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 130)
+        .clipped()
+    }
 
+    private var informationArea: some View {
+        VStack(alignment: .leading, spacing: 5) {
             Text(profile.displayName)
                 .font(VelvetTypography.body(size: 12, weight: .semibold))
                 .foregroundStyle(VelvetColor.ivory)
                 .lineLimit(1)
                 .minimumScaleFactor(0.72)
 
-            if let age = profile.velvetAgeLabel {
-                Text(age)
-                    .font(VelvetTypography.caption(size: 9, weight: .semibold))
-                    .foregroundStyle(VelvetColor.champagneGold)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.72)
-            }
-
-            Text(profile.locationZone ?? profile.city ?? "Zone privée")
-                .font(VelvetTypography.caption(size: 9))
-                .foregroundStyle(VelvetColor.textSecondary)
+            Text(profile.velvetAgeLabel ?? profile.premiumDiscoveryCategory)
+                .font(VelvetTypography.caption(size: 9, weight: .semibold))
+                .foregroundStyle(VelvetColor.champagneGold)
                 .lineLimit(1)
                 .minimumScaleFactor(0.72)
 
-            if history != nil {
-                Text(viewedLabel)
-                    .font(VelvetTypography.caption(size: 8, weight: .semibold))
-                    .foregroundStyle(VelvetColor.champagneGold.opacity(0.82))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.70)
-            }
+            Rectangle()
+                .fill(VelvetColor.borderSubtle.opacity(0.72))
+                .frame(height: 0.5)
+
+            compactLine(
+                symbol: "mappin.and.ellipse",
+                text: profile.locationZone ?? profile.city ?? "Zone privée"
+            )
+
+            compactLine(
+                symbol: history == nil ? "sparkles" : "clock",
+                text: visitLabel
+            )
         }
-        .frame(maxWidth: .infinity, alignment: .topLeading)
-        .contentShape(Rectangle())
+        .padding(.horizontal, 9)
+        .padding(.top, 8)
+        .padding(.bottom, 9)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
-    private var viewedLabel: String {
-        guard let history else { return "" }
-        return "Vu \(history.viewCount ?? 1)× · \(relativeDate(history.lastViewedAt))"
-    }
-
-    private func relativeDate(_ value: String?) -> String {
-        guard let value else { return "date inconnue" }
-        let fractional = ISO8601DateFormatter()
-        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        guard let date = fractional.date(from: value) ?? ISO8601DateFormatter().date(from: value) else {
-            return "date inconnue"
+    private func compactLine(symbol: String, text: String) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: symbol)
+                .font(.system(size: 7.5, weight: .medium))
+                .foregroundStyle(VelvetColor.champagneGold.opacity(0.78))
+                .frame(width: 10)
+            Text(text)
+                .font(VelvetTypography.caption(size: 8))
+                .foregroundStyle(VelvetColor.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.67)
         }
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return formatter.localizedString(for: date, relativeTo: .now)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private extension MemberProfile {
+    var premiumDiscoveryCategory: String {
+        if profileType == .couple {
+            return "Couple"
+        }
+
+        let identities = (individualProfiles ?? [])
+            .compactMap { $0.genderIdentity?.lowercased() }
+
+        if identities.contains(where: {
+            $0.contains("non-binaire")
+                || $0.contains("nonbinary")
+                || $0.contains("non-binary")
+                || $0.contains("genderfluid")
+                || $0.contains("queer")
+        }) {
+            return "Non-binaire"
+        }
+
+        if identities.contains(where: {
+            $0.contains("femme") || $0.contains("woman") || $0.contains("female")
+        }) {
+            return "Femme seule"
+        }
+
+        if identities.contains(where: {
+            $0.contains("homme")
+                || $0 == "man"
+                || ($0.contains("male") && !$0.contains("female"))
+        }) {
+            return "Homme seul"
+        }
+
+        let existing = velvetDemographicLabel.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !existing.isEmpty,
+           existing.localizedCaseInsensitiveContains("individuel") == false {
+            return existing
+        }
+        return "Membre"
     }
 }
 
