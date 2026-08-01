@@ -3,16 +3,14 @@ import SwiftUI
 struct MainShellView: View {
     private enum Tab: String, CaseIterable {
         case home
-        case discover
-        case maps
+        case navigation
         case messages
         case profile
 
         var label: String {
             switch self {
             case .home: "Accueil"
-            case .discover: "Recherche"
-            case .maps: "Maps"
+            case .navigation: "Navigation"
             case .messages: "Messages"
             case .profile: "Profil"
             }
@@ -21,8 +19,7 @@ struct MainShellView: View {
         var icon: String {
             switch self {
             case .home: "house"
-            case .discover: "magnifyingglass"
-            case .maps: "map"
+            case .navigation: "safari"
             case .messages: "bubble.left.and.bubble.right"
             case .profile: "person.crop.circle"
             }
@@ -31,8 +28,7 @@ struct MainShellView: View {
         var selectedIcon: String {
             switch self {
             case .home: "house.fill"
-            case .discover: "magnifyingglass"
-            case .maps: "map.fill"
+            case .navigation: "safari.fill"
             case .messages: "bubble.left.and.bubble.right.fill"
             case .profile: "person.crop.circle.fill"
             }
@@ -40,27 +36,16 @@ struct MainShellView: View {
     }
 
     private enum MenuRoute {
-        case directory
-        case agenda
         case notifications
         case studio
         case editProfile
         case media
         case experience
         case privacy
-
-        var placesSelection: Int? {
-            switch self {
-            case .directory: 1
-            case .agenda: 3
-            default: nil
-            }
-        }
     }
 
     let profile: MemberProfile
 
-    @EnvironmentObject private var appState: AppState
     @StateObject private var store = VelvetStore()
     @StateObject private var chrome = ShellChromeState()
     @Environment(\.scenePhase) private var scenePhase
@@ -68,7 +53,6 @@ struct MainShellView: View {
     @State private var selectedTab: Tab = .home
     @State private var showsNotifications = false
     @State private var showsMenu = false
-    @State private var showsPlacesEvents = false
     @State private var showsStudio = false
     @State private var showsProfileEditor = false
     @State private var showsMediaManager = false
@@ -78,7 +62,6 @@ struct MainShellView: View {
     @State private var pendingNotificationDestination: VelvetNotificationDestination?
     @State private var routedConversation: Conversation?
     @State private var routedProfile: MemberProfile?
-    @State private var placesSelection = 0
 
     var body: some View {
         ZStack {
@@ -132,9 +115,7 @@ struct MainShellView: View {
         .sheet(isPresented: $showsMenu, onDismiss: openPendingMenuRoute) {
             NavigationStack {
                 VelvetMenuView(
-                    openPlaces: { queue(.directory) },
                     openNotifications: { queue(.notifications) },
-                    openAgenda: { queue(.agenda) },
                     openStudio: { queue(.studio) },
                     editProfile: { queue(.editProfile) },
                     manageMedia: { queue(.media) },
@@ -145,18 +126,6 @@ struct MainShellView: View {
             }
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
-        }
-        .sheet(isPresented: $showsPlacesEvents) {
-            NavigationStack {
-                IntelligentPlacesEventsView(initialSelection: placesSelection)
-                    .environmentObject(store)
-                    .toolbar {
-                        ToolbarItem(placement: .topBarLeading) {
-                            Button("Fermer") { showsPlacesEvents = false }
-                                .foregroundStyle(VelvetColor.champagneGold)
-                        }
-                    }
-            }
         }
         .sheet(isPresented: $showsStudio) {
             NavigationStack {
@@ -218,10 +187,8 @@ struct MainShellView: View {
         switch selectedTab {
         case .home:
             NavigationStack { IntelligentHomeActivityView(profile: profile) }
-        case .discover:
-            NavigationStack { PremiumDiscoveryGridView(currentProfile: profile) }
-        case .maps:
-            NavigationStack { MemberMapView() }
+        case .navigation:
+            NavigationStack { VelvetNavigationHubView(profile: profile) }
         case .messages:
             NavigationStack { ManagedConversationsView() }
         case .profile:
@@ -240,8 +207,8 @@ struct MainShellView: View {
                     VStack(spacing: 4) {
                         ZStack(alignment: .topTrailing) {
                             Image(systemName: selectedTab == tab ? tab.selectedIcon : tab.icon)
-                                .font(.system(size: 17, weight: .medium))
-                                .frame(width: 36, height: 30)
+                                .font(.system(size: 18, weight: .medium))
+                                .frame(width: 38, height: 30)
                                 .background {
                                     if selectedTab == tab {
                                         Circle()
@@ -284,7 +251,7 @@ struct MainShellView: View {
                 .accessibilityAddTraits(selectedTab == tab ? .isSelected : [])
             }
         }
-        .padding(.horizontal, 7)
+        .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background(.ultraThinMaterial)
         .background(VelvetColor.velvetBlack.opacity(0.58))
@@ -308,11 +275,6 @@ struct MainShellView: View {
         guard let route = pendingMenuRoute else { return }
         pendingMenuRoute = nil
         DispatchQueue.main.async {
-            if let selection = route.placesSelection {
-                placesSelection = selection
-                showsPlacesEvents = true
-                return
-            }
             switch route {
             case .notifications: showsNotifications = true
             case .studio: showsStudio = true
@@ -320,7 +282,6 @@ struct MainShellView: View {
             case .media: showsMediaManager = true
             case .experience: showsExperienceSettings = true
             case .privacy: showsPrivacy = true
-            default: break
             }
         }
     }
@@ -335,8 +296,7 @@ struct MainShellView: View {
             case let .profile(member):
                 routedProfile = member
             case .events:
-                placesSelection = 0
-                showsPlacesEvents = true
+                selectedTab = .navigation
             }
         }
     }
@@ -357,12 +317,8 @@ struct MainShellView: View {
                 }
             }
 
-        case .events:
-            placesSelection = 0
-            showsPlacesEvents = true
-
-        case .maps:
-            selectedTab = .maps
+        case .events, .maps:
+            selectedTab = .navigation
 
         case .profile:
             if let id = route.profileID,
@@ -377,9 +333,7 @@ struct MainShellView: View {
 
 private struct VelvetMenuView: View {
     @Environment(\.dismiss) private var dismiss
-    let openPlaces: () -> Void
     let openNotifications: () -> Void
-    let openAgenda: () -> Void
     let openStudio: () -> Void
     let editProfile: () -> Void
     let manageMedia: () -> Void
@@ -392,15 +346,18 @@ private struct VelvetMenuView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     VelvetPageHeader(
-                        "Navigation",
+                        "Outils & réglages",
                         title: "Plus de Velvet",
-                        subtitle: "Toutes les fonctions secondaires et les outils de votre profil."
+                        subtitle: "Les fonctions de gestion restent ici. Les profils, clubs et sorties se trouvent dans Navigation."
                     )
                     .padding(.bottom, 8)
 
-                    menuButton("Sorties & clubs", detail: "Agenda, Cap d’Agde et établissements", icon: "sparkles", action: openPlaces)
-                    menuButton("Notifications", detail: "Messages, réactions et activité", icon: "bell", action: openNotifications)
-                    menuButton("Agenda complet", detail: "Sorties, visites et voyages", icon: "calendar", action: openAgenda)
+                    menuButton(
+                        "Notifications",
+                        detail: "Messages, réactions et activité",
+                        icon: "bell",
+                        action: openNotifications
+                    )
 
                     Text("MON PROFIL")
                         .font(VelvetTypography.caption(size: 9, weight: .semibold))
@@ -408,11 +365,36 @@ private struct VelvetMenuView: View {
                         .foregroundStyle(VelvetColor.champagneGold)
                         .padding(.top, 8)
 
-                    menuButton("Studio du profil & Velvet IA", detail: "Plume, organisateur et outils avancés", icon: "wand.and.stars", action: openStudio)
-                    menuButton("Modifier mon profil", detail: "Textes, identité, pratiques et préférences", icon: "square.and.pencil", action: editProfile)
-                    menuButton("Gérer mes photos & albums", detail: "Supprimer les médias publics ou privés", icon: "photo.stack", action: manageMedia)
-                    menuButton("Proximité & Velvet Intelligence", detail: "Rayon, tri et recommandations", icon: "location.circle", action: openExperience)
-                    menuButton("Paramètres & confidentialité", detail: "Face ID, visibilité, notifications et compte", icon: "slider.horizontal.3", action: openPrivacy)
+                    menuButton(
+                        "Studio du profil & Velvet IA",
+                        detail: "Plume, organisateur et outils avancés",
+                        icon: "wand.and.stars",
+                        action: openStudio
+                    )
+                    menuButton(
+                        "Modifier mon profil",
+                        detail: "Textes, identité, pratiques et préférences",
+                        icon: "square.and.pencil",
+                        action: editProfile
+                    )
+                    menuButton(
+                        "Gérer mes photos & albums",
+                        detail: "Médias publics, privés et autorisations",
+                        icon: "photo.stack",
+                        action: manageMedia
+                    )
+                    menuButton(
+                        "Proximité & Velvet Intelligence",
+                        detail: "Rayon, tri et recommandations",
+                        icon: "location.circle",
+                        action: openExperience
+                    )
+                    menuButton(
+                        "Paramètres & confidentialité",
+                        detail: "Face ID, visibilité, notifications et compte",
+                        icon: "slider.horizontal.3",
+                        action: openPrivacy
+                    )
                 }
                 .padding(20)
             }
