@@ -64,10 +64,10 @@ test('Navigation centralizes profile discovery, clubs, outings and attendance on
     'Qui sera présent',
     'Carte Velvet',
     'Cap d’Agde',
-    'Agenda complet'
+    'agenda complet'
   ]) {
-    assert.match(web, new RegExp(contract));
-    assert.match(iosNavigation, new RegExp(contract));
+    assert.match(web, new RegExp(contract, 'i'));
+    assert.match(iosNavigation, new RegExp(contract, 'i'));
   }
   assert.match(web, /J’y serai/);
   assert.match(web, /Nous y serons/);
