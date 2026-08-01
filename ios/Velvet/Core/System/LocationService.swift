@@ -5,6 +5,9 @@ import Foundation
 final class LocationService: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published private(set) var authorizationStatus: CLAuthorizationStatus = .notDetermined
     @Published private(set) var lastLocation: CLLocation?
+    @Published private(set) var locationServicesEnabled = CLLocationManager.locationServicesEnabled()
+
+    var onLocation: ((CLLocationCoordinate2D) -> Void)?
 
     private let manager = CLLocationManager()
 
@@ -16,11 +19,18 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     func requestOneShotLocation() {
-        if manager.authorizationStatus == .notDetermined {
+        locationServicesEnabled = CLLocationManager.locationServicesEnabled()
+        guard locationServicesEnabled else { return }
+
+        switch manager.authorizationStatus {
+        case .notDetermined:
             manager.requestWhenInUseAuthorization()
-        } else if manager.authorizationStatus == .authorizedAlways
-                    || manager.authorizationStatus == .authorizedWhenInUse {
+        case .authorizedAlways, .authorizedWhenInUse:
             manager.requestLocation()
+        case .denied, .restricted:
+            break
+        @unknown default:
+            break
         }
     }
 
@@ -32,7 +42,9 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        lastLocation = locations.last
+        guard let location = locations.last else { return }
+        lastLocation = location
+        onLocation?(location.coordinate)
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
