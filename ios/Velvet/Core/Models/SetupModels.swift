@@ -1,7 +1,9 @@
 import Foundation
 
 struct PhotosResponse: Decodable, Sendable {
-    let profile: MemberProfile?
+    // Le backend renvoie aussi un résumé de profil volontairement partiel.
+    // L’écran iOS de gestion des médias n’en a pas besoin : ignorer cette clé
+    // évite qu’un profil incomplet fasse échouer le décodage de toute la photothèque.
     let photos: [ProfilePhoto]
 }
 
