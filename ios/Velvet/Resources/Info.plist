@@ -36,7 +36,7 @@
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.social-networking</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Velvet utilise une position approximative uniquement lorsque tu demandes les lieux proches.</string>
+	<string>Velvet utilise une position approximative pour classer les profils, clubs et sorties proches, sans enregistrer votre adresse exacte.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Face ID protège l’accès à ton espace privé Velvet lorsque l’application est verrouillée.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

@@ -41,17 +41,17 @@ export async function onRequestDelete({ request, env }) {
       return withSession({ error: 'invalid_photo' }, access.session, 400);
     }
 
+    const profileId = admission.admission.id;
     const rows = await restJson(
       env,
-      `/rest/v1/media_assets?select=id,profile_id,album_id,individual_profile_id,owner_user_id,storage_path,media_role,media_type&profile_id=eq.${encodeURIComponent(admission.admission.id)}&id=eq.${encodeURIComponent(mediaId)}&limit=1`,
+      `/rest/v1/media_assets?select=id,profile_id,album_id,individual_profile_id,owner_user_id,storage_path,media_role,media_type&profile_id=eq.${encodeURIComponent(profileId)}&id=eq.${encodeURIComponent(mediaId)}&limit=1`,
       access.session
     );
     const media = rows?.[0];
     if (!media) return withSession({ error: 'photo_not_found' }, access.session, 404);
-    if (media.owner_user_id !== access.account.userId) {
-      return withSession({ error: 'photo_owner_required' }, access.session, 403);
-    }
 
+    // Un profil Couple est partagé : chaque compte actif lié au profil peut gérer
+    // les médias de ce profil, même lorsque l'autre partenaire les a importés.
     const storageResponse = await supabase(
       env,
       `/storage/v1/object/velvet-media/${media.storage_path}`,
@@ -64,12 +64,12 @@ export async function onRequestDelete({ request, env }) {
 
     await restJson(
       env,
-      `/rest/v1/media_assets?id=eq.${encodeURIComponent(mediaId)}&owner_user_id=eq.${encodeURIComponent(access.account.userId)}`,
+      `/rest/v1/media_assets?id=eq.${encodeURIComponent(mediaId)}&profile_id=eq.${encodeURIComponent(profileId)}`,
       access.session,
       { method: 'DELETE', headers: { prefer: 'return=minimal' } }
     );
 
-    const state = await publicPhotoState(env, access, admission.admission.id);
+    const state = await publicPhotoState(env, access, profileId);
     return withSession({
       ok: true,
       deletedMediaId: mediaId,
