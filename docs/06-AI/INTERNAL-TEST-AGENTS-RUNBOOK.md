@@ -12,6 +12,7 @@ Exécuter dans le projet Supabase interne, dans cet ordre :
 infra/supabase/migrations/0027_internal_ai_test_agents_core.sql
 infra/supabase/migrations/0028_internal_ai_test_agents_operations.sql
 infra/supabase/migrations/0029_internal_ai_test_agents_release_guard.sql
+infra/supabase/migrations/0030_internal_ai_test_agents_hardening.sql
 ```
 
 Cyril ou un administrateur autorisé conserve l’exécution distante des migrations Supabase.
@@ -127,17 +128,17 @@ Content-Type: application/json
 {"action":"cleanup"}
 ```
 
-Cette action désactive le moteur, supprime d’abord les médias synthétiques, puis les données métier et les comptes Supabase Auth. L’ordre permet de relancer proprement le nettoyage en cas d’échec de stockage.
+Cette action désactive le moteur, supprime d’abord les médias synthétiques, puis les données métier et les comptes Supabase Auth. Si la suppression Auth échoue, l’agent technique reste référencé pour permettre une nouvelle tentative.
 
 ## 5. Contrôle avant ouverture externe
 
 Dans Control, le contrôle `internal_test_agents_present` doit afficher :
 
 ```text
-passed — 0 profil concerné
+passed — 0 élément concerné
 ```
 
-Une valeur différente de zéro interdit la publication externe.
+Une valeur différente de zéro interdit la publication externe, y compris lorsqu’un profil a déjà été supprimé mais que son compte Auth attend encore le nettoyage.
 
 ## 6. Retour arrière
 
