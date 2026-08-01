@@ -13,6 +13,7 @@ infra/supabase/migrations/0027_internal_ai_test_agents_core.sql
 infra/supabase/migrations/0028_internal_ai_test_agents_operations.sql
 infra/supabase/migrations/0029_internal_ai_test_agents_release_guard.sql
 infra/supabase/migrations/0030_internal_ai_test_agents_hardening.sql
+infra/supabase/migrations/0031_internal_ai_test_agents_visibility_hardening.sql
 ```
 
 Cyril ou un administrateur autorisé conserve l’exécution distante des migrations Supabase.
@@ -36,7 +37,7 @@ OPENAI_API_KEY=...
 VELVET_TEST_AGENT_MODEL=...
 ```
 
-Sans ces deux dernières variables, les agents utilisent des réponses de secours naturelles afin de permettre la recette fonctionnelle.
+Sans ces deux dernières variables, les agents utilisent des réponses de secours naturelles afin de permettre la recette fonctionnelle. Avec un modèle configuré, les appels utilisent l’API Responses avec `store: false`.
 
 ## 3. Variables du worker
 
@@ -55,7 +56,7 @@ La cadence minimale du cycle est d’une minute. Chaque personnalité possède e
 
 ## 4. API Control
 
-Toutes les requêtes exigent une session Velvet Admin ou Direction.
+Toutes les requêtes exigent une session Velvet Admin ou Direction. Les autres rôles internes ne voient pas les profils IA sans ajout explicite à la liste blanche.
 
 ### Lire l’état
 
