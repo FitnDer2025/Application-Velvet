@@ -1,0 +1,43 @@
+/* Final interaction guard: hidden overlays must never intercept clicks. */
+.nav-scrim,
+#velvetPrivacyShield:not(.visible),
+.velvet-photo-lightbox:not(.visible),
+[aria-hidden="true"][data-overlay],
+[hidden] {
+  pointer-events: none !important;
+}
+
+.nav-scrim {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+@media (max-width: 800px) {
+  body.velvet-member-ui .sidebar:not(.open) {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  body.velvet-member-ui .sidebar.open {
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  body.velvet-member-ui.nav-open .nav-scrim {
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+}
+
+@media (min-width: 801px) {
+  body.velvet-member-ui .sidebar,
+  body.velvet-member-ui main,
+  body.velvet-member-ui button,
+  body.velvet-member-ui a,
+  body.velvet-member-ui input,
+  body.velvet-member-ui select,
+  body.velvet-member-ui textarea {
+    pointer-events: auto;
+  }
+}
