@@ -18,6 +18,7 @@ const PROFILE_SELECT = [
   'journey',
   'favorite_places',
   'availability_text',
+  'profile_photo_ready',
   'created_at',
   'updated_at',
   'individual_profiles(*)',
@@ -70,7 +71,8 @@ function conversationSummaries(conversations, messages, profiles, currentUserId)
   return conversations.map((conversation) => {
     const members = conversation.conversation_members || [];
     const ownMembership = members.find((member) => member.user_id === currentUserId);
-    const otherMembers = members.filter((member) => member.user_id !== currentUserId);
+    if (!ownMembership || ownMembership.left_at || ownMembership.hidden_at) return null;
+    const otherMembers = members.filter((member) => member.user_id !== currentUserId && !member.left_at);
     const participantProfiles = [...new Map(
       otherMembers
         .map((member) => profileByUser.get(member.user_id))
@@ -104,7 +106,7 @@ function conversationSummaries(conversations, messages, profiles, currentUserId)
       last_message_at: latest?.created_at || conversation.updated_at,
       unread_count: unreadCount
     };
-  }).sort((left, right) =>
+  }).filter(Boolean).sort((left, right) =>
     new Date(right.last_message_at || right.updated_at || 0)
       - new Date(left.last_message_at || left.updated_at || 0)
   );
@@ -133,33 +135,34 @@ export async function onRequestGet({ request, env }) {
 
     const token = access.session;
     const [rawProfiles, establishments, venueDirectory, venueRelationships, events, conversations, recommendations] = await Promise.all([
-      restJson(env, `/rest/v1/member_profiles?select=${encodeURIComponent(PROFILE_SELECT)}&visibility=in.(beta_members,published)&order=updated_at.desc&limit=100`, token),
+      restJson(env, `/rest/v1/member_profiles?select=${encodeURIComponent(PROFILE_SELECT)}&visibility=in.(beta_members,published)&order=updated_at.desc&limit=200`, token),
       restJson(env, '/rest/v1/establishments?select=id,directory_venue_id,slug,name,kind,description,city,address_public,phone_public,email_public,opening_hours,amenities,verified_at,subscription_status&visibility=eq.published&order=name.asc&limit=500', token),
       restJson(env, '/rest/v1/rpc/member_venue_catalog', token, { method: 'POST', body: '{}' }),
       restJson(env, `/rest/v1/profile_venue_relationships?select=profile_id,venue_id,relation_type,occurred_on,updated_at&profile_id=eq.${encodeURIComponent(admission.id)}`, token),
-      restJson(env, '/rest/v1/events?select=id,owner_type,establishment_id,organizer_profile_id,title,description,starts_at,ends_at,capacity,location_public,audience,price_cents,currency,registration_open,dress_code,created_at,updated_at&visibility=eq.published&order=starts_at.asc&limit=100', token),
-      restJson(env, '/rest/v1/conversations?select=id,kind,event_id,subject,created_at,updated_at,conversation_members(display_identity,user_id,last_read_at)&order=updated_at.desc&limit=100', token),
-      restJson(env, '/rest/v1/recommendations?select=id,author_profile_id,target_type,target_id,body,rating,created_at&status=eq.published&order=created_at.desc&limit=200', token)
+      restJson(env, '/rest/v1/events?select=id,owner_type,establishment_id,organizer_profile_id,title,description,starts_at,ends_at,capacity,location_public,audience,price_cents,currency,registration_open,dress_code,event_category,cap_zone,cap_venue,moderation_status,created_at,updated_at&visibility=eq.published&moderation_status=eq.approved&order=starts_at.asc&limit=200', token),
+      restJson(env, '/rest/v1/conversations?select=id,kind,event_id,subject,created_at,updated_at,conversation_members(display_identity,user_id,last_read_at,last_delivered_at,left_at,hidden_at)&order=updated_at.desc&limit=200', token),
+      restJson(env, '/rest/v1/recommendations?select=id,author_profile_id,target_type,target_id,body,rating,created_at&status=eq.published&order=created_at.desc&limit=500', token)
     ]);
 
-    const profiles = await enrichProfilesMedia(env, token, rawProfiles);
+    const allProfiles = await enrichProfilesMedia(env, token, rawProfiles || []);
+    const visibleProfiles = allProfiles.filter((profile) => profile.profile_photo_ready === true);
     const conversationIds = (conversations || []).map((conversation) => conversation.id);
     const recentMessages = conversationIds.length
       ? await restJson(
         env,
-        `/rest/v1/messages?select=id,conversation_id,sender_user_id,sender_identity,body,created_at&conversation_id=in.(${conversationIds.join(',')})&deleted_at=is.null&order=created_at.desc&limit=2000`,
+        `/rest/v1/messages?select=id,conversation_id,sender_user_id,sender_identity,body,created_at&conversation_id=in.(${conversationIds.join(',')})&deleted_at=is.null&order=created_at.desc&limit=3000`,
         token
       ).catch(() => [])
       : [];
     const enrichedConversations = conversationSummaries(
       conversations || [],
       recentMessages || [],
-      profiles || [],
+      allProfiles || [],
       access.account.userId
     );
 
     return withSession({
-      profiles,
+      profiles: visibleProfiles,
       establishments,
       venueDirectory: (venueDirectory || []).map(enrichVenueCoordinates),
       venueRelationships,

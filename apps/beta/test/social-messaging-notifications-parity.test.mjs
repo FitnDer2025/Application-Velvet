@@ -79,7 +79,7 @@ test('le Web et la PWA affichent accusés réactions saisie historique et push h
   assert.match(deepLink, /data-open-profile/);
   assert.match(styles, /\.velvet-notification-entity-preview/);
   assert.match(styles, /\.velvet-view-history-v2/);
-  assert.match(worker, /velvet-beta-shell-v16/);
+  assert.match(worker, /velvet-beta-shell-v17/);
   assert.match(worker, /velvet-push-deeplink\.js/);
   assert.match(worker, /self\.addEventListener\('push'/);
   assert.match(worker, /notificationclick/);
@@ -87,12 +87,13 @@ test('le Web et la PWA affichent accusés réactions saisie historique et push h
 });
 
 test('iOS utilise le même état temps réel et archive les notifications', async () => {
-  const [models, service, store, messaging, shell, notifications, memberDetail, discovery] = await Promise.all([
+  const [models, service, store, messaging, shell, managedInbox, notifications, memberDetail, discovery] = await Promise.all([
     read('ios/Velvet/Core/Models/DirectoryModels.swift'),
     read('ios/Velvet/Core/Session/SessionService+IOSSocial.swift'),
     read('ios/Velvet/Core/Session/VelvetStore.swift'),
     read('ios/Velvet/Features/Messaging/RealtimeAppleMessagingViews.swift'),
     read('ios/Velvet/Features/Home/MainShellView.swift'),
+    read('ios/Velvet/Features/Messaging/ManagedConversationsView.swift'),
     read('ios/Velvet/Features/Home/NotificationsView.swift'),
     read('ios/Velvet/Features/Discovery/MemberDetailView.swift'),
     read('ios/Velvet/Features/Discovery/PremiumDiscoveryGridView.swift')
@@ -112,8 +113,9 @@ test('iOS utilise le même état temps réel et archive les notifications', asyn
   assert.match(messaging, /contextMenu/);
   assert.match(messaging, /composerIdentity = UUID\(\)/);
   assert.match(messaging, /setTyping/);
-  assert.match(shell, /RealtimeAppleConversationsView/);
+  assert.match(shell, /ManagedConversationsView/);
   assert.match(shell, /RealtimeAppleConversationView/);
+  assert.match(managedInbox, /removeConversation/);
   assert.match(notifications, /Tout archiver/);
   assert.match(notifications, /NotificationActivityTab/);
   assert.match(notifications, /entityPreviewUrl/);

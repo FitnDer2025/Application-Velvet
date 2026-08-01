@@ -45,6 +45,8 @@ struct MainShellView: View {
         case notifications
         case studio
         case editProfile
+        case media
+        case experience
         case privacy
 
         var placesSelection: Int? {
@@ -69,6 +71,8 @@ struct MainShellView: View {
     @State private var showsPlacesEvents = false
     @State private var showsStudio = false
     @State private var showsProfileEditor = false
+    @State private var showsMediaManager = false
+    @State private var showsExperienceSettings = false
     @State private var showsPrivacy = false
     @State private var pendingMenuRoute: MenuRoute?
     @State private var pendingNotificationDestination: VelvetNotificationDestination?
@@ -133,6 +137,8 @@ struct MainShellView: View {
                     openAgenda: { queue(.agenda) },
                     openStudio: { queue(.studio) },
                     editProfile: { queue(.editProfile) },
+                    manageMedia: { queue(.media) },
+                    openExperience: { queue(.experience) },
                     openPrivacy: { queue(.privacy) }
                 )
                 .environmentObject(store)
@@ -142,7 +148,7 @@ struct MainShellView: View {
         }
         .sheet(isPresented: $showsPlacesEvents) {
             NavigationStack {
-                PlacesEventsView(initialSelection: placesSelection)
+                IntelligentPlacesEventsView(initialSelection: placesSelection)
                     .environmentObject(store)
                     .toolbar {
                         ToolbarItem(placement: .topBarLeading) {
@@ -165,6 +171,12 @@ struct MainShellView: View {
         }
         .sheet(isPresented: $showsProfileEditor) {
             ProfileEditorView(profile: profile)
+        }
+        .sheet(isPresented: $showsMediaManager) {
+            ProfileMediaManagementView()
+        }
+        .sheet(isPresented: $showsExperienceSettings) {
+            ExperienceSettingsView()
         }
         .sheet(isPresented: $showsPrivacy) {
             PrivacySettingsView()
@@ -205,13 +217,13 @@ struct MainShellView: View {
     private var selectedContent: some View {
         switch selectedTab {
         case .home:
-            NavigationStack { PremiumHomeView(profile: profile) }
+            NavigationStack { IntelligentHomeView(profile: profile) }
         case .discover:
             NavigationStack { PremiumDiscoveryGridView(currentProfile: profile) }
         case .maps:
             NavigationStack { MemberMapView() }
         case .messages:
-            NavigationStack { RealtimeAppleConversationsView() }
+            NavigationStack { ManagedConversationsView() }
         case .profile:
             NavigationStack { PremiumOwnProfileView(profile: profile) }
         }
@@ -305,6 +317,8 @@ struct MainShellView: View {
             case .notifications: showsNotifications = true
             case .studio: showsStudio = true
             case .editProfile: showsProfileEditor = true
+            case .media: showsMediaManager = true
+            case .experience: showsExperienceSettings = true
             case .privacy: showsPrivacy = true
             default: break
             }
@@ -368,6 +382,8 @@ private struct VelvetMenuView: View {
     let openAgenda: () -> Void
     let openStudio: () -> Void
     let editProfile: () -> Void
+    let manageMedia: () -> Void
+    let openExperience: () -> Void
     let openPrivacy: () -> Void
 
     var body: some View {
@@ -378,11 +394,11 @@ private struct VelvetMenuView: View {
                     VelvetPageHeader(
                         "Navigation",
                         title: "Plus de Velvet",
-                        subtitle: "Toutes les fonctions secondaires et les outils de ton profil."
+                        subtitle: "Toutes les fonctions secondaires et les outils de votre profil."
                     )
                     .padding(.bottom, 8)
 
-                    menuButton("Sorties & établissements", detail: "Agenda, clubs et professionnels", icon: "sparkles", action: openPlaces)
+                    menuButton("Sorties & clubs", detail: "Agenda, Cap d’Agde et établissements", icon: "sparkles", action: openPlaces)
                     menuButton("Notifications", detail: "Messages, réactions et activité", icon: "bell", action: openNotifications)
                     menuButton("Agenda complet", detail: "Sorties, visites et voyages", icon: "calendar", action: openAgenda)
 
@@ -394,6 +410,8 @@ private struct VelvetMenuView: View {
 
                     menuButton("Studio du profil & Velvet IA", detail: "Plume, organisateur et outils avancés", icon: "wand.and.stars", action: openStudio)
                     menuButton("Modifier mon profil", detail: "Textes, identité, pratiques et préférences", icon: "square.and.pencil", action: editProfile)
+                    menuButton("Gérer mes photos & albums", detail: "Supprimer les médias publics ou privés", icon: "photo.stack", action: manageMedia)
+                    menuButton("Proximité & Velvet Intelligence", detail: "Rayon, tri et recommandations", icon: "location.circle", action: openExperience)
                     menuButton("Paramètres & confidentialité", detail: "Face ID, visibilité, notifications et compte", icon: "slider.horizontal.3", action: openPrivacy)
                 }
                 .padding(20)

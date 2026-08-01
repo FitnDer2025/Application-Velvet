@@ -31,7 +31,7 @@ test('la conversation mobile adopte une ergonomie de messagerie plein écran san
   assert.match(css, /env\(safe-area-inset-bottom\)/);
   assert.match(html, /velvet-chat-whatsapp\.css\?v=20260731-1/);
   assert.match(html, /velvet-chat-whatsapp\.js\?v=20260731-1/);
-  assert.match(worker, /velvet-beta-shell-v16/);
+  assert.match(worker, /velvet-beta-shell-v17/);
   assert.match(worker, /velvet-chat-whatsapp\.css\?v=20260731-1/);
   assert.match(worker, /velvet-chat-whatsapp\.js\?v=20260731-1/);
 });

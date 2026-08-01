@@ -45,6 +45,7 @@ struct MemberSettingsResponse: Codable, Sendable {
     let privacy: PrivacyAudienceSettings
     let notifications: NotificationPreferences
     let location: LocationPreferences
+    let experience: ExperiencePreferences
     let verification: VerificationPreferences
     let profileVerificationStatus: String?
     let verificationProviderConfigured: Bool?
@@ -86,6 +87,14 @@ struct LocationPreferences: Codable, Sendable {
     let precisionKm: Int
 }
 
+struct ExperiencePreferences: Codable, Sendable {
+    let userId: UUID?
+    let discoveryRadiusKm: Int
+    let profileSort: String
+    let aiPersonalizationEnabled: Bool
+    let updatedAt: String?
+}
+
 struct VerificationPreferences: Codable, Sendable {
     let userId: UUID?
     let provider: String?
@@ -104,6 +113,9 @@ struct MemberSettingsRequest: Encodable, Sendable {
     let emailEnabled: Bool
     let quietHoursStart: String?
     let quietHoursEnd: String?
+    let discoveryRadiusKm: Int
+    let profileSort: String
+    let aiPersonalizationEnabled: Bool
 }
 
 struct OrganizerRequestState: Codable, Identifiable, Sendable {
