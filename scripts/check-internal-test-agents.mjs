@@ -4,7 +4,8 @@ const migration = (await Promise.all([
   'infra/supabase/migrations/0027_internal_ai_test_agents_core.sql',
   'infra/supabase/migrations/0028_internal_ai_test_agents_operations.sql',
   'infra/supabase/migrations/0029_internal_ai_test_agents_release_guard.sql',
-  'infra/supabase/migrations/0030_internal_ai_test_agents_hardening.sql'
+  'infra/supabase/migrations/0030_internal_ai_test_agents_hardening.sql',
+  'infra/supabase/migrations/0031_internal_ai_test_agents_visibility_hardening.sql'
 ].map((path) => readFile(path, 'utf8')))).join('\n');
 const endpoint = await readFile('functions/api/control/test-agents.js', 'utf8');
 const runtime = await readFile('apps/worker/src/test-agents.mjs', 'utf8');
@@ -14,6 +15,7 @@ const aiRuntime = await readFile('apps/worker/src/test-agent-ai.mjs', 'utf8');
 const requirements = [
   [migration.includes('is_internal_test_agent boolean not null default false'), 'Le profil doit porter un marqueur interne'],
   [migration.includes('internal_test_agent_viewers'), 'Une liste blanche interne doit exister'],
+  [migration.includes('can_manage_internal_test_agents'), 'La gestion technique doit rester limitée à Admin/Direction'],
   [migration.includes('is_internal_test_cohort_profile'), 'La cohorte doit être contrôlée côté serveur'],
   [migration.includes('create or replace function public.is_conversation_member'), 'La révocation d’un viewer doit couper les conversations existantes'],
   [migration.includes('on delete set null'), 'Le nettoyage Auth doit rester relançable après suppression du profil'],
