@@ -9,6 +9,7 @@ struct IntelligentPlacesEventsView: View {
     @State private var clubKind = "all"
     @State private var frequentedOnly = false
     @State private var isLoading = false
+    @State private var loadIssue: String?
 
     init(initialSelection: Int = 0) {
         _selection = State(initialValue: initialSelection)
@@ -17,6 +18,10 @@ struct IntelligentPlacesEventsView: View {
     private var events: [IntelligentEvent] {
         let source = intelligence?.nearbyEvents ?? []
         return selection == 2 ? source.filter(\.isCapDAgde) : source.filter { !$0.isCapDAgde }
+    }
+
+    private var capZones: [String] {
+        Array(Set(events.compactMap(\.capZone).filter { !$0.isEmpty })).sorted()
     }
 
     private var clubs: [IntelligentClub] {
@@ -38,9 +43,11 @@ struct IntelligentPlacesEventsView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     HStack(alignment: .top) {
                         VelvetPageHeader(
-                            "Agenda intelligent",
-                            title: "Sorties & clubs",
-                            subtitle: "Agendas ouverts dans votre rayon ou publiés par les clubs que vous fréquentez."
+                            selection == 2 ? "Destination signature" : "Agenda intelligent",
+                            title: selection == 2 ? "Cap d’Agde" : "Sorties & clubs",
+                            subtitle: selection == 2
+                                ? "Séjours, rencontres et rendez-vous Velvet dans le village naturiste."
+                                : "Agendas ouverts dans votre rayon ou publiés par les clubs que vous fréquentez."
                         )
                         Spacer(minLength: 8)
                         Button { showsCreator = true } label: {
@@ -52,7 +59,7 @@ struct IntelligentPlacesEventsView: View {
                                 .clipShape(Circle())
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("Créer une sortie")
+                        .accessibilityLabel(selection == 2 ? "Publier un séjour au Cap d’Agde" : "Créer une sortie")
                     }
 
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -64,6 +71,10 @@ struct IntelligentPlacesEventsView: View {
                         }
                     }
 
+                    if let loadIssue {
+                        inlineSyncNotice(loadIssue)
+                    }
+
                     content
                 }
                 .padding(.horizontal, 16)
@@ -72,9 +83,12 @@ struct IntelligentPlacesEventsView: View {
             }
             .refreshable { await load() }
 
-            if isLoading {
+            if isLoading && intelligence == nil {
                 ProgressView()
                     .tint(VelvetColor.champagneGold)
+                    .padding(20)
+                    .background(.ultraThinMaterial)
+                    .clipShape(Circle())
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -89,10 +103,12 @@ struct IntelligentPlacesEventsView: View {
     @ViewBuilder
     private var content: some View {
         switch selection {
-        case 0, 2:
+        case 0:
             eventsContent
         case 1:
             clubsContent
+        case 2:
+            capDAgdeContent
         default:
             AgendaView()
         }
@@ -102,8 +118,8 @@ struct IntelligentPlacesEventsView: View {
     private var eventsContent: some View {
         if events.isEmpty {
             VelvetEmptyState(
-                symbol: selection == 2 ? "sun.max" : "calendar.badge.plus",
-                title: selection == 2 ? "Aucun séjour au Cap publié" : "Aucune sortie proche",
+                symbol: "calendar.badge.plus",
+                title: "Aucune sortie proche",
                 message: "Créez une sortie ou augmentez votre rayon dans les préférences de proximité."
             )
         } else {
@@ -115,6 +131,66 @@ struct IntelligentPlacesEventsView: View {
                         IntelligentEventRow(event: event)
                     }
                     .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private var capDAgdeContent: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            CapDAgdeHero(
+                stayCount: events.count,
+                zoneCount: capZones.count,
+                create: { showsCreator = true }
+            )
+
+            if !capZones.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("ZONES ACTIVES")
+                        .font(VelvetTypography.caption(size: 9, weight: .semibold))
+                        .tracking(1.5)
+                        .foregroundStyle(VelvetColor.champagneGold)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(capZones, id: \.self) { zone in
+                                Label(zone, systemImage: "sun.max.fill")
+                                    .font(VelvetTypography.body(size: 10, weight: .semibold))
+                                    .foregroundStyle(VelvetColor.ivory)
+                                    .padding(.horizontal, 12)
+                                    .frame(height: 38)
+                                    .background(.ultraThinMaterial)
+                                    .background(VelvetColor.champagneGold.opacity(0.05))
+                                    .clipShape(Capsule())
+                                    .overlay(Capsule().stroke(VelvetColor.champagneGold.opacity(0.18)))
+                            }
+                        }
+                    }
+                }
+            }
+
+            HStack(alignment: .lastTextBaseline) {
+                Text("Séjours à venir")
+                    .font(VelvetTypography.title(size: 28))
+                    .foregroundStyle(VelvetColor.ivory)
+                Spacer()
+                Text("\(events.count) PUBLICATION\(events.count > 1 ? "S" : "")")
+                    .font(VelvetTypography.caption(size: 9, weight: .semibold))
+                    .tracking(1.1)
+                    .foregroundStyle(VelvetColor.champagneGold)
+            }
+
+            if events.isEmpty {
+                CapDAgdeEmptyPanel(create: { showsCreator = true })
+            } else {
+                LazyVStack(spacing: 14) {
+                    ForEach(events) { event in
+                        NavigationLink {
+                            IntelligentEventDetailView(event: event)
+                        } label: {
+                            CapDAgdeEventCard(event: event)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
         }
@@ -158,18 +234,44 @@ struct IntelligentPlacesEventsView: View {
         }
     }
 
+    private func inlineSyncNotice(_ message: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "arrow.clockwise.circle")
+                .foregroundStyle(VelvetColor.champagneGold)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Agenda en cours d’actualisation")
+                    .font(VelvetTypography.body(size: 12, weight: .semibold))
+                    .foregroundStyle(VelvetColor.ivory)
+                Text("Les espaces restent accessibles. Tirez l’écran vers le bas pour relancer la synchronisation.")
+                    .font(VelvetTypography.caption(size: 10))
+                    .foregroundStyle(VelvetColor.textSecondary)
+            }
+            Spacer()
+            Button("Réessayer") { Task { await load() } }
+                .font(VelvetTypography.caption(size: 10, weight: .semibold))
+                .foregroundStyle(VelvetColor.champagneGold)
+                .accessibilityHint(message)
+        }
+        .padding(14)
+        .background(VelvetColor.champagneGold.opacity(0.05))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18).stroke(VelvetColor.champagneGold.opacity(0.18)))
+    }
+
     private func clubFilter(_ title: String, value: String) -> some View {
         VelvetChip(title: title, selected: clubKind == value) { clubKind = value }
     }
 
     @MainActor
     private func load() async {
+        guard !isLoading else { return }
         isLoading = true
+        loadIssue = nil
         defer { isLoading = false }
         do {
             intelligence = try await store.service.homeIntelligence()
         } catch {
-            store.errorMessage = ErrorMessage.text(for: error)
+            loadIssue = ErrorMessage.text(for: error)
         }
     }
 }
@@ -187,11 +289,15 @@ struct IntelligentEventDetailView: View {
             VelvetBackground()
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    VelvetPageHeader(
-                        event.isCapDAgde ? "Destination signature" : "Événement Velvet",
-                        title: event.title,
-                        subtitle: event.startsAt.velvetDateLabel
-                    )
+                    if event.isCapDAgde {
+                        CapDAgdeDetailHero(event: event)
+                    } else {
+                        VelvetPageHeader(
+                            "Événement Velvet",
+                            title: event.title,
+                            subtitle: event.startsAt.velvetDateLabel
+                        )
+                    }
 
                     VelvetCard {
                         VStack(alignment: .leading, spacing: 13) {
@@ -449,6 +555,236 @@ struct EventCreationView: View {
         "Ensemble du village", "Port Nature", "Héliopolis", "Port Ambonne",
         "Port Soleil", "Le Môle", "Plage naturiste"
     ]
+}
+
+private struct CapDAgdeHero: View {
+    let stayCount: Int
+    let zoneCount: Int
+    let create: () -> Void
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            LinearGradient(
+                colors: [Color(hex: 0x4A1C2E), Color(hex: 0x21141A), VelvetColor.velvetBlack],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            RadialGradient(
+                colors: [VelvetColor.champagneGold.opacity(0.34), .clear],
+                center: .topTrailing,
+                startRadius: 10,
+                endRadius: 320
+            )
+            Image(systemName: "sun.max.fill")
+                .font(.system(size: 150, weight: .ultraLight))
+                .foregroundStyle(VelvetColor.champagneGold.opacity(0.10))
+                .offset(x: 185, y: -80)
+
+            VStack(alignment: .leading, spacing: 16) {
+                Label("DESTINATION VELVET", systemImage: "sparkles")
+                    .font(VelvetTypography.caption(size: 9, weight: .bold))
+                    .tracking(1.7)
+                    .foregroundStyle(VelvetColor.champagneGold)
+
+                Text("Votre saison au\nCap d’Agde")
+                    .font(VelvetTypography.title(size: 37))
+                    .foregroundStyle(VelvetColor.ivory)
+                    .lineSpacing(-1)
+
+                Text("Repérez les séjours, les zones fréquentées et les membres présents, dans une expérience plus éditoriale et plus lisible.")
+                    .font(VelvetTypography.body(size: 13))
+                    .foregroundStyle(VelvetColor.textSecondary)
+                    .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(spacing: 10) {
+                    CapMetric(value: "\(stayCount)", label: "séjours")
+                    CapMetric(value: "\(zoneCount)", label: "zones")
+                    Spacer()
+                }
+
+                Button(action: create) {
+                    Label("Publier mon séjour", systemImage: "plus")
+                        .font(VelvetTypography.body(size: 13, weight: .semibold))
+                        .foregroundStyle(VelvetColor.velvetBlack)
+                        .padding(.horizontal, 17)
+                        .frame(height: 46)
+                        .background(VelvetColor.champagneGold)
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(22)
+        }
+        .frame(minHeight: 390)
+        .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 30).stroke(.white.opacity(0.10)))
+        .shadow(color: .black.opacity(0.36), radius: 30, y: 16)
+    }
+}
+
+private struct CapMetric: View {
+    let value: String
+    let label: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(value)
+                .font(VelvetTypography.title(size: 25))
+                .foregroundStyle(VelvetColor.ivory)
+            Text(label.uppercased())
+                .font(VelvetTypography.caption(size: 8, weight: .semibold))
+                .tracking(1)
+                .foregroundStyle(VelvetColor.champagneGold)
+        }
+        .padding(.horizontal, 13)
+        .frame(height: 62)
+        .background(.ultraThinMaterial)
+        .background(VelvetColor.ivory.opacity(0.025))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(.white.opacity(0.08)))
+    }
+}
+
+private struct CapDAgdeEmptyPanel: View {
+    let create: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Image(systemName: "sun.horizon.fill")
+                    .font(.system(size: 28, weight: .light))
+                    .foregroundStyle(VelvetColor.champagneGold)
+                    .frame(width: 58, height: 58)
+                    .background(VelvetColor.champagneGold.opacity(0.08))
+                    .clipShape(Circle())
+                Spacer()
+                Text("SAISON À VENIR")
+                    .font(VelvetTypography.caption(size: 9, weight: .bold))
+                    .tracking(1.5)
+                    .foregroundStyle(VelvetColor.champagneGold)
+            }
+            Text("Soyez le premier à annoncer votre présence")
+                .font(VelvetTypography.title(size: 27))
+                .foregroundStyle(VelvetColor.ivory)
+            Text("Même sans publication récente, cet espace reste utile : préparez votre séjour, indiquez votre zone et laissez les autres membres vous retrouver au bon moment.")
+                .font(VelvetTypography.body(size: 13))
+                .foregroundStyle(VelvetColor.textSecondary)
+                .lineSpacing(4)
+            Button(action: create) {
+                Label("Créer un séjour au Cap", systemImage: "plus.circle.fill")
+                    .font(VelvetTypography.body(size: 13, weight: .semibold))
+                    .foregroundStyle(VelvetColor.champagneGold)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(20)
+        .background {
+            LinearGradient(
+                colors: [VelvetColor.velvetBurgundy.opacity(0.28), VelvetColor.panelRaised.opacity(0.72)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 26).stroke(VelvetColor.champagneGold.opacity(0.16)))
+    }
+}
+
+private struct CapDAgdeEventCard: View {
+    let event: IntelligentEvent
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            LinearGradient(
+                colors: [Color(hex: 0x3D1726), VelvetColor.panelRaised, VelvetColor.velvetBlack],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            RadialGradient(
+                colors: [VelvetColor.champagneGold.opacity(0.18), .clear],
+                center: .topTrailing,
+                startRadius: 5,
+                endRadius: 260
+            )
+            Image(systemName: "sun.max.fill")
+                .font(.system(size: 78, weight: .ultraLight))
+                .foregroundStyle(VelvetColor.champagneGold.opacity(0.09))
+                .offset(x: 260, y: -75)
+
+            VStack(alignment: .leading, spacing: 11) {
+                HStack {
+                    Text(event.startsAt.velvetDateLabel.uppercased())
+                        .font(VelvetTypography.caption(size: 9, weight: .bold))
+                        .tracking(1.2)
+                        .foregroundStyle(VelvetColor.champagneGold)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(VelvetColor.champagneGold)
+                }
+                Text(event.title)
+                    .font(VelvetTypography.title(size: 27))
+                    .foregroundStyle(VelvetColor.ivory)
+                    .lineLimit(2)
+                Text(event.description ?? "Séjour Velvet au Cap d’Agde")
+                    .font(VelvetTypography.body(size: 12))
+                    .foregroundStyle(VelvetColor.textSecondary)
+                    .lineLimit(2)
+                HStack(spacing: 12) {
+                    Label(event.capZone ?? "Village naturiste", systemImage: "sun.max.fill")
+                    if let venue = event.capVenue, !venue.isEmpty {
+                        Label(venue, systemImage: "building.2")
+                    }
+                }
+                .font(VelvetTypography.caption(size: 9, weight: .semibold))
+                .foregroundStyle(VelvetColor.softBlush)
+                .lineLimit(1)
+            }
+            .padding(18)
+        }
+        .frame(minHeight: 215)
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 26).stroke(.white.opacity(0.09)))
+        .shadow(color: .black.opacity(0.24), radius: 20, y: 10)
+    }
+}
+
+private struct CapDAgdeDetailHero: View {
+    let event: IntelligentEvent
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            LinearGradient(
+                colors: [Color(hex: 0x4A1C2E), Color(hex: 0x1E1217), VelvetColor.velvetBlack],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            Image(systemName: "sun.max.fill")
+                .font(.system(size: 130, weight: .ultraLight))
+                .foregroundStyle(VelvetColor.champagneGold.opacity(0.10))
+                .offset(x: 205, y: -70)
+            VStack(alignment: .leading, spacing: 10) {
+                Text("DESTINATION SIGNATURE")
+                    .font(VelvetTypography.caption(size: 9, weight: .bold))
+                    .tracking(1.6)
+                    .foregroundStyle(VelvetColor.champagneGold)
+                Text(event.title)
+                    .font(VelvetTypography.title(size: 34))
+                    .foregroundStyle(VelvetColor.ivory)
+                Text(event.startsAt.velvetDateLabel)
+                    .font(VelvetTypography.body(size: 13, weight: .semibold))
+                    .foregroundStyle(VelvetColor.softBlush)
+                Label(event.capZone ?? "Village naturiste", systemImage: "sun.max.fill")
+                    .font(VelvetTypography.body(size: 11, weight: .semibold))
+                    .foregroundStyle(VelvetColor.champagneGold)
+            }
+            .padding(20)
+        }
+        .frame(minHeight: 290)
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 28).stroke(.white.opacity(0.10)))
+        .shadow(color: .black.opacity(0.32), radius: 26, y: 14)
+    }
 }
 
 private struct IntelligentEventRow: View {
