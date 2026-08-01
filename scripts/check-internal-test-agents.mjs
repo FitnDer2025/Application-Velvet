@@ -28,6 +28,7 @@ const requirements = [
   [endpoint.includes("'content-type': 'image/png'") && portraits.includes("chunk('IDAT'"), 'Les visuels de recette doivent respecter les types MIME autorisés'],
   [aiRuntime.includes("VELVET_INTERNAL_TEST_AGENTS || '') === 'enabled'"), 'Le worker doit exiger le drapeau explicite'],
   [aiRuntime.includes('store: false'), 'Les réponses IA ne doivent pas être stockées comme état fournisseur'],
+  [aiRuntime.includes('instructions: IDENTITY_GUARD'), 'Les messages utilisateurs ne doivent pas pouvoir redéfinir l’identité des agents'],
   [runtime.includes('target_profile.is_internal_test_agent'), 'Les réponses doivent rester dans la cohorte'],
   [runtime.includes('internal_test_agent_runs'), 'Les actions doivent être auditées sans contenu intime']
 ];
