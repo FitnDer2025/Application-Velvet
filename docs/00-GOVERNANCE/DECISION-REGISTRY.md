@@ -34,6 +34,7 @@
 - Aucun affichage public de dernière connexion exacte.
 - Velvet Activity Index synthétique, Mode Absence et tendance de réactivité.
 - Notifications push configurables et modes Standard, Discret et Invisible.
+- Les agents IA de recette sont strictement limités aux environnements internes, invisibles aux utilisateurs externes et obligatoirement supprimés avant toute ouverture publique.
 
 ### Conversations, consentement et confiance
 
@@ -113,8 +114,9 @@
 - `ADR-PRO-038-041` : IA organisateur, CRM métier, IA professionnelle et voyages.
 - `ADR-GAM-043-044` : gamification positive et distinctions évolutives.
 - `ADR-TECH-045` : application web responsive installable en PWA pour la V1.
-- `ADR-TECH-058` : fondation iOS native SwiftUI après stabilisation du socle Web.
 - `ADR-MON-057` : offres Découverte, Signature et Pro, cohortes fondatrices, promotions et moteur de droits.
+- `ADR-TECH-058` : fondation iOS native SwiftUI après stabilisation du socle Web.
+- `ADR-AI-059` : profils IA de recette strictement internes, isolés par liste blanche, kill switch, nettoyage et blocage de publication.
 - `ADR-GOV-001` : documentation et commit immédiats après acceptation.
 - `ADR-GOV-002` : pilotage continu par roadmap, métriques et changelog.
 - `ADR-GOV-003` : autonomie complète de livraison Codex, avec exécution SQL Supabase réservée à Cyril.
