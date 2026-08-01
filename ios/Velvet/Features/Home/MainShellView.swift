@@ -225,7 +225,7 @@ struct MainShellView: View {
         case .messages:
             NavigationStack { ManagedConversationsView() }
         case .profile:
-            NavigationStack { PremiumOwnProfileView(profile: profile) }
+            NavigationStack { PremiumOwnProfileOutingsView(profile: profile) }
         }
     }
 
