@@ -323,7 +323,9 @@ final class VelvetStore: ObservableObject {
         body: String,
         hasAttachments: Bool
     ) -> Bool {
-        let ownUserID = response.currentUserId ?? directory?.currentUserId
+        guard let ownUserID = response.currentUserId ?? directory?.currentUserId else {
+            return false
+        }
         let normalizedBody = body.trimmingCharacters(in: .whitespacesAndNewlines)
 
         return response.messages.contains { message in
@@ -375,7 +377,7 @@ final class VelvetStore: ObservableObject {
             venueDirectory: current.venueDirectory,
             events: current.events,
             conversations: mergedConversations,
-            recommendations: current.recommendations ?? refreshed.recommendations,
+            recommendations: current.recommendations ?? refreshed.recommendations ?? [],
             messageUnreadCount: refreshed.messageUnreadCount,
             currentUserId: refreshed.currentUserId
         )
