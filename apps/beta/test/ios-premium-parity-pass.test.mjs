@@ -4,6 +4,7 @@ import test from 'node:test';
 
 const files = {
   shell: 'ios/Velvet/Features/Home/MainShellView.swift',
+  navigation: 'ios/Velvet/Features/Home/VelvetNavigationHubView.swift',
   shellComponents: 'ios/Velvet/DesignSystem/AppleShellComponents.swift',
   presentation: 'ios/Velvet/Core/Models/MemberProfilePresentation.swift',
   discovery: 'ios/Velvet/Features/Discovery/PremiumDiscoveryGridView.swift',
@@ -21,12 +22,14 @@ async function source(name) {
 
 test('iOS shell uses compact header and translucent Apple-style dock', async () => {
   const shell = await source('shell');
+  const navigation = await source('navigation');
   const components = await source('shellComponents');
   const presentation = await source('presentation');
   assert.match(shell, /CompactVelvetTopBar/);
-  assert.match(shell, /PremiumDiscoveryGridView/);
+  assert.match(shell, /VelvetNavigationHubView/);
+  assert.match(navigation, /PremiumDiscoveryGridView/);
   assert.match(shell, /ManagedConversationsView/);
-  assert.match(shell, /PremiumOwnProfileView/);
+  assert.match(shell, /PremiumOwnProfileOutingsView/);
   assert.match(shell, /Studio du profil & Velvet IA/);
   assert.match(shell, /Modifier mon profil/);
   assert.match(shell, /Paramètres & confidentialité/);
@@ -42,8 +45,8 @@ test('iOS discovery displays age, compact 3-column cards and nine-item paginatio
   assert.match(value, /count: 3/);
   assert.match(value, /visibleCount = 9/);
   assert.match(value, /Afficher 9 profils de plus/);
-  assert.match(value, /CompactMemberCard/);
-  assert.match(value, /profile\.velvetDemographicLabel/);
+  assert.match(value, /PremiumDiscoveryMemberCard/);
+  assert.match(value, /profile\.premiumDiscoveryCategory/);
   assert.match(value, /profile\.velvetAgeLabel/);
   assert.match(value, /PremiumDiscoveryFiltersView/);
 });

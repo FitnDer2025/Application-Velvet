@@ -107,7 +107,8 @@ final class VelvetStore: ObservableObject {
             async let directoryRequest = service.directory()
             async let notificationRequest = service.notifications()
             async let engagementRequest = service.engagementState()
-            directory = try await directoryRequest
+            let refreshedDirectory = try await directoryRequest
+            directory = mergedMessagingDirectory(refreshedDirectory)
             notificationFeed = (try? await notificationRequest) ?? notificationFeed
             if let engagement = try? await engagementRequest {
                 apply(engagement)
@@ -130,21 +131,17 @@ final class VelvetStore: ObservableObject {
         }
     }
 
-    func refreshMessages(conversationID: UUID) async {
+    func refreshMessages(conversationID: UUID, reportError: Bool = false) async {
         do {
             let response = try await service.messages(conversationID: conversationID)
-            messages[conversationID] = response.messages
-            if let streak = response.streak {
-                conversationStreaks[conversationID] = streak
-            }
-            messageReceipts[conversationID] = Self.uuidDictionary(response.receipts)
-            messageReactions[conversationID] = Self.uuidDictionary(response.reactions)
-            typingParticipants[conversationID] = response.typing ?? []
+            applyMessagesResponse(response, conversationID: conversationID)
             notificationFeed = (try? await service.notifications()) ?? notificationFeed
             await refreshDirectoryOnly()
             await synchronizeExternalCounters()
         } catch {
-            errorMessage = ErrorMessage.text(for: error)
+            if reportError {
+                errorMessage = ErrorMessage.text(for: error)
+            }
         }
     }
 
@@ -153,17 +150,40 @@ final class VelvetStore: ObservableObject {
         conversationID: UUID,
         attachments: [OutgoingMessageAttachment] = []
     ) async -> Bool {
+        errorMessage = nil
+        let existingIDs = Set((messages[conversationID] ?? []).map(\.id))
+
         do {
             let message = try await service.sendMessage(
                 body,
                 conversationID: conversationID,
                 attachments: attachments
             )
-            messages[conversationID, default: []].append(message)
+            if messages[conversationID, default: []].contains(where: { $0.id == message.id }) == false {
+                messages[conversationID, default: []].append(message)
+            }
             await refreshMessages(conversationID: conversationID)
+            errorMessage = nil
             return true
-        } catch {
-            errorMessage = ErrorMessage.text(for: error)
+        } catch let sendError {
+            // Le serveur peut avoir enregistré le message avant qu’une réponse réseau ou JSON
+            // ne soit lisible par iOS. Une lecture immédiate permet de confirmer la persistance
+            // et évite de remettre à tort le texte déjà envoyé dans le champ de saisie.
+            if let response = try? await service.messages(conversationID: conversationID) {
+                applyMessagesResponse(response, conversationID: conversationID)
+                if persistedMessageExists(
+                    in: response,
+                    existingIDs: existingIDs,
+                    body: body,
+                    hasAttachments: !attachments.isEmpty
+                ) {
+                    await refreshDirectoryOnly()
+                    await synchronizeExternalCounters()
+                    errorMessage = nil
+                    return true
+                }
+            }
+            errorMessage = ErrorMessage.text(for: sendError)
             return false
         }
     }
@@ -282,9 +302,85 @@ final class VelvetStore: ObservableObject {
 
     private func refreshDirectoryOnly() async {
         if let refreshed = try? await service.directory() {
-            directory = refreshed
+            directory = mergedMessagingDirectory(refreshed)
             loadIssue = nil
         }
+    }
+
+    private func applyMessagesResponse(_ response: MessagesResponse, conversationID: UUID) {
+        messages[conversationID] = response.messages
+        if let streak = response.streak {
+            conversationStreaks[conversationID] = streak
+        }
+        messageReceipts[conversationID] = Self.uuidDictionary(response.receipts)
+        messageReactions[conversationID] = Self.uuidDictionary(response.reactions)
+        typingParticipants[conversationID] = response.typing ?? []
+    }
+
+    private func persistedMessageExists(
+        in response: MessagesResponse,
+        existingIDs: Set<UUID>,
+        body: String,
+        hasAttachments: Bool
+    ) -> Bool {
+        guard let ownUserID = response.currentUserId ?? directory?.currentUserId else {
+            return false
+        }
+        let normalizedBody = body.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        return response.messages.contains { message in
+            guard !existingIDs.contains(message.id), message.senderUserId == ownUserID else {
+                return false
+            }
+            let persistedBody = (message.body ?? "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            if !normalizedBody.isEmpty {
+                return persistedBody == normalizedBody
+            }
+            return hasAttachments && !(message.attachments ?? []).isEmpty
+        }
+    }
+
+    private func mergedMessagingDirectory(_ refreshed: DirectoryResponse) -> DirectoryResponse {
+        guard let current = directory else { return refreshed }
+        let previousConversations = Dictionary(
+            uniqueKeysWithValues: current.conversations.map { ($0.id, $0) }
+        )
+        let mergedConversations = refreshed.conversations.map { conversation in
+            guard let previous = previousConversations[conversation.id] else {
+                return conversation
+            }
+            let sameParticipant = previous.participantProfileId == conversation.participantProfileId
+            return Conversation(
+                id: conversation.id,
+                kind: conversation.kind,
+                eventId: conversation.eventId,
+                subject: conversation.subject,
+                createdAt: conversation.createdAt,
+                updatedAt: conversation.updatedAt,
+                conversationMembers: conversation.conversationMembers,
+                participantProfileId: conversation.participantProfileId,
+                participantDisplayName: conversation.participantDisplayName,
+                participantPhotoUrl: sameParticipant
+                    ? (previous.participantPhotoUrl ?? conversation.participantPhotoUrl)
+                    : conversation.participantPhotoUrl,
+                lastMessageBody: conversation.lastMessageBody,
+                lastMessageAt: conversation.lastMessageAt,
+                unreadCount: conversation.unreadCount
+            )
+        }
+
+        return DirectoryResponse(
+            locked: refreshed.locked,
+            profiles: current.profiles,
+            establishments: current.establishments,
+            venueDirectory: current.venueDirectory,
+            events: current.events,
+            conversations: mergedConversations,
+            recommendations: current.recommendations ?? refreshed.recommendations ?? [],
+            messageUnreadCount: refreshed.messageUnreadCount,
+            currentUserId: refreshed.currentUserId
+        )
     }
 
     private func markVisibleMessagesDelivered() async {

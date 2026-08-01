@@ -88,10 +88,11 @@ test('le Web et la PWA exposent le même accueil et les mêmes outils', async ()
   assert.match(worker, /velvet-experience-management\.js/);
 });
 
-test('iOS utilise l’accueil intelligent, les événements, la suppression et le rayon partagé', async () => {
-  const [shell, home, places, media, conversations, settings, service, models] = await Promise.all([
+test('iOS utilise l’accueil communautaire, les événements, la suppression et le rayon partagé', async () => {
+  const [shell, home, navigation, places, media, conversations, settings, service, models] = await Promise.all([
     read('ios/Velvet/Features/Home/MainShellView.swift'),
-    read('ios/Velvet/Features/Home/IntelligentHomeView.swift'),
+    read('ios/Velvet/Features/Home/IntelligentHomeActivityView.swift'),
+    read('ios/Velvet/Features/Home/VelvetNavigationHubView.swift'),
     read('ios/Velvet/Features/Places/IntelligentPlacesEventsView.swift'),
     read('ios/Velvet/Features/Profile/ProfileMediaManagementView.swift'),
     read('ios/Velvet/Features/Messaging/ManagedConversationsView.swift'),
@@ -99,12 +100,17 @@ test('iOS utilise l’accueil intelligent, les événements, la suppression et l
     read('ios/Velvet/Core/Session/SessionService+Experience.swift'),
     read('ios/Velvet/Core/Models/ExperienceModels.swift')
   ]);
-  assert.match(shell, /IntelligentHomeView/);
+  assert.match(shell, /IntelligentHomeActivityView/);
+  assert.match(shell, /VelvetNavigationHubView/);
   assert.match(shell, /ManagedConversationsView/);
   assert.match(shell, /ProfileMediaManagementView/);
   assert.match(home, /curatedProfiles/);
-  assert.match(home, /Classés par proximité/);
-  assert.match(home, /affinitySymbol/);
+  assert.match(home, /À découvrir/);
+  assert.match(home, /Actualité/);
+  assert.match(home, /eligibleProfileIDs/);
+  assert.match(navigation, /Recherche avancée/);
+  assert.match(navigation, /Clubs autour de moi/);
+  assert.match(navigation, /Qui sera présent/);
   assert.match(places, /EventCreationView/);
   assert.match(places, /Participants visibles/);
   assert.match(places, /Cap d’Agde/);
