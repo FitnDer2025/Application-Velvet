@@ -20,12 +20,17 @@ test('le système visuel premium reste synchronisé avec la marque Velvet', asyn
   assert.doesNotMatch(manifest, /velvet-icon\.svg/);
 });
 
-test('la navigation mobile Membres conserve cinq destinations prioritaires', async () => {
+test('la navigation mobile Membres conserve quatre espaces prioritaires communs avec iOS', async () => {
   const html = await read('apps/web/velvet-members-beta-live.html');
   const nav = html.match(/<nav class="bottom-nav"[\s\S]*?<\/nav>/)?.[0] || '';
-  const routes = [...nav.matchAll(/data-route="([^"]+)"/g)].map((match) => match[1]);
+  const destinations = [...nav.matchAll(/data-(?:route|unified-route)="([^"]+)"/g)]
+    .map((match) => match[1]);
 
-  assert.deepEqual(routes, ['home', 'discover', 'maps', 'conversations', 'me']);
+  assert.deepEqual(destinations, ['home', 'navigation', 'conversations', 'me']);
+  assert.match(nav, />Accueil</);
+  assert.match(nav, />Navigation</);
+  assert.match(nav, />Messages</);
+  assert.match(nav, />Profil</);
   assert.match(html, /velvet-premium-ui\.css/);
   assert.match(html, /velvet-editorial-ui\.css/);
   assert.match(html, /velvet-premium-ui\.js/);
@@ -38,6 +43,8 @@ test('la navigation mobile Membres conserve cinq destinations prioritaires', asy
   assert.match(html, /velvet-realtime-reconcile\.js/);
   assert.match(html, /velvet-experience-management\.css/);
   assert.match(html, /velvet-experience-management\.js/);
+  assert.match(html, /velvet-community-parity\.css/);
+  assert.match(html, /velvet-community-parity\.js/);
 });
 
 test('PRO et Contrôle chargent le même langage visuel et mobile', async () => {
@@ -79,7 +86,7 @@ test('la direction artistique éditoriale traite les profils et toutes les surfa
   }
   assert.match(ui, /dataset\.velvetView/);
   assert.match(auth, /velvet-editorial-ui\.css/);
-  assert.match(sw, /velvet-beta-shell-v18/);
+  assert.match(sw, /velvet-beta-shell-v19/);
   assert.match(sw, /velvet-editorial-ui\.css/);
   assert.match(sw, /velvet-messaging-upgrade\.css/);
   assert.match(sw, /velvet-messaging-upgrade\.js/);
@@ -88,6 +95,7 @@ test('la direction artistique éditoriale traite les profils et toutes les surfa
   assert.match(sw, /velvet-social-realtime\.js/);
   assert.match(sw, /velvet-realtime-reconcile\.js/);
   assert.match(sw, /velvet-experience-management\.js/);
+  assert.match(sw, /velvet-community-parity\.js/);
 });
 
 test('la messagerie enrichie reste chargée et exploitable sur mobile', async () => {
