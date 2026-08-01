@@ -12,18 +12,24 @@ struct ProfileVenuePlanningSheet: View {
     @State private var visitDate = Date().addingTimeInterval(24 * 3600)
     @State private var isWorking = false
 
+    private var allVenues: [Venue] {
+        store.directory?.venueDirectory ?? []
+    }
+
     private var venues: [Venue] {
-        (store.directory?.venueDirectory ?? [])
+        let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        return allVenues
             .filter { venue in
-                let category = "\(venue.kind ?? "") \(venue.categoryPrimary ?? "")"
-                    .lowercased()
-                let isClub = category.contains("club")
-                    || category.contains("spa")
-                    || category.contains("bar")
-                let matchesQuery = query.isEmpty
-                    || venue.name.localizedCaseInsensitiveContains(query)
-                    || (venue.city ?? "").localizedCaseInsensitiveContains(query)
-                return isClub && matchesQuery
+                guard !normalized.isEmpty else { return true }
+                let searchable = [
+                    venue.name,
+                    venue.city ?? "",
+                    venue.kind ?? "",
+                    venue.categoryPrimary ?? "",
+                    (venue.categoryTags ?? []).joined(separator: " "),
+                    venue.addressPublic ?? ""
+                ].joined(separator: " ")
+                return searchable.localizedCaseInsensitiveContains(normalized)
             }
             .sorted {
                 let left = $0.distanceKm ?? .greatestFiniteMagnitude
@@ -36,8 +42,7 @@ struct ProfileVenuePlanningSheet: View {
 
     private var selectedVenue: Venue? {
         guard let selectedVenueID else { return nil }
-        return venues.first(where: { $0.id == selectedVenueID })
-            ?? store.directory?.venueDirectory.first(where: { $0.id == selectedVenueID })
+        return allVenues.first(where: { $0.id == selectedVenueID })
     }
 
     var body: some View {
@@ -50,13 +55,24 @@ struct ProfileVenuePlanningSheet: View {
                         VelvetPageHeader(
                             "Depuis ton profil",
                             title: "Renseigner une sortie",
-                            subtitle: "Choisis le club et la date. Cette sortie sera visible sur ta fiche et dans l’actualité des membres autorisés."
+                            subtitle: "Choisis le club et la date. Cette sortie sera visible sur ta fiche, dans l’actualité et dans la liste des présences."
                         )
 
                         VelvetSearchField(
-                            prompt: "Nom du club ou ville…",
+                            prompt: "Nom, ville ou type d’établissement…",
                             text: $query
                         )
+
+                        HStack {
+                            Text("\(venues.count) établissement\(venues.count > 1 ? "s" : "")")
+                                .font(VelvetTypography.caption(size: 10, weight: .semibold))
+                                .foregroundStyle(VelvetColor.textSecondary)
+                            Spacer()
+                            Text("ANNUAIRE COMPLET")
+                                .font(VelvetTypography.caption(size: 8, weight: .semibold))
+                                .tracking(1.1)
+                                .foregroundStyle(VelvetColor.champagneGold)
+                        }
 
                         DatePicker(
                             "Date de la sortie",
@@ -75,11 +91,17 @@ struct ProfileVenuePlanningSheet: View {
                                 .stroke(VelvetColor.borderSubtle, lineWidth: 0.8)
                         }
 
-                        if venues.isEmpty {
+                        if allVenues.isEmpty {
+                            VelvetEmptyState(
+                                symbol: "arrow.clockwise.circle",
+                                title: "Annuaire en cours de synchronisation",
+                                message: "Ferme puis rouvre cette fenêtre, ou tire l’écran principal vers le bas."
+                            )
+                        } else if venues.isEmpty {
                             VelvetEmptyState(
                                 symbol: "building.2",
                                 title: "Aucun établissement correspondant",
-                                message: "Essaie un autre nom ou une autre ville."
+                                message: "Essaie un autre nom, une ville ou un mot plus court."
                             )
                         } else {
                             LazyVStack(spacing: 10) {
@@ -104,8 +126,8 @@ struct ProfileVenuePlanningSheet: View {
                     }
 
                     Text(profile.profileType == .couple
-                         ? "Le texte public sera affiché au pluriel."
-                         : "Le texte public sera affiché au singulier.")
+                         ? "La présence sera affichée au pluriel sur Velvet."
+                         : "La présence sera affichée au singulier sur Velvet.")
                         .font(VelvetTypography.caption(size: 9))
                         .foregroundStyle(VelvetColor.textSecondary)
                 }
@@ -124,6 +146,9 @@ struct ProfileVenuePlanningSheet: View {
             }
             .toolbarBackground(VelvetColor.velvetBlack.opacity(0.92), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
+        }
+        .task {
+            if store.directory == nil { await store.load() }
         }
     }
 
@@ -344,7 +369,13 @@ extension MemberProfile {
     }
 
     var attendanceThirdPersonLabel: String {
-        profileType == .couple ? "Ils y seront" : "Sera présent(e)"
+        if profileType == .couple { return "Ils y seront" }
+        let gender = individualProfiles?.first?.genderIdentity?
+            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "fr_FR"))
+            .lowercased() ?? ""
+        if gender.contains("femme") { return "Elle y sera" }
+        if gender.contains("homme") { return "Il y sera" }
+        return "Cette personne y sera"
     }
 }
 
