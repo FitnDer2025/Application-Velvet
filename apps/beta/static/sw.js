@@ -26,6 +26,7 @@ const APP_SHELL = [
   '/assets/velvet-interaction-recovery.css?v=20260801-1',
   '/assets/velvet-interaction-recovery.js?v=20260801-1',
   '/assets/velvet-community-parity.css?v=20260801-1',
+  '/assets/velvet-community-shell.css?v=20260801-1',
   '/assets/velvet-community-parity.js?v=20260801-1',
   '/assets/pwa-ios.js',
   '/assets/photo-protection.js?v=20260731-5',
