@@ -4,8 +4,11 @@ import { runInternalTestAgents } from './test-agents.mjs';
 
 const { Pool } = pg;
 const databaseUrl = process.env.DATABASE_URL;
+const testAgentsOnly = process.env.VELVET_TEST_AGENTS_ONLY === 'true';
 const signingKey = Buffer.from(process.env.INTEGRATION_SIGNING_KEY_BASE64 || '', 'base64');
-const webhooks = JSON.parse(process.env.INTEGRATION_WEBHOOKS_JSON || '{}');
+const webhooks = testAgentsOnly
+  ? {}
+  : JSON.parse(process.env.INTEGRATION_WEBHOOKS_JSON || '{}');
 const dryRun = process.env.OUTBOX_DRY_RUN === 'true';
 const testAgentIntervalMs = Math.max(
   60_000,
@@ -14,13 +17,25 @@ const testAgentIntervalMs = Math.max(
 let lastTestAgentCycle = 0;
 
 if (!databaseUrl) throw new Error('DATABASE_URL is required');
-if (signingKey.length < 32) throw new Error('INTEGRATION_SIGNING_KEY_BASE64 must contain at least 32 bytes');
+if (!testAgentsOnly && signingKey.length < 32) {
+  throw new Error('INTEGRATION_SIGNING_KEY_BASE64 must contain at least 32 bytes');
+}
 
+function databaseSslOptions(value) {
+  const mode = String(value || '').trim().toLowerCase();
+  if (!mode || mode === 'auto') return undefined;
+  if (mode === 'false' || mode === 'disable') return false;
+  if (mode === 'require') return { rejectUnauthorized: false };
+  if (mode === 'true' || mode === 'verify-full') return { rejectUnauthorized: true };
+  throw new Error('DATABASE_SSL must be auto, require, verify-full, true, false or disable');
+}
+
+const ssl = databaseSslOptions(process.env.DATABASE_SSL);
 const pool = new Pool({
   connectionString: databaseUrl,
-  ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: true } : false,
-  max: 5,
-  application_name: 'velvet-outbox-worker'
+  ...(ssl === undefined ? {} : { ssl }),
+  max: testAgentsOnly ? 2 : 5,
+  application_name: testAgentsOnly ? 'velvet-internal-test-agents' : 'velvet-outbox-worker'
 });
 
 async function prepareDeliveries() {
@@ -155,27 +170,33 @@ async function runTestAgentCycle() {
   lastTestAgentCycle = Date.now();
   try {
     const result = await runInternalTestAgents(pool, process.env);
-    if (result.processed) {
-      console.log(JSON.stringify({
-        level: 'info',
-        event: 'internal_test_agents.cycle',
-        processed: result.processed,
-        enabled: result.enabled
-      }));
-    }
+    console.log(JSON.stringify({
+      level: 'info',
+      event: 'internal_test_agents.cycle',
+      processed: result.processed,
+      enabled: result.enabled
+    }));
   } catch (error) {
     console.error(JSON.stringify({
       level: 'error',
       event: 'internal_test_agents.cycle_failed',
-      message: String(error.message || error).slice(0, 200)
+      message: String(error.message || error).slice(0, 500)
     }));
   }
 }
 
 async function cycle() {
-  await runOutboxCycle();
+  if (!testAgentsOnly) await runOutboxCycle();
   await runTestAgentCycle();
 }
+
+console.log(JSON.stringify({
+  level: 'info',
+  event: 'worker.started',
+  mode: testAgentsOnly ? 'internal_test_agents_only' : 'full',
+  intervalMs: testAgentIntervalMs,
+  openAiConfigured: Boolean(process.env.OPENAI_API_KEY && process.env.VELVET_TEST_AGENT_MODEL)
+}));
 
 const timer = setInterval(cycle, 1_000);
 await cycle();
