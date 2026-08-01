@@ -35,7 +35,7 @@ test('le fil ouvre les profils et les photos acceptent les réactions', async ()
 
   assert.match(html, /velvet-social-interactions-hotfix\.css\?v=20260731-1/);
   assert.match(html, /velvet-social-interactions-hotfix\.js\?v=20260731-1/);
-  assert.match(worker, /velvet-beta-shell-v16/);
+  assert.match(worker, /velvet-beta-shell-v17/);
   assert.match(worker, /velvet-social-interactions-hotfix\.css\?v=20260731-1/);
   assert.match(worker, /velvet-social-interactions-hotfix\.js\?v=20260731-1/);
 });

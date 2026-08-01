@@ -25,7 +25,7 @@ test('iOS shell uses compact header and translucent Apple-style dock', async () 
   const presentation = await source('presentation');
   assert.match(shell, /CompactVelvetTopBar/);
   assert.match(shell, /PremiumDiscoveryGridView/);
-  assert.match(shell, /AppleConversationsView/);
+  assert.match(shell, /ManagedConversationsView/);
   assert.match(shell, /PremiumOwnProfileView/);
   assert.match(shell, /Studio du profil & Velvet IA/);
   assert.match(shell, /Modifier mon profil/);

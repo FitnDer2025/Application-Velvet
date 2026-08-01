@@ -9,6 +9,7 @@ import { enrichProfilesMedia } from './media.js';
 import { geocodeVenueAddress } from './venue-geocoding.js';
 
 const DEFAULT_CENTER = { latitude: 46.603354, longitude: 1.888334, zoom: 5 };
+const DEFAULT_EXPERIENCE = { radiusKm: 50 };
 const geocodeCache = new Map();
 
 function finite(value) {
@@ -77,7 +78,7 @@ function primaryPhoto(profile) {
 async function memberMarkers(env, token, currentProfileId) {
   const rows = await restJson(
     env,
-    '/rest/v1/member_profiles?select=id,profile_type,display_name,location_zone,media_assets(id,is_primary,storage_path,moderation_status,media_role)&visibility=in.(beta_members,published)&location_zone=not.is.null&order=updated_at.desc&limit=100',
+    '/rest/v1/member_profiles?select=id,profile_type,display_name,location_zone,profile_photo_ready,media_assets(id,is_primary,storage_path,moderation_status,media_role)&visibility=in.(beta_members,published)&profile_photo_ready=eq.true&location_zone=not.is.null&order=updated_at.desc&limit=200',
     token
   );
   const profiles = await enrichProfilesMedia(env, token, rows || []);
@@ -139,7 +140,7 @@ async function eventMarkers(env, token, venues) {
   const [events, establishments] = await Promise.all([
     restJson(
       env,
-      '/rest/v1/events?select=id,owner_type,establishment_id,organizer_profile_id,title,starts_at,location_public,audience,created_at,updated_at&visibility=eq.published&order=starts_at.asc&limit=100',
+      '/rest/v1/events?select=id,owner_type,establishment_id,organizer_profile_id,title,starts_at,location_public,audience,event_category,cap_zone,cap_venue,created_at,updated_at&visibility=eq.published&moderation_status=eq.approved&order=starts_at.asc&limit=200',
       token
     ),
     restJson(
@@ -164,10 +165,14 @@ async function eventMarkers(env, token, venues) {
       id: event.id,
       type: 'event',
       ownerType: event.owner_type,
+      organizerProfileId: event.organizer_profile_id,
       title: event.title,
       startsAt: event.starts_at,
       locationPublic: event.location_public,
       audience: event.audience,
+      eventCategory: event.event_category,
+      capZone: event.cap_zone,
+      capVenue: event.cap_venue,
       createdAt: event.created_at,
       updatedAt: event.updated_at,
       latitude: coordinates.latitude,
@@ -180,17 +185,28 @@ async function eventMarkers(env, token, venues) {
 }
 
 async function mapCenter(env, access, markers) {
-  const rows = await restJson(
-    env,
-    `/rest/v1/member_location_settings?select=enabled,latitude_bucket,longitude_bucket&user_id=eq.${encodeURIComponent(access.account.userId)}&limit=1`,
-    access.session
+  const [locationRows, preferenceRows] = await Promise.all([
+    restJson(
+      env,
+      `/rest/v1/member_location_settings?select=enabled,latitude_bucket,longitude_bucket&user_id=eq.${encodeURIComponent(access.account.userId)}&limit=1`,
+      access.session
+    ),
+    restJson(
+      env,
+      `/rest/v1/member_experience_preferences?select=discovery_radius_km&user_id=eq.${encodeURIComponent(access.account.userId)}&limit=1`,
+      access.session
+    ).catch(() => [])
+  ]);
+  const location = locationRows?.[0];
+  const radiusKm = Math.max(
+    10,
+    Math.min(200, Number(preferenceRows?.[0]?.discovery_radius_km) || DEFAULT_EXPERIENCE.radiusKm)
   );
-  const location = rows?.[0];
   if (location?.enabled) {
     const latitude = finite(location.latitude_bucket);
     const longitude = finite(location.longitude_bucket);
     if (latitude !== null && longitude !== null) {
-      return { latitude, longitude, zoom: 10, radiusKm: 50, source: 'private_approximate_location' };
+      return { latitude, longitude, zoom: radiusKm <= 25 ? 11 : radiusKm <= 75 ? 9 : 7, radiusKm, source: 'private_approximate_location' };
     }
   }
   if (markers.length) {
@@ -198,10 +214,11 @@ async function mapCenter(env, access, markers) {
       latitude: markers.reduce((sum, marker) => sum + marker.latitude, 0) / markers.length,
       longitude: markers.reduce((sum, marker) => sum + marker.longitude, 0) / markers.length,
       zoom: markers.length > 8 ? 6 : 7,
+      radiusKm,
       source: 'visible_markers'
     };
   }
-  return { ...DEFAULT_CENTER, source: 'france' };
+  return { ...DEFAULT_CENTER, radiusKm, source: 'france' };
 }
 
 export async function onRequestGet({ request, env }) {
