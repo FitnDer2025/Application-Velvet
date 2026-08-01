@@ -1,4 +1,6 @@
-const COOKIE_NAME = 'velvet_beta_refresh';
+const REFRESH_COOKIE_NAME = 'velvet_beta_refresh';
+const ACCESS_COOKIE_NAME = 'velvet_beta_access';
+const COOKIE_BASE = 'Path=/; HttpOnly; Secure; SameSite=Lax; Priority=High';
 
 export function json(payload, status = 200, headers = {}) {
   return new Response(JSON.stringify(payload), {
@@ -19,20 +21,84 @@ function parseCookies(request) {
       .filter(Boolean)
       .map((part) => {
         const separator = part.indexOf('=');
+        if (separator < 1) return ['', ''];
         return [
           decodeURIComponent(part.slice(0, separator)),
           decodeURIComponent(part.slice(separator + 1))
         ];
       })
+      .filter(([name]) => Boolean(name))
   );
 }
 
+function decodeBase64Url(value) {
+  const normalized = String(value || '').replace(/-/g, '+').replace(/_/g, '/');
+  const padding = '='.repeat((4 - normalized.length % 4) % 4);
+  try {
+    return atob(`${normalized}${padding}`);
+  } catch {
+    try {
+      return Buffer.from(`${normalized}${padding}`, 'base64').toString('utf8');
+    } catch {
+      return '';
+    }
+  }
+}
+
+function accessClaims(token) {
+  try {
+    const payload = String(token || '').split('.')[1];
+    if (!payload) return null;
+    return JSON.parse(decodeBase64Url(payload));
+  } catch {
+    return null;
+  }
+}
+
+function accessCookieMaxAge(session) {
+  const claims = accessClaims(session?.access_token);
+  const expiresAt = Number(session?.expires_at || claims?.exp || 0);
+  if (expiresAt) {
+    return Math.max(60, Math.min(60 * 60, expiresAt - Math.floor(Date.now() / 1000) - 30));
+  }
+  return Math.max(60, Math.min(60 * 60, Number(session?.expires_in || 3300)));
+}
+
 export function refreshCookie(token, maxAge = 60 * 60 * 24 * 30) {
-  return `${COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Strict`;
+  return `${REFRESH_COOKIE_NAME}=${encodeURIComponent(token)}; ${COOKIE_BASE}; Max-Age=${maxAge}`;
+}
+
+export function accessCookie(token, maxAge = 55 * 60) {
+  return `${ACCESS_COOKIE_NAME}=${encodeURIComponent(token)}; ${COOKIE_BASE}; Max-Age=${maxAge}`;
 }
 
 export function clearRefreshCookie() {
-  return `${COOKIE_NAME}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict`;
+  return `${REFRESH_COOKIE_NAME}=; ${COOKIE_BASE}; Max-Age=0`;
+}
+
+export function clearAccessCookie() {
+  return `${ACCESS_COOKIE_NAME}=; ${COOKIE_BASE}; Max-Age=0`;
+}
+
+export function sessionCookies(session) {
+  const cookies = [];
+  if (session?.refresh_token) cookies.push(refreshCookie(session.refresh_token));
+  if (session?.access_token) cookies.push(accessCookie(session.access_token, accessCookieMaxAge(session)));
+  return cookies;
+}
+
+export function clearSessionCookies() {
+  return [clearRefreshCookie(), clearAccessCookie()];
+}
+
+export function appendSessionCookies(headers, session) {
+  sessionCookies(session).forEach((cookie) => headers.append('set-cookie', cookie));
+  return headers;
+}
+
+export function appendClearedSessionCookies(headers) {
+  clearSessionCookies().forEach((cookie) => headers.append('set-cookie', cookie));
+  return headers;
 }
 
 function configuration(env) {
@@ -94,13 +160,40 @@ export async function verifyTurnstile(request, env, token, expectedAction) {
   return { ok: true, configured: true };
 }
 
+function sessionFromAccessCookie(accessToken, refreshToken) {
+  const claims = accessClaims(accessToken);
+  const expiresAt = Number(claims?.exp || 0);
+  const stillValid = Boolean(
+    accessToken
+    && claims?.sub
+    && expiresAt > Math.floor(Date.now() / 1000) + 60
+  );
+  if (!stillValid) return null;
+  return {
+    access_token: accessToken,
+    refresh_token: refreshToken || '',
+    expires_at: expiresAt,
+    user: {
+      id: claims.sub,
+      email: claims.email || claims.user_metadata?.email || ''
+    }
+  };
+}
+
 export async function refreshSession(request, env) {
-  const token = parseCookies(request)[COOKIE_NAME];
-  if (!token) return null;
+  const cookies = parseCookies(request);
+  const cachedSession = sessionFromAccessCookie(
+    cookies[ACCESS_COOKIE_NAME],
+    cookies[REFRESH_COOKIE_NAME]
+  );
+  if (cachedSession) return cachedSession;
+
+  const refreshToken = cookies[REFRESH_COOKIE_NAME];
+  if (!refreshToken) return null;
 
   const response = await supabase(env, '/auth/v1/token?grant_type=refresh_token', {
     method: 'POST',
-    body: JSON.stringify({ refresh_token: token })
+    body: JSON.stringify({ refresh_token: refreshToken })
   });
   const session = await response.json();
   if (!response.ok || !session.access_token || !session.refresh_token) return null;
@@ -146,7 +239,10 @@ export async function accountContext(env, session) {
 }
 
 export function sessionResponse(payload, session, status = 200) {
-  return json(payload, status, {
-    'set-cookie': refreshCookie(session.refresh_token)
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
   });
+  appendSessionCookies(headers, session);
+  return new Response(JSON.stringify(payload), { status, headers });
 }
