@@ -118,7 +118,8 @@ export async function generateAgentReply(env, agent, messages, targetProfile) {
     body: JSON.stringify({
       model,
       input: buildAgentPrompt(agent, messages, targetProfile),
-      max_output_tokens: 180
+      max_output_tokens: 180,
+      store: false
     }),
     signal: AbortSignal.timeout(20_000)
   });
