@@ -31,8 +31,17 @@ const PROFILE_SELECT = [
   'updated_at',
   'individual_profiles(*)',
   'media_assets(id,individual_profile_id,owner_user_id,media_role,is_primary,storage_path,moderation_status,created_at)',
-  'albums(id,name,confidentiality,expires_at,created_at,media_assets(id,owner_user_id,media_type,storage_path,moderation_status,created_at),album_access_grants(grantee_user_id,grantee_profile_id,granted_at,expires_at,revoked_at))',
   'profile_members!inner(user_id,member_slot,status)'
+].join(',');
+
+const ALBUM_SELECT = [
+  'id',
+  'name',
+  'confidentiality',
+  'expires_at',
+  'created_at',
+  'media_assets(id,owner_user_id,media_type,storage_path,moderation_status,created_at)',
+  'album_access_grants(grantee_user_id,grantee_profile_id,granted_at,expires_at,revoked_at)'
 ].join(',');
 
 async function myProfile(env, session) {
@@ -41,7 +50,18 @@ async function myProfile(env, session) {
     `/rest/v1/member_profiles?select=${encodeURIComponent(PROFILE_SELECT)}&profile_members.user_id=eq.${encodeURIComponent(session.user.id)}&profile_members.status=in.(active,pending)&limit=1`,
     session
   );
-  return rows?.[0] || null;
+  const profile = rows?.[0] || null;
+  if (!profile?.id) return null;
+
+  // Les albums privés sont relus séparément pour ne pas dépendre d'une relation
+  // imbriquée mise en cache par PostgREST et pour toujours cibler le profil courant.
+  const albums = await restJson(
+    env,
+    `/rest/v1/albums?select=${encodeURIComponent(ALBUM_SELECT)}&profile_id=eq.${encodeURIComponent(profile.id)}&order=created_at.desc`,
+    session
+  ).catch(() => []);
+
+  return { ...profile, albums: albums || [] };
 }
 
 function nullableNumber(value, min, max) {
