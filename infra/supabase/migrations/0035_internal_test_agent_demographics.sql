@@ -20,8 +20,7 @@ begin
     when new.slug = 'nina-lucas' and ip.member_slot = 'partner_b' then 'homme'
     when new.slug = 'camille-bxl' and ip.member_slot = 'individual' then 'non-binaire'
     else ip.gender_identity
-  end,
-  updated_at = now()
+  end
   where ip.profile_id = new.profile_id;
 
   return new;
@@ -50,8 +49,7 @@ set gender_identity = case
   when a.slug = 'nina-lucas' and ip.member_slot = 'partner_b' then 'homme'
   when a.slug = 'camille-bxl' and ip.member_slot = 'individual' then 'non-binaire'
   else ip.gender_identity
-end,
-updated_at = now()
+end
 from public.internal_test_agents a
 where a.profile_id = ip.profile_id;
 
