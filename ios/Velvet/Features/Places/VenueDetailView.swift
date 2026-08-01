@@ -6,7 +6,6 @@ struct VenueDetailView: View {
 
     @State private var favorite = false
     @State private var visited = false
-    @State private var planning = false
     @State private var plannedDate = Date().addingTimeInterval(24 * 3600)
     @State private var showsPlanningSheet = false
     @State private var isWorking = false
@@ -51,7 +50,7 @@ struct VenueDetailView: View {
                                         .foregroundStyle(VelvetColor.champagneGold)
                                 }
                             }
-                            Text("Choisis une date de sortie : elle sera visible sur ta fiche et dans l’actualité des membres concernés.")
+                            Text("Choisis une date : ta présence sera visible sur ta fiche, dans l’actualité et dans la liste des personnes attendues.")
                                 .font(VelvetTypography.body(size: 12))
                                 .foregroundStyle(VelvetColor.textSecondary)
                         }
@@ -199,15 +198,11 @@ struct VenueDetailView: View {
             let formatter = DateFormatter()
             formatter.locale = Locale(identifier: "en_US_POSIX")
             formatter.dateFormat = "yyyy-MM-dd"
-            _ = try await store.service.setVenueRelationship(
+            _ = try await store.service.addVenueVisit(
                 venueID: venue.id,
-                relation: "planning",
-                enabled: true,
                 visitDate: formatter.string(from: plannedDate)
             )
-            planning = true
             showsPlanningSheet = false
-            await store.load()
         } catch {
             store.errorMessage = ErrorMessage.text(for: error)
         }
