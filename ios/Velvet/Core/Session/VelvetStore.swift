@@ -34,6 +34,7 @@ final class VelvetStore: ObservableObject {
     @Published private(set) var typingParticipants: [UUID: [TypingParticipant]] = [:]
     @Published private(set) var photoReactions: [UUID: PhotoReactionSummary] = [:]
     @Published private(set) var isLoading = false
+    @Published private(set) var loadIssue: String?
     @Published var errorMessage: String?
 
     let service: SessionService
@@ -63,6 +64,7 @@ final class VelvetStore: ObservableObject {
 
     func load() async {
         isLoading = true
+        loadIssue = nil
         defer { isLoading = false }
         do {
             async let directoryRequest = service.directory()
@@ -94,7 +96,9 @@ final class VelvetStore: ObservableObject {
             await markVisibleMessagesDelivered()
             await synchronizeExternalCounters()
         } catch {
-            errorMessage = ErrorMessage.text(for: error)
+            // Un incident de synchronisation au démarrage ne doit plus bloquer l’utilisateur
+            // avec une alerte modale. Les écrans présentent un état de repli et un bouton Réessayer.
+            loadIssue = ErrorMessage.text(for: error)
         }
     }
 
@@ -279,6 +283,7 @@ final class VelvetStore: ObservableObject {
     private func refreshDirectoryOnly() async {
         if let refreshed = try? await service.directory() {
             directory = refreshed
+            loadIssue = nil
         }
     }
 
