@@ -150,6 +150,8 @@ struct VenueVisit: Codable, Identifiable, Sendable {
     let profileId: UUID?
     let venueId: UUID
     let visitDate: String
+    let createdAt: String?
+    let updatedAt: String?
     let venueDirectory: Venue?
 }
 
