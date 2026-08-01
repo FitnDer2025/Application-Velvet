@@ -217,7 +217,7 @@ struct MainShellView: View {
     private var selectedContent: some View {
         switch selectedTab {
         case .home:
-            NavigationStack { IntelligentHomeView(profile: profile) }
+            NavigationStack { IntelligentHomeActivityView(profile: profile) }
         case .discover:
             NavigationStack { PremiumDiscoveryGridView(currentProfile: profile) }
         case .maps:
