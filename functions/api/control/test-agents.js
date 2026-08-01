@@ -5,6 +5,7 @@ import { portraitPng } from './_test-agent-portraits.js';
 
 const INTERNAL_ENVIRONMENTS = new Set(['development', 'dev', 'staging', 'preview', 'internal', 'test']);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const DEFAULT_IMAGE_MODEL = 'gpt-image-1-mini';
 
 function environmentName(env) {
   return String(env.VELVET_ENVIRONMENT || env.ENVIRONMENT || '').trim().toLowerCase();
@@ -55,23 +56,130 @@ function randomToken(length = 24) {
   return [...bytes].map((byte) => alphabet[byte % alphabet.length]).join('');
 }
 
-async function uploadPortraits(env, agent, userId, profileId) {
+function base64Bytes(value) {
+  const binary = atob(String(value || ''));
+  const output = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    output[index] = binary.charCodeAt(index);
+  }
+  return output;
+}
+
+function personDescription(person = {}) {
+  const age = person.birth_year ? Math.max(18, new Date().getUTCFullYear() - Number(person.birth_year)) : 'adult';
+  return [
+    `${person.first_name || 'personne'} (${age} ans)`,
+    person.morphology,
+    person.hair_color ? `cheveux ${person.hair_color}` : null,
+    person.eye_color ? `yeux ${person.eye_color}` : null
+  ].filter(Boolean).join(', ');
+}
+
+function portraitPrompt(agent, index) {
+  const people = (agent.persona.people || []).map(personDescription).join(' et ');
+  const scenes = [
+    'portrait lifestyle naturel dans un lounge contemporain aux lumières chaudes, cadrage poitrine, regard détendu et sourire discret',
+    'photographie spontanée en tenue chic lors d’un cocktail premium, cadrage trois-quarts, décor élégant et profondeur de champ cinématographique',
+    'photographie de voyage haut de gamme dans le hall raffiné d’un hôtel, attitude complice et naturelle, lumière douce de fin de journée'
+  ];
+  const profileInstruction = agent.persona.profile_type === 'couple'
+    ? 'Les deux mêmes adultes fictifs doivent apparaître ensemble et rester parfaitement reconnaissables et cohérents avec les autres images de leur galerie.'
+    : 'La même personne adulte fictive doit rester parfaitement reconnaissable et cohérente avec les autres images de sa galerie.';
+
+  return [
+    `Créer une photo carrée photoréaliste pour un profil communautaire premium français nommé ${agent.persona.display_name}.`,
+    `Personnes fictives majeures uniquement : ${people}.`,
+    profileInstruction,
+    `Scène demandée : ${scenes[index % scenes.length]}.`,
+    'Direction artistique : photographie éditoriale contemporaine, chic, naturelle, chaleureuse, peau réaliste, proportions anatomiques correctes, vêtements élégants et non suggestifs, ambiance bordeaux, anthracite et champagne très subtile.',
+    'Aucune nudité, aucun sous-vêtement, aucune pose sexuelle, aucun geste explicite, aucun texte, logo, filigrane ou interface. Ne pas produire un rendu de mannequin publicitaire artificiel.'
+  ].join(' ');
+}
+
+async function generatedPortrait(env, agent, index) {
+  const apiKey = String(env.OPENAI_API_KEY || '');
+  if (!apiKey) return null;
+  const model = String(env.VELVET_TEST_AGENT_IMAGE_MODEL || DEFAULT_IMAGE_MODEL).trim() || DEFAULT_IMAGE_MODEL;
+  const response = await fetch('https://api.openai.com/v1/images/generations', {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${apiKey}`,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      model,
+      prompt: portraitPrompt(agent, index),
+      n: 1,
+      size: '1024x1024',
+      quality: 'medium',
+      output_format: 'png',
+      moderation: 'auto'
+    })
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(payload?.error?.message || 'test_agent_ai_portrait_generation_failed');
+  }
+  const encoded = payload?.data?.[0]?.b64_json;
+  if (!encoded) throw new Error('test_agent_ai_portrait_missing');
+  return {
+    bytes: base64Bytes(encoded),
+    generator: model,
+    promptVersion: 'velvet-lifestyle-v1'
+  };
+}
+
+async function existingPortraits(env, profileId) {
+  return serviceJson(
+    env,
+    `/rest/v1/media_assets?select=id,storage_path,ai_assessment&profile_id=eq.${encodeURIComponent(profileId)}&media_type=eq.image&order=created_at.asc`
+  ).catch(() => []);
+}
+
+async function uploadPortraits(env, agent, userId, profileId, { forceAi = false } = {}) {
+  const current = (await existingPortraits(env, profileId))
+    .filter((row) => String(row.storage_path || '').startsWith(`internal-test-agents/${agent.slug}/portrait-`));
+  const alreadyGenerated = current.filter((row) =>
+    String(row.ai_assessment?.generator || '').startsWith('gpt-image')
+  ).length >= 3;
+  if (alreadyGenerated && !forceAi) {
+    return { generated: 0, preserved: 3, fallback: 0 };
+  }
+
   const role = agent.persona.profile_type === 'couple' ? 'couple_gallery' : 'individual_gallery';
+  const generated = await Promise.all(
+    [0, 1, 2].map(async (index) => {
+      try {
+        return await generatedPortrait(env, agent, index);
+      } catch {
+        return null;
+      }
+    })
+  );
   const rows = [];
+  let generatedCount = 0;
+  let fallbackCount = 0;
+
   for (let index = 0; index < 3; index += 1) {
     const storagePath = `internal-test-agents/${agent.slug}/portrait-${index + 1}.png`;
+    const image = generated[index];
+    const bytes = image?.bytes || portraitPng(agent, index);
+    if (image) generatedCount += 1;
+    else fallbackCount += 1;
+
     const upload = await serviceResponse(env, `/storage/v1/object/velvet-media/${storagePath}`, {
       method: 'POST',
       headers: {
         'content-type': 'image/png',
         'x-upsert': 'true'
       },
-      body: portraitPng(agent, index)
+      body: bytes
     });
     if (!upload.ok) {
       const detail = await upload.text().catch(() => '');
       throw new Error(detail || 'test_agent_portrait_upload_failed');
     }
+
     rows.push({
       profile_id: profileId,
       owner_user_id: userId,
@@ -84,7 +192,9 @@ async function uploadPortraits(env, agent, userId, profileId) {
       ai_assessment: {
         synthetic: true,
         internal_test_only: true,
-        generator: 'velvet-png-fixture'
+        generator: image?.generator || 'velvet-png-fixture',
+        prompt_version: image?.promptVersion || 'abstract-fallback-v1',
+        generated_at: new Date().toISOString()
       },
       ai_reviewed_at: new Date().toISOString()
     });
@@ -95,6 +205,12 @@ async function uploadPortraits(env, agent, userId, profileId) {
     headers: { prefer: 'resolution=merge-duplicates,return=minimal' },
     body: JSON.stringify(rows)
   });
+  await serviceJson(env, '/rest/v1/rpc/sync_profile_photo_ready', {
+    method: 'POST',
+    body: JSON.stringify({ target_profile_id: profileId })
+  }).catch(() => null);
+
+  return { generated: generatedCount, preserved: 0, fallback: fallbackCount };
 }
 
 async function findAccountByEmail(env, email) {
@@ -200,13 +316,33 @@ async function seedAgent(env, access, agent) {
     })
   });
   if (!UUID.test(profileId || '')) throw new Error('test_agent_profile_creation_failed');
-  await uploadPortraits(env, agent, account.user_id, profileId);
+  const portraits = await uploadPortraits(env, agent, account.user_id, profileId);
   return {
     slug: agent.slug,
     status: existing?.[0] ? 'updated' : 'created',
     userId: account.user_id,
-    profileId
+    profileId,
+    portraits
   };
+}
+
+async function refreshAgentPortrait(env, agent) {
+  const rows = await serviceJson(
+    env,
+    `/rest/v1/internal_test_agents?select=user_id,profile_id,slug&slug=eq.${encodeURIComponent(agent.slug)}&limit=1`
+  );
+  const registered = rows?.[0];
+  if (!UUID.test(registered?.user_id || '') || !UUID.test(registered?.profile_id || '')) {
+    return { slug: agent.slug, status: 'not_seeded' };
+  }
+  const portraits = await uploadPortraits(
+    env,
+    agent,
+    registered.user_id,
+    registered.profile_id,
+    { forceAi: true }
+  );
+  return { slug: agent.slug, status: portraits.generated === 3 ? 'generated' : 'partial', portraits };
 }
 
 async function statusPayload(env) {
@@ -240,6 +376,8 @@ async function statusPayload(env) {
         && String(env.VELVET_INTERNAL_TEST_AGENTS || '') === 'enabled',
       serviceRoleConfigured: Boolean(env.SUPABASE_SERVICE_ROLE_KEY),
       openAiConfigured: Boolean(env.OPENAI_API_KEY && env.VELVET_TEST_AGENT_MODEL),
+      openAiImageConfigured: Boolean(env.OPENAI_API_KEY),
+      imageModel: String(env.VELVET_TEST_AGENT_IMAGE_MODEL || DEFAULT_IMAGE_MODEL),
       accessMode: 'authenticated_internal',
       workerRequired: true
     }
@@ -325,6 +463,12 @@ export async function onRequestPost({ request, env }) {
         : DEFAULT_AGENTS;
       result = [];
       for (const agent of selected) result.push(await seedAgent(env, access, agent));
+    } else if (body.action === 'refresh_portraits') {
+      const selected = Array.isArray(body.slugs) && body.slugs.length
+        ? DEFAULT_AGENTS.filter((agent) => body.slugs.includes(agent.slug))
+        : DEFAULT_AGENTS;
+      result = [];
+      for (const agent of selected) result.push(await refreshAgentPortrait(env, agent));
     } else if (body.action === 'set_enabled') {
       await setGlobalEnabled(env, Boolean(body.enabled), access.account.userId);
       result = { enabled: Boolean(body.enabled) };
