@@ -7,6 +7,7 @@ const read = (path) => readFile(path, 'utf8');
 const files = {
   html: 'apps/web/velvet-members-beta-live.html',
   web: 'apps/beta/static/assets/velvet-community-parity.js',
+  bridge: 'apps/beta/static/assets/velvet-community-parity-bridge.js',
   styles: 'apps/beta/static/assets/velvet-community-parity.css',
   shellStyles: 'apps/beta/static/assets/velvet-community-shell.css',
   worker: 'apps/beta/static/sw.js',
@@ -87,18 +88,25 @@ test('A club outing writes the shared profile venue visit model and exposes part
 });
 
 test('Responsive premium surfaces cover desktop, mobile and PWA caching', async () => {
-  const [html, styles, shellStyles, worker] = await Promise.all([
-    read(files.html), read(files.styles), read(files.shellStyles), read(files.worker)
+  const [html, web, bridge, styles, shellStyles, worker] = await Promise.all([
+    read(files.html), read(files.web), read(files.bridge), read(files.styles), read(files.shellStyles), read(files.worker)
   ]);
+  assert.doesNotThrow(() => new Function(web));
+  assert.doesNotThrow(() => new Function(bridge));
   assert.match(html, /velvet-community-parity\.css\?v=20260801-1/);
   assert.match(html, /velvet-community-shell\.css\?v=20260801-1/);
   assert.match(html, /velvet-community-parity\.js\?v=20260801-1/);
+  assert.match(html, /velvet-community-parity-bridge\.js\?v=20260801-1/);
   assert.match(styles, /@media \(max-width: 760px\)/);
   assert.match(styles, /grid-template-columns: repeat\(4/);
   assert.match(styles, /velvet-parity-action-grid/);
   assert.match(shellStyles, /sidebar-tools/);
   assert.match(shellStyles, /mobile-head-actions/);
+  assert.match(bridge, /velvet-parity-ownership/);
+  assert.match(bridge, /data-velvet-intelligent-home/);
   assert.match(worker, /velvet-beta-shell-v19/);
   assert.match(worker, /velvet-community-parity\.css\?v=20260801-1/);
+  assert.match(worker, /velvet-community-shell\.css\?v=20260801-1/);
   assert.match(worker, /velvet-community-parity\.js\?v=20260801-1/);
+  assert.match(worker, /velvet-community-parity-bridge\.js\?v=20260801-1/);
 });
