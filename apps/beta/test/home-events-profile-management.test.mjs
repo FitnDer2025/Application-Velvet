@@ -66,30 +66,34 @@ test('les membres publient des sorties et séjours Cap d’Agde avec participant
   assert.match(events, /onRequestDelete/);
 });
 
-test('le Web et la PWA exposent le même accueil et les mêmes outils', async () => {
-  const [html, script, styles, worker, peopleFirst] = await Promise.all([
+test('le Web et la PWA exposent le même accueil, les mêmes médias et les mêmes outils', async () => {
+  const [html, management, styles, worker, parity, mediaApi] = await Promise.all([
     read('apps/web/velvet-members-beta-live.html'),
     read('apps/beta/static/assets/velvet-experience-management.js'),
     read('apps/beta/static/assets/velvet-experience-management.css'),
     read('apps/beta/static/sw.js'),
-    read('apps/beta/static/assets/velvet-people-first.js')
+    read('apps/beta/static/assets/velvet-web-ios-parity.js'),
+    read('functions/api/members/media.js')
   ]);
-  assert.doesNotThrow(() => new Function(script));
-  assert.doesNotThrow(() => new Function(peopleFirst));
+  assert.doesNotThrow(() => new Function(management));
+  assert.doesNotThrow(() => new Function(parity));
   assert.match(html, /velvet-experience-management\.js/);
   assert.match(html, /velvet-experience-management\.css/);
-  assert.match(html, /velvet-people-first\.js/);
-  assert.match(script, /\/api\/members\/photo-management/);
-  assert.match(script, /\/api\/members\/conversations/);
-  assert.match(script, /\/api\/members\/events/);
-  assert.match(peopleFirst, /\/api\/members\/home-intelligence/);
-  assert.match(peopleFirst, /\/api\/members\/plans/);
-  assert.match(peopleFirst, /Cap d’Agde/);
+  assert.match(html, /velvet-web-ios-parity\.js/);
+  assert.match(management, /\/api\/members\/photo-management/);
+  assert.match(management, /\/api\/members\/conversations/);
+  assert.match(management, /\/api\/members\/events/);
+  assert.match(parity, /\/api\/members\/home-intelligence/);
+  assert.match(parity, /\/api\/members\/plans/);
+  assert.match(parity, /media_assets/);
+  assert.match(parity, /Cap d’Agde/);
+  assert.match(mediaApi, /previewUrl/);
+  assert.match(mediaApi, /media_assets/);
   assert.match(styles, /\.velvet-profile-grid/);
   assert.match(styles, /\.velvet-media-manager-grid/);
-  assert.match(worker, /velvet-beta-shell-v20/);
+  assert.match(worker, /velvet-beta-shell-v21/);
   assert.match(worker, /velvet-experience-management\.js/);
-  assert.match(worker, /velvet-people-first\.js/);
+  assert.match(worker, /velvet-web-ios-parity\.js/);
 });
 
 test('iOS utilise le fil people-first, les événements, la suppression et le rayon partagé', async () => {
