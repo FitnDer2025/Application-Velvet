@@ -26,6 +26,8 @@ struct PremiumOwnProfileOutingsView: View {
                         selectedTab = "outings"
                     }
                 }
+            case "recommendations":
+                RecommendationInboxView()
             default:
                 PremiumOwnProfileView(profile: profile)
             }
@@ -83,6 +85,7 @@ struct PremiumOwnProfileOutingsView: View {
             HStack(spacing: 5) {
                 tab("Profil", value: "profile", icon: "person.text.rectangle")
                 tab("Sorties", value: "outings", icon: "calendar.badge.clock")
+                tab("Recommandations", value: "recommendations", icon: "quote.bubble")
                 tab("Déclarer une sortie", value: "publish", icon: "plus.circle.fill")
             }
             .padding(.horizontal, 16)
