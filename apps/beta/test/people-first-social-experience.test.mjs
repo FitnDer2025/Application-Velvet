@@ -109,4 +109,4 @@ test('les boutons critiques possèdent une destination explicite', async () => {
   assert.match(outings, /showsEvent = true/);
   assert.match(outings, /showsCap = true/);
   assert.match(outings, /showsTravel = true/);
-}
+});
