@@ -67,32 +67,36 @@ test('les membres publient des sorties et séjours Cap d’Agde avec participant
 });
 
 test('le Web et la PWA exposent le même accueil et les mêmes outils', async () => {
-  const [html, script, styles, worker] = await Promise.all([
+  const [html, script, styles, worker, peopleFirst] = await Promise.all([
     read('apps/web/velvet-members-beta-live.html'),
     read('apps/beta/static/assets/velvet-experience-management.js'),
     read('apps/beta/static/assets/velvet-experience-management.css'),
-    read('apps/beta/static/sw.js')
+    read('apps/beta/static/sw.js'),
+    read('apps/beta/static/assets/velvet-people-first.js')
   ]);
   assert.doesNotThrow(() => new Function(script));
+  assert.doesNotThrow(() => new Function(peopleFirst));
   assert.match(html, /velvet-experience-management\.js/);
   assert.match(html, /velvet-experience-management\.css/);
-  assert.match(script, /\/api\/members\/home-intelligence/);
+  assert.match(html, /velvet-people-first\.js/);
   assert.match(script, /\/api\/members\/photo-management/);
   assert.match(script, /\/api\/members\/conversations/);
   assert.match(script, /\/api\/members\/events/);
-  assert.match(script, /data-velvet-all-profile-grid/);
-  assert.match(script, /Cap d’Agde/);
+  assert.match(peopleFirst, /\/api\/members\/home-intelligence/);
+  assert.match(peopleFirst, /\/api\/members\/plans/);
+  assert.match(peopleFirst, /Cap d’Agde/);
   assert.match(styles, /\.velvet-profile-grid/);
   assert.match(styles, /\.velvet-media-manager-grid/);
-  assert.match(worker, /velvet-beta-shell-v19/);
+  assert.match(worker, /velvet-beta-shell-v20/);
   assert.match(worker, /velvet-experience-management\.js/);
+  assert.match(worker, /velvet-people-first\.js/);
 });
 
-test('iOS utilise l’accueil communautaire, les événements, la suppression et le rayon partagé', async () => {
-  const [shell, home, navigation, places, media, conversations, settings, service, models] = await Promise.all([
+test('iOS utilise le fil people-first, les événements, la suppression et le rayon partagé', async () => {
+  const [shell, home, outings, places, media, conversations, settings, service, models] = await Promise.all([
     read('ios/Velvet/Features/Home/MainShellView.swift'),
-    read('ios/Velvet/Features/Home/IntelligentHomeActivityView.swift'),
-    read('ios/Velvet/Features/Home/VelvetNavigationHubView.swift'),
+    read('ios/Velvet/Features/Home/PeopleFirstHomeView.swift'),
+    read('ios/Velvet/Features/Places/SocialOutingsViews.swift'),
     read('ios/Velvet/Features/Places/IntelligentPlacesEventsView.swift'),
     read('ios/Velvet/Features/Profile/ProfileMediaManagementView.swift'),
     read('ios/Velvet/Features/Messaging/ManagedConversationsView.swift'),
@@ -100,20 +104,20 @@ test('iOS utilise l’accueil communautaire, les événements, la suppression et
     read('ios/Velvet/Core/Session/SessionService+Experience.swift'),
     read('ios/Velvet/Core/Models/ExperienceModels.swift')
   ]);
-  assert.match(shell, /IntelligentHomeActivityView/);
-  assert.match(shell, /VelvetNavigationHubView/);
+  assert.match(shell, /PeopleFirstHomeView/);
+  assert.match(shell, /PeopleFirstClubDirectoryView/);
   assert.match(shell, /ManagedConversationsView/);
-  assert.match(shell, /ProfileMediaManagementView/);
-  assert.match(home, /curatedProfiles/);
-  assert.match(home, /À découvrir/);
+  assert.match(shell, /PremiumOwnProfileOutingsView/);
+  assert.match(home, /recommendations/);
+  assert.match(home, /À DÉCOUVRIR/);
   assert.match(home, /Actualité/);
-  assert.match(home, /eligibleProfileIDs/);
-  assert.match(navigation, /Recherche avancée/);
-  assert.match(navigation, /Clubs autour de moi/);
-  assert.match(navigation, /Qui sera présent/);
-  assert.match(places, /EventCreationView/);
+  assert.match(home, /FIL COMMUNAUTAIRE/);
+  assert.match(outings, /PeopleFirstClubDirectoryView/);
+  assert.match(outings, /Soirées organisées/);
+  assert.match(outings, /Qui a prévu d’y aller/);
+  assert.match(outings, /EventCreationView/);
+  assert.match(outings, /Cap d’Agde/);
   assert.match(places, /Participants visibles/);
-  assert.match(places, /Cap d’Agde/);
   assert.match(media, /trois photos de profil validées/);
   assert.match(conversations, /removeConversation/);
   assert.match(settings, /Rayon de découverte/);

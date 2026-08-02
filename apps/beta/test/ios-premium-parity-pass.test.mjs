@@ -4,7 +4,8 @@ import test from 'node:test';
 
 const files = {
   shell: 'ios/Velvet/Features/Home/MainShellView.swift',
-  navigation: 'ios/Velvet/Features/Home/VelvetNavigationHubView.swift',
+  home: 'ios/Velvet/Features/Home/PeopleFirstHomeView.swift',
+  places: 'ios/Velvet/Features/Places/SocialOutingsViews.swift',
   shellComponents: 'ios/Velvet/DesignSystem/AppleShellComponents.swift',
   presentation: 'ios/Velvet/Core/Models/MemberProfilePresentation.swift',
   discovery: 'ios/Velvet/Features/Discovery/PremiumDiscoveryGridView.swift',
@@ -20,20 +21,24 @@ async function source(name) {
   return readFile(files[name], 'utf8');
 }
 
-test('iOS shell uses compact header and translucent Apple-style dock', async () => {
+test('iOS shell uses compact header and translucent Apple-style people-first dock', async () => {
   const shell = await source('shell');
-  const navigation = await source('navigation');
+  const home = await source('home');
+  const places = await source('places');
   const components = await source('shellComponents');
   const presentation = await source('presentation');
   assert.match(shell, /CompactVelvetTopBar/);
-  assert.match(shell, /VelvetNavigationHubView/);
-  assert.match(navigation, /PremiumDiscoveryGridView/);
+  assert.match(shell, /PeopleFirstHomeView/);
+  assert.match(shell, /PremiumDiscoveryGridView/);
+  assert.match(shell, /PeopleFirstClubDirectoryView/);
   assert.match(shell, /ManagedConversationsView/);
   assert.match(shell, /PremiumOwnProfileOutingsView/);
   assert.match(shell, /Studio du profil & Velvet IA/);
   assert.match(shell, /Modifier mon profil/);
   assert.match(shell, /Paramètres & confidentialité/);
   assert.match(shell, /\.ultraThinMaterial/);
+  assert.match(home, /FIL COMMUNAUTAIRE/);
+  assert.match(places, /Soirées organisées/);
   assert.match(components, /ShellChromeState/);
   assert.match(presentation, /Femme seule/);
   assert.match(presentation, /Homme seul/);
@@ -87,7 +92,7 @@ test('profile editing and Velvet AI are directly available in native iOS', async
   assert.match(editor, /ProfileUpsertRequest/);
 });
 
-test('member detail exposes full profile, interactive albums and affinity memory', async () => {
+test('member detail exposes full profile, outings, interactive albums and affinity memory', async () => {
   const detail = await source('memberDetail');
   const social = await source('socialMedia');
   const entry = await source('detailEntry');
@@ -112,4 +117,6 @@ test('member detail exposes full profile, interactive albums and affinity memory
   assert.match(social, /PhotoReactionBar/);
   assert.match(social, /InteractiveMediaViewer/);
   assert.match(entry, /PremiumMemberDetailView/);
+  assert.match(entry, /MemberOutingsHistoryView/);
+  assert.match(entry, /tab\("Soirées"/);
 });
