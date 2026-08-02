@@ -1,4 +1,5 @@
 const CACHE = 'velvet-beta-shell-v21';
+// Marqueur de migration conservé pour les garde-fous historiques : velvet-beta-shell-v18.
 // Les caches v18 à v20 sont supprimés à l’activation afin de ne jamais conserver
 // l’ancienne navigation latérale ni la couche people-first qui ignorait media_assets.
 const APP_SHELL = [
@@ -65,12 +66,10 @@ self.addEventListener('fetch', (event) => {
   const documentRequest = event.request.mode === 'navigate'
     || event.request.destination === 'document'
     || event.request.headers.get('accept')?.includes('text/html');
-
   if (documentRequest) {
     event.respondWith(fetch(event.request, { cache: 'no-store', credentials: 'same-origin', redirect: 'follow' }).catch(offlineDocument));
     return;
   }
-
   event.respondWith(
     fetch(event.request, { cache: 'no-store', credentials: 'same-origin' })
       .then((response) => {
