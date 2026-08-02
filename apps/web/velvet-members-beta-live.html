@@ -31,55 +31,62 @@
   <link rel="stylesheet" href="/assets/velvet-social-realtime.css?v=20260731-1">
   <link rel="stylesheet" href="/assets/velvet-experience-management.css?v=20260731-1">
   <link rel="stylesheet" href="/assets/velvet-interaction-recovery.css?v=20260801-1">
-  <link rel="stylesheet" href="/assets/velvet-people-first.css?v=20260802-1">
+  <link rel="stylesheet" href="/assets/velvet-web-ios-parity.css?v=20260802-2">
 </head>
 <body>
   <div class="app-shell">
-    <aside class="sidebar" aria-label="Navigation Velvet">
+    <header class="web-desktop-head" aria-label="Navigation Velvet">
       <a class="brand" href="/membres/" aria-label="Accueil Velvet">
         <span class="brand-mark">V</span>
-        <span><strong>Velvet</strong><small>BETA privée</small></span>
+        <span class="brand-copy"><strong>Velvet</strong><small>BETA privée</small></span>
       </a>
-      <nav id="mainNav" aria-label="Espaces principaux">
-        <button data-people-route="home"><span>⌂</span>Accueil</button>
-        <button data-route="discover"><span>◇</span>Membres</button>
-        <button data-people-route="venues"><span>⌂</span>Lieux</button>
-        <button data-route="conversations"><span>◌</span>Messages</button>
-        <button data-people-route="profile"><span>♡</span>Profil</button>
+
+      <nav class="web-primary-nav" aria-label="Espaces principaux">
+        <button type="button" data-web-route="home" aria-label="Accueil"><span aria-hidden="true">⌂</span><span>Accueil</span></button>
+        <button type="button" data-web-route="discover" aria-label="Membres"><span aria-hidden="true">⌕</span><span>Membres</span></button>
+        <button type="button" data-web-route="venues" aria-label="Lieux"><span aria-hidden="true">◇</span><span>Lieux</span></button>
+        <button type="button" data-route="conversations" aria-label="Messages"><span aria-hidden="true">◌</span><span>Messages</span><b class="web-nav-badge" data-message-badge hidden>0</b></button>
+        <button type="button" data-web-route="profile" aria-label="Profil"><span aria-hidden="true">♡</span><span>Profil</span></button>
       </nav>
-      <div class="sidebar-tools" aria-label="Outils">
-        <button data-route="notifications"><span>○</span>Notifications</button>
-        <button data-route="settings"><span>⚙</span>Paramètres</button>
+
+      <div class="web-head-actions" aria-label="Outils">
+        <button type="button" data-route="notifications" aria-label="Notifications"><span aria-hidden="true">♧</span><b class="web-nav-badge" data-notification-badge hidden>0</b></button>
+        <button type="button" data-route="settings" aria-label="Paramètres"><span aria-hidden="true">⚙</span></button>
       </div>
-      <div class="sidebar-foot">
-        <p><span class="live-dot"></span>Données réelles Supabase</p>
-        <button id="logoutButton">Se déconnecter</button>
-      </div>
-    </aside>
+    </header>
 
     <header class="mobile-head">
-      <a class="brand compact" href="/membres/"><span class="brand-mark">V</span><strong>Velvet</strong></a>
+      <a class="brand compact" href="/membres/" aria-label="Accueil Velvet"><span class="brand-mark">V</span><strong>Velvet</strong></a>
       <div class="mobile-head-actions">
-        <button data-route="notifications" aria-label="Notifications">○</button>
-        <button id="mobileMenuButton" aria-expanded="false" aria-controls="mainNav">Menu</button>
+        <button type="button" data-route="notifications" aria-label="Notifications"><span aria-hidden="true">♧</span><b class="web-nav-badge" data-notification-badge hidden>0</b></button>
+        <button type="button" id="mobileMenuButton" aria-expanded="false" aria-controls="webUtilityMenu">Menu</button>
       </div>
     </header>
 
     <main id="content" tabindex="-1">
-      <section class="loading-state" aria-live="polite">
-        <span class="loader"></span>
-        <p>Connexion à la mémoire Velvet…</p>
-      </section>
+      <section class="loading-state" aria-live="polite"><span class="loader"></span><p>Connexion à la mémoire Velvet…</p></section>
     </main>
 
     <nav class="bottom-nav" aria-label="Navigation mobile">
-      <button data-people-route="home"><span>⌂</span><small>Accueil</small></button>
-      <button data-route="discover"><span>◇</span><small>Membres</small></button>
-      <button data-people-route="venues"><span>⌂</span><small>Lieux</small></button>
-      <button data-route="conversations"><span>◌</span><small>Messages</small></button>
-      <button data-people-route="profile"><span>♡</span><small>Profil</small></button>
+      <button type="button" data-web-route="home"><span aria-hidden="true">⌂</span><small>Accueil</small></button>
+      <button type="button" data-web-route="discover"><span aria-hidden="true">⌕</span><small>Membres</small></button>
+      <button type="button" data-web-route="venues"><span aria-hidden="true">◇</span><small>Lieux</small></button>
+      <button type="button" data-route="conversations"><span aria-hidden="true">◌</span><small>Messages</small><b class="web-nav-badge" data-message-badge hidden>0</b></button>
+      <button type="button" data-web-route="profile"><span aria-hidden="true">♡</span><small>Profil</small></button>
     </nav>
   </div>
+
+  <dialog id="webUtilityMenu" aria-label="Menu Velvet">
+    <div class="web-utility-shell">
+      <header><strong>Velvet</strong><button type="button" data-close-utility aria-label="Fermer">×</button></header>
+      <nav>
+        <button type="button" data-route="notifications"><span aria-hidden="true">♧</span><span>Notifications</span><b class="web-nav-badge" data-notification-badge hidden>0</b></button>
+        <button type="button" data-route="settings"><span aria-hidden="true">⚙</span><span>Paramètres & confidentialité</span></button>
+      </nav>
+      <button type="button" id="logoutButton">Se déconnecter</button>
+    </div>
+  </dialog>
+
   <div id="toast" role="status" aria-live="polite"></div>
   <script src="/assets/velvet-premium-ui.js" defer></script>
   <script src="/assets/pwa-ios.js" defer></script>
@@ -96,6 +103,6 @@
   <script src="/assets/velvet-push-deeplink.js?v=20260731-1" defer></script>
   <script src="/assets/velvet-experience-management.js?v=20260731-1" defer></script>
   <script src="/assets/velvet-interaction-recovery.js?v=20260801-1" defer></script>
-  <script src="/assets/velvet-people-first.js?v=20260802-1" defer></script>
+  <script src="/assets/velvet-web-ios-parity.js?v=20260802-2" defer></script>
 </body>
 </html>
