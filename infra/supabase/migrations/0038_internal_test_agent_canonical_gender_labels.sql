@@ -1,5 +1,5 @@
 -- Velvet internal-only AI test agents — canonical gender identities.
--- Database stores stable machine values; clients render French labels.
+-- Database stores schema-approved French values; clients render concise labels.
 
 begin;
 
@@ -12,15 +12,15 @@ as $$
 begin
   update public.individual_profiles ip
   set gender_identity = case
-    when new.slug = 'clara-mathieu' and ip.member_slot = 'partner_a' then 'woman'
-    when new.slug = 'clara-mathieu' and ip.member_slot = 'partner_b' then 'man'
-    when new.slug = 'lea-nord' and ip.member_slot = 'individual' then 'woman'
-    when new.slug = 'sophie-thomas' and ip.member_slot = 'partner_a' then 'woman'
-    when new.slug = 'sophie-thomas' and ip.member_slot = 'partner_b' then 'man'
-    when new.slug = 'maxime-lille' and ip.member_slot = 'individual' then 'man'
-    when new.slug = 'nina-lucas' and ip.member_slot = 'partner_a' then 'woman'
-    when new.slug = 'nina-lucas' and ip.member_slot = 'partner_b' then 'man'
-    when new.slug = 'camille-bxl' and ip.member_slot = 'individual' then 'non_binary'
+    when new.slug = 'clara-mathieu' and ip.member_slot = 'partner_a' then 'Femme'
+    when new.slug = 'clara-mathieu' and ip.member_slot = 'partner_b' then 'Homme'
+    when new.slug = 'lea-nord' and ip.member_slot = 'individual' then 'Femme'
+    when new.slug = 'sophie-thomas' and ip.member_slot = 'partner_a' then 'Femme'
+    when new.slug = 'sophie-thomas' and ip.member_slot = 'partner_b' then 'Homme'
+    when new.slug = 'maxime-lille' and ip.member_slot = 'individual' then 'Homme'
+    when new.slug = 'nina-lucas' and ip.member_slot = 'partner_a' then 'Femme'
+    when new.slug = 'nina-lucas' and ip.member_slot = 'partner_b' then 'Homme'
+    when new.slug = 'camille-bxl' and ip.member_slot = 'individual' then 'Personne non binaire'
     else ip.gender_identity
   end
   where ip.profile_id = new.profile_id;
@@ -66,15 +66,15 @@ execute function public.sync_internal_test_agent_demographics();
 
 update public.individual_profiles ip
 set gender_identity = case
-  when agent.slug = 'clara-mathieu' and ip.member_slot = 'partner_a' then 'woman'
-  when agent.slug = 'clara-mathieu' and ip.member_slot = 'partner_b' then 'man'
-  when agent.slug = 'lea-nord' and ip.member_slot = 'individual' then 'woman'
-  when agent.slug = 'sophie-thomas' and ip.member_slot = 'partner_a' then 'woman'
-  when agent.slug = 'sophie-thomas' and ip.member_slot = 'partner_b' then 'man'
-  when agent.slug = 'maxime-lille' and ip.member_slot = 'individual' then 'man'
-  when agent.slug = 'nina-lucas' and ip.member_slot = 'partner_a' then 'woman'
-  when agent.slug = 'nina-lucas' and ip.member_slot = 'partner_b' then 'man'
-  when agent.slug = 'camille-bxl' and ip.member_slot = 'individual' then 'non_binary'
+  when agent.slug = 'clara-mathieu' and ip.member_slot = 'partner_a' then 'Femme'
+  when agent.slug = 'clara-mathieu' and ip.member_slot = 'partner_b' then 'Homme'
+  when agent.slug = 'lea-nord' and ip.member_slot = 'individual' then 'Femme'
+  when agent.slug = 'sophie-thomas' and ip.member_slot = 'partner_a' then 'Femme'
+  when agent.slug = 'sophie-thomas' and ip.member_slot = 'partner_b' then 'Homme'
+  when agent.slug = 'maxime-lille' and ip.member_slot = 'individual' then 'Homme'
+  when agent.slug = 'nina-lucas' and ip.member_slot = 'partner_a' then 'Femme'
+  when agent.slug = 'nina-lucas' and ip.member_slot = 'partner_b' then 'Homme'
+  when agent.slug = 'camille-bxl' and ip.member_slot = 'individual' then 'Personne non binaire'
   else ip.gender_identity
 end
 from public.internal_test_agents agent
