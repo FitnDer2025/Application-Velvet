@@ -1,83 +1,123 @@
 import SwiftUI
 
-/// Point d’entrée historique conservé pour Maps, Recherche et les notifications.
-/// La fiche complète est désormais portée par PremiumMemberDetailView afin de
-/// garantir la même richesse fonctionnelle que la version Web.
+/// Point d’entrée partagé par l’accueil, Membres, Lieux, Maps et les notifications.
+/// La fiche présente immédiatement l’identité du profil, puis sépare son univers
+/// éditorial de son historique de sorties.
 struct MemberDetailView: View {
     @EnvironmentObject private var store: VelvetStore
     let profile: MemberProfile
 
     @State private var plans: PlanStateResponse?
+    @State private var selectedTab = "profile"
 
     private var history: ProfileViewHistory? {
         store.viewHistory(for: profile.id)
     }
 
-    private var nextVenueVisit: VenueVisit? {
-        (plans?.venueVisits ?? [])
-            .filter { $0.profileId == profile.id }
-            .filter {
-                guard let date = $0.visitDate.profileOutingDateValue else { return true }
-                return date >= Calendar.current.startOfDay(for: Date())
-            }
-            .sorted { ($0.visitDate.profileOutingDateValue ?? .distantFuture) < ($1.visitDate.profileOutingDateValue ?? .distantFuture) }
-            .first
-    }
-
     var body: some View {
         VStack(spacing: 0) {
-            if history != nil || nextVenueVisit != nil {
-                VStack(spacing: 8) {
-                    if let history {
-                        historyBadge(history)
-                    }
+            memberIdentityHeader
+            profileTabs
 
-                    if let nextVenueVisit {
-                        MemberNextOutingBanner(profile: profile, visit: nextVenueVisit)
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
-                .padding(.bottom, 4)
-                .background(VelvetColor.velvetBlack.opacity(0.90))
+            if selectedTab == "outings" {
+                MemberOutingsHistoryView(profile: profile, plans: plans)
+            } else {
+                PremiumMemberDetailView(profile: profile)
             }
-
-            PremiumMemberDetailView(profile: profile)
         }
+        .background(VelvetBackground())
+        .navigationBarTitleDisplayMode(.inline)
         .task {
             plans = try? await store.service.plans()
         }
     }
 
-    private func historyBadge(_ history: ProfileViewHistory) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: "eye.fill")
-            Text("Déjà consulté \(history.viewCount ?? 1) fois")
-            Text("·")
-            Text("dernière visite \(history.lastViewedAt.memberDetailRelativeDate)")
-            Spacer(minLength: 0)
-        }
-        .font(.system(size: 9, weight: .semibold))
-        .foregroundStyle(VelvetColor.champagneGold)
-        .padding(.horizontal, 11)
-        .frame(minHeight: 30)
-        .background(.ultraThinMaterial)
-        .background(VelvetColor.velvetBlack.opacity(0.60))
-        .clipShape(Capsule())
-        .overlay(Capsule().stroke(VelvetColor.champagneGold.opacity(0.24), lineWidth: 0.8))
-        .accessibilityLabel("Profil consulté \(history.viewCount ?? 1) fois, dernière visite \(history.lastViewedAt.memberDetailRelativeDate)")
-    }
-}
+    private var memberIdentityHeader: some View {
+        HStack(spacing: 13) {
+            VelvetRemoteImage(
+                url: profile.socialPrimaryPhoto,
+                symbol: profile.profileType == .couple ? "person.2.fill" : "person.fill"
+            )
+            .frame(width: 68, height: 68)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(VelvetColor.champagneGold.opacity(0.26), lineWidth: 0.9)
+            }
 
-private extension Optional where Wrapped == String {
-    var memberDetailRelativeDate: String {
-        guard let value = self else { return "inconnue" }
-        let fractional = ISO8601DateFormatter()
-        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        let date = fractional.date(from: value) ?? ISO8601DateFormatter().date(from: value)
-        guard let date else { return "inconnue" }
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .full
-        return formatter.localizedString(for: date, relativeTo: .now)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(profile.displayName)
+                    .font(VelvetTypography.title(size: 25))
+                    .foregroundStyle(VelvetColor.ivory)
+                    .lineLimit(1)
+                Text([profile.velvetDemographicAndAgeLabel, profile.locationZone ?? profile.city]
+                    .compactMap { $0 }
+                    .joined(separator: " · "))
+                    .font(VelvetTypography.caption(size: 10, weight: .semibold))
+                    .foregroundStyle(VelvetColor.champagneGold)
+                    .lineLimit(2)
+
+                if let history {
+                    Label(
+                        "Consulté \(history.viewCount ?? 1) fois",
+                        systemImage: "eye.fill"
+                    )
+                    .font(VelvetTypography.caption(size: 8))
+                    .foregroundStyle(VelvetColor.textSecondary)
+                }
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(.ultraThinMaterial)
+        .background(VelvetColor.velvetBlack.opacity(0.78))
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(VelvetColor.borderSubtle)
+                .frame(height: 0.7)
+        }
+    }
+
+    private var profileTabs: some View {
+        HStack(spacing: 5) {
+            tab("Profil", value: "profile", icon: "person.text.rectangle")
+            tab("Soirées", value: "outings", icon: "calendar.badge.clock")
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(VelvetColor.velvetBlack.opacity(0.92))
+    }
+
+    private func tab(_ title: String, value: String, icon: String) -> some View {
+        Button {
+            withAnimation(.easeOut(duration: VelvetMotion.fast)) {
+                selectedTab = value
+            }
+        } label: {
+            Label(title, systemImage: icon)
+                .font(VelvetTypography.body(size: 11, weight: .semibold))
+                .foregroundStyle(selectedTab == value ? VelvetColor.champagneGold : VelvetColor.textSecondary)
+                .frame(maxWidth: .infinity)
+                .frame(height: 40)
+                .background(
+                    selectedTab == value
+                        ? VelvetColor.champagneGold.opacity(0.09)
+                        : Color.clear
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 13, style: .continuous)
+                        .stroke(
+                            selectedTab == value
+                                ? VelvetColor.champagneGold.opacity(0.20)
+                                : VelvetColor.borderSubtle,
+                            lineWidth: 0.7
+                        )
+                }
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selectedTab == value ? .isSelected : [])
     }
 }
