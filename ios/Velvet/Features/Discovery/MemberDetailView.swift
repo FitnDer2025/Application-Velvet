@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Point d’entrée partagé par l’accueil, Membres, Lieux, Maps et les notifications.
 /// La fiche présente immédiatement l’identité du profil, puis sépare son univers
-/// éditorial de son historique de sorties.
+/// éditorial de son historique de sorties et de ses recommandations consenties.
 struct MemberDetailView: View {
     @EnvironmentObject private var store: VelvetStore
     let profile: MemberProfile
@@ -19,9 +19,12 @@ struct MemberDetailView: View {
             memberIdentityHeader
             profileTabs
 
-            if selectedTab == "outings" {
+            switch selectedTab {
+            case "outings":
                 MemberOutingsHistoryView(profile: profile, plans: plans)
-            } else {
+            case "recommendations":
+                ProfileRecommendationsView(profile: profile)
+            default:
                 PremiumMemberDetailView(profile: profile)
             }
         }
@@ -84,6 +87,7 @@ struct MemberDetailView: View {
         HStack(spacing: 5) {
             tab("Profil", value: "profile", icon: "person.text.rectangle")
             tab("Soirées", value: "outings", icon: "calendar.badge.clock")
+            tab("Avis", value: "recommendations", icon: "quote.bubble")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
