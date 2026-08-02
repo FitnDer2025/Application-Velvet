@@ -1,6 +1,6 @@
-const CACHE = 'velvet-beta-shell-v20';
+const CACHE = 'velvet-beta-shell-v21';
 // Caches historiques explicitement supprimés pendant l’activation :
-// velvet-beta-shell-v18, velvet-beta-shell-v19.
+// velvet-beta-shell-v18, velvet-beta-shell-v19, velvet-beta-shell-v20.
 const APP_SHELL = [
   '/assets/members-live.css',
   '/assets/members-live.js',
@@ -27,8 +27,8 @@ const APP_SHELL = [
   '/assets/velvet-experience-management.js?v=20260731-1',
   '/assets/velvet-interaction-recovery.css?v=20260801-1',
   '/assets/velvet-interaction-recovery.js?v=20260801-1',
-  '/assets/velvet-people-first.css?v=20260802-1',
-  '/assets/velvet-people-first.js?v=20260802-1',
+  '/assets/velvet-web-ios-parity.css?v=20260802-2',
+  '/assets/velvet-web-ios-parity.js?v=20260802-2',
   '/assets/pwa-ios.js',
   '/assets/photo-protection.js?v=20260731-5',
   '/assets/location-verification.js',
@@ -93,9 +93,7 @@ self.addEventListener('fetch', (event) => {
 
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'VELVET_CLEAR_CACHES') {
-    event.waitUntil(
-      caches.keys().then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
-    );
+    event.waitUntil(caches.keys().then((keys) => Promise.all(keys.map((key) => caches.delete(key)))));
     return;
   }
   if (event.data?.type !== 'VELVET_NOTIFICATION') return;
@@ -112,23 +110,16 @@ self.addEventListener('message', (event) => {
 
 self.addEventListener('push', (event) => {
   let payload = {};
-  try {
-    payload = event.data?.json?.() || {};
-  } catch {
-    payload = { body: event.data?.text?.() || '' };
-  }
+  try { payload = event.data?.json?.() || {}; }
+  catch { payload = { body: event.data?.text?.() || '' }; }
   const declarative = payload.notification || payload;
   const conversationId = payload.conversationId || declarative.conversationId || '';
   const profileId = payload.profileId || declarative.profileId || '';
   const eventId = payload.eventId || declarative.eventId || '';
   let destination = declarative.navigate || payload.url || '/membres/';
-  if (conversationId) {
-    destination = `/membres/?route=conversations&conversation=${encodeURIComponent(conversationId)}`;
-  } else if (profileId) {
-    destination = `/membres/?route=discover&profile=${encodeURIComponent(profileId)}`;
-  } else if (eventId) {
-    destination = `/membres/?route=events&event=${encodeURIComponent(eventId)}`;
-  }
+  if (conversationId) destination = `/membres/?route=conversations&conversation=${encodeURIComponent(conversationId)}`;
+  else if (profileId) destination = `/membres/?route=members&profile=${encodeURIComponent(profileId)}`;
+  else if (eventId) destination = `/membres/?route=events&event=${encodeURIComponent(eventId)}`;
   event.waitUntil(self.registration.showNotification(declarative.title || 'Velvet', {
     body: declarative.body || 'Une nouvelle activité vous attend.',
     icon: declarative.icon || '/assets/velvet-icon-192.png',
@@ -137,27 +128,16 @@ self.addEventListener('push', (event) => {
     tag: declarative.tag || 'velvet-push',
     renotify: declarative.renotify !== false,
     requireInteraction: declarative.requireInteraction === true,
-    data: {
-      url: destination,
-      route: payload.route || null,
-      conversationId: conversationId || null,
-      profileId: profileId || null,
-      eventId: eventId || null
-    }
+    data: { url: destination, route: payload.route || null, conversationId: conversationId || null, profileId: profileId || null, eventId: eventId || null }
   }));
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const destination = event.notification.data?.url || '/membres/';
-  event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (clients) => {
-      const existing = clients.find((client) => client.url.startsWith(self.location.origin));
-      if (existing) {
-        await existing.focus();
-        return existing.navigate(destination);
-      }
-      return self.clients.openWindow(destination);
-    })
-  );
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (clients) => {
+    const existing = clients.find((client) => client.url.startsWith(self.location.origin));
+    if (existing) { await existing.focus(); return existing.navigate(destination); }
+    return self.clients.openWindow(destination);
+  }));
 });
