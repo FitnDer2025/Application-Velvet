@@ -18,7 +18,11 @@ struct PremiumOwnProfileOutingsView: View {
             case "publish":
                 OwnOutingPublisherView(profile: profile) { updated in
                     Task { @MainActor in
-                        plans = updated ?? (try? await store.service.plans())
+                        if let updated {
+                            plans = updated
+                        } else {
+                            plans = try? await store.service.plans()
+                        }
                         selectedTab = "outings"
                     }
                 }
