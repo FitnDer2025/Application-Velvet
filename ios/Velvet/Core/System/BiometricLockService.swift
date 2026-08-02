@@ -6,10 +6,12 @@ final class BiometricLockService: ObservableObject {
     @Published private(set) var isEnabled: Bool
     @Published private(set) var isUnlocked: Bool
     @Published private(set) var isAvailable = false
+    @Published private(set) var isAuthenticating = false
     @Published private(set) var biometryName = "Face ID"
     @Published var errorMessage: String?
 
     private let enabledKey = "velvet.biometric-lock.enabled"
+    private var activeContext: LAContext?
 
     init() {
         let enabled = UserDefaults.standard.bool(forKey: enabledKey)
@@ -55,19 +57,27 @@ final class BiometricLockService: ObservableObject {
             return true
         }
 
+        activeContext?.invalidate()
+        activeContext = nil
+        isAuthenticating = false
         isEnabled = false
         isUnlocked = true
+        errorMessage = nil
         UserDefaults.standard.set(false, forKey: enabledKey)
         return true
     }
 
+    /// Verrouille uniquement lors d'un vrai passage en arrière-plan.
+    /// L'état `.inactive` est également utilisé par la feuille Face ID elle-même
+    /// et ne doit donc jamais relancer le verrouillage.
     func lock() {
         guard isEnabled else { return }
         isUnlocked = false
+        errorMessage = nil
     }
 
     func unlockIfNeeded() async {
-        guard isEnabled, !isUnlocked else { return }
+        guard isEnabled, !isUnlocked, !isAuthenticating else { return }
         _ = await unlock()
     }
 
@@ -77,6 +87,8 @@ final class BiometricLockService: ObservableObject {
             isUnlocked = true
             return true
         }
+        guard !isAuthenticating else { return isUnlocked }
+
         let success = await authenticate(
             reason: "Déverrouille ton espace privé Velvet."
         )
@@ -85,9 +97,20 @@ final class BiometricLockService: ObservableObject {
     }
 
     private func authenticate(reason: String) async -> Bool {
+        guard !isAuthenticating else { return isUnlocked }
+
+        isAuthenticating = true
+        errorMessage = nil
+        defer {
+            activeContext = nil
+            isAuthenticating = false
+        }
+
         let context = LAContext()
+        activeContext = context
         context.localizedCancelTitle = "Annuler"
         context.localizedFallbackTitle = "Utiliser le code"
+        context.interactionNotAllowed = false
 
         var error: NSError?
         guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
@@ -100,8 +123,22 @@ final class BiometricLockService: ObservableObject {
                 .deviceOwnerAuthentication,
                 localizedReason: reason
             )
+        } catch let authenticationError as LAError {
+            switch authenticationError.code {
+            case .userCancel, .appCancel, .systemCancel:
+                // Une annulation volontaire ou système garde simplement l'écran verrouillé.
+                // Aucun dialogue supplémentaire ne doit recouvrir le prochain essai.
+                errorMessage = nil
+            case .notInteractive:
+                // Peut survenir pendant les toutes premières millisecondes du retour actif.
+                // Le bouton de l'écran verrouillé reste disponible pour relancer proprement.
+                errorMessage = nil
+            default:
+                errorMessage = "Velvet reste verrouillé. Réessaie avec \(biometryName) ou le code de l’iPhone."
+            }
+            return false
         } catch {
-            errorMessage = "Velvet reste verrouillé. Réessaie lorsque tu es prêt."
+            errorMessage = "Velvet reste verrouillé. Réessaie avec \(biometryName) ou le code de l’iPhone."
             return false
         }
     }
@@ -127,7 +164,7 @@ struct BiometricLockView: View {
                         .font(VelvetTypography.title(size: 31))
                         .foregroundStyle(VelvetColor.ivory)
 
-                    Text("Ton contenu reste masqué dès que l’application quitte l’écran.")
+                    Text("Ton contenu reste masqué dès que l’application passe en arrière-plan.")
                         .font(VelvetTypography.body(size: 13))
                         .foregroundStyle(VelvetColor.textSecondary)
                         .multilineTextAlignment(.center)
@@ -137,12 +174,19 @@ struct BiometricLockView: View {
                 Button {
                     Task { await biometrics.unlock() }
                 } label: {
-                    Label(
-                        "Déverrouiller avec \(biometrics.biometryName)",
-                        systemImage: biometrics.biometryName == "Face ID"
-                            ? "faceid"
-                            : "touchid"
-                    )
+                    Group {
+                        if biometrics.isAuthenticating {
+                            ProgressView()
+                                .tint(VelvetColor.velvetBlack)
+                        } else {
+                            Label(
+                                "Déverrouiller avec \(biometrics.biometryName)",
+                                systemImage: biometrics.biometryName == "Face ID"
+                                    ? "faceid"
+                                    : "touchid"
+                            )
+                        }
+                    }
                     .font(VelvetTypography.body(size: 14, weight: .semibold))
                     .foregroundStyle(VelvetColor.velvetBlack)
                     .frame(maxWidth: .infinity, minHeight: 50)
@@ -155,6 +199,7 @@ struct BiometricLockView: View {
                     )
                 }
                 .buttonStyle(.plain)
+                .disabled(biometrics.isAuthenticating)
                 .frame(maxWidth: 320)
             }
             .padding(24)
