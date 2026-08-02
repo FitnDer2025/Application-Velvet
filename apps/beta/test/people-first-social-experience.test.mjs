@@ -13,9 +13,7 @@ const webFiles = {
 test('le Web mobile présente un vrai fil social avec les médias Supabase', async () => {
   const [html, script, styles, worker] = await Promise.all(Object.values(webFiles).map(read));
   assert.doesNotThrow(() => new Function(script));
-  for (const contract of ['Actualité', 'FIL COMMUNAUTAIRE', 'Ce qui se passe maintenant', 'data-open-profile', 'data-open-venue', 'IntersectionObserver']) {
-    assert.match(script, new RegExp(contract, 'i'));
-  }
+  for (const contract of ['Actualité', 'FIL COMMUNAUTAIRE', 'Ce qui se passe maintenant', 'data-open-profile', 'data-open-venue', 'IntersectionObserver']) assert.match(script, new RegExp(contract, 'i'));
   assert.match(script, /mediaAssets/);
   assert.match(script, /media_assets/);
   assert.match(script, /previewUrl/);
@@ -55,16 +53,12 @@ test('les fiches Web reprennent le contenu complet de la fiche iOS', async () =>
     'attractedTo', 'attracted_to', 'desiredPractices', 'desired_practices',
     'partnerPermissions', 'partner_permissions', 'albums', 'media_assets'
   ]) assert.match(script, new RegExp(contract));
-  for (const label of ['Le récit', 'Pratiques & expériences', 'Photos & albums', 'Recommandations', 'Sécurité, blocage et signalement']) {
-    assert.match(script, new RegExp(label));
-  }
+  for (const label of ['Le récit', 'Pratiques & expériences', 'Photos & albums', 'Recommandations', 'Sécurité, blocage et signalement']) assert.match(script, new RegExp(label, 'i'));
 });
 
 test('les profils, lieux et sorties partagent les informations essentielles', async () => {
   const script = await read(webFiles.script);
-  for (const contract of ['On y sera', 'On y était', 'J’y serai', 'J’y étais', 'Soirées organisées', 'Qui a prévu d’y aller', 'Déclarer une sortie']) {
-    assert.match(script, new RegExp(contract));
-  }
+  for (const contract of ['On y sera', 'On y était', 'J’y serai', 'J’y étais', 'Soirées organisées', 'Qui a prévu d’y aller', 'Déclarer une sortie']) assert.match(script, new RegExp(contract));
   assert.match(script, /data-publish-venue/);
   assert.match(script, /data-publish-travel/);
   assert.match(script, /action: 'venue_visit'/);
