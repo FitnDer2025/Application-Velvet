@@ -1,5 +1,5 @@
-const CACHE = 'velvet-beta-shell-v19';
-// Cache précédent explicitement supprimé pendant l’activation : velvet-beta-shell-v18.
+const CACHE = 'velvet-beta-shell-v20';
+// Cache précédent explicitement supprimé pendant l’activation : velvet-beta-shell-v19.
 const APP_SHELL = [
   '/assets/members-live.css',
   '/assets/members-live.js',
@@ -26,10 +26,8 @@ const APP_SHELL = [
   '/assets/velvet-experience-management.js?v=20260731-1',
   '/assets/velvet-interaction-recovery.css?v=20260801-1',
   '/assets/velvet-interaction-recovery.js?v=20260801-1',
-  '/assets/velvet-community-parity.css?v=20260801-1',
-  '/assets/velvet-community-shell.css?v=20260801-1',
-  '/assets/velvet-community-parity.js?v=20260801-1',
-  '/assets/velvet-community-parity-bridge.js?v=20260801-1',
+  '/assets/velvet-people-first.css?v=20260802-1',
+  '/assets/velvet-people-first.js?v=20260802-1',
   '/assets/pwa-ios.js',
   '/assets/photo-protection.js?v=20260731-5',
   '/assets/location-verification.js',
