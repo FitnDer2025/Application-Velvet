@@ -35,8 +35,18 @@ struct VelvetApp: App {
         .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .active:
-                Task { await biometrics.unlockIfNeeded() }
-            case .inactive, .background:
+                Task {
+                    // Laisse la scène et LocalAuthentication redevenir interactifs
+                    // avant de présenter Face ID après une sortie de veille.
+                    try? await Task.sleep(for: .milliseconds(220))
+                    guard !Task.isCancelled else { return }
+                    await biometrics.unlockIfNeeded()
+                }
+            case .inactive:
+                // Face ID, le centre de contrôle et plusieurs feuilles système
+                // utilisent cet état. Le verrouillage ici créait une boucle.
+                break
+            case .background:
                 biometrics.lock()
             @unknown default:
                 break
