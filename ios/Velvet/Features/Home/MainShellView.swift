@@ -194,7 +194,7 @@ struct MainShellView: View {
         case .people:
             NavigationStack { PremiumDiscoveryGridView(currentProfile: profile) }
         case .places:
-            NavigationStack { PeopleFirstClubDirectoryView() }
+            NavigationStack { RecommendedClubDirectoryView() }
         case .messages:
             NavigationStack { ManagedConversationsView() }
         case .profile:
