@@ -59,7 +59,7 @@ struct MemberDetailView: View {
 
                 if let history {
                     Label(
-                        "Consulté \(history.viewCount ?? 1) fois",
+                        "Déjà consulté · \(history.viewCount ?? 1) visite\((history.viewCount ?? 1) > 1 ? "s" : "")",
                         systemImage: "eye.fill"
                     )
                     .font(VelvetTypography.caption(size: 8))
