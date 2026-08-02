@@ -3,14 +3,16 @@ import SwiftUI
 struct MainShellView: View {
     private enum Tab: String, CaseIterable {
         case home
-        case navigation
+        case people
+        case places
         case messages
         case profile
 
         var label: String {
             switch self {
             case .home: "Accueil"
-            case .navigation: "Navigation"
+            case .people: "Membres"
+            case .places: "Lieux"
             case .messages: "Messages"
             case .profile: "Profil"
             }
@@ -19,7 +21,8 @@ struct MainShellView: View {
         var icon: String {
             switch self {
             case .home: "house"
-            case .navigation: "safari"
+            case .people: "person.2"
+            case .places: "building.2"
             case .messages: "bubble.left.and.bubble.right"
             case .profile: "person.crop.circle"
             }
@@ -28,7 +31,8 @@ struct MainShellView: View {
         var selectedIcon: String {
             switch self {
             case .home: "house.fill"
-            case .navigation: "safari.fill"
+            case .people: "person.2.fill"
+            case .places: "building.2.fill"
             case .messages: "bubble.left.and.bubble.right.fill"
             case .profile: "person.crop.circle.fill"
             }
@@ -186,9 +190,11 @@ struct MainShellView: View {
     private var selectedContent: some View {
         switch selectedTab {
         case .home:
-            NavigationStack { IntelligentHomeActivityView(profile: profile) }
-        case .navigation:
-            NavigationStack { VelvetNavigationHubView(profile: profile) }
+            NavigationStack { PeopleFirstHomeView(profile: profile) }
+        case .people:
+            NavigationStack { PremiumDiscoveryGridView(currentProfile: profile) }
+        case .places:
+            NavigationStack { PeopleFirstClubDirectoryView() }
         case .messages:
             NavigationStack { ManagedConversationsView() }
         case .profile:
@@ -197,7 +203,7 @@ struct MainShellView: View {
     }
 
     private var bottomNavigation: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 0) {
             ForEach(Tab.allCases, id: \.rawValue) { tab in
                 Button {
                     withAnimation(.easeOut(duration: VelvetMotion.fast)) {
@@ -208,21 +214,7 @@ struct MainShellView: View {
                         ZStack(alignment: .topTrailing) {
                             Image(systemName: selectedTab == tab ? tab.selectedIcon : tab.icon)
                                 .font(.system(size: 18, weight: .medium))
-                                .frame(width: 38, height: 30)
-                                .background {
-                                    if selectedTab == tab {
-                                        Circle()
-                                            .fill(.ultraThinMaterial)
-                                            .background(VelvetColor.champagneGold.opacity(0.08))
-                                            .clipShape(Circle())
-                                            .overlay {
-                                                Circle().stroke(
-                                                    VelvetColor.champagneGold.opacity(0.24),
-                                                    lineWidth: 0.8
-                                                )
-                                            }
-                                    }
-                                }
+                                .frame(width: 38, height: 26)
 
                             if tab == .messages, store.unreadMessageCount > 0 {
                                 Text(store.unreadMessageCount > 99 ? "99+" : "\(store.unreadMessageCount)")
@@ -232,38 +224,45 @@ struct MainShellView: View {
                                     .frame(minWidth: 17, minHeight: 17)
                                     .background(VelvetColor.danger)
                                     .clipShape(Capsule())
-                                    .offset(x: 7, y: -5)
+                                    .offset(x: 8, y: -6)
                             }
                         }
 
                         Text(tab.label)
-                            .font(.system(size: 9, weight: selectedTab == tab ? .semibold : .medium))
+                            .font(.system(size: 8, weight: selectedTab == tab ? .semibold : .medium))
                             .lineLimit(1)
                     }
                     .foregroundStyle(
                         selectedTab == tab ? VelvetColor.champagneGold : VelvetColor.textSecondary
                     )
                     .frame(maxWidth: .infinity)
-                    .frame(height: 54)
+                    .frame(height: 52)
+                    .background {
+                        if selectedTab == tab {
+                            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                                .fill(VelvetColor.champagneGold.opacity(0.075))
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 13, style: .continuous)
+                                        .stroke(VelvetColor.champagneGold.opacity(0.14), lineWidth: 0.7)
+                                }
+                        }
+                    }
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(selectedTab == tab ? .isSelected : [])
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
+        .padding(.horizontal, 5)
+        .padding(.top, 5)
+        .padding(.bottom, 4)
         .background(.ultraThinMaterial)
-        .background(VelvetColor.velvetBlack.opacity(0.58))
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .stroke(VelvetColor.borderSubtle, lineWidth: 0.7)
+        .background(VelvetColor.velvetBlack.opacity(0.74))
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(VelvetColor.borderSubtle)
+                .frame(height: 0.7)
         }
-        .shadow(color: .black.opacity(0.26), radius: 20, y: 8)
-        .padding(.horizontal, 12)
-        .padding(.top, 4)
-        .padding(.bottom, 6)
     }
 
     private func queue(_ route: MenuRoute) {
@@ -296,7 +295,7 @@ struct MainShellView: View {
             case let .profile(member):
                 routedProfile = member
             case .events:
-                selectedTab = .navigation
+                selectedTab = .places
             }
         }
     }
@@ -318,7 +317,7 @@ struct MainShellView: View {
             }
 
         case .events, .maps:
-            selectedTab = .navigation
+            selectedTab = .places
 
         case .profile:
             if let id = route.profileID,
@@ -348,7 +347,7 @@ private struct VelvetMenuView: View {
                     VelvetPageHeader(
                         "Outils & réglages",
                         title: "Plus de Velvet",
-                        subtitle: "Les fonctions de gestion restent ici. Les profils, clubs et sorties se trouvent dans Navigation."
+                        subtitle: "Les profils se trouvent dans Membres. Les clubs, soirées et participants se trouvent dans Lieux."
                     )
                     .padding(.bottom, 8)
 
