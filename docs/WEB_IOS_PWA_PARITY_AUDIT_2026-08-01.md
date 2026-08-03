@@ -1,39 +1,42 @@
 # Audit de parité Velvet — iOS, Web desktop et Web mobile/PWA
 
-Date : 1er août 2026  
+Date : mise à jour du 3 août 2026
 Périmètre : espace Membres Velvet, environnement BETA privé.
 
 ## Conclusion
 
-Les trois interfaces reposent désormais sur les mêmes parcours, les mêmes API et les mêmes données métier pour l’accueil communautaire, la recherche de profils, les établissements, les sorties et les participants.
+La version iOS validée reste inchangée et sert de référence. Web desktop et Web mobile/PWA reposent désormais sur le cœur fonctionnel Membres complet, les mêmes API et les mêmes données métier pour l’accueil communautaire, la recherche de profils, les établissements, les sorties, les participants, la messagerie et le profil.
 
-Les contrôles automatisés n’ont détecté aucune anomalie bloquante après synchronisation :
+La V1.1 Web supprime l’ancienne concurrence entre une application complète et une couche de parité simplifiée : `members-live.js` redevient l’unique moteur fonctionnel, tandis que `velvet-web-ios-parity.js` se limite au shell responsive, à la synchronisation de la navigation et au menu mobile. Cette séparation évite les écrans incomplets, les doubles gestionnaires de contenu et les couches invisibles bloquant les clics.
+
+Les contrôles automatisés de la V1.1 couvrent notamment :
 
 - validation syntaxique Node de toutes les couches Web/API concernées ;
-- 91 tests de contrats fonctionnels réussis ;
+- 100 tests de contrats fonctionnels réussis ;
 - contrôles Supabase/RLS réussis sur 60 tables protégées ;
 - 37 parcours de persistance contrôlés ;
 - 23 parcours utilisateurs bout en bout contrôlés ;
 - build BETA Web/PWA réussi ;
-- compilation Apple validée précédemment pour l’application iPhone, le widget iPhone, l’application Apple Watch et sa complication.
+- garde-fou Git confirmant qu’aucun fichier du dossier `ios/` n’est modifié par cette livraison Web.
 
 ## Navigation commune
 
-Les trois interfaces exposent quatre espaces principaux :
+Les trois interfaces exposent cinq espaces principaux :
 
 1. Accueil
-2. Navigation
-3. Messages
-4. Profil
+2. Membres
+3. Lieux
+4. Messages
+5. Profil
 
 Les notifications et paramètres restent disponibles comme outils secondaires afin de ne pas surcharger le parcours principal.
 
 ## Accueil communautaire
 
-Le même ordre fonctionnel est appliqué :
+Le même ordre fonctionnel que `PeopleFirstHomeView` est appliqué :
 
 1. salutation personnalisée ;
-2. derniers profils et recommandations Velvet Intelligence ;
+2. sélection « À découvrir » avec les derniers profils et recommandations ;
 3. fil communautaire vertical et non figé.
 
 Le fil exploite les mêmes sources pour afficher :
@@ -49,7 +52,7 @@ La sélection est contextualisée par les préférences, les affinités, le rayo
 
 ## Recherche de profils
 
-La recherche avancée demeure accessible depuis Navigation sur les trois interfaces. Les critères, profils, types démographiques, âges, photos et données d’affinité proviennent du même annuaire Membres.
+La recherche avancée demeure accessible depuis Membres sur les trois interfaces. Les critères, profils, types démographiques, âges, photos et données d’affinité proviennent du même annuaire Membres.
 
 ## Clubs et établissements
 
@@ -80,11 +83,11 @@ Le parcours commun est :
 
 ## Web mobile/PWA
 
-Le service worker utilise le cache `velvet-beta-shell-v19` et supprime les versions précédentes à l’activation. Les nouvelles couches communautaires, de navigation et de compatibilité sont incluses dans le cache applicatif.
+Le service worker utilise le cache `velvet-beta-shell-v22` et supprime les versions précédentes à l’activation. Le cœur Membres complet et le shell responsive V1.1 sont versionnés ensemble dans le cache applicatif.
 
 Le rendu responsive conserve :
 
-- quatre destinations dans la barre basse ;
+- cinq destinations dans la barre basse ;
 - cartes et boutons dimensionnés pour le tactile ;
 - formulaire de sortie en une colonne sur petit écran ;
 - listes d’établissements et de participants sans débordement horizontal ;
@@ -92,11 +95,11 @@ Le rendu responsive conserve :
 
 ## Protection contre les régressions
 
-Une couche de compatibilité empêche les anciens enrichissements JavaScript d’injecter une seconde page d’accueil ou de perturber la navigation unifiée.
+Le shell de compatibilité ne produit plus aucun contenu métier. Il synchronise uniquement les cinq destinations, l’état actif, le menu secondaire et le scrim mobile ; toutes les pages et actions sont rendues par le cœur Membres.
 
 La suite `web-ios-community-parity.test.mjs` vérifie notamment :
 
-- les quatre espaces communs ;
+- les cinq espaces communs ;
 - l’ordre de l’accueil communautaire ;
 - les catégories d’activité ;
 - l’annuaire complet des établissements ;

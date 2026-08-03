@@ -6,6 +6,12 @@
   const conversationId = params.get('conversation');
   const profileId = params.get('profile');
   const eventId = params.get('event');
+  const routeAliases = {
+    members: 'discover',
+    places: 'venues',
+    messages: 'conversations',
+    profile: 'me'
+  };
   if (!route && !conversationId && !profileId && !eventId) return;
 
   const startedAt = Date.now();
@@ -48,7 +54,8 @@
       if (click(direct)) return complete();
       click(document.querySelector('[data-route="events"]'));
     } else if (route) {
-      if (click(document.querySelector(`[data-route="${CSS.escape(route)}"]`))) return complete();
+      const resolvedRoute = routeAliases[route] || route;
+      if (click(document.querySelector(`[data-route="${CSS.escape(resolvedRoute)}"]`))) return complete();
     }
 
     if (Date.now() - startedAt > 12_000) {

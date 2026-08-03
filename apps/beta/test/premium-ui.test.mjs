@@ -18,8 +18,8 @@ test('le système visuel premium reste synchronisé avec la marque Velvet', asyn
 test('la navigation mobile Membres conserve cinq espaces communs avec iOS', async () => {
   const html = await read('apps/web/velvet-members-beta-live.html');
   const nav = html.match(/<nav class="bottom-nav"[\s\S]*?<\/nav>/)?.[0] || '';
-  const destinations = [...nav.matchAll(/data-web-route="([^"]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(destinations,['home','members','places','conversations','profile']);
+  const destinations = [...nav.matchAll(/data-route="([^"]+)"/g)].map((match) => match[1]);
+  assert.deepEqual(destinations,['home','discover','venues','conversations','me']);
   for (const label of ['Accueil','Membres','Lieux','Messages','Profil']) assert.match(nav,new RegExp(label));
   assert.match(html,/velvet-web-ios-parity\.css/);
   assert.match(html,/velvet-web-ios-parity\.js/);
@@ -39,19 +39,23 @@ test('PRO et Contrôle gardent le langage visuel Velvet', async () => {
 });
 
 test('la direction artistique traite profils, fil et établissements', async () => {
-  const [editorial, parity, auth, sw] = await Promise.all([
+  const [editorial, parity, premiumUi, auth, sw] = await Promise.all([
     read('apps/beta/static/assets/velvet-editorial-ui.css'),
     read('apps/beta/static/assets/velvet-web-ios-parity.css'),
+    read('apps/beta/static/assets/velvet-premium-ui.js'),
     read('apps/web/velvet-auth-beta-rc1.html'),
     read('apps/beta/static/sw.js')
   ]);
   assert.match(editorial,/\.velvet-member-ui \.profile-layout/);
-  assert.match(parity,/\.vp-feed-card/);
-  assert.match(parity,/\.vp-profile-hero/);
-  assert.match(parity,/\.vp-venue-card/);
-  assert.match(parity,/\.sidebar #mainNav button\.active/);
+  assert.match(parity,/\.home-feed-card/);
+  assert.match(parity,/\.hero-copy/);
+  assert.match(parity,/\.venue-tile/);
+  assert.match(parity,/\.venue-tile[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(parity,/\.sidebar nav button\.active/);
+  assert.match(premiumUi,/notifications\.innerHTML = icon\('bell'\)/);
+  assert.match(premiumUi,/menuButton\.innerHTML = icon\('menu'\)/);
   assert.match(auth,/velvet-editorial-ui\.css/);
-  assert.match(sw,/velvet-beta-shell-v21/);
+  assert.match(sw,/velvet-beta-shell-v22/);
   assert.match(sw,/velvet-web-ios-parity\.js/);
 });
 
