@@ -46,9 +46,10 @@ test('les membres publient des sorties et séjours avec participants et contrôl
 });
 
 test('le Web et la PWA exposent le même accueil et les mêmes outils', async () => {
-  const [html, management, parity, styles, worker] = await Promise.all([
+  const [html, management, core, parity, styles, worker] = await Promise.all([
     read('apps/web/velvet-members-beta-live.html'),
     read('apps/beta/static/assets/velvet-experience-management.js'),
+    read('apps/beta/static/assets/members-live.js'),
     read('apps/beta/static/assets/velvet-web-ios-parity.js'),
     read('apps/beta/static/assets/velvet-web-ios-parity.css'),
     read('apps/beta/static/sw.js')
@@ -58,11 +59,12 @@ test('le Web et la PWA exposent le même accueil et les mêmes outils', async ()
   assert.match(html, /velvet-web-ios-parity\.js/);
   assert.match(html, /velvet-web-ios-parity\.css/);
   assert.match(management, /\/api\/members\/photo-management/);
-  assert.match(parity, /\/api\/members\/home-intelligence/);
-  assert.match(parity, /\/api\/members\/plans/);
-  assert.match(parity, /media_assets/);
-  assert.match(styles, /\.vp-profile-hero/);
-  assert.match(worker, /velvet-beta-shell-v21/);
+  assert.match(core, /homeDiscoveryProfiles/);
+  assert.match(core, /\/api\/members\/plans/);
+  assert.match(core, /approvedProfilePhotos/);
+  assert.match(parity, /PRIMARY_ROUTES/);
+  assert.match(styles, /\.hero-copy/);
+  assert.match(worker, /velvet-beta-shell-v22/);
   assert.match(worker, /velvet-web-ios-parity\.js/);
 });
 

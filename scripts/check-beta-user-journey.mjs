@@ -125,7 +125,7 @@ const journeys = [
   },
   {
     name: 'Accueil et recherche filtrée',
-    valid: has('apps/beta/static/assets/members-live.js', 'profil${profilesToday.length', 'événement${nearbyEvents.length', 'lieux référencés', 'Votre actualité Velvet')
+    valid: has('apps/beta/static/assets/members-live.js', 'homeDiscoveryProfiles', 'Les profils qui comptent', 'Ce qui se passe maintenant', 'homeFeedItems')
       && has('apps/beta/static/assets/members-live.js', 'maleAgeMin', 'femaleAgeMin', 'discoverChoices', 'filteredDiscoverProfiles', 'data-save-search', 'presenceBadge')
       && has('functions/api/members/discovery.js', 'member_saved_searches', 'member_presence_snapshot')
   },

@@ -4,48 +4,48 @@ import test from 'node:test';
 
 const read = (path) => readFile(path, 'utf8');
 
-test('la correction Web ne modifie aucun fichier iOS', async () => {
-  const packageJson = JSON.parse(await read('package.json'));
-  assert.ok(packageJson);
+test('la correction Web ne remplace pas le code iOS par une WebView', async () => {
+  const root = await read('ios/Velvet/App/RootView.swift');
+  assert.doesNotMatch(root, /WKWebView|SFSafariViewController/);
 });
 
-test('Web et PWA utilisent une seule couche de navigation people-first', async () => {
-  const [html, script, styles, worker] = await Promise.all([
+test('Web et PWA exécutent un seul cœur fonctionnel sous un shell V1.1', async () => {
+  const [html, shell, worker] = await Promise.all([
     read('apps/web/velvet-members-beta-live.html'),
     read('apps/beta/static/assets/velvet-web-ios-parity.js'),
-    read('apps/beta/static/assets/velvet-web-ios-parity.css'),
     read('apps/beta/static/sw.js')
   ]);
-  assert.doesNotThrow(() => new Function(script));
-  assert.match(html, /velvet-web-ios-parity\.css\?v=20260802-2/);
-  assert.match(html, /velvet-web-ios-parity\.js\?v=20260802-2/);
+  assert.doesNotThrow(() => new Function(shell));
+  assert.match(html, /members-live\.js\?v=20260803-1/);
+  assert.ok(html.indexOf('members-live.js') < html.indexOf('velvet-web-ios-parity.js'));
   assert.doesNotMatch(html, /velvet-people-first\.js/);
-  assert.equal((html.match(/data-web-route=/g) || []).length, 10);
-  for (const route of ['home', 'members', 'places', 'conversations', 'profile']) {
-    assert.match(html, new RegExp(`data-web-route="${route}"`));
-  }
-  assert.match(worker, /velvet-beta-shell-v21/);
-  assert.match(styles, /\.sidebar #mainNav button\.active/);
+  assert.equal((html.match(/<nav class="bottom-nav"[\s\S]*?<\/nav>/)?.[0].match(/data-route=/g) || []).length, 5);
+  assert.match(shell, /PRIMARY_ROUTES = \['home', 'discover', 'venues', 'conversations', 'me'\]/);
+  assert.match(worker, /velvet-beta-shell-v22/);
 });
 
-test('les photos réelles Supabase alimentent le fil et les fiches', async () => {
-  const script = await read('apps/beta/static/assets/velvet-web-ios-parity.js');
-  assert.match(script, /media_assets/);
-  assert.match(script, /profileGalleryPhotos/);
-  assert.match(script, /previewUrl/);
-  assert.match(script, /signedUrl/);
-  assert.match(script, /function primary/);
-  assert.match(script, /vp-media-button/);
-  assert.match(script, /vp-profile-hero/);
-  assert.match(script, /vp-gallery/);
+test('les photos Supabase alimentent le fil, les résultats et les fiches complètes', async () => {
+  const core = await read('apps/beta/static/assets/members-live.js');
+  for (const contract of [
+    'approvedProfilePhotos',
+    'homeDiscoveryCard',
+    'profilePreviewCard',
+    'profileCarousel',
+    'albumsView',
+    'renderProfile'
+  ]) assert.match(core, new RegExp(contract));
 });
 
-test('les boutons essentiels ont une destination explicite', async () => {
-  const script = await read('apps/beta/static/assets/velvet-web-ios-parity.js');
-  for (const contract of ['data-vp-profile', 'data-vp-venue', 'data-web-route', 'data-refresh', 'data-more', 'data-close']) {
-    assert.match(script, new RegExp(contract));
-  }
-  assert.match(script, /navigate\(b\.dataset\.webRoute\)/);
-  assert.match(script, /profileDialog/);
-  assert.match(script, /venueDialog/);
+test('les boutons critiques conservent une destination fonctionnelle', async () => {
+  const core = await read('apps/beta/static/assets/members-live.js');
+  for (const contract of [
+    'data-open-profile',
+    'data-open-venue',
+    'data-open-conversation',
+    'data-route',
+    'data-edit-profile',
+    'data-message-profile'
+  ]) assert.match(core, new RegExp(contract));
+  assert.match(core, /function route/);
+  assert.match(core, /function bindDynamicForms/);
 });

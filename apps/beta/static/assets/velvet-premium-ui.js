@@ -95,26 +95,34 @@
 
     const header = document.querySelector('.mobile-head');
     const menuButton = document.querySelector('#mobileMenuButton');
-    if (header && menuButton && !header.querySelector('.mobile-head-actions')) {
-      const actions = document.createElement('span');
-      actions.className = 'mobile-head-actions';
-      const notifications = document.createElement('button');
-      notifications.type = 'button';
-      notifications.className = 'mobile-head-action';
-      notifications.dataset.route = 'notifications';
+    if (header && menuButton) {
+      let actions = header.querySelector('.mobile-head-actions');
+      if (!actions) {
+        actions = document.createElement('span');
+        actions.className = 'mobile-head-actions';
+        header.append(actions);
+      }
+      let notifications = actions.querySelector('[data-route="notifications"]');
+      if (!notifications) {
+        notifications = document.createElement('button');
+        notifications.type = 'button';
+        notifications.dataset.route = 'notifications';
+        actions.prepend(notifications);
+      }
+      notifications.classList.add('mobile-head-action');
       notifications.setAttribute('aria-label', 'Notifications');
-      notifications.innerHTML = icon('bell');
+      if (!notifications.querySelector('svg')) notifications.innerHTML = icon('bell');
       menuButton.textContent = '';
       menuButton.setAttribute('aria-label', 'Ouvrir la navigation');
       menuButton.innerHTML = icon('menu');
       menuButton.classList.add('mobile-head-action');
-      actions.append(notifications, menuButton);
-      header.append(actions);
-      menuButton.addEventListener('click', () => {
+      actions.append(menuButton);
+      if (!menuButton.dataset.velvetMenuBound) menuButton.addEventListener('click', () => {
         requestAnimationFrame(() => {
           document.body.classList.toggle('nav-open', document.querySelector('.sidebar')?.classList.contains('open'));
         });
       });
+      menuButton.dataset.velvetMenuBound = 'true';
     }
 
     if (!document.querySelector('.nav-scrim')) {

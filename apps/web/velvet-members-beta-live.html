@@ -31,7 +31,7 @@
   <link rel="stylesheet" href="/assets/velvet-social-realtime.css?v=20260731-1">
   <link rel="stylesheet" href="/assets/velvet-experience-management.css?v=20260731-1">
   <link rel="stylesheet" href="/assets/velvet-interaction-recovery.css?v=20260801-1">
-  <link rel="stylesheet" href="/assets/velvet-web-ios-parity.css?v=20260802-2">
+  <link rel="stylesheet" href="/assets/velvet-web-ios-parity.css?v=20260803-1">
 </head>
 <body>
   <div class="app-shell">
@@ -41,15 +41,18 @@
         <span><strong>Velvet</strong><small>BETA privée</small></span>
       </a>
       <nav id="mainNav" aria-label="Espaces principaux">
-        <button data-web-route="home"><span>⌂</span>Accueil</button>
-        <button data-web-route="members"><span>⌕</span>Membres</button>
-        <button data-web-route="places"><span>⌂</span>Lieux</button>
-        <button data-web-route="conversations"><span>◌</span>Messages</button>
-        <button data-web-route="profile"><span>♡</span>Profil</button>
+        <button type="button" data-route="home"><span>⌂</span>Accueil</button>
+        <button type="button" data-route="discover"><span>⌕</span>Membres</button>
+        <button type="button" data-route="venues"><span>⌂</span>Lieux</button>
+        <button type="button" data-route="conversations"><span>◌</span>Messages</button>
+        <button type="button" data-route="me"><span>♡</span>Profil</button>
       </nav>
-      <div class="sidebar-tools" aria-label="Outils">
-        <button data-route="notifications"><span>○</span>Notifications</button>
-        <button data-route="settings"><span>⚙</span>Paramètres</button>
+      <div class="sidebar-tools" aria-label="Outils et réglages">
+        <p>PLUS DE VELVET</p>
+        <button type="button" data-route="events"><span>✦</span>Sorties & agenda</button>
+        <button type="button" data-route="maps"><span>⌖</span>Carte</button>
+        <button type="button" data-route="notifications"><span>○</span>Notifications</button>
+        <button type="button" data-route="settings"><span>⚙</span>Paramètres</button>
       </div>
       <div class="sidebar-foot">
         <p><span class="live-dot"></span>Données réelles Supabase</p>
@@ -60,8 +63,8 @@
     <header class="mobile-head">
       <a class="brand compact" href="/membres/"><span class="brand-mark">V</span><strong>Velvet</strong></a>
       <div class="mobile-head-actions">
-        <button data-route="notifications" aria-label="Notifications">○</button>
-        <button id="mobileMenuButton" aria-expanded="false" aria-controls="mainNav">Menu</button>
+        <button type="button" data-route="notifications" aria-label="Notifications">○</button>
+        <button type="button" id="mobileMenuButton" aria-expanded="false" aria-controls="mainNav" aria-label="Ouvrir le menu">Menu</button>
       </div>
     </header>
 
@@ -73,14 +76,15 @@
     </main>
 
     <nav class="bottom-nav" aria-label="Navigation mobile">
-      <button data-web-route="home"><span>⌂</span><small>Accueil</small></button>
-      <button data-web-route="members"><span>⌕</span><small>Membres</small></button>
-      <button data-web-route="places"><span>⌂</span><small>Lieux</small></button>
-      <button data-web-route="conversations"><span>◌</span><small>Messages</small></button>
-      <button data-web-route="profile"><span>♡</span><small>Profil</small></button>
+      <button type="button" data-route="home"><span>⌂</span><small>Accueil</small></button>
+      <button type="button" data-route="discover"><span>⌕</span><small>Membres</small></button>
+      <button type="button" data-route="venues"><span>⌂</span><small>Lieux</small></button>
+      <button type="button" data-route="conversations"><span>◌</span><small>Messages</small></button>
+      <button type="button" data-route="me"><span>♡</span><small>Profil</small></button>
     </nav>
   </div>
   <div id="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/members-live.js?v=20260803-1" defer></script>
   <script src="/assets/velvet-premium-ui.js" defer></script>
   <script src="/assets/pwa-ios.js" defer></script>
   <script src="/assets/photo-protection.js?v=20260731-5" defer></script>
@@ -96,6 +100,6 @@
   <script src="/assets/velvet-push-deeplink.js?v=20260731-1" defer></script>
   <script src="/assets/velvet-experience-management.js?v=20260731-1" defer></script>
   <script src="/assets/velvet-interaction-recovery.js?v=20260801-1" defer></script>
-  <script src="/assets/velvet-web-ios-parity.js?v=20260802-2" defer></script>
+  <script src="/assets/velvet-web-ios-parity.js?v=20260803-1" defer></script>
 </body>
 </html>

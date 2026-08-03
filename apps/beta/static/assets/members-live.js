@@ -1784,19 +1784,33 @@
       .filter((profile) => profile.id !== state.profile.id)
       .filter((profile) => state.following.includes(profile.id) || profileMatchesOwnPreferences(profile))
       .filter((profile) => state.following.includes(profile.id) || !locationEnabled || (profileDistance(profile) ?? Infinity) <= 50);
-    const profileItems = profiles.map((profile) => ({
-      id: `profile-${profile.id}`,
-      type: 'profile',
-      date: profile.created_at,
-      profile
-    }));
-    const photoItems = profiles.flatMap((profile) => approvedProfilePhotos(profile).map((photo) => ({
-      id: `photo-${photo.id}`,
-      type: 'photo',
-      date: photo.created_at,
-      profile,
-      photo
-    })));
+    const profileItems = profiles.map((profile) => {
+      const createdAt = new Date(profile.created_at || 0);
+      const updatedAt = new Date(profile.updated_at || profile.created_at || 0);
+      const photo = approvedProfilePhotos(profile)
+        .sort((left, right) => new Date(right.created_at || 0) - new Date(left.created_at || 0))[0];
+      const photoAt = new Date(photo?.created_at || 0);
+      if (photo && photoAt > new Date(createdAt.getTime() + 60 * 60 * 1000)) {
+        return {
+          id: `photo-${photo.id}`,
+          type: 'photo',
+          date: photo.created_at,
+          profile,
+          photo
+        };
+      }
+      return {
+        id: `profile-${profile.id}`,
+        type: 'profile',
+        date: updatedAt > new Date(createdAt.getTime() + 12 * 60 * 60 * 1000)
+          ? profile.updated_at
+          : profile.created_at,
+        activity: updatedAt > new Date(createdAt.getTime() + 12 * 60 * 60 * 1000)
+          ? `${profile.display_name} a enrichi son profil`
+          : `${profile.display_name} vient de rejoindre Velvet`,
+        profile
+      };
+    });
     const eventItems = nearbyHomeEvents(50).map((event) => ({
       id: `event-${event.id}`,
       type: 'event',
@@ -1804,35 +1818,35 @@
       event
     }));
     const followedPlans = [
-      ...list(state.plans.travelPlans).filter((plan) => state.following.includes(plan.profile_id)).map((plan) => ({
+      ...list(state.plans.travelPlans).filter((plan) => plan.profile_id !== state.profile.id).map((plan) => ({
         id: `travel-${plan.id}`,
         type: 'plan',
         date: plan.created_at,
-        profile: profiles.find((profile) => profile.id === plan.profile_id),
+        profile: list(state.directory.profiles).find((profile) => profile.id === plan.profile_id),
         title: plan.title,
         detail: `${plan.location_label} · du ${dateLabel(plan.starts_on)} au ${dateLabel(plan.ends_on)}`
       })),
-      ...list(state.plans.venueVisits).filter((plan) => state.following.includes(plan.profile_id)).map((plan) => ({
+      ...list(state.plans.venueVisits).filter((plan) => plan.profile_id !== state.profile.id).map((plan) => ({
         id: `visit-${plan.id}`,
         type: 'plan',
         date: plan.created_at,
-        profile: profiles.find((profile) => profile.id === plan.profile_id),
+        profile: list(state.directory.profiles).find((profile) => profile.id === plan.profile_id),
         title: plan.venue_directory?.name || 'Sortie annoncée',
         detail: dateLabel(plan.visit_date)
       })),
-      ...list(state.plans.eventPlans).filter((plan) => state.following.includes(plan.profile_id)).map((plan) => {
+      ...list(state.plans.eventPlans).filter((plan) => plan.profile_id !== state.profile.id).map((plan) => {
         const event = list(state.directory.events).find((row) => row.id === plan.event_id);
         return {
           id: `event-plan-${plan.profile_id}-${plan.event_id}`,
           type: 'plan',
           date: plan.created_at,
-          profile: profiles.find((profile) => profile.id === plan.profile_id),
+          profile: list(state.directory.profiles).find((profile) => profile.id === plan.profile_id),
           title: event?.title || 'Événement Velvet',
           detail: event ? new Date(event.starts_at).toLocaleString('fr-FR') : plan.registration_status
         };
       })
     ].filter((item) => item.profile);
-    return [...profileItems, ...photoItems, ...eventItems, ...followedPlans]
+    return [...profileItems, ...eventItems, ...followedPlans]
       .filter((item) => item.date)
       .sort((left, right) => new Date(right.date) - new Date(left.date))
       .slice(0, 30);
@@ -1863,33 +1877,59 @@
       </article>`;
     }
     return `<article class="card home-feed-card profile-feed-card">
-      <header><span class="feed-avatar">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}</span><div><strong>Nouveau profil : ${e(profile.display_name)}</strong><small>${e(viewedAtLabel(item.date))}</small></div></header>
+      <header><span class="feed-avatar">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}</span><div><strong>${e(item.activity || `${profile.display_name} vient de rejoindre Velvet`)}</strong><small>${e(viewedAtLabel(item.date))}</small></div></header>
       <div class="home-profile-preview">${profilePreviewCard(profile, { variant: 'feed' })}</div>
     </article>`;
   }
 
+  function homeDiscoveryProfiles() {
+    const rows = list(state.directory.profiles).filter((profile) => profile.id !== state.profile.id);
+    const byId = new Map(rows.map((profile) => [profile.id, profile]));
+    const recommended = list(state.directory.recommendations)
+      .filter((item) => item.target_type === 'profile')
+      .map((item) => byId.get(item.target_id))
+      .filter(Boolean);
+    const latest = [...rows].sort((left, right) =>
+      new Date(right.updated_at || right.created_at || 0) - new Date(left.updated_at || left.created_at || 0)
+    );
+    return [...new Map([...recommended, ...latest].map((profile) => [profile.id, profile])).values()].slice(0, 12);
+  }
+
+  function homeDiscoveryCard(profile) {
+    const cover = approvedProfilePhotos(profile)[0];
+    const identity = profilePreviewIdentity(profile);
+    return `<button class="home-discovery-card" type="button" data-open-profile="${e(profile.id)}">
+      <span class="home-discovery-media">
+        ${cover ? `<img src="${e(cover.previewUrl)}" alt="Photo de profil de ${e(profile.display_name)}">` : `<b>${e(initials(profile.display_name))}</b>`}
+        <i class="profile-preview-presence ${(state.presence[profile.id] || 'offline') === 'online' ? 'green' : (state.presence[profile.id] || 'offline') === 'today' ? 'orange' : 'red'}" aria-hidden="true"></i>
+      </span>
+      <span class="home-discovery-copy"><strong>${e(profile.display_name)}</strong><small>${e(identity.label)} · ${e(profileAges(profile))}</small><em>${e(profile.location_zone || 'Zone privée')}</em></span>
+    </button>`;
+  }
+
   function renderHome() {
     const own = state.profile;
-    const today = parisDayKey();
-    const profilesToday = list(state.directory.profiles).filter(
-      (profile) => profile.id !== own.id && parisDayKey(profile.created_at) === today
-    );
-    const nearbyEvents = nearbyHomeEvents(50);
     const feed = homeFeedItems();
+    const discoveries = homeDiscoveryProfiles();
     const locationEnabled = state.mapData?.center?.source === 'private_approximate_location';
     return `<div class="page home-page">
-      ${pageHead('Votre espace privé', `Bonjour ${own.display_name}`, '')}
-      <section class="home-kpis">
-        <button type="button" class="card kpi" data-home-new-profiles><strong>${profilesToday.length}</strong><span>profil${profilesToday.length > 1 ? 's' : ''} créé${profilesToday.length > 1 ? 's' : ''} aujourd’hui</span><i>Voir →</i></button>
-        <button type="button" class="card kpi" data-home-events><strong>${locationEnabled ? nearbyEvents.length : '—'}</strong><span>événement${nearbyEvents.length > 1 ? 's' : ''} près de chez toi</span><i>${locationEnabled ? 'Voir →' : 'Activer ma zone →'}</i></button>
-        <button type="button" class="card kpi" data-route="venues"><strong>${list(state.directory.venueDirectory).length}</strong><span>lieux référencés</span><i>Explorer →</i></button>
+      <header class="ios-home-header">
+        <p class="eyebrow">Bonjour ${e(own.display_name)}</p>
+        <h1>Actualité</h1>
+        <p>Les personnes, leurs nouvelles photos et les sorties qui prennent vie autour de vous.</p>
+      </header>
+      <section class="home-discovery-section">
+        <header class="section-heading"><div><p class="eyebrow">À découvrir</p><h2>Les profils qui comptent</h2></div><button class="text-button" type="button" data-route="discover">Tout voir</button></header>
+        ${discoveries.length
+          ? `<div class="home-discovery-rail">${discoveries.map(homeDiscoveryCard).join('')}</div>`
+          : emptyState('La sélection se prépare', 'Les nouveaux profils apparaîtront ici.', '◇')}
       </section>
       <section class="home-feed">
-        <header class="section-heading"><div><p class="eyebrow">Sélection personnalisée</p><h2>Votre actualité Velvet</h2></div></header>
+        <header class="section-heading"><div><p class="eyebrow">Fil communautaire</p><h2>Ce qui se passe maintenant</h2></div></header>
         ${feed.length
           ? `<div class="home-feed-list">${feed.map(homeFeedItem).join('')}</div>`
           : emptyState(
-              'Votre fil se prépare',
+              'Le fil va prendre vie',
               locationEnabled
                 ? 'Les nouveaux profils, photos publiques et événements correspondant à vos préférences apparaîtront ici.'
                 : 'Activez votre zone pour ajouter les événements situés à moins de 50 km à votre actualité.',
@@ -3136,9 +3176,28 @@
 
   function venueTile(venue) {
     const distance = Number(venue._catalogDistanceKm);
+    const visitors = venueUpcomingProfiles(venue.id);
     return `<button class="card venue-tile" data-open-venue="${e(venue.id)}">
-      <span class="venue-symbol">⌑</span><span><small>${e(venue.kind || 'lieu Velvet')} · ${e(venue.city || 'Localisation à confirmer')}${Number.isFinite(distance) ? ` · ${e(Math.round(distance))} km` : Number.isFinite(Number(venue.distance_km)) ? ` · ${e(Math.round(Number(venue.distance_km)))} km` : ''}</small><b>${e(venue.name)}</b><em>${e(venue.claim_status === 'claimed' ? 'Fiche professionnelle reliée à Velvet Pro' : 'Référencé par Velvet · informations à confirmer')}</em></span><i>→</i>
+      <span class="venue-tile-main"><span class="venue-symbol">⌑</span><span><small>${e(venue.kind || 'lieu Velvet')} · ${e(venue.city || 'Localisation à confirmer')}${Number.isFinite(distance) ? ` · ${e(Math.round(distance))} km` : Number.isFinite(Number(venue.distance_km)) ? ` · ${e(Math.round(Number(venue.distance_km)))} km` : ''}</small><b>${e(venue.name)}</b><em>${e(venue.claim_status === 'claimed' ? 'Fiche professionnelle reliée à Velvet Pro' : 'Référencé par Velvet · informations à confirmer')}</em></span><i>→</i></span>
+      <span class="venue-tile-community">
+        <strong>${visitors.length} profil${visitors.length > 1 ? 's' : ''} annoncé${visitors.length > 1 ? 's' : ''}</strong>
+        ${visitors.length ? `<span class="venue-presence-rail">${visitors.slice(0, 7).map((profile) => {
+          const cover = approvedProfilePhotos(profile)[0];
+          return `<span class="venue-presence-avatar" title="${e(profile.display_name)}">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}</span>`;
+        }).join('')}</span>` : '<small>La communauté apparaîtra ici.</small>'}
+      </span>
     </button>`;
+  }
+
+  function venueUpcomingProfiles(venueId) {
+    const today = parisDayKey();
+    const rows = list(state.plans.venueVisits)
+      .filter((visit) => visit.venue_id === venueId && String(visit.visit_date || '') >= today)
+      .map((visit) => visit.profile_id === state.profile.id
+        ? state.profile
+        : list(state.directory.profiles).find((profile) => profile.id === visit.profile_id))
+      .filter(Boolean);
+    return [...new Map(rows.map((profile) => [profile.id, profile])).values()];
   }
 
   function renderEvents() {
@@ -3240,7 +3299,12 @@
     const radiusHelp = hasCenter
       ? `Dans un rayon de ${radius} km autour de ${e(state.venueCenter.label || state.venueLocationQuery)}.`
       : 'Choisis une ville ou un code postal dans les suggestions pour activer le périmètre.';
-    return `<div class="page">${pageHead('Référentiel France & Belgique', 'Établissements', 'Les fiches non revendiquées sont proposées à titre informatif et clairement distinguées des professionnels abonnés à Velvet Pro.')}
+    return `<div class="page venues-page">${pageHead(
+      'Lieux & sorties',
+      'Clubs et établissements',
+      'Une recherche distincte des membres, avec les soirées et les profils qui ont annoncé leur présence.',
+      '<div class="page-head-actions"><button class="secondary" type="button" data-route="events">Agenda</button><button class="secondary" type="button" data-route="maps">Carte</button></div>'
+    )}
       <section class="card venue-catalog-filters">
         <div class="venue-catalog-grid">
           <label>Nom ou mot-clé<input id="venueCatalogSearch" value="${e(state.venueQuery)}" placeholder="Nom ou adresse"></label>
@@ -3257,7 +3321,7 @@
         </div>
         <div class="venue-filter-footer"><p class="muted">${venues.length} résultat${venues.length > 1 ? 's' : ''} · les données marquées « à confirmer » ne constituent pas une validation professionnelle.</p>${state.venueLocationQuery ? '<button class="text-button" type="button" data-clear-venue-location>Effacer la zone</button>' : ''}</div>
       </section>
-      ${venues.length ? `<section class="grid three">${venues.map(venueTile).join('')}</section>` : emptyState('Aucun établissement correspondant', 'Modifie les filtres pour élargir la recherche.', '⌑')}
+      ${venues.length ? `<section class="venue-directory-grid">${venues.map(venueTile).join('')}</section>` : emptyState('Aucun établissement correspondant', 'Modifie les filtres pour élargir la recherche.', '⌑')}
     </div>`;
   }
 
@@ -3915,14 +3979,31 @@
   }
 
   function route(name) {
+    name = ({
+      members: 'discover',
+      places: 'venues',
+      messages: 'conversations',
+      profile: 'me'
+    })[name] || name;
     if (state.profile?.admission_status !== 'approved') {
       renderAdmission();
       return;
     }
     state.route = name;
+    document.body.dataset.velvetRoute = name;
     if (name !== 'maps') mapResizeObserver?.disconnect();
     state.editing = false;
-    navButtons.forEach((button) => button.classList.toggle('active', button.dataset.route === name));
+    const primaryRoute = ({ maps: 'venues', events: 'venues', settings: 'me' })[name] || name;
+    navButtons.forEach((button) => {
+      const inPrimaryNavigation = Boolean(button.closest('#mainNav,.bottom-nav'));
+      const active = button.dataset.route === name
+        || (inPrimaryNavigation && button.dataset.route === primaryRoute);
+      button.classList.toggle('active', active);
+      if (inPrimaryNavigation) {
+        if (active) button.setAttribute('aria-current', 'page');
+        else button.removeAttribute('aria-current');
+      }
+    });
     document.querySelector('.sidebar')?.classList.remove('open');
     document.body.classList.remove('nav-open');
     document.querySelector('#mobileMenuButton')?.setAttribute('aria-expanded', 'false');
