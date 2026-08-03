@@ -54,7 +54,7 @@
     <div class="brand"><b>VELVET</b><span class="pro">PRO</span></div>
     <div class="venue-switch"><small>Organisation</small><select id="venueSelect" onchange="changeVenue(this.value)"></select></div>
     <nav id="nav" class="nav"></nav>
-    <div class="sidebar-foot"><div class="account"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=75"><div><b>Émilie Martin</b><small>Administratrice · 3 lieux</small></div></div></div>
+    <div class="sidebar-foot"><div class="account"><img src="/assets/velvet-atmosphere.svg"><div><b>Émilie Martin</b><small>Administratrice · 3 lieux</small></div></div></div>
   </aside>
   <main class="main">
     <header class="topbar"><h2 id="pageTitle">Tableau de bord</h2><div class="top-actions"><span id="syncState" class="status ok">Fiche publique synchronisée</span><button class="btn secondary" onclick="openPublicPreview()">Aperçu public</button><button class="btn" onclick="openEventModal()">Créer une soirée</button></div></header>
@@ -68,17 +68,17 @@
 <script src="/assets/velvet-premium-ui.js" defer></script>
 <script>
 const IMG={
-  club:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1400&q=82',
-  spa:'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1400&q=82',
-  room:'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1400&q=82',
-  party:'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1400&q=82',
-  party2:'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=1200&q=82',
-  lounge:'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=82',
-  c1:'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=700&q=80',
-  c2:'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=700&q=80',
-  w1:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=700&q=80',
-  w2:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=700&q=80',
-  m1:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=700&q=80'
+  club:'/assets/velvet-atmosphere.svg',
+  spa:'/assets/velvet-atmosphere.svg',
+  room:'/assets/velvet-atmosphere.svg',
+  party:'/assets/velvet-atmosphere.svg',
+  party2:'/assets/velvet-atmosphere.svg',
+  lounge:'/assets/velvet-atmosphere.svg',
+  c1:'/assets/velvet-atmosphere.svg',
+  c2:'/assets/velvet-atmosphere.svg',
+  w1:'/assets/velvet-atmosphere.svg',
+  w2:'/assets/velvet-atmosphere.svg',
+  m1:'/assets/velvet-atmosphere.svg'
 };
 const BASE_VENUES=[
   {id:'op',name:'O’Pulsions',type:'Club privé',city:'Lille',hero:IMG.club,status:'published',description:'Un club élégant et chaleureux pensé pour la liberté, la qualité des rencontres et le respect de chacun.',address:'Métropole lilloise',phone:'03 20 00 00 00',email:'contact@demo-velvet.fr',hours:'Vendredi 22h–4h · Samedi 21h30–5h',equipment:['Bar premium','Dancefloor','Lounge','Terrasse','Parking discret'],views:12840},

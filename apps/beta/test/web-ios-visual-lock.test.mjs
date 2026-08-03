@@ -16,12 +16,12 @@ test('Web et PWA exécutent un seul cœur fonctionnel sous un shell V1.1', async
     read('apps/beta/static/sw.js')
   ]);
   assert.doesNotThrow(() => new Function(shell));
-  assert.match(html, /members-live\.js\?v=20260803-3/);
+  assert.match(html, /members-live\.js\?v=20260803-4/);
   assert.ok(html.indexOf('members-live.js') < html.indexOf('velvet-web-ios-parity.js'));
   assert.doesNotMatch(html, /velvet-people-first\.js/);
   assert.equal((html.match(/<nav class="bottom-nav"[\s\S]*?<\/nav>/)?.[0].match(/data-route=/g) || []).length, 5);
   assert.match(shell, /PRIMARY_ROUTES = \['home', 'discover', 'venues', 'conversations', 'me'\]/);
-  assert.match(worker, /velvet-beta-shell-v24/);
+  assert.match(worker, /const CACHE = 'velvet-beta-shell-v25'/);
 });
 
 test('les photos Supabase alimentent le fil, les résultats et les fiches complètes', async () => {

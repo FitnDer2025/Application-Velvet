@@ -64,7 +64,7 @@ test('le Web et la PWA exposent le même accueil et les mêmes outils', async ()
   assert.match(core, /approvedProfilePhotos/);
   assert.match(parity, /PRIMARY_ROUTES/);
   assert.match(styles, /\.hero-copy/);
-  assert.match(worker, /velvet-beta-shell-v24/);
+  assert.match(worker, /const CACHE = 'velvet-beta-shell-v25'/);
   assert.match(worker, /velvet-web-ios-parity\.js/);
 });
 

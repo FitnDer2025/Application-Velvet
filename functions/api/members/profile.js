@@ -143,7 +143,7 @@ function normalizeProfile(body) {
 
 export async function onRequestGet({ request, env }) {
   try {
-    const access = await memberSession(request, env);
+    const access = await memberSession(request, env, { allowUnverified: true });
     if (access.response) return access.response;
     const profile = await enrichProfileMedia(env, access.session, await myProfile(env, access.session));
     const memberAccess = profile?.id && profile.admission_status === 'approved'
@@ -167,7 +167,7 @@ export async function onRequestGet({ request, env }) {
 
 export async function onRequestPost({ request, env }) {
   try {
-    const access = await memberSession(request, env);
+    const access = await memberSession(request, env, { allowUnverified: true });
     if (access.response) return access.response;
     const raw = await readJson(request);
     if (JSON.stringify(raw).length > 40000) {

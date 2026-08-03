@@ -91,7 +91,7 @@ export async function onRequestGet({ request, env }) {
     );
   }
   try {
-    const access = await memberSession(request, env);
+    const access = await memberSession(request, env, { allowUnverified: true });
     if (access.response) return access.response;
     return withSession(await lifecycleState(env, access), access.session);
   } catch (error) {
@@ -127,7 +127,7 @@ export async function onRequestPost({ request, env }) {
   }
 
   try {
-    const access = await memberSession(request, env);
+    const access = await memberSession(request, env, { allowUnverified: true });
     if (access.response) return access.response;
     const body = await readJson(request);
     if (body.action === 'cancel' || body.action === 'resume') {

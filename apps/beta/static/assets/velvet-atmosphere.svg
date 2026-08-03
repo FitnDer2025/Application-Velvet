@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title description">
+  <title id="title">Atmosphère Velvet</title>
+  <desc id="description">Composition abstraite bordeaux, prune et or.</desc>
+  <defs>
+    <radialGradient id="bg" cx="72%" cy="18%" r="92%">
+      <stop offset="0" stop-color="#7a2749"/>
+      <stop offset="0.46" stop-color="#2b111d"/>
+      <stop offset="1" stop-color="#09080a"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#f2d59c" stop-opacity=".76"/>
+      <stop offset="1" stop-color="#9d7045" stop-opacity=".08"/>
+    </linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="34"/></filter>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <ellipse cx="760" cy="410" rx="330" ry="460" fill="#8d3153" opacity=".2" filter="url(#blur)"/>
+  <ellipse cx="940" cy="330" rx="170" ry="360" fill="url(#gold)" transform="rotate(24 940 330)"/>
+  <path d="M120 860C230 560 410 340 720 70" fill="none" stroke="#e2bb76" stroke-opacity=".18" stroke-width="3"/>
+  <path d="M300 900C390 620 570 390 960 100" fill="none" stroke="#f2d59c" stroke-opacity=".08" stroke-width="80" filter="url(#blur)"/>
+  <circle cx="885" cy="335" r="9" fill="#f2d59c" opacity=".72"/>
+</svg>
