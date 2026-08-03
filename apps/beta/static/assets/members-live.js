@@ -909,7 +909,7 @@
 
   function lockApplication() {
     document.body.classList.add('admission-locked');
-    document.querySelector('.sidebar')?.classList.remove('open');
+    window.VelvetWebV11?.closeMenu();
   }
 
   function unlockApplication() {
@@ -4022,9 +4022,6 @@
         else button.removeAttribute('aria-current');
       }
     });
-    document.querySelector('.sidebar')?.classList.remove('open');
-    document.body.classList.remove('nav-open');
-    document.querySelector('#mobileMenuButton')?.setAttribute('aria-expanded', 'false');
     if (name === 'home') content.innerHTML = renderHome();
     if (name === 'discover') content.innerHTML = renderDiscover();
     if (name === 'maps') {
@@ -4883,13 +4880,6 @@
   document.querySelector('#logoutButton').addEventListener('click', async () => {
     await api('/api/auth/logout', { method: 'POST', body: '{}' }).catch(() => {});
     window.location.href = '/';
-  });
-
-  document.querySelector('#mobileMenuButton').addEventListener('click', (event) => {
-    const sidebar = document.querySelector('.sidebar');
-    const open = !sidebar.classList.contains('open');
-    sidebar.classList.toggle('open', open);
-    event.currentTarget.setAttribute('aria-expanded', String(open));
   });
 
   async function refreshPresence() {

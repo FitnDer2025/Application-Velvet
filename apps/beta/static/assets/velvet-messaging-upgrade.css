@@ -43,13 +43,6 @@
 .composer.composer-v2 button[type=submit]{grid-column:2;grid-row:1;align-self:end;min-height:48px;gap:7px;padding:0 18px;white-space:nowrap}
 .composer.composer-v2 button[type=submit] .send-symbol{font-size:14px}
 
-@media(max-width:900px){
-  body.velvet-mobile-menu-open{overflow:hidden}
-  .sidebar{display:flex!important;transform:translateX(-110%);transition:transform .24s ease;z-index:100}
-  .velvet-mobile-menu-open .sidebar{transform:translateX(0)}
-  .velvet-mobile-menu-open:after{content:"";position:fixed;inset:0;background:#0009;backdrop-filter:blur(4px);z-index:90}
-  .mobile-head{z-index:110}
-}
 @media(max-width:760px){
   .conversation.conversation-v2{grid-template-columns:56px minmax(0,1fr) auto;min-height:92px;padding:14px;gap:12px}
   .conversation-avatar-v2{width:56px;height:56px;font-size:22px}

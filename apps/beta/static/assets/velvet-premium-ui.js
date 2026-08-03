@@ -117,25 +117,6 @@
       menuButton.innerHTML = icon('menu');
       menuButton.classList.add('mobile-head-action');
       actions.append(menuButton);
-      if (!menuButton.dataset.velvetMenuBound) menuButton.addEventListener('click', () => {
-        requestAnimationFrame(() => {
-          document.body.classList.toggle('nav-open', document.querySelector('.sidebar')?.classList.contains('open'));
-        });
-      });
-      menuButton.dataset.velvetMenuBound = 'true';
-    }
-
-    if (!document.querySelector('.nav-scrim')) {
-      const scrim = document.createElement('button');
-      scrim.type = 'button';
-      scrim.className = 'nav-scrim';
-      scrim.setAttribute('aria-label', 'Fermer la navigation');
-      scrim.addEventListener('click', () => {
-        document.querySelector('.sidebar')?.classList.remove('open');
-        document.querySelector('#mobileMenuButton')?.setAttribute('aria-expanded', 'false');
-        document.body.classList.remove('nav-open');
-      });
-      document.body.append(scrim);
     }
     return true;
   }
@@ -294,9 +275,4 @@
   document.addEventListener('DOMContentLoaded', enhance, { once: true });
   const observer = new MutationObserver(schedule);
   observer.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'hidden', 'aria-hidden'] });
-  document.addEventListener('keydown', (event) => {
-    if (event.key !== 'Escape') return;
-    document.querySelector('.sidebar.open')?.classList.remove('open');
-    document.body.classList.remove('nav-open');
-  });
 })();

@@ -32,16 +32,19 @@ test('le service worker ne peut plus mettre une page de connexion en cache sous 
   assert.match(worker, /velvet-beta-shell-v18/);
 });
 
-test('le garde-fou rend le menu desktop actif et les couches fermées inoffensives', async () => {
-  const [html, script, styles] = await Promise.all([
+test('le shell garde le menu accessible et les couches fermées inoffensives', async () => {
+  const [html, script, styles, menuShell] = await Promise.all([
     read('apps/web/velvet-members-beta-live.html'),
     read('apps/beta/static/assets/velvet-interaction-recovery.js'),
-    read('apps/beta/static/assets/velvet-interaction-recovery.css')
+    read('apps/beta/static/assets/velvet-interaction-recovery.css'),
+    read('apps/beta/static/assets/velvet-web-ios-parity.js')
   ]);
 
-  assert.match(html, /velvet-interaction-recovery\.js\?v=20260801-1/);
-  assert.match(html, /velvet-interaction-recovery\.css\?v=20260801-1/);
-  assert.match(script, /sidebar\.inert = false/);
+  assert.match(html, /velvet-interaction-recovery\.js\?v=20260803-3/);
+  assert.match(html, /velvet-interaction-recovery\.css\?v=20260803-3/);
+  assert.match(menuShell, /sidebar\.inert = false/);
+  assert.match(menuShell, /sidebar\.inert = !open/);
+  assert.doesNotMatch(script, /velvet-mobile-menu-open/);
   assert.match(script, /document\.visibilityState === 'visible'/);
   assert.match(styles, /@media \(min-width: 901px\)/);
   assert.match(styles, /pointer-events: none !important/);

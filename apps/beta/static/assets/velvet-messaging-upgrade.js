@@ -236,39 +236,10 @@
     }
   }
 
-  function closeMenu() {
-    document.querySelector('.sidebar')?.classList.remove('open');
-    document.body.classList.remove('nav-open', 'velvet-mobile-menu-open');
-    document.querySelector('#mobileMenuButton')?.setAttribute('aria-expanded', 'false');
-  }
-
-  function toggleMenu(button) {
-    const sidebar = document.querySelector('.sidebar');
-    if (!sidebar) return;
-    const open = !sidebar.classList.contains('open');
-    sidebar.classList.toggle('open', open);
-    document.body.classList.toggle('nav-open', open);
-    document.body.classList.toggle('velvet-mobile-menu-open', open);
-    button.setAttribute('aria-expanded', String(open));
-  }
-
   document.addEventListener('click', (event) => {
-    const menu = event.target.closest('#mobileMenuButton');
-    if (menu) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      if (window.VelvetWebV11?.toggleMenu) window.VelvetWebV11.toggleMenu();
-      else toggleMenu(menu);
-      return;
-    }
     const conversation = event.target.closest('[data-open-conversation]');
     if (conversation) state.selectedConversationId = conversation.dataset.openConversation;
-    if (event.target.closest('[data-route]') && matchMedia('(max-width:900px)').matches) closeMenu();
   }, true);
-
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeMenu();
-  });
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) refreshMessaging();
   });

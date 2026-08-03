@@ -18,8 +18,8 @@ test('le Web mobile présente le fil social people-first complet', async () => {
   assert.match(core, /approvedProfilePhotos/);
   assert.match(styles, /\.home-feed-card/);
   assert.match(styles, /\.feed-avatar/);
-  assert.match(html, /velvet-web-ios-parity\.css\?v=20260803-2/);
-  assert.match(worker, /velvet-beta-shell-v23/);
+  assert.match(html, /velvet-web-ios-parity\.css\?v=20260803-3/);
+  assert.match(worker, /velvet-beta-shell-v24/);
 });
 
 test('la navigation sépare clairement Membres et Lieux', async () => {

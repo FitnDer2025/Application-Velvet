@@ -9,7 +9,7 @@ La version iOS validée reste inchangée et sert de référence. Web desktop et 
 
 La V1.1 Web supprime l’ancienne concurrence entre une application complète et une couche de parité simplifiée : `members-live.js` redevient l’unique moteur fonctionnel, tandis que `velvet-web-ios-parity.js` se limite au shell responsive, à la synchronisation de la navigation et au menu mobile. Cette séparation évite les écrans incomplets, les doubles gestionnaires de contenu et les couches invisibles bloquant les clics.
 
-Le correctif de stabilité du 3 août complète cette séparation : le menu mobile possède désormais un contrôleur unique pour l’ouverture, le voile, l’accessibilité et la fermeture ; l’autorisation Web Push est déclenchée directement par le commutateur ; le double bandeau de consultation est retiré du fil ; les médias des agents IA disposent d’une signature serveur de secours strictement limitée aux environnements internes autorisés.
+Le correctif de stabilité du 3 août complète cette séparation : le menu mobile possède désormais un contrôleur unique pour l’ouverture, le voile, l’accessibilité et la fermeture ; les anciens contrôleurs du cœur Membres, de la messagerie, du fil mobile et de la couche Premium ne modifient plus son état ; le pseudo-voile historique de la messagerie, qui recouvrait le tiroir, est supprimé. L’autorisation Web Push est déclenchée directement par le commutateur ; le double bandeau de consultation est retiré du fil ; les médias des agents IA disposent d’une signature serveur de secours strictement limitée aux environnements internes autorisés.
 
 Les contrôles automatisés de la V1.1 couvrent notamment :
 
@@ -85,7 +85,7 @@ Le parcours commun est :
 
 ## Web mobile/PWA
 
-Le service worker utilise le cache `velvet-beta-shell-v23` et supprime les versions précédentes à l’activation. Le cœur Membres complet et le shell responsive V1.1 sont versionnés ensemble dans le cache applicatif.
+Le service worker utilise le cache `velvet-beta-shell-v24` et supprime les versions précédentes à l’activation. Le cœur Membres complet et le shell responsive V1.1 sont versionnés ensemble dans le cache applicatif.
 
 Le rendu responsive conserve :
 

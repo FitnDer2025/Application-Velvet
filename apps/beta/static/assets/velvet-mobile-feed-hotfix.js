@@ -125,20 +125,8 @@
     return document.querySelector('.sidebar');
   }
 
-  function syncMenuInteraction() {
-    const menu = sidebar();
-    if (!menu) return;
-    const open = menu.classList.contains('open');
-    menu.inert = !open;
-    menu.setAttribute('aria-hidden', String(!open));
-    document.body.classList.toggle('nav-open', open);
-    document.body.classList.toggle('velvet-mobile-menu-open', open);
-    document.querySelector('#mobileMenuButton')?.setAttribute('aria-expanded', String(open));
-  }
-
   function closeMobileMenu() {
-    sidebar()?.classList.remove('open');
-    syncMenuInteraction();
+    window.VelvetWebV11?.closeMenu();
   }
 
   function closeLightbox() {
@@ -239,7 +227,7 @@
         const menu = sidebar();
         if (menu) menu.inert = false;
         canonicalButton?.click();
-        requestAnimationFrame(syncMenuInteraction);
+        requestAnimationFrame(() => window.VelvetWebV11?.synchronize());
       });
       const fileInput = content.querySelector('#messageForm [name=attachments]');
       fileInput?.addEventListener('change', () => {
@@ -275,7 +263,7 @@
       const menu = sidebar();
       if (menu) menu.inert = false;
       canonicalButton?.click();
-      requestAnimationFrame(syncMenuInteraction);
+      requestAnimationFrame(() => window.VelvetWebV11?.synchronize());
     } finally {
       state.opening = false;
     }
@@ -286,7 +274,6 @@
     if (state.patching) return;
     state.patching = true;
     patchFeedAvatars();
-    syncMenuInteraction();
     requestAnimationFrame(() => { state.patching = false; });
   }
 
@@ -321,7 +308,7 @@
     canonicalButton.click();
     requestAnimationFrame(() => {
       delete messageButton.dataset.velvetRouteRelay;
-      syncMenuInteraction();
+      window.VelvetWebV11?.synchronize();
     });
     return true;
   }
@@ -372,15 +359,6 @@
       closeLightbox();
     }
   });
-
-  const menu = sidebar();
-  if (menu) {
-    closeMobileMenu();
-    new MutationObserver(syncMenuInteraction).observe(menu, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-  }
 
   new MutationObserver(schedulePatch).observe(document.documentElement, { childList: true, subtree: true });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshProfiles(); });
