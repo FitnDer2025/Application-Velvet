@@ -426,15 +426,10 @@
 
   function decorateProfileViews() {
     const views = new Map(list(state.engagement?.views).map((view) => [String(view.viewed_profile_id), view]));
-    document.querySelectorAll('[data-open-profile]').forEach((button) => {
-      const view = views.get(String(button.dataset.openProfile));
-      button.querySelector('.velvet-profile-viewed-v2')?.remove();
-      if (!view) return;
-      const badge = document.createElement('span');
-      badge.className = 'velvet-profile-viewed-v2';
-      badge.textContent = `Déjà consulté · ${Number(view.view_count || 1)} fois · ${relativeDate(view.last_viewed_at)}`;
-      button.appendChild(badge);
-    });
+    // Le cœur Membres rend déjà son badge « Déjà vu » dans les vignettes.
+    // L’ancien décorateur ajoutait un second bandeau absolu à chaque bouton du
+    // fil (photo, sortie, profil) et recouvrait le contenu de l’actualité.
+    document.querySelectorAll('.velvet-profile-viewed-v2').forEach((badge) => badge.remove());
 
     document.querySelectorAll('[data-profile-carousel][data-profile-id]').forEach((carousel) => {
       const view = views.get(String(carousel.dataset.profileId));

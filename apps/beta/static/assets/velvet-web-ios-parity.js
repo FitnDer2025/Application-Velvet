@@ -24,15 +24,31 @@
     if (restoreFocus && wasOpen) menuButton?.focus({ preventScroll: true });
   }
 
+  function toggleMenu({ restoreFocus = false } = {}) {
+    const sidebar = document.querySelector('.sidebar');
+    if (!sidebar || !isMobile()) return false;
+    const open = !sidebar.classList.contains('open');
+    sidebar.classList.toggle('open', open);
+    if (!open && restoreFocus) {
+      document.querySelector('#mobileMenuButton')?.focus({ preventScroll: true });
+    }
+    synchronizeNavigation();
+    return open;
+  }
+
   function ensureScrim() {
     let scrim = document.querySelector('.nav-scrim');
-    if (scrim) return scrim;
-    scrim = document.createElement('button');
-    scrim.type = 'button';
-    scrim.className = 'nav-scrim';
-    scrim.setAttribute('aria-label', 'Fermer le menu');
-    scrim.addEventListener('click', () => closeMenu({ restoreFocus: true }));
-    document.body.append(scrim);
+    if (!scrim) {
+      scrim = document.createElement('button');
+      scrim.type = 'button';
+      scrim.className = 'nav-scrim';
+      scrim.setAttribute('aria-label', 'Fermer le menu');
+      document.body.append(scrim);
+    }
+    if (scrim.dataset.velvetV11Bound !== 'true') {
+      scrim.addEventListener('click', () => closeMenu({ restoreFocus: true }));
+      scrim.dataset.velvetV11Bound = 'true';
+    }
     return scrim;
   }
 
@@ -58,10 +74,14 @@
     document.body.classList.toggle('velvet-mobile-menu-open', Boolean(open));
     document.querySelector('#mobileMenuButton')?.setAttribute('aria-expanded', String(Boolean(open)));
     if (sidebar && isMobile()) {
+      sidebar.inert = !open;
+      sidebar.setAttribute('aria-hidden', String(!open));
       sidebar.setAttribute('aria-modal', String(Boolean(open)));
       sidebar.setAttribute('role', 'dialog');
       sidebar.setAttribute('aria-label', 'Plus de Velvet');
     } else if (sidebar) {
+      sidebar.inert = false;
+      sidebar.removeAttribute('aria-hidden');
       sidebar.removeAttribute('aria-modal');
       sidebar.setAttribute('role', 'navigation');
       sidebar.setAttribute('aria-label', 'Navigation Velvet');
@@ -127,6 +147,7 @@
     version: '1.1',
     primaryRoutes: [...PRIMARY_ROUTES],
     closeMenu,
+    toggleMenu,
     synchronize
   };
 })();

@@ -18,8 +18,8 @@ test('le Web mobile présente le fil social people-first complet', async () => {
   assert.match(core, /approvedProfilePhotos/);
   assert.match(styles, /\.home-feed-card/);
   assert.match(styles, /\.feed-avatar/);
-  assert.match(html, /velvet-web-ios-parity\.css\?v=20260803-1/);
-  assert.match(worker, /velvet-beta-shell-v22/);
+  assert.match(html, /velvet-web-ios-parity\.css\?v=20260803-2/);
+  assert.match(worker, /velvet-beta-shell-v23/);
 });
 
 test('la navigation sépare clairement Membres et Lieux', async () => {
@@ -50,7 +50,7 @@ test('iOS reste verrouillé sur les cinq espaces validés', async () => {
 
 test('le shell Web gère menu, scrim et cinq destinations sans couche de contenu concurrente', async () => {
   const shell = await read('apps/beta/static/assets/velvet-web-ios-parity.js');
-  for (const contract of ['PRIMARY_ROUTES', 'closeMenu', 'ensureScrim', 'synchronizeNavigation']) {
+  for (const contract of ['PRIMARY_ROUTES', 'closeMenu', 'toggleMenu', 'ensureScrim', 'synchronizeNavigation']) {
     assert.match(shell, new RegExp(contract));
   }
   assert.doesNotMatch(shell, /content\.innerHTML/);

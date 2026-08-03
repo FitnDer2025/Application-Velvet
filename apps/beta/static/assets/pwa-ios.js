@@ -9,16 +9,6 @@
     || window.navigator.standalone
   );
 
-  function toast(message, error = false) {
-    const node = document.querySelector('#toast');
-    if (!node) return;
-    node.textContent = message;
-    node.style.borderColor = error ? 'rgba(255,142,167,.45)' : '';
-    node.classList.add('show');
-    window.clearTimeout(toast.timer);
-    toast.timer = window.setTimeout(() => node.classList.remove('show'), 4200);
-  }
-
   function base64UrlToBytes(value) {
     const padding = '='.repeat((4 - (value.length % 4)) % 4);
     const base64 = (value + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -49,12 +39,13 @@
       throw new Error('Ce navigateur ne prend pas en charge les notifications Web Push.');
     }
     if (isIos && !isStandalone()) {
+      showIosInstallGuide();
       throw new Error('Sur iPhone, ajoute d’abord Velvet à l’écran d’accueil, puis ouvre le raccourci pour activer les notifications.');
     }
 
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
-      throw new Error('Les notifications restent bloquées dans les réglages de l’iPhone.');
+      throw new Error('Les notifications restent bloquées dans les réglages du navigateur.');
     }
 
     const registration = await serviceWorkerRegistration();
@@ -68,8 +59,9 @@
     if (!configResponse.ok) throw new Error(config.error || 'Configuration Web Push indisponible.');
 
     if (!config.publicKey) {
-      await showLocalNotification('Velvet est prêt', 'Les notifications locales sont actives sur cet iPhone.');
-      throw new Error('L’iPhone est autorisé. La clé d’envoi distante sera activée avant l’ouverture de la BETA aux invités.');
+      await showLocalNotification('Velvet est prêt', 'Les notifications locales sont actives sur cet appareil.');
+      localStorage.setItem('velvet_notifications_permission', 'granted');
+      return { mode: 'local', subscribed: false };
     }
 
     let subscription = await registration.pushManager.getSubscription();
@@ -94,20 +86,26 @@
     if (!response.ok) throw new Error(payload.error || 'Abonnement aux notifications impossible.');
 
     localStorage.setItem('velvet_push_origin', window.location.origin);
+    localStorage.setItem('velvet_notifications_permission', 'granted');
     await showLocalNotification('Velvet est prêt', 'Tes notifications sont maintenant reliées à cet iPhone.');
-    return true;
+    return { mode: 'push', subscribed: true };
   }
 
   async function disableNotifications() {
     const registration = await serviceWorkerRegistration();
     const subscription = await registration?.pushManager?.getSubscription?.();
-    if (!subscription) return true;
+    if (!subscription) {
+      localStorage.removeItem('velvet_push_origin');
+      localStorage.removeItem('velvet_notifications_permission');
+      return true;
+    }
     await nativeFetch(`/api/members/push-subscriptions?endpoint=${encodeURIComponent(subscription.endpoint)}`, {
       method: 'DELETE',
       credentials: 'same-origin'
     }).catch(() => null);
     await subscription.unsubscribe().catch(() => null);
     localStorage.removeItem('velvet_push_origin');
+    localStorage.removeItem('velvet_notifications_permission');
     return true;
   }
 
@@ -147,24 +145,6 @@
   }
 
   document.addEventListener('click', async (event) => {
-    const notificationButton = event.target.closest('[data-test-notification]');
-    if (notificationButton) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      notificationButton.disabled = true;
-      try {
-        await enableNotifications();
-        const toggle = document.querySelector('[name=browser_enabled]');
-        if (toggle) toggle.checked = true;
-        toast('Notifications Velvet activées sur cet appareil.');
-      } catch (error) {
-        toast(error.message, true);
-      } finally {
-        notificationButton.disabled = false;
-      }
-      return;
-    }
-
     const installButton = event.target.closest('[data-install-velvet]');
     if (installButton && isIos && !isStandalone()) {
       event.preventDefault();

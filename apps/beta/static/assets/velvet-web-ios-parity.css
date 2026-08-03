@@ -694,7 +694,13 @@ body.velvet-v11.nav-open .nav-scrim { opacity: 1; pointer-events: auto; }
     transition: transform var(--v11-normal) var(--v11-ease);
   }
 
-  body.velvet-v11 .sidebar.open { transform: none; }
+  body.velvet-v11 .sidebar.open {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none;
+  }
   body.velvet-v11 .sidebar .brand { padding-bottom: 18px; }
   body.velvet-v11 .sidebar nav button,
   body.velvet-v11 .sidebar-tools button { min-height: 48px; }

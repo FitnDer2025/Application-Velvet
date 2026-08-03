@@ -43,6 +43,19 @@ export async function onRequestPost({ request, env }) {
         })
       }
     );
+    await restJson(
+      env,
+      '/rest/v1/member_notification_settings?on_conflict=user_id',
+      access.session,
+      {
+        method: 'POST',
+        headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+        body: JSON.stringify({
+          user_id: access.account.userId,
+          browser_enabled: true
+        })
+      }
+    );
     return withSession({
       ok: true,
       installationOrigin: cleanText(body.installationOrigin, 500) || new URL(request.url).origin,

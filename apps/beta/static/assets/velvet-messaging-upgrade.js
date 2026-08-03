@@ -257,13 +257,13 @@
     if (menu) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      toggleMenu(menu);
+      if (window.VelvetWebV11?.toggleMenu) window.VelvetWebV11.toggleMenu();
+      else toggleMenu(menu);
       return;
     }
     const conversation = event.target.closest('[data-open-conversation]');
     if (conversation) state.selectedConversationId = conversation.dataset.openConversation;
     if (event.target.closest('[data-route]') && matchMedia('(max-width:900px)').matches) closeMenu();
-    if (event.target.closest('[data-test-notification]')) setTimeout(enrollWebPush, 800);
   }, true);
 
   document.addEventListener('keydown', (event) => {

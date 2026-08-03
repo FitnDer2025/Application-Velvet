@@ -1,16 +1,16 @@
-const CACHE = 'velvet-beta-shell-v22';
+const CACHE = 'velvet-beta-shell-v23';
 // Caches historiques explicitement supprimés pendant l’activation :
-// velvet-beta-shell-v18, velvet-beta-shell-v19, velvet-beta-shell-v20, velvet-beta-shell-v21.
+// velvet-beta-shell-v18 à velvet-beta-shell-v22.
 const APP_SHELL = [
   '/assets/members-live.css',
-  '/assets/members-live.js?v=20260803-1',
+  '/assets/members-live.js?v=20260803-2',
   '/assets/members-onboarding-v2.css',
   '/assets/members-onboarding-v2.js',
   '/assets/velvet-premium-ui.css',
   '/assets/velvet-premium-ui.js',
   '/assets/velvet-editorial-ui.css',
   '/assets/velvet-messaging-upgrade.css?v=20260731-5',
-  '/assets/velvet-messaging-upgrade.js?v=20260731-5',
+  '/assets/velvet-messaging-upgrade.js?v=20260803-2',
   '/assets/velvet-mobile-feed-hotfix.css?v=20260731-5',
   '/assets/velvet-mobile-feed-hotfix.js?v=20260731-5',
   '/assets/velvet-chat-whatsapp.css?v=20260731-1',
@@ -20,16 +20,16 @@ const APP_SHELL = [
   '/assets/velvet-social-interactions-hotfix.css?v=20260731-1',
   '/assets/velvet-social-interactions-hotfix.js?v=20260731-1',
   '/assets/velvet-social-realtime.css?v=20260731-1',
-  '/assets/velvet-social-realtime.js?v=20260731-1',
+  '/assets/velvet-social-realtime.js?v=20260803-2',
   '/assets/velvet-realtime-reconcile.js?v=20260731-1',
   '/assets/velvet-push-deeplink.js?v=20260731-1',
   '/assets/velvet-experience-management.css?v=20260731-1',
   '/assets/velvet-experience-management.js?v=20260731-1',
   '/assets/velvet-interaction-recovery.css?v=20260801-1',
   '/assets/velvet-interaction-recovery.js?v=20260801-1',
-  '/assets/velvet-web-ios-parity.css?v=20260803-1',
-  '/assets/velvet-web-ios-parity.js?v=20260803-1',
-  '/assets/pwa-ios.js',
+  '/assets/velvet-web-ios-parity.css?v=20260803-2',
+  '/assets/velvet-web-ios-parity.js?v=20260803-2',
+  '/assets/pwa-ios.js?v=20260803-2',
   '/assets/photo-protection.js?v=20260731-5',
   '/assets/location-verification.js',
   '/assets/velvet-icon-180.png',
