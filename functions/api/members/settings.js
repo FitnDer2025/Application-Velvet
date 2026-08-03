@@ -1,5 +1,11 @@
 import { json, readJson } from '../auth/_shared.js';
-import { memberSession, restJson, withSession } from './_shared.js';
+import {
+  internalRecipeBypass,
+  memberSession,
+  restJson,
+  verificationGateEnabled,
+  withSession
+} from './_shared.js';
 
 const AUDIENCES = ['couple', 'woman', 'man', 'trans_nonbinary', 'other'];
 const EVENT_TYPES = [
@@ -122,16 +128,28 @@ async function readSettings(env, session, userId, profile) {
       updated_at: null
     },
     profileVerificationStatus: profile.verification_status || 'not_started',
-    verificationProviderConfigured: Boolean(env.IDENTITY_AGE_VERIFICATION_START_URL),
+    verificationProviderConfigured: Boolean(
+      env.IDENTITY_AGE_VERIFICATION_START_URL
+      && env.IDENTITY_AGE_VERIFICATION_CALLBACK_SECRET
+      && env.SUPABASE_SERVICE_ROLE_KEY
+    ),
     exactLocationStored: false,
     identityDocumentsStoredByVelvet: false,
-    verificationBlocksAccess: false
+    verificationRequired: verificationGateEnabled(env),
+    verificationBypassedForInternalRecipe: internalRecipeBypass(env, userId),
+    verificationBlocksAccess: verificationGateEnabled(env)
+      && !(verificationRows?.[0]?.status === 'verified'
+        && verificationRows[0].identity_verified === true
+        && verificationRows[0].majority_verified === true
+        && (!verificationRows[0].expires_at
+          || new Date(verificationRows[0].expires_at).getTime() > Date.now()))
+      && !internalRecipeBypass(env, userId)
   };
 }
 
 export async function onRequestGet({ request, env }) {
   try {
-    const access = await memberSession(request, env);
+    const access = await memberSession(request, env, { allowUnverified: true });
     if (access.response) return access.response;
     const profile = await ownProfile(env, access.session, access.account.userId);
     if (!profile) return withSession({ error: 'profile_required' }, access.session, 409);
@@ -146,7 +164,7 @@ export async function onRequestGet({ request, env }) {
 
 export async function onRequestPost({ request, env }) {
   try {
-    const access = await memberSession(request, env);
+    const access = await memberSession(request, env, { allowUnverified: true });
     if (access.response) return access.response;
     const profile = await ownProfile(env, access.session, access.account.userId);
     if (!profile) return withSession({ error: 'profile_required' }, access.session, 409);

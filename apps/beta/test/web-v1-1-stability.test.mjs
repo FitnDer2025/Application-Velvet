@@ -158,13 +158,13 @@ test('les notifications utilisent le même parcours depuis le commutateur et le 
   assert.match(endpoint, /browser_enabled: true/);
 });
 
-test('le cache V24 force le chargement du correctif du menu sur les PWA existantes', async () => {
+test('le cache V25 force le chargement des correctifs techniques sur les PWA existantes', async () => {
   const [html, worker] = await Promise.all([
     read('apps/web/velvet-members-beta-live.html'),
     read('apps/beta/static/sw.js')
   ]);
   for (const asset of [
-    'members-live.js?v=20260803-3',
+    'members-live.js?v=20260803-4',
     'velvet-premium-ui.js?v=20260803-3',
     'velvet-messaging-upgrade.css?v=20260803-3',
     'velvet-messaging-upgrade.js?v=20260803-3',
@@ -173,10 +173,11 @@ test('le cache V24 force le chargement du correctif du menu sur les PWA existant
     'velvet-interaction-recovery.css?v=20260803-3',
     'velvet-interaction-recovery.js?v=20260803-3',
     'velvet-web-ios-parity.css?v=20260803-3',
-    'velvet-web-ios-parity.js?v=20260803-3'
+    'velvet-web-ios-parity.js?v=20260803-3',
+    'location-verification.js?v=20260803-1'
   ]) {
     assert.match(html, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(worker, /velvet-beta-shell-v24/);
+  assert.match(worker, /velvet-beta-shell-v25/);
 });

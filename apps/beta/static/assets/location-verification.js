@@ -110,15 +110,25 @@
     return `<section class="card settings-card velvet-verification-card" data-velvet-verification-card>
       <p class="eyebrow">Confiance Velvet</p>
       <h2>Identité et majorité</h2>
-      <p>Le contrôle final sera réalisé par un prestataire tiers unique. Velvet recevra seulement le résultat nécessaire pour attribuer le badge ; aucune pièce d’identité, identité civile ou date de naissance ne sera conservée par Velvet.</p>
+      <p>Le contrôle est réalisé par un prestataire tiers. Velvet reçoit seulement le résultat nécessaire pour attribuer le badge ; aucune pièce d’identité, identité civile ou date de naissance n’est conservée par Velvet.</p>
       <div class="velvet-feature-status ${verified ? 'verified' : ''}">
         <span aria-hidden="true">${verified ? '✓' : '◇'}</span>
-        <div><strong>${escapeHtml(verificationStatusLabel(verification.status))}</strong><small>${verified ? `Vérifiée le ${escapeHtml(formatDate(verification.verified_at))}` : 'Cette préparation ne bloque actuellement ni le site ni les albums.'}</small></div>
+        <div><strong>${escapeHtml(verificationStatusLabel(verification.status))}</strong><small>${verified ? `Vérifiée le ${escapeHtml(formatDate(verification.verified_at))}` : payload?.accessBlockedByVerification ? 'L’accès communautaire reste fermé jusqu’à la confirmation.' : payload?.bypassedForInternalRecipe ? 'Compte autorisé uniquement pour la recette interne.' : 'Le verrou sera activé avant toute ouverture externe.'}</small></div>
       </div>
       ${payload?.providerConfigured
         ? '<button class="secondary" type="button" data-start-velvet-verification>Commencer la vérification</button>'
-        : '<button class="secondary" type="button" disabled>Prestataire à raccorder pour la version finale</button>'}
+        : '<button class="secondary" type="button" disabled>Prestataire volontairement non raccordé</button>'}
       <small class="velvet-foundation-note">Le badge « Profil vérifié Velvet » apparaîtra uniquement après confirmation simultanée de l’identité et de la majorité. Pour un couple, les deux partenaires devront être vérifiés.</small>
+    </section>`;
+  }
+
+  function exportCard() {
+    return `<section class="card settings-card velvet-export-card" data-velvet-export-card>
+      <p class="eyebrow">Portabilité</p>
+      <h2>Télécharger mes données</h2>
+      <p>Velvet prépare un fichier JSON lisible et réutilisable contenant les données liées à ton compte. Les pièces d’identité et les informations privées d’autres membres n’y figurent jamais.</p>
+      <button class="secondary" type="button" data-export-velvet>Préparer mon export JSON</button>
+      <small class="velvet-foundation-note">Le téléchargement est généré à la demande, n’est pas mis en cache et ses médias restent protégés par ta session.</small>
     </section>`;
   }
 
@@ -145,7 +155,7 @@
 
     try {
       const [location, verification] = await Promise.all([loadLocation(), loadVerification()]);
-      holder.innerHTML = `${locationCard(location)}${verificationCard(verification)}`;
+      holder.innerHTML = `${locationCard(location)}${verificationCard(verification)}${exportCard()}`;
     } catch (error) {
       holder.innerHTML = `<section class="card settings-card"><p class="eyebrow">Services mobiles</p><h2>Chargement impossible</h2><p>${escapeHtml(error.message)}</p></section>`;
     }
@@ -204,6 +214,46 @@
     } catch (error) {
       toast(error.message, true);
       button.disabled = false;
+    }
+  }
+
+  function exportFilename(response) {
+    const header = response.headers.get('content-disposition') || '';
+    return header.match(/filename="([^"]+)"/i)?.[1]
+      || `velvet-export-${new Date().toISOString().slice(0, 10)}.json`;
+  }
+
+  async function exportData(button) {
+    button.disabled = true;
+    const previous = button.textContent;
+    button.textContent = 'Préparation sécurisée…';
+    try {
+      const response = await nativeFetch('/api/members/data-export', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { accept: 'application/json' }
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || 'data_export_failed');
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = exportFilename(response);
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      toast('Ton export Velvet a été téléchargé sur cet appareil.');
+    } catch (error) {
+      toast(error.message === 'data_export_failed'
+        ? 'Ton export n’a pas pu être préparé. Réessaie dans quelques instants.'
+        : error.message, true);
+    } finally {
+      button.disabled = false;
+      button.textContent = previous;
     }
   }
 
@@ -278,6 +328,13 @@
       event.preventDefault();
       event.stopImmediatePropagation();
       startVerification(verification);
+      return;
+    }
+    const exportButton = event.target.closest('[data-export-velvet]');
+    if (exportButton) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      exportData(exportButton);
     }
   }, true);
 

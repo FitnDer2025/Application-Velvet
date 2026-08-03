@@ -7,12 +7,9 @@
   <title>Velvet — Connexion & création de profil</title>
   <link rel="icon" href="/assets/velvet-icon-192.png" type="image/png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/velvet-icon-180.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;1,500&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     :root{--bg:#0d0d0d;--panel:#1b1b1d;--panel2:#2d2d30;--line:#ffffff16;--txt:#f4f4f2;--muted:#aaa5a0;--gold:#c6a96a;--wine:#641b36;--wine2:#3b1024;--green:#79d9ae;--red:#e2879f}
-    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--txt);font-family:Montserrat,Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}
     body{background:radial-gradient(circle at 86% 6%,#641b3631,transparent 30rem),radial-gradient(circle at 8% 100%,#c6a96a12,transparent 26rem),var(--bg)}
     .intro{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:radial-gradient(circle at 50% 46%,#1b0e14 0%,#0d0d0d 38%,#080808 78%);animation:introAway .8s 5.45s forwards}
     .intro svg{width:min(760px,94vw);height:min(620px,92vh);overflow:visible}
@@ -35,7 +32,7 @@
     .brand-side{position:relative;min-height:100vh;overflow:hidden;background:#0d0d10}.brand-side>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.52}.brand-side:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#0d0d0ddc 0%,#0d0d0d5d 65%,#0d0d0dfa),linear-gradient(0deg,#0d0d0dfa,transparent 60%)}
     .brand-copy{position:absolute;z-index:2;left:clamp(28px,5vw,72px);right:35px;bottom:clamp(38px,8vh,88px)}.brand{font:300 25px Montserrat,Arial,sans-serif;letter-spacing:.3em;color:var(--gold)}.brand-copy h1{font:500 clamp(45px,6vw,78px)/.98 Poppins,Arial,sans-serif;margin:24px 0 18px}.brand-copy p{font-size:17px;line-height:1.65;color:#ded7d0;max-width:650px}
     .value-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:21px}.value{border:1px solid #ffffff24;background:#0d0d0d7d;backdrop-filter:blur(10px);border-radius:99px;padding:8px 11px;font-size:10px;letter-spacing:.05em}
-    .auth-panel{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:38px}.auth-box{width:min(500px,100%)}.ey{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}h1,h2,h3{font-family:Poppins,Arial,sans-serif;font-weight:500}.auth-box h2{font-size:42px;margin:8px 0 10px}.lead{color:var(--muted);line-height:1.6}
+    .auth-panel{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:38px}.auth-box{width:min(500px,100%)}.ey{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:500}.auth-box h2{font-size:42px;margin:8px 0 10px}.lead{color:var(--muted);line-height:1.6}
     .mode{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:5px;border:1px solid var(--line);border-radius:15px;background:#111114;margin:23px 0}.mode button{border:0;border-radius:11px;padding:10px;background:transparent;color:var(--muted)}.mode button.active{background:#ffffff0b;color:#fff}
     .social{display:grid;grid-template-columns:1fr 1fr;gap:9px}.social button{border:1px solid var(--line);border-radius:13px;padding:12px;background:#ffffff06;color:white}.separator{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:10px;margin:19px 0}.separator:before,.separator:after{content:"";height:1px;flex:1;background:var(--line)}
     .form{display:grid;grid-template-columns:1fr 1fr;gap:11px}.field{display:grid;gap:6px;color:var(--muted);font-size:11px}.field.wide{grid-column:1/-1}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:13px;background:#18181c;color:#fff;padding:12px}.field textarea{min-height:105px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{outline:1px solid #c6a96a77;border-color:#c6a96a77}.hint{font-size:10px;color:#817d79}
@@ -101,7 +98,7 @@
 </div>
 
 <section id="auth" class="auth-shell">
-  <aside class="brand-side"><img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1500&q=84" alt=""><div class="brand-copy"><div class="brand">VELVET</div><h1>Les rencontres commencent par la confiance.</h1><p>Un espace discret pour raconter qui vous êtes, ce que vous recherchez et la manière dont vous souhaitez vivre chaque rencontre.</p><div class="value-row"><span class="value">Consentement</span><span class="value">Discrétion</span><span class="value">Profils vérifiés</span><span class="value">Communauté choisie</span></div></div></aside>
+  <aside class="brand-side"><img src="/assets/velvet-atmosphere.svg" alt=""><div class="brand-copy"><div class="brand">VELVET</div><h1>Les rencontres commencent par la confiance.</h1><p>Un espace discret pour raconter qui vous êtes, ce que vous recherchez et la manière dont vous souhaitez vivre chaque rencontre.</p><div class="value-row"><span class="value">Consentement</span><span class="value">Discrétion</span><span class="value">Profils vérifiés</span><span class="value">Communauté choisie</span></div></div></aside>
   <main class="auth-panel"><div class="auth-box"><div class="ey">Espace privé · 18 ans et plus</div><h2 id="authTitle">Heureux de vous revoir.</h2><p id="authLead" class="lead">Retrouvez votre univers Velvet en toute discrétion.</p><div class="mode"><button id="loginTab" class="active" onclick="setAuthMode('login')">Se connecter</button><button id="registerTab" onclick="setAuthMode('register')">Créer un profil</button></div>
     <div id="authForm"></div><p class="legal">En continuant, vous confirmez avoir au moins 18 ans et acceptez les conditions d’utilisation ainsi que la politique de confidentialité de Velvet. Données fictives dans cette démonstration.</p>
   </div></main>
@@ -117,7 +114,7 @@
 <script src="/assets/velvet-premium-ui.js" defer></script>
 
 <script>
-const PHOTO={couple:'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1200&q=82',woman:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=82',man:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=82'};
+const PHOTO={couple:'/assets/velvet-atmosphere.svg',woman:'/assets/velvet-atmosphere.svg',man:'/assets/velvet-atmosphere.svg'};
 const STEPS=[['type','Votre profil'],['accounts','Vos deux accès'],['couple','Votre couple'],['person1','Première personne'],['person2','Deuxième personne'],['photos','Photos publiques'],['privacy','Confidentialité'],['verify','Vérifications'],['preview','Prévisualisation']];
 const DEFAULT={
   authMode:'login',step:0,type:'Couple',profileName:'Camille & Julien',city:'Lille',email:'camille@exemple.fr',password:'',phone:'06 00 00 00 00',

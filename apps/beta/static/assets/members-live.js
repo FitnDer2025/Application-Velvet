@@ -55,6 +55,7 @@
     personalProfileComplete: false,
     photos: [],
     settings: null,
+    verification: null,
     socialActions: {},
     notifications: [],
     unreadCount: 0,
@@ -200,7 +201,10 @@
     promotion_limit_reached: 'Toutes les activations prévues pour ce code ont été utilisées.',
     promotion_already_used: 'Ce code a déjà été utilisé par ce profil.',
     promotion_audience_mismatch: 'Ce code n’est pas destiné à ce type de profil.',
-    billing_provider_not_configured: 'Le paiement sera ouvert après validation définitive de notre partenaire bancaire.'
+    billing_provider_not_configured: 'Le paiement sera ouvert après validation définitive de notre partenaire bancaire.',
+    identity_age_verification_required: 'La vérification de l’identité et de la majorité est obligatoire avant d’accéder à Velvet.',
+    verification_provider_not_configured: 'Le prestataire de vérification n’est pas encore raccordé sur cet environnement.',
+    data_export_failed: 'Ton export n’a pas pu être préparé. Réessaie ou contacte l’équipe Velvet.'
   };
 
   const REFERENCES = {
@@ -779,12 +783,21 @@
 
   async function loadAll() {
     try {
-      const profileResult = await api('/api/members/profile');
+      const [profileResult, verificationResult] = await Promise.all([
+        api('/api/members/profile'),
+        api('/api/members/verification')
+      ]);
       state.profile = profileResult.profile;
       state.account = profileResult.account;
       state.access = profileResult.access || state.access;
       state.membership = profileResult.membership;
       state.personalProfileComplete = profileResult.personalProfileComplete;
+      state.verification = verificationResult;
+      if (verificationResult.accessBlockedByVerification) {
+        lockApplication();
+        renderVerificationGate(verificationResult);
+        return;
+      }
       if (!state.profile || !state.personalProfileComplete) {
         lockApplication();
         renderOnboarding(state.profile);
@@ -841,12 +854,21 @@
   }
 
   async function refreshData() {
-    const profileResult = await api('/api/members/profile');
+    const [profileResult, verificationResult] = await Promise.all([
+      api('/api/members/profile'),
+      api('/api/members/verification')
+    ]);
     state.profile = profileResult.profile;
     state.account = profileResult.account;
     state.access = profileResult.access || state.access;
     state.membership = profileResult.membership;
     state.personalProfileComplete = profileResult.personalProfileComplete;
+    state.verification = verificationResult;
+    if (verificationResult.accessBlockedByVerification) {
+      lockApplication();
+      renderVerificationGate(verificationResult);
+      return;
+    }
     if (state.profile?.admission_status !== 'approved') {
       state.directory = { profiles: [], establishments: [], venueDirectory: [], venueRelationships: [], events: [], conversations: [], recommendations: [] };
       state.engagement = { views: [], reactions: [], streaks: [], currentUserId: null, currentProfileId: null };
@@ -914,6 +936,47 @@
 
   function unlockApplication() {
     document.body.classList.remove('admission-locked');
+  }
+
+  function renderVerificationGate(payload = {}) {
+    lockApplication();
+    const verification = payload.verification || {};
+    const status = ({
+      pending: 'Contrôle en cours',
+      failed: 'Contrôle non abouti',
+      expired: 'Vérification à renouveler',
+      revoked: 'Vérification retirée'
+    })[verification.status] || 'Vérification requise';
+    content.innerHTML = `<div class="page admission-page verification-gate">
+      <header class="admission-brand">
+        <span class="brand-mark">V</span><span><strong>Velvet</strong><small>ACCÈS PROTÉGÉ</small></span>
+        <button class="text-button" id="admissionLogout" type="button">Se déconnecter</button>
+      </header>
+      ${pageHead(
+        'Identité · majorité · confidentialité',
+        'Vérifions que Velvet reste un espace adulte.',
+        'L’accès aux profils, messages, lieux et albums est fermé tant que l’identité et la majorité ne sont pas confirmées.'
+      )}
+      <section class="card admission-status">
+        <div><p class="eyebrow">État actuel</p><h2>${e(status)}</h2><p>Velvet ne conserve ni pièce d’identité, ni identité civile, ni date de naissance. Seuls le résultat, sa date et sa durée de validité sont enregistrés.</p></div>
+        <span class="pill">18+</span>
+      </section>
+      <section class="grid two">
+        <article class="card section">
+          <p class="eyebrow">Contrôle indépendant</p><h2>Identité et majorité</h2>
+          <p>Le prestataire reçoit la pièce nécessaire et renvoie uniquement un résultat signé. Un profil couple exige la vérification personnelle de chacun des deux partenaires.</p>
+          ${payload.providerConfigured
+            ? '<button class="primary" type="button" data-start-velvet-verification>Commencer la vérification</button>'
+            : '<p class="status-box">Le raccordement au prestataire reste volontairement fermé pendant la recette interne zéro dépense.</p>'}
+        </article>
+        <article class="card section">
+          <p class="eyebrow">Tes droits restent accessibles</p><h2>Récupérer tes données</h2>
+          <p>Tu peux télécharger tes informations Velvet même lorsque l’accès communautaire est verrouillé.</p>
+          <button class="secondary" type="button" data-export-velvet>Préparer mon export JSON</button>
+        </article>
+      </section>
+    </div>`;
+    document.querySelector('#admissionLogout')?.addEventListener('click', logout);
   }
 
   async function loadPhotos() {
@@ -4003,6 +4066,10 @@
       messages: 'conversations',
       profile: 'me'
     })[name] || name;
+    if (state.verification?.accessBlockedByVerification) {
+      renderVerificationGate(state.verification);
+      return;
+    }
     if (state.profile?.admission_status !== 'approved') {
       renderAdmission();
       return;

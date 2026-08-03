@@ -6,14 +6,66 @@ import {
   supabase
 } from '../auth/_shared.js';
 
-export async function memberSession(request, env) {
+export async function memberSession(request, env, options = {}) {
   const session = await refreshSession(request, env);
   if (!session) return { response: json({ error: 'authentication_required' }, 401) };
   const account = await accountContext(env, session);
   if (!account || account.status !== 'active') {
     return { response: json({ error: 'member_access_required' }, 403) };
   }
-  return { session, account };
+  const access = { session, account };
+  if (!options.allowUnverified && verificationGateEnabled(env)) {
+    const verification = await memberVerificationState(env, access);
+    if (!verification.verified && !internalRecipeBypass(env, account.userId)) {
+      return {
+        ...access,
+        verification,
+        response: withSession({
+          error: 'identity_age_verification_required',
+          verification
+        }, session, 403)
+      };
+    }
+  }
+  return access;
+}
+
+export function verificationGateEnabled(env) {
+  return ['1', 'true', 'required'].includes(
+    String(env.IDENTITY_AGE_VERIFICATION_REQUIRED || '').trim().toLowerCase()
+  );
+}
+
+export function internalRecipeBypass(env, userId) {
+  if (String(env.VELVET_RUNTIME_MODE || '').trim() !== 'internal_recipe') return false;
+  const allowlist = String(env.VELVET_INTERNAL_RECIPE_USER_IDS || '')
+    .split(',')
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+  return allowlist.includes(String(userId || '').trim().toLowerCase());
+}
+
+export async function memberVerificationState(env, access) {
+  const rows = await restJson(
+    env,
+    `/rest/v1/account_identity_age_verifications?select=status,identity_verified,majority_verified,verified_at,expires_at&user_id=eq.${encodeURIComponent(access.account.userId)}&limit=1`,
+    access.session
+  ).catch(() => []);
+  const row = rows?.[0] || null;
+  const expiresAt = row?.expires_at ? new Date(row.expires_at).getTime() : null;
+  const expired = Number.isFinite(expiresAt) && expiresAt <= Date.now();
+  const verified = row?.status === 'verified'
+    && row.identity_verified === true
+    && row.majority_verified === true
+    && !expired;
+  return {
+    status: expired ? 'expired' : row?.status || 'not_started',
+    identityVerified: row?.identity_verified === true,
+    majorityVerified: row?.majority_verified === true,
+    verifiedAt: row?.verified_at || null,
+    expiresAt: row?.expires_at || null,
+    verified
+  };
 }
 
 export async function memberAdmission(env, access) {

@@ -86,6 +86,10 @@ import {
   onRequestPost as memberVerificationPost
 } from '../../../functions/api/members/verification.js';
 import {
+  onRequestGet as memberDataExportGet,
+  onRequestPost as memberDataExportPost
+} from '../../../functions/api/members/data-export.js';
+import {
   onRequestGet as memberEngagementGet,
   onRequestPost as memberEngagementPost
 } from '../../../functions/api/members/engagement.js';
@@ -178,6 +182,8 @@ const API_ROUTES = new Map([
   ['GET /api/members/verification', memberVerificationGet],
   ['POST /api/members/verification', memberVerificationPost],
   ['GET /api/members/verification/callback', memberVerificationCallback],
+  ['GET /api/members/data-export', memberDataExportGet],
+  ['POST /api/members/data-export', memberDataExportPost],
   ['GET /api/members/engagement', memberEngagementGet],
   ['POST /api/members/engagement', memberEngagementPost],
   ['GET /api/members/photo-reactions', photoReactionsGet],
@@ -215,7 +221,7 @@ function securityHeaders(response) {
   secured.headers.set('cross-origin-resource-policy', 'same-origin');
   secured.headers.set(
     'content-security-policy',
-    "default-src 'self'; base-uri 'none'; frame-ancestors 'self'; form-action 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com https://tile.openstreetmap.org; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; upgrade-insecure-requests"
+    "default-src 'self'; base-uri 'none'; frame-ancestors 'self'; form-action 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://tile.openstreetmap.org; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; upgrade-insecure-requests"
   );
   return secured;
 }

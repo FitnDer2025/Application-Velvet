@@ -10,7 +10,13 @@ on:
       - "functions/**"
       - "infra/**"
       - "scripts/check-supabase-migrations.mjs"
+      - "scripts/security/**"
+      - "scripts/ops/**"
+      - "scripts/recipe/**"
+      - "tests/recipe/**"
+      - "playwright.config.mjs"
       - "package.json"
+      - "package-lock.json"
       - "wrangler.jsonc"
   pull_request:
     paths:
@@ -21,7 +27,13 @@ on:
       - "functions/**"
       - "infra/**"
       - "scripts/check-supabase-migrations.mjs"
+      - "scripts/security/**"
+      - "scripts/ops/**"
+      - "scripts/recipe/**"
+      - "tests/recipe/**"
+      - "playwright.config.mjs"
       - "package.json"
+      - "package-lock.json"
       - "wrangler.jsonc"
 
 permissions:
@@ -30,13 +42,16 @@ permissions:
 jobs:
   security-and-contracts:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "24.18.0"
-      - run: npm install --ignore-scripts
+      - run: npm ci --ignore-scripts
+      - run: npm run security:audit
       - run: npm run check
       - run: npm test
       - run: npm run build:beta
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run recipe:browser

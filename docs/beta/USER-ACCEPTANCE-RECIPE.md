@@ -1,5 +1,7 @@
 # Recette utilisateur complète — Velvet BETA
 
+> Complément V1.1 : `npm run recipe:browser` exécute désormais le build exact dans Chromium desktop, Chromium Android et WebKit iPhone. Cette preuve couvre le rendu, les débordements et le menu tactile. Elle ne remplace pas les scénarios connectés ci-dessous ni l’essai sur un iPhone physique installé en PWA.
+
 Cette recette valide les parcours réels avec des comptes de test invités. Chaque
 action doit être confirmée à l’écran après relecture de Supabase. Une réussite
 visuelle sans persistance serveur est considérée comme un échec.
