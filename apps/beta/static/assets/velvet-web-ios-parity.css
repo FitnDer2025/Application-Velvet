@@ -637,6 +637,7 @@ body.velvet-v11.nav-open .nav-scrim { opacity: 1; pointer-events: auto; }
   :root { --v11-sidebar: min(390px, calc(100vw - 38px)); }
 
   body.velvet-v11 { padding: 0; }
+  body.velvet-v11.nav-open { overflow: hidden; }
 
   body.velvet-v11 .mobile-head {
     position: fixed;
@@ -681,9 +682,11 @@ body.velvet-v11.nav-open .nav-scrim { opacity: 1; pointer-events: auto; }
   body.velvet-v11 .mobile-head-actions .velvet-ui-icon { width: 20px; height: 20px; }
 
   body.velvet-v11 .sidebar {
+    inset: 0 auto 0 0;
     z-index: 70;
     width: var(--v11-sidebar);
     max-width: none;
+    height: 100dvh;
     padding-top: calc(18px + env(safe-area-inset-top));
     border-right: 1px solid rgba(217, 184, 121, .16);
     border-radius: 0 24px 24px 0;

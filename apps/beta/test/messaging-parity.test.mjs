@@ -8,6 +8,7 @@ const files = {
   notifications: 'functions/api/members/_message-notifications.js',
   web: 'apps/beta/static/assets/velvet-messaging-upgrade.js',
   webCss: 'apps/beta/static/assets/velvet-messaging-upgrade.css',
+  menuShell: 'apps/beta/static/assets/velvet-web-ios-parity.js',
   iosModels: 'ios/Velvet/Core/Models/DirectoryModels.swift',
   iosStore: 'ios/Velvet/Core/Session/VelvetStore.swift',
   iosMessages: 'ios/Velvet/Features/Messaging/ConversationsView.swift',
@@ -47,15 +48,17 @@ test('opening and sending messages update read state and notifications', async (
   assert.match(notifier, /aes128gcm/);
 });
 
-test('Web messaging provides badges, participant cards, multiline input and menu recovery', async () => {
-  const value = await source('web');
+test('Web messaging provides badges, participant cards and multiline input without controlling the menu', async () => {
+  const [value, menuShell] = await Promise.all([source('web'), source('menuShell')]);
   assert.match(value, /velvet-message-badge/);
   assert.match(value, /participant_display_name/);
   assert.match(value, /document\.createElement\('textarea'\)/);
   assert.match(value, /send-label/);
   assert.match(value, /enrollWebPush/);
-  assert.match(value, /stopImmediatePropagation/);
-  assert.match(value, /velvet-mobile-menu-open/);
+  assert.doesNotMatch(value, /velvet-mobile-menu-open/);
+  assert.doesNotMatch(value, /mobileMenuButton/);
+  assert.match(menuShell, /function bindMenuButton/);
+  assert.match(menuShell, /velvet-mobile-menu-open/);
 
   const css = await source('webCss');
   assert.match(css, /\.messages \.message\.mine/);

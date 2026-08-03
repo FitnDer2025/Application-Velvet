@@ -18,16 +18,16 @@ test('le correctif mobile reste syntaxiquement valide et raccordé à la page me
   assert.match(script, /individual_portrait/);
   assert.match(script, /bottom-nav \[data-route="conversations"\]/);
   assert.match(script, /canonicalButton\.click\(\)/);
-  assert.match(script, /menu\.inert = !open/);
+  assert.match(script, /VelvetWebV11\?\.closeMenu/);
+  assert.doesNotMatch(script, /classList\.toggle\('open'/);
   assert.match(script, /openFeedLightbox/);
   assert.match(script, /openConversationDirect/);
   assert.match(style, /grid-template-columns: repeat\(5/);
   assert.match(style, /\.feed-avatar\.is-profile-portrait img/);
-  assert.match(style, /\.sidebar:not\(\.open\)[\s\S]*pointer-events: none/);
-  assert.match(style, /\.sidebar\.open[\s\S]*pointer-events: auto/);
+  assert.doesNotMatch(style, /velvet-mobile-menu-open/);
   assert.match(style, /\.velvet-photo-lightbox/);
-  assert.match(page, /velvet-mobile-feed-hotfix\.css\?v=20260731-5/);
-  assert.match(page, /velvet-mobile-feed-hotfix\.js\?v=20260731-5/);
+  assert.match(page, /velvet-mobile-feed-hotfix\.css\?v=20260803-3/);
+  assert.match(page, /velvet-mobile-feed-hotfix\.js\?v=20260803-3/);
 });
 
 test('les interactions essentielles disposent toutes d’un gestionnaire explicite', async () => {

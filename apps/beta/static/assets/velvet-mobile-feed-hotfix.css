@@ -95,33 +95,6 @@
   pointer-events: none;
 }
 
-/*
- * Le menu Premium était seulement transparent lorsqu'il était fermé.
- * Il restait donc au-dessus de la page et interceptait les touchers.
- */
-@media (max-width: 800px) {
-  .velvet-member-ui .sidebar:not(.open) {
-    visibility: hidden !important;
-    pointer-events: none !important;
-    user-select: none !important;
-    -webkit-user-select: none !important;
-  }
-
-  .velvet-member-ui .sidebar.open {
-    visibility: visible !important;
-    pointer-events: auto !important;
-  }
-
-  .velvet-member-ui .nav-scrim {
-    pointer-events: none !important;
-  }
-
-  .velvet-member-ui.nav-open .nav-scrim,
-  .velvet-member-ui.velvet-mobile-menu-open .nav-scrim {
-    pointer-events: auto !important;
-  }
-}
-
 #velvetPrivacyShield:not(.visible) {
   pointer-events: none !important;
 }

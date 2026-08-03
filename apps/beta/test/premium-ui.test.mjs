@@ -55,7 +55,7 @@ test('la direction artistique traite profils, fil et établissements', async () 
   assert.match(premiumUi,/notifications\.innerHTML = icon\('bell'\)/);
   assert.match(premiumUi,/menuButton\.innerHTML = icon\('menu'\)/);
   assert.match(auth,/velvet-editorial-ui\.css/);
-  assert.match(sw,/velvet-beta-shell-v23/);
+  assert.match(sw,/velvet-beta-shell-v24/);
   assert.match(sw,/velvet-web-ios-parity\.js/);
 });
 

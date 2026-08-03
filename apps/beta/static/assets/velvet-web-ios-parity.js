@@ -21,6 +21,7 @@
     sidebar?.classList.remove('open');
     document.body.classList.remove('nav-open', 'velvet-mobile-menu-open');
     menuButton?.setAttribute('aria-expanded', 'false');
+    synchronizeNavigation();
     if (restoreFocus && wasOpen) menuButton?.focus({ preventScroll: true });
   }
 
@@ -52,6 +53,17 @@
     return scrim;
   }
 
+  function bindMenuButton() {
+    const menuButton = document.querySelector('#mobileMenuButton');
+    if (!menuButton || menuButton.dataset.velvetV11ControllerBound === 'true') return;
+    menuButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleMenu({ restoreFocus: true });
+    });
+    menuButton.dataset.velvetV11ControllerBound = 'true';
+  }
+
   function currentRoute() {
     const route = document.body.dataset.velvetRoute
       || document.querySelector('.sidebar [data-route].active')?.dataset.route
@@ -60,6 +72,7 @@
   }
 
   function synchronizeNavigation() {
+    bindMenuButton();
     const primary = currentRoute();
     document.querySelectorAll('#mainNav [data-route],.bottom-nav [data-route]').forEach((button) => {
       const active = button.dataset.route === primary;
@@ -72,7 +85,9 @@
     const open = isMobile() && sidebar?.classList.contains('open');
     document.body.classList.toggle('nav-open', Boolean(open));
     document.body.classList.toggle('velvet-mobile-menu-open', Boolean(open));
-    document.querySelector('#mobileMenuButton')?.setAttribute('aria-expanded', String(Boolean(open)));
+    const menuButton = document.querySelector('#mobileMenuButton');
+    menuButton?.setAttribute('aria-expanded', String(Boolean(open)));
+    menuButton?.setAttribute('aria-label', open ? 'Fermer la navigation' : 'Ouvrir la navigation');
     if (sidebar && isMobile()) {
       sidebar.inert = !open;
       sidebar.setAttribute('aria-hidden', String(!open));
@@ -137,7 +152,7 @@
     childList: true,
     subtree: true,
     attributes: true,
-    attributeFilter: ['class', 'data-velvet-route', 'aria-expanded']
+    attributeFilter: ['class', 'data-velvet-route']
   });
 
   document.addEventListener('DOMContentLoaded', synchronize, { once: true });
