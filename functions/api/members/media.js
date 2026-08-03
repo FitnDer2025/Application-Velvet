@@ -1,5 +1,45 @@
 import { supabase } from '../auth/_shared.js';
 
+const INTERNAL_ENVIRONMENTS = new Set(['development', 'dev', 'staging', 'preview', 'internal', 'test']);
+
+function mediaUrl(env, signedPath) {
+  const supabaseBase = String(env.SUPABASE_URL).replace(/\/$/, '');
+  if (/^https?:\/\//i.test(signedPath)) return signedPath;
+  if (signedPath.startsWith('/storage/v1/')) {
+    return new URL(signedPath, `${supabaseBase}/`).toString();
+  }
+  return new URL(
+    signedPath.replace(/^\/+/, ''),
+    `${supabaseBase}/storage/v1/`
+  ).toString();
+}
+
+function canUseInternalMediaFallback(env, path) {
+  const environment = String(env.VELVET_ENVIRONMENT || env.ENVIRONMENT || '').trim().toLowerCase();
+  return String(path).startsWith('internal-test-agents/')
+    && INTERNAL_ENVIRONMENTS.has(environment)
+    && environment !== 'production'
+    && String(env.VELVET_INTERNAL_TEST_AGENTS || '') === 'enabled'
+    && Boolean(env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
+async function signedInternalMediaUrl(env, path, expiresIn) {
+  const base = String(env.SUPABASE_URL || '').replace(/\/$/, '');
+  const key = String(env.SUPABASE_SERVICE_ROLE_KEY || '');
+  if (!base || !key) return null;
+  const response = await fetch(`${base}/storage/v1/object/sign/velvet-media/${path}`, {
+    method: 'POST',
+    headers: {
+      apikey: key,
+      authorization: `Bearer ${key}`,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({ expiresIn })
+  });
+  const payload = await response.json().catch(() => ({}));
+  return response.ok && payload.signedURL ? mediaUrl(env, String(payload.signedURL)) : null;
+}
+
 export async function signedMediaUrl(env, session, path, expiresIn = 600) {
   if (!path) return null;
   const ttl = Math.max(60, Math.min(3600, Number(expiresIn) || 600));
@@ -13,17 +53,13 @@ export async function signedMediaUrl(env, session, path, expiresIn = 600) {
     session.access_token
   );
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok || !payload.signedURL) return null;
-  const supabaseBase = String(env.SUPABASE_URL).replace(/\/$/, '');
-  const signedPath = String(payload.signedURL);
-  if (/^https?:\/\//i.test(signedPath)) return signedPath;
-  if (signedPath.startsWith('/storage/v1/')) {
-    return new URL(signedPath, `${supabaseBase}/`).toString();
+  if (response.ok && payload.signedURL) {
+    return mediaUrl(env, String(payload.signedURL));
   }
-  return new URL(
-    signedPath.replace(/^\/+/, ''),
-    `${supabaseBase}/storage/v1/`
-  ).toString();
+  if (canUseInternalMediaFallback(env, path)) {
+    return signedInternalMediaUrl(env, path, ttl);
+  }
+  return null;
 }
 
 async function enrichRows(env, session, rows = []) {

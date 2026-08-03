@@ -3526,6 +3526,34 @@
       state.theme = applyTheme(event.target.checked ? 'light' : 'dark');
       storeTheme(state.theme);
     });
+    const browserToggle = form.querySelector('[name=browser_enabled]');
+    const synchronizeBrowserNotifications = async (enabled) => {
+      if (!browserToggle || !window.VelvetPWA) return false;
+      browserToggle.disabled = true;
+      try {
+        if (!enabled) {
+          await window.VelvetPWA.disableNotifications();
+          browserToggle.checked = false;
+          toast('Notifications désactivées sur cet appareil.');
+          return true;
+        }
+        const result = await window.VelvetPWA.enableNotifications();
+        browserToggle.checked = true;
+        toast(result?.subscribed
+          ? 'Notifications Velvet activées sur cet appareil.'
+          : 'Autorisation accordée. L’envoi distant doit encore être configuré sur cet environnement.');
+        return true;
+      } catch (error) {
+        browserToggle.checked = false;
+        toast(error.message, true);
+        return false;
+      } finally {
+        browserToggle.disabled = false;
+      }
+    };
+    browserToggle?.addEventListener('change', (event) => {
+      synchronizeBrowserNotifications(event.target.checked);
+    });
     form.querySelector('[data-promotion-redeem] button')?.addEventListener('click', async (event) => {
       const redeem = event.currentTarget.closest('[data-promotion-redeem]');
       const button = event.currentTarget;
@@ -3591,20 +3619,10 @@
       }
     });
 
-    form.querySelector('[data-test-notification]')?.addEventListener('click', async () => {
-      if (!('Notification' in window)) {
-        toast('Ce navigateur ne prend pas en charge les notifications web.', true);
-        return;
-      }
-      const permission = await Notification.requestPermission();
-      const browserToggle = form.querySelector('[name=browser_enabled]');
-      browserToggle.checked = permission === 'granted';
-      if (permission === 'granted') {
-        await showBrowserNotification('Velvet est prêt', 'Tes notifications web sont maintenant autorisées.');
-        toast('Notification de test envoyée.');
-      } else {
-        toast('Les notifications restent bloquées dans les réglages du navigateur.', true);
-      }
+    form.querySelector('[data-test-notification]')?.addEventListener('click', async (event) => {
+      event.currentTarget.disabled = true;
+      await synchronizeBrowserNotifications(true);
+      event.currentTarget.disabled = false;
     });
 
     form.querySelectorAll('[data-lifecycle-action]').forEach((button) => {
