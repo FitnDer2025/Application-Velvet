@@ -32,6 +32,8 @@
 ### Modération, activité et confidentialité
 
 - Modération hybride avec première vérification par IA et revue humaine des cas sensibles.
+- Velvet Contrôle expose l’historique réel des décisions IA, les motifs, le niveau de confiance et les reprises humaines, sans journaliser le contenu ou l’URL d’un média intime (`ADR-UX-061`).
+- Les seuils d’automatisation sont distincts pour les médias publics et privés ; le mode Observation désactive toute décision automatique sans désactiver l’analyse (`ADR-UX-061`).
 - Aucun affichage public de dernière connexion exacte.
 - Velvet Activity Index synthétique, Mode Absence et tendance de réactivité.
 - Notifications push configurables et modes Standard, Discret et Invisible.
@@ -104,6 +106,8 @@
 - `ADR-STATUS.md` permet de vérifier rapidement les sujets déjà couverts.
 - Codex livre de manière autonome les changements Velvet jusqu'à leur fusion et leur déploiement.
 - Cyril conserve exclusivement l'exécution distante des scripts et migrations SQL Supabase.
+- Velvet Contrôle est organisé en cinq destinations : Pilotage, À traiter, IA & modération, Communications et Gestion ; son accueil montre en priorité ce que fait l’IA et ce que l’humain doit décider (`ADR-UX-061`).
+- Les modèles e-mail restent dans une enveloppe visuelle Velvet fixe et auditée ; aucun envoi marketing n’est autorisé sans consentement et désinscription opérationnels (`ADR-UX-061`).
 
 ## ADR récentes
 
@@ -119,6 +123,7 @@
 - `ADR-TECH-058` : fondation iOS native SwiftUI après stabilisation du socle Web.
 - `ADR-AI-059` : profils IA de recette strictement internes, isolés par liste blanche, kill switch, nettoyage et blocage de publication.
 - `ADR-UX-060` : changement de compte commun et sélecteur Web des trois interfaces réservé à `admin`.
+- `ADR-UX-061` : cockpit Velvet Contrôle, historique IA, actions humaines, seuils photo et modèles e-mail Velvet.
 - `ADR-GOV-001` : documentation et commit immédiats après acceptation.
 - `ADR-GOV-002` : pilotage continu par roadmap, métriques et changelog.
 - `ADR-GOV-003` : autonomie complète de livraison Codex, avec exécution SQL Supabase réservée à Cyril.

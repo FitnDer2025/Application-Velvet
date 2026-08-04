@@ -26,10 +26,11 @@ const memberDiscoveryPreferences = await readFile('infra/supabase/migrations/002
 const memberSocialPlansLifecycle = await readFile('infra/supabase/migrations/0024_member_social_plans_lifecycle.sql', 'utf8');
 const controlAiMediaModeration = await readFile('infra/supabase/migrations/0025_control_ai_media_moderation.sql', 'utf8');
 const monetizationAccessPromotions = await readFile('infra/supabase/migrations/0026_monetization_access_promotions.sql', 'utf8');
+const controlPilotingCockpit = await readFile('infra/supabase/migrations/0039_control_piloting_cockpit.sql', 'utf8');
 
-const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}\n${memberSocialPlansLifecycle}\n${controlAiMediaModeration}\n${monetizationAccessPromotions}`;
+const migrationBundle = `${core}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}\n${memberSocialPlansLifecycle}\n${controlAiMediaModeration}\n${monetizationAccessPromotions}\n${controlPilotingCockpit}`;
 const tables = [...migrationBundle.matchAll(/create table(?: if not exists)? public\.([a-z_]+)/gi)].map((match) => match[1]);
-const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}\n${memberSocialPlansLifecycle}\n${controlAiMediaModeration}\n${monetizationAccessPromotions}`;
+const rlsSources = `${rls}\n${neutralBeta}\n${sharedCouple}\n${memberOnboarding}\n${photoAdmission}\n${memberPreferences}\n${stagedCouple}\n${locationVerification}\n${memberEngagement}\n${photoInteractions}\n${memberActions}\n${memberNotifications}\n${proWorkspace}\n${controlOperations}\n${releaseReadiness}\n${venueCatalog}\n${profilePhotoModeration}\n${controlAuditActor}\n${memberDiscoveryPreferences}\n${memberSocialPlansLifecycle}\n${controlAiMediaModeration}\n${monetizationAccessPromotions}\n${controlPilotingCockpit}`;
 const missingRls = tables.filter((table) => !rlsSources.includes(`alter table public.${table} enable row level security;`));
 
 if (missingRls.length) {
@@ -145,6 +146,13 @@ const requirements = [
   [monetizationAccessPromotions.includes('control_create_promotion') && monetizationAccessPromotions.includes('control_grant_campaign') && monetizationAccessPromotions.includes('control_manage_account'), 'Velvet Control doit piloter promotions, cohortes et comptes'],
   [monetizationAccessPromotions.includes("'Fondateurs couples · lancement'") && monetizationAccessPromotions.includes("'Fondateurs Velvet Pro · lancement'"), 'Les cohortes fondatrices doivent être préparées sans activation automatique'],
   [monetizationAccessPromotions.includes('provider_subscription_reference') && !monetizationAccessPromotions.toLowerCase().includes('card_number'), 'Le schéma de paiement doit rester indépendant et ne stocker aucune carte'],
+  [controlPilotingCockpit.includes('control_ai_policies') && controlPilotingCockpit.includes('current_media_moderation_policy'), 'La politique de modération IA doit être centralisée et lisible par les parcours média'],
+  [controlPilotingCockpit.includes('public_auto_confidence between 0.800 and 0.980') && controlPilotingCockpit.includes('private_auto_confidence between 0.800 and 0.980'), 'Les seuils IA public et privé doivent rester distincts et bornés'],
+  [controlPilotingCockpit.includes("automation_mode in ('active','observation')"), 'Le mode Observation doit permettre de désactiver les décisions automatiques sans masquer les analyses'],
+  [controlPilotingCockpit.includes('control_email_templates') && controlPilotingCockpit.includes('marketing_template_requires_footer'), 'Les modèles e-mail doivent distinguer transactionnel et marketing avec désinscription'],
+  [controlPilotingCockpit.includes('control_update_email_template') && controlPilotingCockpit.includes('email_template_updated'), 'Chaque modification de modèle e-mail doit être auditée'],
+  [controlPilotingCockpit.includes("null,'ai_agent','media_ai_' || decision"), 'Les décisions photo de l’IA doivent apparaître explicitement dans le journal d’audit'],
+  [!controlPilotingCockpit.includes('storage_path') && !controlPilotingCockpit.includes('media_url'), 'Le journal IA ne doit jamais recopier le chemin ou l’URL d’un média intime'],
   [!migrationBundle.includes('service_role'), 'Aucune clé ou dépendance service_role ne doit être intégrée aux migrations client']
 ];
 

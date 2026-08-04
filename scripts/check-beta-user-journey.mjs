@@ -85,7 +85,7 @@ const journeys = [
       && has('apps/beta/static/assets/members-live.js', 'Album système public', 'Photos de profil', 'profilePhotos.length || albums.length', 'data-album-folder', 'Ouvrir le dossier')
       && has('apps/beta/static/assets/members-onboarding-v2.js', "profile.profile_type === 'individual' && galleryCount < 3", 'data-add-gallery')
       && has('functions/api/control/workspace.js', 'decide_media', 'control_decide_media')
-      && has('apps/beta/static/assets/control-live.js', 'data-media-decision', 'Médias à contrôler', 'control-media-viewer')
+      && has('apps/beta/static/assets/control-live.js', 'data-media-decision', 'File de contrôle média', 'control-media-viewer')
   },
   {
     name: 'Albums publics et privés',

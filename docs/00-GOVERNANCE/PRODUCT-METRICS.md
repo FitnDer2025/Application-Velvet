@@ -1,10 +1,10 @@
 # Velvet Product Metrics
 
-**Dernière mise à jour :** 30 juillet 2026
+**Dernière mise à jour :** 4 août 2026
 
 ## Indicateur global
 
-**Architecture produit : 80 %**
+**Architecture produit : 82 %**
 
 Cet indicateur mesure l'avancement des arbitrages et spécifications structurantes. Il ne mesure pas l'avancement du développement logiciel.
 
@@ -25,8 +25,8 @@ ADR-GOV-003 clarifie l'autonomie de livraison sans modifier les pourcentages d'a
 | Clubs | 70 % |
 | Professionnels | 90 % |
 | Voyages Velvet | 90 % |
-| Administration / back-office | 65 % |
-| IA Velvet | 75 % |
+| Administration / back-office | 85 % |
+| IA Velvet | 80 % |
 | Monétisation | 95 % |
 | Gamification | 70 % |
 | Mobile avancé | 50 % |
@@ -52,6 +52,13 @@ ADR-GOV-003 clarifie l'autonomie de livraison sans modifier les pourcentages d'a
 - Monétisation : 70 % → 95 %
 - Le solde dépend de l'accord écrit du prestataire de paiement et de la revue juridique avant vente réelle.
 
+## Progression apportée par ADR-UX-061
+
+- Administration / back-office : 65 % → 85 %
+- IA Velvet : 75 % → 80 %
+- Contrôle dispose d’un cockpit réel, d’une file humaine, d’un historique IA explicable et de réglages média bornés.
+- Le solde dépend des futurs connecteurs d’identité, de marketing et de la validation en recette authentifiée.
+
 ## Règles de calcul
 
 - Les pourcentages sont des estimations de pilotage validées par domaine.
@@ -62,8 +69,8 @@ ADR-GOV-003 clarifie l'autonomie de livraison sans modifier les pourcentages d'a
 
 ## Domaine actif
 
-**Gamification — 70 %**
+**Administration / back-office — 85 %**
 
 ## Prochain seuil
 
-Le domaine pourra être considéré comme suffisamment verrouillé lorsque les règles d'affichage, de confidentialité, d'attribution, d'évolution et de retrait des distinctions auront été précisées.
+Le domaine pourra atteindre son prochain seuil après activation de la migration du cockpit, preuve sur les décisions réelles de recette et raccordement des connecteurs futurs validés.

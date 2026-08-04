@@ -5,7 +5,24 @@ import {
   restJson,
   withSession
 } from './_shared.js';
-import { buildCoupleInvitationEmail } from './couple-invitation-email.js';
+import {
+  buildConfiguredVelvetEmail,
+  buildCoupleInvitationEmail
+} from './couple-invitation-email.js';
+
+async function configuredTemplate(env, session, templateKey) {
+  try {
+    const result = await restJson(
+      env,
+      '/rest/v1/rpc/active_email_template',
+      session,
+      { method: 'POST', body: JSON.stringify({ target_template_key: templateKey }) }
+    );
+    return Array.isArray(result) ? result[0] || null : result || null;
+  } catch {
+    return null;
+  }
+}
 
 async function recordDelivery(env, session, invitationId, status, provider = null, messageId = null) {
   if (!invitationId) return;
@@ -31,7 +48,13 @@ async function sendInvitationEmail(env, { email, registrationUrl, profileName, i
     return { status: 'not_configured', provider: null, messageId: null };
   }
 
-  const template = buildCoupleInvitationEmail({ profileName, registrationUrl });
+  const selected = await configuredTemplate(env, session, 'couple_invitation');
+  const template = buildConfiguredVelvetEmail({
+    template: selected,
+    variables: { profile_name: profileName, registration_url: registrationUrl },
+    ctaUrl: registrationUrl,
+    logoUrl: `${new URL(registrationUrl).origin}/assets/velvet-icon-192.png`
+  }) || buildCoupleInvitationEmail({ profileName, registrationUrl });
   const message = {
     from: env.VELVET_FROM_EMAIL,
     to: [email],

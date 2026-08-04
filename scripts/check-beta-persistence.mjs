@@ -72,8 +72,8 @@ const requirements = [
   [includes('apps/beta/static/assets/members-live.js', '/api/members/notifications', '/api/members/map', '/api/members/discovery', '/api/members/venue-relationships', 'data-open-venue'), 'L’interface doit exploiter notifications, Maps, découverte, catalogue et préférences établissements'],
   [includes('apps/beta/static/assets/members-live.js', 'Velvet Découverte', 'Velvet Signature', '/api/billing/promotion', '/api/billing/checkout'), 'L’espace membre doit afficher les offres et exploiter le raccordement commercial'],
   [includes('apps/beta/static/assets/pro-live.js', '/api/pro/workspace', 'S.threads = []', "localStorage.removeItem('velvetProCrmV1')", 'Cette vue ne contient plus aucune donnée de démonstration', "'trial', 'active'"), 'Velvet Pro doit neutraliser les données fictives et respecter l’abonnement serveur'],
-  [includes('apps/beta/static/assets/control-live.js', '/api/control/workspace', 'Opérations Velvet', 'data-organizer-decision', 'data-subscription-status', 'controlClaimVenueForm', 'originalShowView', "document.querySelectorAll('.page')", 'showOperations(tab)'), 'Velvet Control doit piloter le catalogue Pro et permettre le retour depuis Invitations'],
-  [includes('apps/web/velvet-control-intelligence-beta-final.html', '/api/admin/invites', 'Générer le code sécurisé'), 'Velvet Control doit utiliser l’API réelle des invitations']
+  [includes('apps/beta/static/assets/control-live.js', '/api/control/workspace', 'Pilotage', 'data-organizer-decision', 'data-subscription-status', 'controlClaimVenueForm', 'data-management-section', 'setView'), 'Velvet Control doit réunir le pilotage réel, le catalogue Pro et les invitations'],
+  [includes('apps/beta/static/assets/control-live.js', '/api/admin/invites', 'Générer le code sécurisé'), 'Velvet Control doit utiliser l’API réelle des invitations']
 ];
 
 for (const [valid, message] of requirements) {

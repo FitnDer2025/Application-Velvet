@@ -4,6 +4,16 @@ Ce document retrace les décisions produit validées. Il ne remplace ni les ADR 
 
 ## 4 août 2026
 
+### ADR-UX-061 — Velvet Contrôle devient un cockpit de pilotage
+
+- La page d’accueil de Contrôle affiche un briefing réel : actions humaines attendues, décisions IA récentes, autonomie observée et état des connecteurs.
+- L’interface est limitée à cinq destinations : Pilotage, À traiter, IA & modération, Communications et Gestion.
+- Les démonstrateurs `localStorage`, pourcentages de disponibilité et faux agents/services sont retirés de l’interface livrée.
+- La modération photo conserve l’architecture IA-first et sépare les seuils d’automatisation des médias publics et privés ; le mode Observation confie toutes les décisions à l’humain.
+- Les vidéos et les cas ambigus, incertains ou techniquement non analysables restent dans la file humaine.
+- Les modèles transactionnels et marketing utilisent une enveloppe Velvet fixe, sans HTML arbitraire ; le marketing reste sans diffusion tant que consentement et désinscription ne sont pas opérationnels.
+- Chaque modification de politique IA ou de modèle e-mail et chaque décision automatique sont auditables sans recopier de média intime dans le journal.
+
 ### ADR-UX-060 — Compte et interfaces Web
 
 - Membres, Velvet Pro et Velvet Control proposent désormais la même action « Changer de compte » avec révocation de session et retour à la connexion.

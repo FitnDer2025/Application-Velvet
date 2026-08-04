@@ -47,7 +47,12 @@
     invitations: 'invite',
     runbook: 'runbook',
     roadmap: 'chart',
-    operations: 'dashboard'
+    operations: 'dashboard',
+    pilot: 'dashboard',
+    actions: 'quality',
+    intelligence: 'shield',
+    communications: 'message',
+    management: 'settings'
   };
 
   function icon(name, label = '') {
@@ -203,7 +208,7 @@
   }
 
   function controlUi() {
-    if (!document.querySelector('.top .tabs') || !document.querySelector('#operationsView')) return false;
+    if (!document.querySelector('.top .tabs') || !document.querySelector('#controlApp')) return false;
     document.body.classList.add('velvet-control-ui');
     document.body.dataset.velvetView = `control-${document.querySelector('.top .tab.active[data-view]')?.dataset.view || 'operations'}`;
     const brand = document.querySelector('.top > .brand');

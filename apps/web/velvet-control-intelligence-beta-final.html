@@ -1,178 +1,61 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0D0D0D">
-<title>Velvet Intelligence — V1.1 Final</title>
-<link rel="icon" href="/assets/velvet-icon-192.png" type="image/png">
-<link rel="apple-touch-icon" sizes="180x180" href="/assets/velvet-icon-180.png">
-<style>
-:root{--bg:#0d0d0f;--panel:#17171a;--panel2:#202026;--line:#ffffff16;--txt:#f5f3ef;--muted:#aaa6a1;--gold:#c6a96a;--wine:#641b36;--wine2:#96395f;--green:#6fd2a1;--orange:#e2a35f;--red:#e27b93;--blue:#78a9ff}
-*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family:Inter,Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}.shell{height:100%;display:grid;grid-template-rows:68px 1fr}.top{display:flex;align-items:center;gap:14px;padding:0 18px;border-bottom:1px solid var(--line);background:#0b0b0ef2;backdrop-filter:blur(18px);z-index:30}.brand{font:20px Georgia;letter-spacing:.21em;color:var(--gold)}.tag{font-size:9px;letter-spacing:.14em;border:1px solid #c6a96a55;border-radius:99px;padding:5px 8px}.tabs{display:flex;gap:5px;margin-left:15px;overflow:auto}.tab{border:1px solid transparent;background:transparent;color:var(--muted);border-radius:99px;padding:9px 11px;white-space:nowrap}.tab.active{color:#fff;background:#ffffff0c;border-color:var(--line)}.spacer{flex:1}.release{display:flex;align-items:center;gap:7px;color:var(--green);font-size:11px;white-space:nowrap}.release:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 15px var(--green)}.view{min-height:0}.frame{border:0;width:100%;height:100%;background:#0d0d0d}.page{display:none;height:100%;overflow:auto;padding:24px}.page.active{display:block}.wrap{max-width:1540px;margin:auto}
-.ey{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}h1,h2,h3{font-family:Georgia}h1{font-size:clamp(39px,5vw,65px);line-height:1;margin:8px 0 12px}h2{font-size:28px}.lead{color:var(--muted);line-height:1.6;max-width:900px}.head{display:flex;justify-content:space-between;gap:20px;align-items:end}.head-actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:99px;padding:10px 14px;color:white;background:linear-gradient(135deg,var(--wine2),var(--wine));font-weight:700}.btn.secondary{background:transparent;color:var(--gold);border:1px solid #c6a96a55}.btn.ghost{background:#ffffff08;color:#ddd;border:1px solid var(--line)}.btn.danger{background:#8d2a45}.btn:disabled{opacity:.38;cursor:not-allowed}.card{border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,#ffffff09,#ffffff03);padding:18px}.card h2,.card h3{margin:4px 0 14px}.grid{display:grid;gap:13px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:19px 0}.kpi{border:1px solid var(--line);border-radius:17px;background:#ffffff05;padding:14px}.kpi small{color:var(--muted)}.kpi b{display:block;color:var(--gold);font-size:27px;margin:6px 0}.trend{font-size:10px;color:var(--green)}.trend.warn{color:var(--orange)}.section-head{display:flex;justify-content:space-between;gap:14px;align-items:end;margin:22px 0 12px}.section-head h2{margin:0}.section-head p{margin:4px 0 0;color:var(--muted)}
-.state{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;padding:5px 7px;font-size:9px;white-space:nowrap}.state:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}.ok{color:var(--green)}.warning{color:var(--orange)}.paused{color:#aaa}.critical{color:var(--red)}.info{color:var(--blue)}
-.release-hero{display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:center;border:1px solid #c6a96a45;border-radius:24px;padding:22px;background:radial-gradient(circle at 0 50%,#641b365c,transparent 35%),linear-gradient(145deg,#ffffff09,#ffffff03)}.score{width:230px;height:230px;border-radius:50%;display:grid;place-items:center;margin:auto;position:relative;background:conic-gradient(var(--green) 0 100%,#ffffff10 100%)}.score:before{content:"";position:absolute;inset:13px;border-radius:50%;background:#131316}.score div{position:relative;text-align:center}.score b{display:block;font-size:55px;color:var(--gold);font-family:Georgia}.score small{color:var(--muted);letter-spacing:.14em}.release-copy h1{font-size:clamp(38px,5vw,62px)}.gate-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}.gate{border:1px solid var(--line);border-radius:15px;padding:13px;background:#ffffff05}.gate small{display:block;color:var(--muted)}.gate b{display:block;margin-top:7px}
-.suite-layout{display:grid;grid-template-columns:1fr 390px;gap:14px}.test-groups{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.test-group{border:1px solid var(--line);border-radius:18px;padding:15px;background:#ffffff04}.test-group h3{margin:7px 0 12px}.test{display:grid;grid-template-columns:18px 1fr auto;gap:8px;padding:9px 0;border-top:1px solid #ffffff0c;align-items:start}.test i{width:15px;height:15px;border-radius:50%;border:1px solid var(--line);margin-top:1px}.test i.pass{border-color:var(--green);background:var(--green);box-shadow:inset 0 0 0 4px #17171a}.test i.run{border-color:var(--orange);background:var(--orange);animation:pulse 1s infinite}.test p{font-size:11px;margin:0;line-height:1.4}.test small{color:var(--muted);font-size:9px}.console{height:405px;overflow:auto;border:1px solid var(--line);border-radius:15px;background:#09090b;padding:13px;font:11px/1.6 monospace}.console p{margin:0;color:#aaa}.console .pass{color:var(--green)}.console .run{color:var(--orange)}.console time{color:var(--gold);margin-right:8px}
-.role-layout{display:grid;grid-template-columns:350px 1fr;gap:14px}.role-list{display:grid;gap:8px}.role{border:1px solid var(--line);border-radius:15px;padding:13px;background:#ffffff04;color:white;text-align:left}.role.active{border-color:#c6a96a66;background:#c6a96a08}.role-top{display:flex;justify-content:space-between;gap:9px}.role p{font-size:10px;color:var(--muted);line-height:1.5;margin:7px 0 0}.permission-table{width:100%;border-collapse:collapse}.permission-table th,.permission-table td{text-align:left;border-bottom:1px solid #ffffff0c;padding:12px 9px;font-size:11px}.permission-table th{color:var(--muted);font-weight:500}.toggle{width:43px;height:24px;border:0;border-radius:99px;background:#ffffff18;position:relative}.toggle:after{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#aaa;transition:.2s}.toggle.on{background:var(--wine)}.toggle.on:after{left:22px;background:#fff}.approval{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.approval div{border:1px solid var(--line);border-radius:15px;padding:13px;background:#ffffff04}.approval small{display:block;color:var(--muted);margin-bottom:6px}
-.runbook-layout{display:grid;grid-template-columns:1fr 390px;gap:14px}.service-list{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.service{border:1px solid var(--line);border-radius:16px;padding:14px;background:#ffffff04}.service-head{display:flex;justify-content:space-between;gap:8px}.service h3{margin:9px 0 5px}.service p{font-size:10px;color:var(--muted);line-height:1.5}.steps{counter-reset:step;display:grid;gap:9px}.step{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:14px;background:#ffffff04}.step:before{counter-increment:step;content:counter(step);width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:#641b3645;color:var(--gold);font-weight:800}.step h3{font:700 12px Inter;margin:1px 0 4px}.step p{margin:0;color:var(--muted);font-size:10px;line-height:1.5}.backup-zone{border:1px dashed #c6a96a55;border-radius:17px;padding:15px;background:#c6a96a07}.backup-zone input{display:none}.backup-zone label{display:inline-block}.audit-row{display:grid;grid-template-columns:75px 1fr auto;gap:10px;padding:11px 0;border-bottom:1px solid #ffffff0c}.audit-row time{font-size:10px;color:var(--muted)}.audit-row p{font-size:11px;margin:0;line-height:1.4}.audit-row small{display:block;color:var(--muted);margin-top:3px}
-.invite-layout{display:grid;grid-template-columns:minmax(320px,.72fr) minmax(0,1.28fr);gap:14px;margin-top:20px}.invite-form{display:grid;gap:13px}.invite-form label{display:grid;gap:7px;color:var(--muted);font-size:10px}.invite-form input,.invite-form select{width:100%;border:1px solid var(--line);border-radius:13px;background:#0c0c0f;color:white;padding:12px}.invite-result{margin-top:14px;padding:15px;border:1px solid #6fd2a144;border-radius:16px;background:#6fd2a108}.invite-result code{display:block;margin:9px 0;padding:12px;border-radius:12px;background:#09090b;color:var(--gold);font-size:15px;letter-spacing:.12em;overflow-wrap:anywhere}.invite-result a{color:var(--gold);font-size:11px;overflow-wrap:anywhere}.invite-table{width:100%;border-collapse:collapse}.invite-table th,.invite-table td{text-align:left;border-bottom:1px solid #ffffff0c;padding:11px 8px;font-size:10px}.invite-table th{color:var(--muted);font-weight:500}.invite-empty{padding:35px;text-align:center;color:var(--muted)}.invite-status{min-height:18px;color:var(--muted);font-size:10px}
-.road-hero{display:flex;justify-content:space-between;gap:20px;align-items:end}.progress-card{min-width:280px;border:1px solid #6fd2a155;border-radius:20px;padding:18px;background:#6fd2a108}.progress-card b{font-size:38px;color:var(--gold)}.bar{height:9px;border-radius:99px;background:#ffffff10;overflow:hidden;margin-top:11px}.bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--wine),var(--gold),var(--green))}.road-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin:22px 0}.road-card{border:1px solid var(--line);border-radius:20px;padding:17px;background:#ffffff04}.road-card h3{margin:7px 0 12px}.meta{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:10px}.task{display:grid;grid-template-columns:17px 1fr auto;gap:8px;padding:10px 0;border-top:1px solid #ffffff0d}.task p{margin:3px 0;color:var(--muted);font-size:10px;line-height:1.4}.tick{width:15px;height:15px;border-radius:50%;border:1px solid var(--green);background:var(--green);box-shadow:inset 0 0 0 4px #171719}.percent{font-size:10px;color:var(--gold)}.timeline{border:1px solid var(--line);border-radius:20px;padding:18px;background:#ffffff04}.log-row{display:grid;grid-template-columns:95px 12px 1fr;gap:9px}.log-row time{color:var(--muted);font-size:10px;padding-top:3px}.log-row i{width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:4px;position:relative}.log-row i:after{content:"";position:absolute;left:3px;top:11px;width:1px;height:40px;background:var(--line)}.log-row:last-child i:after{display:none}.log-row p{margin:0 0 17px;font-size:12px}.log-row small{display:block;color:var(--muted);margin-top:3px}.scope-note{border-left:2px solid var(--gold);padding:4px 0 4px 15px;color:var(--muted);line-height:1.6}.toast{position:fixed;right:20px;bottom:20px;z-index:100;border:1px solid #c6a96a55;border-radius:14px;background:#1b1b1f;padding:13px 17px;opacity:0;transform:translateY(10px);transition:.2s}.toast.show{opacity:1;transform:none}
-@keyframes pulse{50%{opacity:.35}}@media(max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.test-groups{grid-template-columns:1fr 1fr}.service-list{grid-template-columns:1fr 1fr}.road-grid{grid-template-columns:1fr 1fr}}@media(max-width:900px){.top{padding:0 9px}.brand{font-size:15px}.tag,.release{display:none}.tabs{margin-left:0}.tab{font-size:10px;padding:8px}.page{padding:15px 12px}.head,.road-hero{display:block}.head-actions{margin-top:13px}.release-hero,.suite-layout,.role-layout,.runbook-layout,.invite-layout,.g2,.g3{grid-template-columns:1fr}.score{width:190px;height:190px}.gate-grid,.approval{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:1fr 1fr}.test-groups,.service-list{grid-template-columns:1fr}.road-grid{grid-template-columns:1fr}.permission-table,.invite-table{min-width:680px}.table-scroll{overflow:auto}}
-</style>
-<link rel="stylesheet" href="/assets/velvet-premium-ui.css">
-<link rel="stylesheet" href="/assets/velvet-editorial-ui.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0D0D0D">
+  <title>Velvet Contrôle — Pilotage</title>
+  <link rel="icon" href="/assets/velvet-icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/velvet-icon-180.png">
+  <link rel="stylesheet" href="/assets/velvet-premium-ui.css">
+  <link rel="stylesheet" href="/assets/velvet-editorial-ui.css">
+  <link rel="stylesheet" href="/assets/control-pilot.css?v=20260804-1">
 </head>
-<body>
-<div class="shell">
- <header class="top"><div class="brand">VELVET</div><span class="tag">INTELLIGENCE</span><nav class="tabs"><button class="tab" data-view="suite" onclick="showView('suite',this)">Suite V1.1</button><button class="tab active" data-view="release" onclick="showView('release',this)">Release Center</button><button class="tab" data-view="quality" onclick="showView('quality',this)">Qualité</button><button class="tab" data-view="access" onclick="showView('access',this)">Droits</button><button class="tab" data-view="invitations" onclick="showView('invitations',this)">Invitations</button><button class="tab" data-view="runbook" onclick="showView('runbook',this)">Runbook</button><button class="tab" data-view="roadmap" onclick="showView('roadmap',this)">Avancement</button></nav><div class="spacer"></div><div class="release">V1.1 Final · Stable</div></header>
- <main class="view">
-  <iframe id="suiteView" class="frame" style="display:none" title="Velvet Intelligence Version D" src="./velvet-control-intelligence-d-beta.html"></iframe>
-  <section id="releaseView" class="page active"><div id="releaseRoot" class="wrap"></div></section>
-  <section id="qualityView" class="page"><div id="qualityRoot" class="wrap"></div></section>
-  <section id="accessView" class="page"><div id="accessRoot" class="wrap"></div></section>
-  <section id="invitationsView" class="page"><div id="invitationsRoot" class="wrap"></div></section>
-  <section id="runbookView" class="page"><div id="runbookRoot" class="wrap"></div></section>
-  <section id="roadmapView" class="page"><div id="roadmapRoot" class="wrap"></div></section>
- </main>
-</div>
-<div id="toast" class="toast" role="status"></div>
-<script src="/assets/velvet-premium-ui.js" defer></script>
-<script>
-const TEST_GROUPS=[
- {name:'Socle & navigation',tests:['Chargement Control V1','Chargement Intelligence C','Chargement Orchestration D','Navigation sans rupture']},
- {name:'Gouvernance IA',tests:['Simulation avant/après','Audit explicable','Validation humaine','Versioning des politiques']},
- {name:'Automatisation',tests:['Création de workflow','Bibliothèque de modèles','Test sans action','Journal d’exécution']},
- {name:'Escalades',tests:['Routage intelligent','Réaffectation équipe','Respect du Human Gate','Résolution journalisée']},
- {name:'Direction',tests:['Briefing exécutif','Questions Analyst','Plan d’action','Exports JSON']},
- {name:'Qualité transverse',tests:['Persistance locale','Responsive mobile','Libellés données fictives','Accessibilité clavier']}
-];
-const ROLES=[
- {id:'direction',name:'Direction',desc:'Vision globale, briefing et décisions stratégiques.',members:3},
- {id:'admin',name:'Administrateur',desc:'Configuration des politiques, agents et workflows.',members:2},
- {id:'moderator',name:'Modération',desc:'Dossiers, validations humaines et recours.',members:12},
- {id:'support',name:'Support',desc:'Tickets, synthèses et escalades clients.',members:18},
- {id:'pro',name:'Équipe Pro',desc:'Établissements, événements et alertes métier.',members:8},
- {id:'auditor',name:'Auditeur',desc:'Lecture des décisions et exports sans modification.',members:2}
-];
-const PERMISSIONS=[
- {id:'cockpit',name:'Voir le cockpit',critical:false,defaults:['direction','admin','moderator','support','pro','auditor']},
- {id:'policy',name:'Modifier une politique',critical:true,defaults:['admin']},
- {id:'deploy',name:'Déployer une politique',critical:true,defaults:['admin']},
- {id:'human',name:'Valider un dossier sensible',critical:true,defaults:['admin','moderator']},
- {id:'workflow',name:'Publier un workflow',critical:true,defaults:['admin']},
- {id:'escalation',name:'Gérer les escalades',critical:false,defaults:['admin','moderator','support','pro']},
- {id:'briefing',name:'Accéder au briefing direction',critical:false,defaults:['direction','admin']},
- {id:'export',name:'Exporter les audits',critical:false,defaults:['direction','admin','auditor']},
- {id:'roles',name:'Administrer les droits',critical:true,defaults:['admin']}
-];
-const SERVICES=[
- {id:'gateway',name:'Gateway IA',owner:'Technique',health:'99,99%',mode:'Actif'},
- {id:'guardian',name:'Guardian',owner:'Trust & Safety',health:'99,98%',mode:'Actif'},
- {id:'moderator',name:'Moderator',owner:'Modération',health:'99,95%',mode:'Actif'},
- {id:'ledger',name:'Audit Ledger',owner:'Conformité',health:'Intègre',mode:'Actif'},
- {id:'policy',name:'Policy Engine',owner:'Administration',health:'v2.4',mode:'Actif'},
- {id:'orchestrator',name:'Orchestrateur',owner:'Technique',health:'98,1%',mode:'Actif'}
-];
-const DEFAULT_LOGS=[
- ['08:55:12','Recette finale terminée','24/24 contrôles réussis','Réussi'],['08:53:46','Revue des permissions','5 actions sensibles protégées','Réussi'],['08:51:22','Sauvegarde de configuration','Instantané final-v1.1 généré','Réussi'],['08:48:09','Version D vérifiée','Workflows, escalades et briefing disponibles','Réussi']
-];
-let S=JSON.parse(localStorage.getItem('velvetIntelligenceFinal')||'{}');
-S.tests=S.tests||Object.fromEntries(TEST_GROUPS.flatMap(g=>g.tests).map(t=>[t,'pass']));S.running=S.running||false;S.selectedRole=S.selectedRole||'admin';S.permissions=S.permissions||Object.fromEntries(PERMISSIONS.map(p=>[p.id,Object.fromEntries(ROLES.map(r=>[r.id,p.defaults.includes(r.id)]))]));S.permissionDirty=S.permissionDirty||false;S.backupDone=S.backupDone!==false;S.reviewDone=S.reviewDone!==false;S.logs=S.logs||DEFAULT_LOGS;S.serviceModes=S.serviceModes||Object.fromEntries(SERVICES.map(s=>[s.id,s.mode]));S.resetArmed=S.resetArmed||false;S.releaseStatus=S.releaseStatus||'Stable';
-let inviteRows=[],inviteLoading=false,latestInvitation=null;
-const save=()=>localStorage.setItem('velvetIntelligenceFinal',JSON.stringify(S));
-function toastMsg(text){toast.textContent=text;toast.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>toast.classList.remove('show'),2200)}
-function safe(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
-async function controlApi(path,options={}){const response=await fetch(path,{credentials:'same-origin',headers:{...(options.body?{'content-type':'application/json'}:{}),...(options.headers||{})},...options});const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload.error||'control_api_failed');return payload}
-function showView(view,button){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===button));suiteView.style.display=view==='suite'?'block':'none';['release','quality','access','invitations','runbook','roadmap'].forEach(x=>document.getElementById(x+'View').classList.toggle('active',x===view));if(view==='release')renderRelease();if(view==='quality')renderQuality();if(view==='access')renderAccess();if(view==='invitations'){renderInvitations();loadInvitations()}if(view==='runbook')renderRunbook();if(view==='roadmap')renderRoadmap()}
-function goTo(view){showView(view,document.querySelector(`.tab[data-view="${view}"]`))}
-function passCount(){return Object.values(S.tests).filter(x=>x==='pass').length}
-function allGates(){return passCount()===24&&S.reviewDone&&S.backupDone&&!S.permissionDirty}
-function release(){
- const ready=allGates();
- return `<div class="release-hero"><div class="score"><div><b>100%</b><small>V1.1 TESTABLE</small></div></div><div class="release-copy"><div class="ey">Release finale · Périmètre fonctionnel de démonstration</div><h1>Velvet Intelligence est achevé.</h1><p class="lead">Les Versions B, C et D sont verrouillées dans une V1.1 finale. La recette, les permissions, la sauvegarde de configuration et le runbook sont intégrés dans un centre de mise en production unique.</p><div class="gate-grid"><div class="gate"><small>Recette fonctionnelle</small><b class="ok">${passCount()}/24 réussis</b></div><div class="gate"><small>Revue des droits</small><b class="${S.reviewDone?'ok':'warning'}">${S.reviewDone?'Validée':'À valider'}</b></div><div class="gate"><small>Sauvegarde</small><b class="${S.backupDone?'ok':'warning'}">${S.backupDone?'Disponible':'À générer'}</b></div><div class="gate"><small>Statut de release</small><b class="${ready?'ok':'warning'}">${ready?S.releaseStatus:'Conditionnelle'}</b></div></div><div class="head-actions" style="margin-top:16px"><button class="btn secondary" onclick="goTo('quality')">Voir la recette</button><button class="btn" onclick="sealRelease()" ${ready&&S.releaseStatus!=='Scellée'?'':'disabled'}>${S.releaseStatus==='Scellée'?'V1.1 scellée':'Sceller la V1.1'}</button></div></div></div>
- <div class="kpis"><div class="kpi"><small>Versions consolidées</small><b>3</b><span class="trend">B + C + D</span></div><div class="kpi"><small>Agents IA</small><b>7</b><span class="trend">Supervisés</span></div><div class="kpi"><small>Tests de recette</small><b>24</b><span class="trend">100% réussis</span></div><div class="kpi"><small>Rôles</small><b>6</b><span class="trend">Droits séparés</span></div><div class="kpi"><small>Actions sensibles</small><b>5</b><span class="trend">Human Gate</span></div><div class="kpi"><small>Documentation</small><b>100%</b><span class="trend">Runbook inclus</span></div></div>
- <div class="grid g3"><article class="card"><div class="ey">Produit</div><h2>Suite complète</h2><p class="lead">Accès à Control V1, au cockpit IA, à la gouvernance, aux workflows, aux escalades et au briefing Direction.</p><button class="btn secondary" onclick="goTo('suite')">Ouvrir la suite</button></article><article class="card"><div class="ey">Gouvernance</div><h2>Droits maîtrisés</h2><p class="lead">Chaque capacité sensible possède un rôle autorisé et les sanctions définitives conservent une validation humaine.</p><button class="btn secondary" onclick="goTo('access')">Voir les permissions</button></article><article class="card"><div class="ey">Exploitation</div><h2>Prêt à transmettre</h2><p class="lead">Procédures d’incident, modes de repli, sauvegarde de configuration et journal de release sont réunis.</p><button class="btn secondary" onclick="goTo('runbook')">Ouvrir le runbook</button></article></div>
- <div class="section-head"><div><h2>Dernières validations</h2><p>Journal local de la release finale.</p></div><span class="state ok">Audit complet</span></div><section class="card">${S.logs.slice(0,6).map(l=>`<div class="audit-row"><time>${l[0]}</time><p><b>${l[1]}</b><small>${l[2]}</small></p><span class="state ok">${l[3]}</span></div>`).join('')}</section>`;
-}
-function quality(){
- const total=24,passed=passCount();
- return `<div class="head"><div><div class="ey">Recette fonctionnelle et non-régression</div><h1>Centre Qualité</h1><p class="lead">Les contrôles couvrent l’ensemble du parcours démontrable. Ils peuvent être relancés à tout moment sans modifier les données métier.</p></div><div class="head-actions"><button class="btn secondary" onclick="resetTests()">Réinitialiser</button><button class="btn" onclick="runTests()" ${S.running?'disabled':''}>${S.running?'Recette en cours…':'Relancer les 24 tests'}</button></div></div>
- <div class="suite-layout" style="margin-top:20px"><main><div class="test-groups">${TEST_GROUPS.map(g=>`<section class="test-group"><div class="ey">Suite</div><h3>${g.name}</h3>${g.tests.map(t=>`<div class="test"><i class="${S.tests[t]||''}"></i><p>${t}</p><small>${S.tests[t]==='pass'?'Réussi':S.tests[t]==='run'?'En cours':'À lancer'}</small></div>`).join('')}</section>`).join('')}</div></main><aside class="card"><div class="ey">Résultat</div><h2>${passed}/${total} contrôles</h2><div class="kpi"><small>Taux de réussite</small><b>${Math.round(passed/total*100)}%</b><span class="trend">${passed===total?'Release validée':'Recette incomplète'}</span></div><h3 style="margin-top:20px">Console</h3><div class="console" id="testConsole">${S.logs.slice(0,12).map(l=>`<p class="${l[3]==='Réussi'?'pass':'run'}"><time>${l[0]}</time>${l[1]} — ${l[2]}</p>`).join('')}</div><button class="btn secondary" style="width:100%;margin-top:13px" onclick="exportQuality()">Exporter le rapport</button></aside></div>`;
-}
-function access(){
- const role=ROLES.find(r=>r.id===S.selectedRole)||ROLES[0];
- return `<div class="head"><div><div class="ey">RBAC simulé · Séparation des responsabilités</div><h1>Droits et validations</h1><p class="lead">Les permissions sont configurables par rôle. Les cinq actions sensibles sont clairement identifiées et restent limitées aux équipes autorisées.</p></div><div class="head-actions"><button class="btn secondary" onclick="discardPermissions()">Annuler les changements</button><button class="btn" onclick="savePermissions()">Valider la matrice</button></div></div><div class="role-layout" style="margin-top:20px"><aside class="card"><div class="ey">Rôles</div><h2>${ROLES.length} profils d’accès</h2><div class="role-list">${ROLES.map(r=>`<button class="role ${r.id===role.id?'active':''}" onclick="selectRole('${r.id}')"><div class="role-top"><b>${r.name}</b><span class="state info">${r.members} comptes</span></div><p>${r.desc}</p></button>`).join('')}</div></aside><section class="card"><div class="head"><div><div class="ey">Matrice du rôle</div><h2>${role.name}</h2></div><span class="state ${S.permissionDirty?'warning':'ok'}">${S.permissionDirty?'Brouillon':'Validé'}</span></div><p class="lead">${role.desc}</p><div class="table-scroll"><table class="permission-table"><thead><tr><th>Capacité</th><th>Niveau</th><th>Accès</th></tr></thead><tbody>${PERMISSIONS.map(p=>`<tr><td><b>${p.name}</b></td><td><span class="state ${p.critical?'critical':'info'}">${p.critical?'Sensible':'Standard'}</span></td><td><button class="toggle ${S.permissions[p.id][role.id]?'on':''}" onclick="togglePermission('${p.id}','${role.id}')" aria-label="Modifier ${p.name}"></button></td></tr>`).join('')}</tbody></table></div></section></div>
- <div class="section-head"><div><h2>Chaîne d’approbation</h2><p>Règles non contournables dans le périmètre V1.1.</p></div></div><div class="approval"><div><small>Sanction définitive</small><b>Modérateur + responsable</b></div><div><small>Déploiement de politique</small><b>Administrateur autorisé</b></div><div><small>Modification des droits</small><b>Journalisation obligatoire</b></div></div>`;
-}
-function invitations(){
- const statusLabel={active:'Actif',used:'Utilisé',expired:'Expiré',revoked:'Révoqué'};
- const roleLabel={member:'Membre',organizer:'Organisateur',pro_owner:'Propriétaire Pro',pro_staff:'Collaborateur Pro',moderator:'Modération',support:'Support',auditor:'Auditeur',direction:'Direction',admin:'Administrateur'};
- return `<div class="head"><div><div class="ey">Accès BETA · Administration réelle</div><h1>Codes d’invitation</h1><p class="lead">Créez un accès individuel lié à une adresse e-mail et à un rôle précis. Le code n’est affiché qu’au moment de sa création ; la base n’en conserve ensuite qu’une empreinte sécurisée.</p></div><span class="state ok">API Supabase active</span></div>
- <div class="invite-layout"><section class="card"><div class="ey">Nouvelle invitation</div><h2>Inviter une personne</h2><form id="inviteForm" class="invite-form" onsubmit="createInvitation(event)">
-  <label>Adresse e-mail<input name="email" type="email" autocomplete="off" required placeholder="prenom@exemple.fr"></label>
-  <label>Rôle accordé<select name="role"><option value="member">Membre</option><option value="organizer">Organisateur privé</option><option value="pro_owner">Propriétaire Velvet Pro</option><option value="pro_staff">Collaborateur Velvet Pro</option><option value="moderator">Modération</option><option value="support">Support</option><option value="auditor">Auditeur</option><option value="direction">Direction</option><option value="admin">Administrateur</option></select></label>
-  <label>Durée de validité<select name="validityDays"><option value="7">7 jours</option><option value="14">14 jours</option><option value="30">30 jours</option></select></label>
-  <button class="btn" type="submit">Générer le code sécurisé</button><div id="inviteStatus" class="invite-status" role="status"></div>
- </form>${latestInvitation?`<div class="invite-result"><div class="ey">À transmettre maintenant</div><strong>${safe(latestInvitation.invitedEmail)}</strong><code>${safe(latestInvitation.invitation.invite_code)}</code><a href="${safe(latestInvitation.registrationUrl)}">${safe(latestInvitation.registrationUrl)}</a><div class="head-actions" style="margin-top:12px"><button class="btn secondary" type="button" onclick="copyInvitation()">Copier le lien complet</button></div></div>`:''}</section>
- <section class="card"><div class="head"><div><div class="ey">Historique serveur</div><h2>Invitations récentes</h2></div><button class="btn ghost" type="button" onclick="loadInvitations(true)">Actualiser</button></div>
-  <div class="table-scroll">${inviteLoading?'<div class="invite-empty">Lecture sécurisée de Supabase…</div>':inviteRows.length?`<table class="invite-table"><thead><tr><th>E-mail</th><th>Rôle</th><th>Créée</th><th>Expire</th><th>État</th></tr></thead><tbody>${inviteRows.map(row=>`<tr><td>${safe(row.email)}</td><td>${safe(roleLabel[row.intended_role]||row.intended_role)}</td><td>${safe(new Date(row.created_at).toLocaleString('fr-FR'))}</td><td>${safe(new Date(row.expires_at).toLocaleString('fr-FR'))}</td><td><span class="state ${row.status==='active'?'ok':row.status==='used'?'info':'paused'}">${safe(statusLabel[row.status]||row.status)}</span></td></tr>`).join('')}</tbody></table>`:'<div class="invite-empty">Aucune invitation générée.</div>'}</div>
- </section></div>`;
-}
-async function loadInvitations(force=false){
- if(inviteLoading||(!force&&inviteRows.length))return;
- inviteLoading=true;renderInvitations();
- try{const result=await controlApi('/api/admin/invites');inviteRows=result.invitations||[]}
- catch(error){toastMsg(error.message==='admin_required'?'Accès réservé aux administrateurs.':`Invitations indisponibles : ${error.message}`)}
- finally{inviteLoading=false;renderInvitations()}
-}
-async function createInvitation(event){
- event.preventDefault();const form=event.currentTarget,button=form.querySelector('button[type=submit]'),status=form.querySelector('#inviteStatus'),data=new FormData(form);
- button.disabled=true;status.textContent='Création et confirmation dans Supabase…';
- try{
-  latestInvitation=await controlApi('/api/admin/invites',{method:'POST',body:JSON.stringify({email:data.get('email'),role:data.get('role'),validityDays:Number(data.get('validityDays'))})});
-  status.textContent='Invitation créée et journalisée.';inviteRows=[];renderInvitations();await loadInvitations(true);toastMsg('Code d’invitation généré')
- }catch(error){status.textContent=`Création impossible : ${error.message}`;button.disabled=false}
-}
-async function copyInvitation(){
- if(!latestInvitation?.registrationUrl)return;
- try{await navigator.clipboard.writeText(latestInvitation.registrationUrl);toastMsg('Lien d’invitation copié')}
- catch{toastMsg('Copie automatique indisponible')}
-}
-function runbook(){
- return `<div class="head"><div><div class="ey">Exploitation, continuité et transmission</div><h1>Runbook opérationnel</h1><p class="lead">Ce centre rassemble les procédures utiles pour diagnostiquer, contenir et transmettre un incident de la démonstration Velvet Intelligence.</p></div><div class="head-actions"><button class="btn secondary" onclick="exportBackup()">Sauvegarder la configuration</button><label class="btn" for="backupInput">Restaurer une sauvegarde</label><input id="backupInput" type="file" accept="application/json" style="display:none" onchange="importBackup(this)"></div></div>
- <div class="runbook-layout" style="margin-top:20px"><main><div class="section-head" style="margin-top:0"><div><h2>Services supervisés</h2><p>Modes de repli indépendants.</p></div><span class="state ok">6 opérationnels</span></div><div class="service-list">${SERVICES.map(s=>`<article class="service"><div class="service-head"><span class="state ${S.serviceModes[s.id]==='Actif'?'ok':'warning'}">${S.serviceModes[s.id]}</span><button class="toggle ${S.serviceModes[s.id]==='Actif'?'on':''}" onclick="toggleService('${s.id}')" aria-label="Mode ${s.name}"></button></div><h3>${s.name}</h3><p>${s.owner}<br>Santé : <b>${s.health}</b></p></article>`).join('')}</div><div class="section-head"><div><h2>Procédure d’incident</h2><p>Ordre d’exécution recommandé.</p></div></div><section class="steps"><article class="step"><div><h3>Qualifier</h3><p>Identifier le service, la gravité, le périmètre et les données potentiellement concernées.</p></div><span class="state info">2 min</span></article><article class="step"><div><h3>Contenir</h3><p>Passer l’agent ou l’orchestrateur en mode observation sans interrompre le contrôle humain.</p></div><span class="state warning">5 min</span></article><article class="step"><div><h3>Escalader</h3><p>Router vers l’équipe propriétaire avec le contexte, les signaux et la chronologie.</p></div><span class="state critical">SLA</span></article><article class="step"><div><h3>Restaurer et auditer</h3><p>Revenir à la dernière politique stable, contrôler la propagation et documenter la résolution.</p></div><span class="state ok">Traçable</span></article></section></main>
- <aside><section class="card backup-zone"><div class="ey">Configuration</div><h2>Point de restauration</h2><p class="lead">L’export contient les réglages de cette enveloppe finale. Les données métier des Versions C et D conservent leurs propres espaces locaux.</p><div class="head-actions"><button class="btn secondary" onclick="exportBackup()">Télécharger</button><label class="btn ghost" for="backupInput2">Importer</label><input id="backupInput2" type="file" accept="application/json" onchange="importBackup(this)"></div></section><section class="card" style="margin-top:14px"><div class="ey">Données de démonstration</div><h2>Réinitialisation contrôlée</h2><p class="lead">Deux clics sont nécessaires. Cette action efface uniquement l’état local de la V1.1 finale dans ce navigateur.</p><button class="btn ${S.resetArmed?'danger':'secondary'}" style="width:100%" onclick="armReset()">${S.resetArmed?'Confirmer la réinitialisation':'Préparer la réinitialisation'}</button></section><section class="card" style="margin-top:14px"><div class="ey">Limite assumée</div><h2>Industrialisation</h2><p class="scope-note">Le backend, l’authentification réelle, le chiffrement serveur et les connecteurs de production relèvent de la phase suivante. Ils ne sont pas artificiellement comptés dans les 100 % de cette V1.1 testable.</p></section></aside></div>`;
-}
-function roadmap(){
- return `<div class="road-hero"><div><div class="ey">Périmètre fonctionnel final</div><h1>Velvet Intelligence V1.1</h1><p class="lead">Le module de démonstration est achevé. Les quatre étapes publiées restent accessibles et la finalisation ajoute les contrôles nécessaires pour transmettre proprement le produit à l’industrialisation.</p></div><div class="progress-card"><div class="ey">Progression V1.1 testable</div><b>100%</b><div class="bar"><i></i></div><p class="lead" style="font-size:11px;margin-bottom:0">Fonctions, gouvernance, orchestration, recette et exploitation.</p></div></div><div class="road-grid"><article class="road-card"><div class="meta"><span>Version B</span><span class="state ok">Clôturée</span></div><h3>NOC & Agents</h3>${tasks(['Sept agents IA','Monitoring simulé','Sensibilité par risque'])}</article><article class="road-card"><div class="meta"><span>Version C</span><span class="state ok">Clôturée</span></div><h3>Gouvernance</h3>${tasks(['Simulation avant/après','Audit explicable','Versioning et propagation'])}</article><article class="road-card"><div class="meta"><span>Version D</span><span class="state ok">Clôturée</span></div><h3>Orchestration</h3>${tasks(['Workflows conditionnels','Escalades et SLA','Briefing Direction'])}</article><article class="road-card"><div class="meta"><span>V1.1 Final</span><span class="state ok">Livrée</span></div><h3>Release</h3>${tasks(['Recette 24/24','Droits et validations','Runbook et sauvegarde'])}</article></div>
- <div class="grid g2"><section class="timeline"><div class="ey">Changelog</div><h2>Cycle achevé</h2><div class="log-row"><time>28/07/2026</time><i></i><p><b>V1.1 Final — 100%</b><small>Release Center, qualité, droits, sauvegarde et runbook.</small></p></div><div class="log-row"><time>28/07/2026</time><i></i><p><b>Version D — 96%</b><small>Workflows, escalades et pilotage exécutif.</small></p></div><div class="log-row"><time>28/07/2026</time><i></i><p><b>Versions B et C</b><small>Cockpit, simulation, audit et politiques.</small></p></div></section><aside class="timeline"><div class="ey">Étape suivante hors périmètre</div><h2>Industrialisation</h2><p class="lead">La suite logique est de transformer les simulations en services réels : API, base de données, authentification, permissions serveur, audit durable et interconnexion effective avec Velvet Membres et Velvet Pro.</p><div class="scope-note">Cette phase fera l’objet d’un nouveau socle technique. Elle ne remettra pas en cause les parcours et décisions fonctionnelles désormais verrouillés.</div></aside></div>`;
-}
-function tasks(items){return items.map(x=>`<div class="task"><span class="tick"></span><div><b>${x}</b><p>Fonction disponible et intégrée au périmètre final.</p></div><span class="percent">100%</span></div>`).join('')}
-function runTests(){
- if(S.running)return;S.running=true;const tests=TEST_GROUPS.flatMap(g=>g.tests);tests.forEach(t=>S.tests[t]='');save();renderQuality();let i=0;
- const timer=setInterval(()=>{if(i>0)S.tests[tests[i-1]]='pass';if(i<tests.length)S.tests[tests[i]]='run';i++;if(i>tests.length){clearInterval(timer);S.running=false;const now=new Date().toLocaleTimeString('fr-FR');S.logs.unshift([now,'Recette finale relancée','24/24 contrôles réussis','Réussi']);save();renderQuality();renderRelease();toastMsg('Recette terminée : 24/24')}else{save();renderQuality()}},90)
-}
-function resetTests(){S.tests=Object.fromEntries(TEST_GROUPS.flatMap(g=>g.tests).map(t=>[t,'']));S.running=false;save();renderQuality();renderRelease();toastMsg('Résultats de recette réinitialisés')}
-function exportQuality(){download('velvet-intelligence-v1-1-quality.json',{notice:'Rapport de démonstration',version:'V1.1 Final',tests:S.tests,passed:passCount(),total:24})}
-function selectRole(id){S.selectedRole=id;save();renderAccess()}
-function togglePermission(permission,role){S.permissions[permission][role]=!S.permissions[permission][role];S.permissionDirty=true;S.reviewDone=false;save();renderAccess();renderRelease()}
-function savePermissions(){S.permissionDirty=false;S.reviewDone=true;const now=new Date().toLocaleTimeString('fr-FR');S.logs.unshift([now,'Matrice des droits validée','Revue RBAC enregistrée','Réussi']);save();renderAccess();renderRelease();toastMsg('Permissions validées et journalisées')}
-function discardPermissions(){S.permissions=Object.fromEntries(PERMISSIONS.map(p=>[p.id,Object.fromEntries(ROLES.map(r=>[r.id,p.defaults.includes(r.id)]))]));S.permissionDirty=false;S.reviewDone=true;save();renderAccess();renderRelease();toastMsg('Matrice restaurée à sa version validée')}
-function toggleService(id){S.serviceModes[id]=S.serviceModes[id]==='Actif'?'Observation':'Actif';save();renderRunbook();toastMsg(`${id} : mode ${S.serviceModes[id]}`)}
-function exportBackup(){S.backupDone=true;const data={format:'velvet-intelligence-final-backup',version:'1.1',createdAt:new Date().toISOString(),state:S};save();download('velvet-intelligence-v1-1-backup.json',data);renderRelease()}
-function importBackup(input){const file=input.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(data.format!=='velvet-intelligence-final-backup')throw new Error('format');S=data.state;S.backupDone=true;save();renderAll();toastMsg('Configuration restaurée avec succès')}catch(e){toastMsg('Sauvegarde incompatible')}};reader.readAsText(file)}
-function armReset(){if(!S.resetArmed){S.resetArmed=true;save();renderRunbook();toastMsg('Cliquez une seconde fois pour confirmer');return}localStorage.removeItem('velvetIntelligenceFinal');location.reload()}
-function sealRelease(){if(!allGates()){toastMsg('Un contrôle de release reste ouvert');return}S.releaseStatus='Scellée';const now=new Date().toLocaleTimeString('fr-FR');S.logs.unshift([now,'V1.1 scellée','Périmètre fonctionnel final verrouillé','Réussi']);save();renderRelease();toastMsg('V1.1 finale scellée')}
-function download(name,data){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);toastMsg('Fichier JSON généré')}
-function renderRelease(){releaseRoot.innerHTML=release()}
-function renderQuality(){qualityRoot.innerHTML=quality()}
-function renderAccess(){accessRoot.innerHTML=access()}
-function renderInvitations(){invitationsRoot.innerHTML=invitations()}
-function renderRunbook(){runbookRoot.innerHTML=runbook()}
-function renderRoadmap(){roadmapRoot.innerHTML=roadmap()}
-function renderAll(){renderRelease();renderQuality();renderAccess();renderInvitations();renderRunbook();renderRoadmap()}
-renderAll();
-</script>
+<body class="velvet-control-ui" data-velvet-view="control-pilot">
+  <div class="shell control-shell">
+    <header class="top control-top">
+      <div class="brand">VELVET</div>
+      <span class="tag">CONTRÔLE</span>
+      <nav class="tabs" aria-label="Navigation Velvet Contrôle">
+        <button class="tab active" type="button" data-view="pilot">Pilotage</button>
+        <button class="tab" type="button" data-view="actions">À traiter <span class="control-nav-count" data-action-count hidden></span></button>
+        <button class="tab" type="button" data-view="intelligence">IA &amp; modération</button>
+        <button class="tab" type="button" data-view="communications">Communications</button>
+        <button class="tab" type="button" data-view="management">Gestion</button>
+      </nav>
+      <div class="spacer"></div>
+      <div class="release" data-control-status>Connexion sécurisée…</div>
+    </header>
+    <main id="controlApp" class="control-app" aria-live="polite">
+      <div class="control-loading"><span></span><p>Velvet Contrôle prépare le briefing…</p></div>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/velvet-premium-ui.js?v=20260804-control1" defer></script>
+  <script>
+    function safe(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[character]);
+    }
+    async function controlApi(path, options = {}) {
+      const response = await fetch(path, {
+        credentials: 'same-origin',
+        headers: { accept: 'application/json', 'content-type': 'application/json', ...(options.headers || {}) },
+        ...options
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || 'control_request_failed');
+      return payload;
+    }
+    function toastMsg(message) {
+      const toast = document.querySelector('#toast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(window.controlToastTimer);
+      window.controlToastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+  </script>
 </body>
 </html>
