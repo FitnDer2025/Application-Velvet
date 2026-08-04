@@ -158,7 +158,7 @@ test('les notifications utilisent le même parcours depuis le commutateur et le 
   assert.match(endpoint, /browser_enabled: true/);
 });
 
-test('le cache V25 force le chargement des correctifs techniques sur les PWA existantes', async () => {
+test('le cache V26 force le chargement de l’inscription guidée sur les PWA existantes', async () => {
   const [html, worker] = await Promise.all([
     read('apps/web/velvet-members-beta-live.html'),
     read('apps/beta/static/sw.js')
@@ -179,5 +179,5 @@ test('le cache V25 force le chargement des correctifs techniques sur les PWA exi
     assert.match(html, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(worker, /velvet-beta-shell-v25/);
+  assert.match(worker, /velvet-beta-shell-v26/);
 });

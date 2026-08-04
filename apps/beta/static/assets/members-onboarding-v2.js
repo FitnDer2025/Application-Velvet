@@ -181,19 +181,37 @@
     return Array.isArray(value) ? value : [];
   }
 
-  function optionList(options, current = '') {
+  function optionList(options, current = '', { allowOther = true } = {}) {
+    const known = options.includes(current);
     return `<option value="">Choisir…</option>${options.map((option) =>
       `<option value="${escapeHtml(option)}"${option === current ? ' selected' : ''}>${escapeHtml(option)}</option>`
-    ).join('')}`;
+    ).join('')}${allowOther ? `<option value="Autre"${current && !known ? ' selected' : ''}>Autre — je me définis autrement</option>` : ''}`;
   }
 
-  function checkGrid(name, options, values = []) {
+  function checkGrid(name, options, values = [], { allowOther = true } = {}) {
     const active = new Set(values || []);
-    return `<div class="ov-choice-grid">${options.map((option) => `
+    const custom = (values || []).find((value) => !options.includes(value)) || '';
+    return `<div class="ov-choice-grid" data-choice-group="${escapeHtml(name)}">${options.map((option) => `
       <label class="ov-check">
         <input type="checkbox" name="${escapeHtml(name)}" value="${escapeHtml(option)}"${active.has(option) ? ' checked' : ''}>
         <span>${escapeHtml(option)}</span>
-      </label>`).join('')}</div>`;
+      </label>`).join('')}${allowOther ? `
+      <label class="ov-check ov-check-other">
+        <input type="checkbox" name="${escapeHtml(name)}" value="__other__"${custom ? ' checked' : ''}>
+        <span>Autre — préciser librement</span>
+      </label>
+      <label class="ov-field ov-other-field"${custom ? '' : ' hidden'}>Ma réponse
+        <input type="text" data-other-for="${escapeHtml(name)}" maxlength="120" value="${escapeHtml(custom)}" placeholder="Quelques mots suffisent">
+      </label>` : ''}</div>`;
+  }
+
+  function selectWithOther(name, label, options, current = '', required = false) {
+    const known = options.includes(current);
+    return `<div class="ov-select-other"><label class="ov-field">${escapeHtml(label)}
+      <select name="${escapeHtml(name)}"${required ? ' required' : ''}>${optionList(options, current)}</select>
+    </label><label class="ov-field ov-other-field"${current && !known ? '' : ' hidden'}>Ma réponse
+      <input type="text" data-select-other-for="${escapeHtml(name)}" maxlength="120" value="${escapeHtml(current && !known ? current : '')}" placeholder="Décris-toi avec tes propres mots">
+    </label></div>`;
   }
 
   function communeInput(name, label, value = '', help = '') {
@@ -217,6 +235,17 @@
         <span class="ov-results" data-venue-results hidden></span>
       </span>
       <small>Les propositions proviennent du référentiel Velvet France–Belgique.</small>
+    </div>`;
+  }
+
+  function discoveryPreview(draft, couple) {
+    const chips = (values) => (values || []).map((value) => `<span>${escapeHtml(value)}</span>`).join('') || '<em>À compléter plus tard</em>';
+    return `<div class="ov-preview">
+      <article><small>Présentation</small><strong>${escapeHtml(draft.display_name || draft.p0_first_name || 'Mon profil')}</strong><p>${escapeHtml(draft.description || '')}</p></article>
+      <article><small>${couple ? 'Notre univers' : 'Mon univers'}</small><div>${chips(draft.practices || draft.p0_desired_practices)}</div></article>
+      <article><small>Ce qui compte</small><div>${chips(draft.values_list)}</div></article>
+      <article><small>Rencontres et affinités</small><div>${chips([...(draft.meeting_styles || []), ...(draft.p0_attracted_to || [])])}</div></article>
+      <p>Tout restera modifiable depuis le profil. Velvet n’ajoute aucune envie ni expérience que tu n’as pas déclarée.</p>
     </div>`;
   }
 
@@ -319,6 +348,17 @@
         draft[name] = first.value;
       }
     });
+    form.querySelectorAll('[data-other-for]').forEach((input) => {
+      const name = input.dataset.otherFor;
+      const custom = input.value.trim();
+      const values = Array.isArray(draft[name]) ? draft[name].filter((value) => value !== '__other__') : [];
+      if (custom && form.querySelector(`[name="${CSS.escape(name)}"][value="__other__"]`)?.checked) values.push(custom);
+      draft[name] = values;
+    });
+    form.querySelectorAll('[data-select-other-for]').forEach((input) => {
+      const name = input.dataset.selectOtherFor;
+      if (draft[name] === 'Autre') draft[name] = input.value.trim();
+    });
     state.draft = draft;
   }
 
@@ -350,6 +390,21 @@
       </div>`;
       const form = content.querySelector('#ovStepForm');
       bindAutocomplete(form);
+      form.querySelectorAll('[data-choice-group]').forEach((group) => {
+        const other = group.querySelector('input[value="__other__"]');
+        const field = group.querySelector('[data-other-for]')?.closest('.ov-other-field');
+        other?.addEventListener('change', () => {
+          if (field) field.hidden = !other.checked;
+          if (other.checked) field?.querySelector('input')?.focus();
+        });
+      });
+      form.querySelectorAll('.ov-select-other select').forEach((select) => {
+        const field = select.closest('.ov-select-other')?.querySelector('[data-select-other-for]')?.closest('.ov-other-field');
+        select.addEventListener('change', () => {
+          if (field) field.hidden = select.value !== 'Autre';
+          if (select.value === 'Autre') field?.querySelector('input')?.focus();
+        });
+      });
       form.querySelector('[data-back]')?.addEventListener('click', () => {
         collectForm(form);
         index = Math.max(0, index - 1);
@@ -388,16 +443,10 @@
         body: (d) => `<label class="ov-field">Nom ou pseudonyme du couple<input name="display_name" maxlength="120" value="${escapeHtml(d.display_name)}" required></label>`
       },
       {
-        audience: 'À propos du couple', kicker: 'Votre histoire',
-        title: 'Depuis quand partagez-vous votre vie ?',
-        guide: 'Une année suffit. Elle donnera un premier repère à votre histoire commune.',
-        body: (d) => `<label class="ov-field">Ensemble depuis<input name="relationship_since" type="number" min="1900" max="${new Date().getFullYear()}" value="${escapeHtml(d.relationship_since)}" placeholder="Exemple : 2012"></label>`
-      },
-      {
-        audience: 'À propos du couple', kicker: 'Votre localisation privée',
-        title: 'Dans quelle commune vivez-vous ?',
-        guide: 'Cette commune sert à calculer les distances. Elle ne sera pas publiée telle quelle.',
-        body: (d) => communeInput('city', 'Commune de résidence', d.city, 'Cette information reste privée.')
+        audience: 'À propos du couple', kicker: 'Vos premiers repères',
+        title: 'D’où partez-vous, et depuis quand avancez-vous ensemble ?',
+        guide: 'Ces deux repères suffisent. La commune exacte reste privée et seule la zone choisie sera affichée.',
+        body: (d) => `<div class="ov-grid"><label class="ov-field">Ensemble depuis<input name="relationship_since" type="number" min="1900" max="${new Date().getFullYear()}" value="${escapeHtml(d.relationship_since)}" placeholder="Exemple : 2012"></label>${communeInput('city', 'Commune de résidence', d.city, 'Cette information reste privée.')}</div>`
       },
       {
         audience: 'À propos du couple', kicker: 'Votre localisation publique',
@@ -406,28 +455,10 @@
         body: (d) => communeInput('location_zone', 'Zone affichée sur le profil', d.location_zone, 'Exemple : Lens et alentours.')
       },
       {
-        audience: 'À propos du couple', kicker: 'Première impression',
-        title: 'Comment présenteriez-vous votre couple en quelques phrases ?',
-        guide: 'C’est le texte que les autres liront en premier. Parlez de votre énergie, de votre complicité et de votre façon de rencontrer.',
-        body: (d) => aiWriterField('description', 'Présentation principale', d.description, { minLength: 20, maxLength: 4000, required: true })
-      },
-      {
-        audience: 'À propos du couple', kicker: 'Votre récit',
-        title: 'Racontez-moi votre histoire.',
-        guide: 'Ce qui vous unit, les étapes importantes et ce qui fait de vous un couple singulier.',
-        body: (d) => aiWriterField('story', 'Votre histoire', d.story, { maxLength: 8000 })
-      },
-      {
-        audience: 'À propos du couple', kicker: 'Votre parcours',
-        title: 'Comment avez-vous découvert cet univers ?',
-        guide: 'Il n’est pas nécessaire d’en dire trop. Quelques repères sincères suffisent.',
-        body: (d) => aiWriterField('journey', 'Votre parcours', d.journey, { maxLength: 4000 })
-      },
-      {
-        audience: 'À propos du couple', kicker: 'Vos rencontres',
-        title: 'Qu’aimeriez-vous trouver sur Velvet ?',
-        guide: 'Parlez des personnes, du rythme et surtout du type de feeling que vous recherchez.',
-        body: (d) => aiWriterField('search_text', 'Ce que nous recherchons', d.search_text, { maxLength: 4000 })
+        audience: 'À propos du couple', kicker: 'Votre façon de rencontrer',
+        title: 'Quel type de connexion vous ressemble ?',
+        guide: 'Choisissez les réponses qui vous attirent. Si aucune ne convient, écrivez la vôtre en quelques mots.',
+        body: () => checkGrid('meeting_styles', ['Échanges d’abord, rencontre ensuite', 'Sorties en club ou spa', 'Soirées privées en petit comité', 'Rencontres suivies', 'Découverte sans scénario écrit', 'Selon le feeling'], selected('meeting_styles'))
       },
       {
         audience: 'À propos du couple', kicker: 'Vos pratiques communes',
@@ -448,11 +479,23 @@
         body: (d) => checkGrid('availability', AVAILABILITY, selected('availability'))
       },
       {
+        audience: 'À propos du couple', kicker: 'Vos mots',
+        title: 'Décrivez-vous, simplement.',
+        guide: 'C’est le seul texte libre demandé. Dites ce qui vous rend singuliers ; Velvet utilisera aussi vos choix pour structurer le reste de la fiche.',
+        body: (d) => aiWriterField('description', 'Décrivez-vous', d.description, { minLength: 20, maxLength: 4000, required: true })
+      },
+      {
         audience: 'À propos du couple', kicker: 'Vos habitudes',
         title: 'Quels lieux aimez-vous fréquenter ?',
         guide: 'Commencez à saisir le nom d’un club ou d’un spa. Cette liste restera modifiable depuis votre profil.',
-        finish: 'Créer notre espace couple',
         body: (d) => venueInput(d.favorite_places || [])
+      },
+      {
+        audience: 'À propos du couple', kicker: 'Votre reflet Velvet',
+        title: 'Est-ce bien vous ?',
+        guide: 'Voici ce que vos réponses racontent. Revenez en arrière si quelque chose ne vous ressemble pas.',
+        finish: 'Créer notre espace couple',
+        body: (d) => discoveryPreview(d, true)
       }
     ];
   }
@@ -470,7 +513,7 @@
         audience: audience(), kicker: 'Ton identité',
         title: 'Comment souhaites-tu être présenté(e) ?',
         guide: 'Cette réponse permet à Velvet de respecter les filtres de visibilité et de s’adresser correctement à toi.',
-        body: (d) => `<label class="ov-field">Identité de genre<select name="p0_gender_identity" required>${optionList(GENDERS, d.p0_gender_identity)}</select></label>`
+        body: (d) => selectWithOther('p0_gender_identity', 'Identité de genre', GENDERS, d.p0_gender_identity, true)
       },
       {
         audience: audience(), kicker: 'Quelques repères',
@@ -480,7 +523,7 @@
           <label class="ov-field">Année de naissance<input name="p0_birth_year" type="number" min="1900" max="${new Date().getFullYear() - 18}" value="${escapeHtml(d.p0_birth_year)}"></label>
           <label class="ov-field">Taille en cm<input name="p0_height_cm" type="number" min="100" max="250" value="${escapeHtml(d.p0_height_cm)}"></label>
           <label class="ov-field">Poids en kg<input name="p0_weight_kg" type="number" min="30" max="350" value="${escapeHtml(d.p0_weight_kg)}"></label>
-          <label class="ov-field">Morphologie<select name="p0_morphology">${optionList(MORPHOLOGIES, d.p0_morphology)}</select></label>
+          ${selectWithOther('p0_morphology', 'Morphologie', MORPHOLOGIES, d.p0_morphology)}
         </div>`
       },
       {
@@ -488,8 +531,8 @@
         title: 'Quels détails complètent ton portrait ?',
         guide: 'Deux repères simples avant de passer à ce qui te caractérise vraiment.',
         body: (d) => `<div class="ov-grid">
-          <label class="ov-field">Couleur des cheveux<select name="p0_hair_color">${optionList(HAIR, d.p0_hair_color)}</select></label>
-          <label class="ov-field">Couleur des yeux<select name="p0_eye_color">${optionList(EYES, d.p0_eye_color)}</select></label>
+          ${selectWithOther('p0_hair_color', 'Couleur des cheveux', HAIR, d.p0_hair_color)}
+          ${selectWithOther('p0_eye_color', 'Couleur des yeux', EYES, d.p0_eye_color)}
         </div>`
       },
       {
@@ -506,7 +549,7 @@
         audience: audience(), kicker: 'Tes affinités',
         title: 'Comment définis-tu ton orientation ?',
         guide: 'Choisis la réponse qui te ressemble aujourd’hui. Elle pourra évoluer plus tard.',
-        body: (d) => `<label class="ov-field">Orientation<select name="p0_orientation">${optionList(ORIENTATIONS, d.p0_orientation)}</select></label>`
+        body: (d) => selectWithOther('p0_orientation', 'Orientation', ORIENTATIONS, d.p0_orientation)
       },
       {
         audience: audience(), kicker: 'Ce que tu recherches',
@@ -518,7 +561,7 @@
         audience: audience(), kicker: 'Ton expérience',
         title: 'À quel rythme pratiques-tu aujourd’hui ?',
         guide: 'Découverte, pause ou pratique régulière : choisis simplement ce qui correspond à ta réalité actuelle.',
-        body: (d) => `<label class="ov-field">Fréquence actuelle<select name="p0_frequency">${optionList(FREQUENCIES, d.p0_frequency)}</select></label>`
+        body: (d) => selectWithOther('p0_frequency', 'Fréquence actuelle', FREQUENCIES, d.p0_frequency)
       }
     ];
     if (couple) {
@@ -537,13 +580,7 @@
         body: (d) => checkGrid('p0_desired_practices', PRACTICES, selected('p0_desired_practices'))
       });
     }
-    steps.push({
-      audience: audience(), kicker: 'Derrière le profil',
-      title: 'Si tu devais te présenter librement…',
-      guide: 'Raconte ton caractère, ta manière d’aborder les rencontres et ce que les autres devraient comprendre de toi.',
-      finish: couple ? 'Enregistrer ma fiche' : 'Continuer',
-      body: (d) => aiWriterField('p0_biography', 'Ta description personnelle', d.p0_biography, { maxLength: 4000 })
-    });
+    steps[steps.length - 1].finish = couple ? 'Enregistrer ma fiche' : 'Continuer';
     return steps;
   }
 
@@ -570,21 +607,9 @@
       ...personalSteps({ couple: false }),
       {
         audience: 'Ton profil individuel', kicker: 'Première impression',
-        title: 'Comment te présenter en quelques phrases ?',
-        guide: 'Ce texte sera la première chose que les autres membres liront.',
-        body: (d) => aiWriterField('description', 'Présentation principale', d.description, { minLength: 20, maxLength: 4000, required: true })
-      },
-      {
-        audience: 'Ton profil individuel', kicker: 'Ton histoire',
-        title: 'Quel parcours t’a mené jusqu’ici ?',
-        guide: 'Raconte ce que tu souhaites partager de ton histoire et de tes découvertes.',
-        body: (d) => `<div class="ov-grid">${aiWriterField('story', 'Ton histoire', d.story, { maxLength: 8000 })}${aiWriterField('journey', 'Ton parcours', d.journey, { maxLength: 4000 })}</div>`
-      },
-      {
-        audience: 'Ton profil individuel', kicker: 'Tes rencontres',
-        title: 'Qu’aimerais-tu trouver sur Velvet ?',
-        guide: 'Parle des personnes, du rythme et du type de relation que tu recherches.',
-        body: (d) => aiWriterField('search_text', 'Ce que je recherche', d.search_text, { maxLength: 4000 })
+        title: 'Décris-toi, simplement.',
+        guide: 'C’est le seul texte libre demandé. Parle de ton caractère et de ce qui te rend singulier ; Velvet structurera le reste à partir de tes réponses.',
+        body: (d) => aiWriterField('description', 'Décris-toi', d.description, { minLength: 20, maxLength: 4000, required: true })
       },
       {
         audience: 'Ton profil individuel', kicker: 'Tes pratiques',
@@ -608,8 +633,14 @@
         audience: 'Ton profil individuel', kicker: 'Tes habitudes',
         title: 'Quels lieux aimes-tu fréquenter ?',
         guide: 'Tu pourras compléter cette liste plus tard depuis ta page Mon profil.',
-        finish: 'Créer mon profil',
         body: (d) => venueInput(d.favorite_places || [])
+      },
+      {
+        audience: 'Ton profil individuel', kicker: 'Ton reflet Velvet',
+        title: 'Est-ce bien toi ?',
+        guide: 'Voici ce que tes réponses racontent. Reviens en arrière si quelque chose ne te ressemble pas.',
+        finish: 'Créer mon profil',
+        body: (d) => discoveryPreview(d, false)
       }
     ];
   }
@@ -645,9 +676,9 @@
             city: draft.city,
             location_zone: draft.location_zone,
             description: draft.description,
-            story: draft.story,
-            journey: draft.journey,
-            search_text: draft.search_text,
+            story: '',
+            journey: '',
+            search_text: discoverySearchText(draft, true),
             practices: draft.practices || [],
             values_list: draft.values_list || [],
             availability_text: (draft.availability || []).join(' · '),
@@ -658,6 +689,17 @@
         showPartnerInvitation();
       }
     });
+  }
+
+  function discoverySearchText(draft, couple) {
+    const targets = (draft.p0_attracted_to || []).join(', ');
+    const styles = (draft.meeting_styles || []).join(', ');
+    const values = (draft.values_list || []).join(', ');
+    const parts = [];
+    if (targets) parts.push(`${couple ? 'Nous pouvons être attirés par' : 'Je peux être attiré(e) par'} ${targets.toLocaleLowerCase('fr')}`);
+    if (styles) parts.push(`${couple ? 'Nous privilégions' : 'Je privilégie'} ${styles.toLocaleLowerCase('fr')}`);
+    if (values) parts.push(`Avec ${values.toLocaleLowerCase('fr')}`);
+    return parts.length ? `${parts.join('. ')}.` : '';
   }
 
   function startSolo() {
@@ -683,9 +725,9 @@
         location_zone: common.location_zone,
         relationship_since: common.relationship_since,
         description: common.description,
-        story: common.story,
-        journey: common.journey,
-        search_text: common.search_text,
+        story: common.story || '',
+        journey: common.journey || '',
+        search_text: common.search_text || discoverySearchText(draft, profileType === 'couple'),
         practices: common.practices || draft.practices || [],
         values_list: common.values_list || draft.values_list || [],
         availability_text: common.availability_text || (draft.availability || []).join(' · '),
@@ -706,7 +748,7 @@
             : draft.p0_profession_private !== false,
           orientation: draft.p0_orientation,
           frequency: draft.p0_frequency,
-          biography: draft.p0_biography,
+          biography: draft.p0_biography || (profileType === 'individual' ? common.description : ''),
           attracted_to: draft.p0_attracted_to || [],
           desired_practices: draft.p0_desired_practices || [],
           partner_permissions: profileType === 'couple' ? (draft.p0_partner_permissions || []) : []
