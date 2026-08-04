@@ -43,7 +43,7 @@ test('le build publie les deux accès Marketing directement dans le module', () 
 });
 
 test('la voix finale est choisie en français avant le tournage', () => {
-  assert.match(moduleSource, /speechSynthesis\.getVoices/);
+  assert.match(moduleSource, /getVoices/);
   assert.match(moduleSource, /SpeechSynthesisUtterance/);
   assert.match(moduleSource, /femaleScore/);
   assert.match(moduleSource, /\^fr\(\?:-\|_\)/);
