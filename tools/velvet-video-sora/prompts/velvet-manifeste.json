@@ -1,0 +1,48 @@
+{
+  "campaign": "Velvet — Le libertinage évolue",
+  "format": "vertical social 9:16",
+  "scenes": [
+    {
+      "id": "01-logo-ribbon",
+      "model": "sora-2-pro",
+      "seconds": 8,
+      "size": "720x1280",
+      "prompt": "Vertical premium cinematic brand opening on a deep black velvet background. A single burgundy silk ribbon, color #641B36, enters slowly from darkness, catches a subtle champagne-gold light, folds with realistic fabric physics and forms an elegant asymmetric letter V. Tiny restrained gold particles, no excess sparkle, no people, no text, no watermark. Luxury, intimate, discreet, refined, Apple-level minimalism, smooth camera, soft depth of field. End frame holds the completed V centered with generous negative space."
+    },
+    {
+      "id": "02-couple-prepares-evening",
+      "model": "sora-2-pro",
+      "seconds": 8,
+      "size": "720x1280",
+      "prompt": "Vertical cinematic lifestyle scene in an elegant contemporary apartment at night. A confident adult couple in their late thirties prepares for an evening out, dressed chic and tasteful, warm intimate light, discreet gestures, genuine complicity, no nudity, no explicit sexuality. One person checks a premium dark mobile app with burgundy and champagne-gold accents. The phone screen is visible only as abstract interface shapes, no fake readable text. Sophisticated, inclusive, sensual but safe for social media, realistic camera movement."
+    },
+    {
+      "id": "03-discovery-trust",
+      "model": "sora-2-pro",
+      "seconds": 8,
+      "size": "720x1280",
+      "prompt": "Vertical premium product film. Close-up of a hand navigating a refined dark mobile interface for a trusted adult social community. Elegant profile cards, event cards, map pins, discreet trust shield, consent check and private album symbols animate smoothly. Palette strictly black #0D0D0D, anthracite #1B1B1D, burgundy #641B36 and champagne gold #C6A96A. No readable text, no explicit imagery, no dating-app clichés, no hearts raining. Cinematic macro lens, glass depth, calm fluid transitions."
+    },
+    {
+      "id": "04-venue-event",
+      "model": "sora-2-pro",
+      "seconds": 8,
+      "size": "720x1280",
+      "prompt": "Vertical cinematic shot inside a premium adults-only social club before opening. Elegant lounge, dark velvet textures, champagne-gold highlights, staff preparing tables and lighting, sophisticated and welcoming rather than provocative. A venue manager uses a tablet showing an abstract premium dashboard with event capacity, reservations and a rising occupancy gauge. No readable text, no nudity, no explicit content. Smooth dolly movement, refined business atmosphere, realistic lighting."
+    },
+    {
+      "id": "05-community-evening",
+      "model": "sora-2-pro",
+      "seconds": 8,
+      "size": "720x1280",
+      "prompt": "Vertical social-media-safe cinematic evening in an upscale lounge. Diverse adult couples and individuals converse, smile and share a drink in a respectful, elegant atmosphere. Focus on authentic connection, trust, discretion and inclusion, no nudity, no explicit sexuality, no voyeuristic framing. Burgundy velvet and champagne-gold art direction, shallow depth of field, graceful slow motion, warm human energy."
+    },
+    {
+      "id": "06-final-brand-space",
+      "model": "sora-2-pro",
+      "seconds": 8,
+      "size": "720x1280",
+      "prompt": "Vertical cinematic closing background for a luxury brand. Deep black velvet surface, a soft burgundy silk ribbon moves slowly across frame and reveals a restrained champagne-gold glow. Minimal, elegant, intimate, premium, no people, no text, no logo, no watermark. Leave a perfectly clean central area and lower third for adding the Velvet logo, signature and launch call-to-action during editing."
+    }
+  ]
+}
