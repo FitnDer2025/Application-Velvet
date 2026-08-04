@@ -54,7 +54,9 @@ auth = auth
   .replace('</body>', '<script src="/assets/real-auth-gate.js"></script></body>');
 await emit(resolve(output, 'index.html'), addLegalBar(auth));
 
-await emit(resolve(output, 'membres/index.html'), addLegalBar(await required(sources.members)));
+let members = await required(sources.members);
+members = members.replace('<head>', '<head><script src="/assets/velvet-capture-mode.js?v=20260804-1"></script>');
+await emit(resolve(output, 'membres/index.html'), addLegalBar(members));
 
 let pro = await required(sources.pro);
 pro = pro
@@ -72,7 +74,7 @@ pro = pro
 await emit(resolve(output, 'pro/index.html'), addLegalBar(pro));
 
 let control = await required(sources.control);
-control = control.replace('</body>', '<script src="/assets/control-live.js?v=20260804-2"></script><script src="/assets/velvet-studio-control.js?v=20260804-1"></script><script src="/assets/account-access-menu.js?v=20260804-1"></script></body>');
+control = control.replace('</body>', '<script src="/assets/control-live.js?v=20260804-2"></script><script src="/assets/velvet-studio-control.js?v=20260804-1"></script><script src="/assets/velvet-studio-ai.js?v=20260804-1"></script><script src="/assets/account-access-menu.js?v=20260804-1"></script></body>');
 await emit(resolve(output, 'control/index.html'), addLegalBar(control));
 await cp(sources.controlD, resolve(output, 'control/velvet-control-intelligence-d-beta.html'));
 await cp(sources.controlC, resolve(output, 'control/velvet-control-intelligence-c-beta.html'));
