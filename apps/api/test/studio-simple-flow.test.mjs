@@ -14,14 +14,15 @@ test('Velvet Studio simple compile côté navigateur', async () => {
   assert.match(source, /Montage et export/);
 });
 
-test('le pipeline Workers AI couvre scénario images et voix', async () => {
+test('le serveur Workers AI conserve scénario illustration et voix', async () => {
   const source = await readFile(serverUrl, 'utf8');
   assert.match(source, /action === 'plan_video'/);
   assert.match(source, /action === 'generate_voice'/);
-  assert.match(source, /action !== 'generate_image'/);
+  assert.match(source, /action === 'generate_image'/);
   assert.match(source, /@cf\/meta\/llama-3\.1-8b-instruct-fast/);
   assert.match(source, /@cf\/black-forest-labs\/flux-1-schnell/);
   assert.match(source, /@cf\/myshell-ai\/melotts/);
+  assert.match(source, /pipeline:\s*\['plan', 'velvet-screens', 'voice', 'render'\]/);
 });
 
 test('le mode simple masque les accès versionnés de l’interface principale', async () => {
