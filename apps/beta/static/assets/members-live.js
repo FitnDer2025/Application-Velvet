@@ -2566,6 +2566,40 @@
     }).join('');
   }
 
+  function profileStoryTimeline(profile, voice) {
+    const events = [];
+    const createdAt = profile.created_at ? new Date(profile.created_at) : null;
+    if (createdAt && !Number.isNaN(createdAt.getTime())) {
+      events.push({
+        date: createdAt,
+        title: 'Le début de son histoire Velvet',
+        text: `${profile.display_name} a rejoint la communauté et posé les premiers repères de son univers.`
+      });
+    }
+    list(profile.media_assets)
+      .filter((photo) => photo.moderation_status === 'approved' && photo.created_at)
+      .sort((left, right) => new Date(left.created_at) - new Date(right.created_at))
+      .slice(0, 3)
+      .forEach((photo, index) => events.push({
+        date: new Date(photo.created_at),
+        title: index ? 'Son univers s’est enrichi' : 'Ses premières images',
+        text: 'De nouvelles photos ont rejoint son profil après validation.'
+      }));
+    list(state.directory.recommendations)
+      .filter((item) => item.target_type === 'profile' && item.target_id === profile.id && item.created_at)
+      .forEach((item) => events.push({
+        date: new Date(item.created_at),
+        title: 'Une recommandation reçue',
+        text: item.body
+      }));
+    if (!events.length) return `<p>${e(voice.storyFallback)}</p>`;
+    return `<ol class="profile-story-timeline">${events
+      .filter((item) => !Number.isNaN(item.date.getTime()))
+      .sort((left, right) => right.date - left.date)
+      .map((item) => `<li><time datetime="${e(item.date.toISOString())}">${e(new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(item.date))}</time><strong>${e(item.title)}</strong><p>${e(item.text)}</p></li>`)
+      .join('')}</ol>`;
+  }
+
   function dateLabel(value) {
     return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' }).format(new Date(`${value}T12:00:00`));
   }
@@ -2808,8 +2842,7 @@
     return `<section class="profile-layout">
       <div>
         <article class="card section"><p class="eyebrow">En quelques mots</p><h2>${voice.aboutTitle}</h2><p class="quote">${e(profile.description || voice.descriptionFallback)}</p>${chips(profile.values_list, 'Valeurs à compléter')}</article>
-        <article class="card section"><p class="eyebrow">Le récit</p><h2>${voice.storyTitle}</h2><p>${e(profile.story || voice.storyFallback)}</p></article>
-        <article class="card section"><p class="eyebrow">Le chemin parcouru</p><h2>${voice.journeyTitle}</h2><p>${e(profile.journey || voice.journeyFallback)}</p></article>
+        <article class="card section"><p class="eyebrow">Le récit vivant</p><h2>${voice.storyTitle}</h2>${profileStoryTimeline(profile, voice)}</article>
         <article class="card section"><p class="eyebrow">Les rencontres souhaitées</p><h2>${voice.searchTitle}</h2><p>${e(profile.search_text || voice.searchFallback)}</p></article>
         <article class="card section"><p class="eyebrow">${voice.practicesEyebrow}</p><h2>${voice.practicesTitle}</h2>${chips(profile.practices, 'Pratiques à compléter')}</article>
         ${profilePlansView(profile, own)}

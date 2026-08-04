@@ -1,6 +1,6 @@
-const CACHE = 'velvet-beta-shell-v25';
+const CACHE = 'velvet-beta-shell-v26';
 // Caches historiques explicitement supprimés pendant l’activation :
-// velvet-beta-shell-v18 à velvet-beta-shell-v24.
+// velvet-beta-shell-v18 à velvet-beta-shell-v25.
 const APP_SHELL = [
   '/assets/members-live.css',
   '/assets/members-live.js?v=20260803-4',

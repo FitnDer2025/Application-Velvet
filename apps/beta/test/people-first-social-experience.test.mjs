@@ -19,7 +19,7 @@ test('le Web mobile présente le fil social people-first complet', async () => {
   assert.match(styles, /\.home-feed-card/);
   assert.match(styles, /\.feed-avatar/);
   assert.match(html, /velvet-web-ios-parity\.css\?v=20260803-3/);
-  assert.match(worker, /const CACHE = 'velvet-beta-shell-v25'/);
+  assert.match(worker, /const CACHE = 'velvet-beta-shell-v26'/);
 });
 
 test('la navigation sépare clairement Membres et Lieux', async () => {
