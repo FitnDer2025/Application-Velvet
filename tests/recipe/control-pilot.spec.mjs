@@ -60,9 +60,29 @@ test('Velvet Contrôle rend le briefing, les décisions IA et les actions sur to
   await expect(page.getByText('12', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('Signalement à traiter').first()).toBeVisible();
   await expect(page.getByText('Aucun service simulé.')).toBeVisible();
+  await expect(page.locator('.velvet-account-access')).toBeVisible();
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
+
+  const geometry = await page.evaluate(() => {
+    const header = document.querySelector('.control-top')?.getBoundingClientRect();
+    const app = document.querySelector('#controlApp')?.getBoundingClientRect();
+    const title = document.querySelector('.control-head h1')?.getBoundingClientRect();
+    const headerChildren = [...document.querySelectorAll('.control-top > *')]
+      .filter((node) => getComputedStyle(node).display !== 'none')
+      .map((node) => node.getBoundingClientRect());
+    return {
+      header: header && { top: header.top, bottom: header.bottom, height: header.height },
+      app: app && { top: app.top },
+      title: title && { top: title.top },
+      childOverflow: header && headerChildren.some((rect) => rect.top < header.top - 1 || rect.bottom > header.bottom + 1)
+    };
+  });
+  expect(geometry.header?.height).toBeGreaterThanOrEqual(63);
+  expect(geometry.app?.top).toBeGreaterThanOrEqual((geometry.header?.bottom || 0) - 1);
+  expect(geometry.title?.top).toBeGreaterThan((geometry.header?.bottom || 0) + 8);
+  expect(geometry.childOverflow).toBe(false);
 
   const navigation = await page.locator('.control-mobile-nav').isVisible()
     ? page.locator('.control-mobile-nav')

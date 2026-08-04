@@ -25,7 +25,7 @@ test('web avatars are not covered and conversations open through the messages AP
   assert.match(menuShell, /sidebar\.inert = !open/);
   assert.match(html, /photo-protection\.js\?v=20260731-5/);
   assert.match(html, /velvet-mobile-feed-hotfix\.js\?v=20260803-3/);
-  assert.match(worker, /const CACHE = 'velvet-beta-shell-v28'/);
+  assert.match(worker, /const CACHE = 'velvet-beta-shell-v29'/);
   assert.match(worker, /velvet-social-realtime\.js/);
 });
 
