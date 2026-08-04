@@ -4,8 +4,8 @@ const CACHE = 'velvet-beta-shell-v27';
 const APP_SHELL = [
   '/assets/members-live.css',
   '/assets/members-live.js?v=20260803-4',
-  '/assets/members-onboarding-v2.css',
-  '/assets/members-onboarding-v2.js',
+  '/assets/members-onboarding-v2.css?v=20260804-1',
+  '/assets/members-onboarding-v2.js?v=20260804-1',
   '/assets/account-access-menu.js?v=20260804-1',
   '/assets/velvet-premium-ui.css',
   '/assets/velvet-premium-ui.js?v=20260803-3',
