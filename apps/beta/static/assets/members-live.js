@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 68367)
-Total output lines: 5011
-
 (() => {
   const THEME_STORAGE_KEY = 'velvet-member-theme-v1';
   const SAVED_SEARCH_STORAGE_KEY = 'velvet-saved-searches-v1';
@@ -1262,7 +1259,2560 @@ Total output lines: 5011
       discoveryStep(nextIndex + 3, 'Tes affinités', 'Comment définis-tu ton orientation ?', 'Il ne s’agit pas de t’enfermer dans une case : choisis simplement la réponse qui te ressemble aujourd’hui.', `
         ${selectField('p0_orientation', 'Orientation', REFERENCES.orientations, ownPerson.orientation)}
       `),
-      discoveryStep(nextIndex + 4, 'Tes affinités', 'Vers qui va naturellement ton attirance ?', 'Plusieurs réponses sont possibles.…38367 tokens truncated…TML = `<div class="page">
+      discoveryStep(nextIndex + 4, 'Tes affinités', 'Vers qui va naturellement ton attirance ?', 'Plusieurs réponses sont possibles. Elles amélioreront les propositions sans jamais présumer de tes envies du moment.', `
+        ${multiField('p0_attracted_to', 'Je peux être attiré(e) par', REFERENCES.attractions, ownPerson.attracted_to)}
+      `),
+      discoveryStep(nextIndex + 5, 'Ton expérience', 'À quel rythme pratiques-tu aujourd’hui ?', 'Une découverte, une pause ou une pratique régulière ne racontent pas la même histoire. Choisis ce qui correspond à ta réalité actuelle.', `
+        ${selectField('p0_frequency', 'Fréquence actuelle', REFERENCES.frequencies, ownPerson.frequency)}
+      `),
+      discoveryStep(nextIndex + 6, 'Tes envies', 'Qu’aimerais-tu vivre pour toi ?', 'Choisis ce qui te ressemble aujourd’hui. Chaque rencontre restera évidemment soumise au dialogue et au consentement du moment.', `
+        <div class="form-grid">
+          ${multiField('p0_desired_practices', 'Ce que je souhaite vivre', REFERENCES.experiences, ownPerson.desired_practices)}
+        </div>
+      `),
+      discoveryStep(nextIndex + 7, 'Votre équilibre', 'Qu’es-tu à l’aise de laisser vivre à ta moitié ?', 'Cette réponse exprime ton niveau de confort actuel. Elle ne remplace jamais une discussion ni un consentement explicite entre vous.', `
+        ${multiField('p0_partner_permissions', 'Ce qui me met à l’aise pour mon/ma partenaire', REFERENCES.experiences, ownPerson.partner_permissions)}
+      `, 'data-couple-step '),
+      discoveryStep(nextIndex + 8, 'Derrière le profil', 'Si tu devais te présenter librement…', 'Oublions les cases. Raconte-moi ton caractère, ta façon d’aborder les rencontres et ce que les autres devraient comprendre de toi.', `
+        ${aiWriterField('p0_biography', 'Ta description personnelle', ownPerson.biography, {
+          maxLength: 4000,
+          long: true,
+          placeholder: 'Ton caractère, ta façon d’aborder les rencontres, ce qui compte pour toi…'
+        })}
+      `)
+    );
+
+    if (!joiningPartner) {
+      const commonIndex = nextIndex + 9;
+      steps.push(
+        discoveryStep(commonIndex, 'L’essentiel', 'Quelle première impression doit donner votre profil ?', 'Imagine les premières lignes de votre page. Elles doivent être sincères, vivantes et donner envie de découvrir la suite.', `
+          ${aiWriterField('description', 'Description principale', profile?.description, {
+            maxLength: 4000,
+            minLength: 20,
+            required: true,
+            long: true,
+            dynamicLabel: true,
+            placeholder: 'Décrivez votre énergie, votre complicité et votre façon de rencontrer…'
+          })}
+        `),
+        discoveryStep(commonIndex + 1, 'Votre histoire', 'Raconte-moi votre histoire.', 'C’est ici que le profil prend une âme : ce qui vous unit, votre complicité et les moments qui ont construit votre univers.', `
+          ${aiWriterField('story', 'Votre histoire', profile?.story, { maxLength: 8000, long: true })}
+        `),
+        discoveryStep(commonIndex + 2, 'Votre parcours', 'Comment avez-vous découvert cet univers ?', 'Racontez votre cheminement, vos premières découvertes et la manière dont vos envies ont évolué.', `
+          ${aiWriterField('journey', 'Votre parcours', profile?.journey, { maxLength: 4000, long: true })}
+        `),
+        discoveryStep(commonIndex + 3, 'Vos rencontres', 'Qu’aimeriez-vous trouver sur Velvet ?', 'Parlez-moi des personnes, du type de relation et du feeling que vous espérez rencontrer.', `
+          ${aiWriterField('search_text', 'Ce que vous recherchez', profile?.search_text, { maxLength: 4000, long: true })}
+        `),
+        discoveryStep(commonIndex + 4, 'Votre univers', 'Quelles pratiques font partie de vos envies ?', 'Sélectionnez ce que vous appréciez déjà ou souhaitez réellement explorer ensemble.', `
+          ${multiField('practices', 'Nos pratiques et envies communes', REFERENCES.practices, profile?.practices)}
+        `),
+        discoveryStep(commonIndex + 5, 'Votre philosophie', 'Quelles valeurs doivent guider vos rencontres ?', 'Ces valeurs aideront les autres membres à comprendre immédiatement votre manière de vivre Velvet.', `
+          ${multiField('values_list', 'Les valeurs qui comptent pour nous', REFERENCES.values, profile?.values_list)}
+        `),
+        discoveryStep(commonIndex + 6, 'Votre rythme', 'Quand êtes-vous généralement disponibles ?', 'Ces repères permettront à Velvet de vous proposer des sorties et des profils compatibles avec votre quotidien.', `
+          ${multiField('availability', 'Nos disponibilités habituelles', REFERENCES.availability, selectedFromText(profile?.availability_text))}
+        `),
+        discoveryStep(commonIndex + 7, 'Vos habitudes', 'Quels lieux aimez-vous fréquenter ?', 'Commencez à saisir le nom d’un club ou d’un spa. Vous pourrez compléter cette liste plus tard depuis votre profil.', `
+          ${venueField(profile?.favorite_places)}
+        `)
+      );
+    }
+
+    const total = steps.length;
+    return `<form id="profileForm" class="form-shell discovery-form" data-discovery data-total-steps="${total}">
+      <section class="onboarding discovery-shell">
+        <header class="discovery-progress" aria-label="Progression">
+          <span class="progress-count"><strong data-progress-current>1</strong><small> sur <span data-progress-total>${total}</span></small></span>
+          <div><i data-progress-bar style="width:${Math.max(5, 100 / total)}%"></i></div>
+          <span class="progress-label">Création guidée du profil</span>
+        </header>
+        ${steps.join('')}
+        <footer class="discovery-actions">
+          <button class="secondary" type="button" data-discovery-back hidden>Retour</button>
+          <button class="primary" type="button" data-discovery-next>Continuer</button>
+          <button class="primary" type="submit" data-discovery-submit hidden>${joiningPartner ? 'Rejoindre notre profil' : 'Découvrir Velvet'}</button>
+        </footer>
+        <p id="profileFormStatus" class="status-box" hidden></p>
+      </section>
+    </form>`;
+  }
+
+  function renderOnboarding(profile = null) {
+    state.editing = true;
+    const joiningPartner = Boolean(profile && !state.personalProfileComplete);
+    content.innerHTML = `<div class="page">${(!profile || joiningPartner) ? discoveryProfileForm(profile) : profileForm(profile)}</div>`;
+    if (!profile || joiningPartner) bindDiscoveryForm();
+    else bindProfileForm();
+    content.focus();
+  }
+
+  function bindDiscoveryForm() {
+    const form = document.querySelector('#profileForm[data-discovery]');
+    if (!form) return;
+    bindReferenceFields(form);
+    const steps = [...form.querySelectorAll('[data-discovery-step]')];
+    const back = form.querySelector('[data-discovery-back]');
+    const next = form.querySelector('[data-discovery-next]');
+    const submit = form.querySelector('[data-discovery-submit]');
+    const progress = form.querySelector('[data-progress-current]');
+    const progressTotal = form.querySelector('[data-progress-total]');
+    const bar = form.querySelector('[data-progress-bar]');
+    let current = 0;
+
+    const profileType = () => new FormData(form).get('profile_type') || state.profile?.profile_type || '';
+    const activeSteps = () => {
+      const couple = profileType() === 'couple';
+      return steps.filter((step) => !step.hasAttribute('data-couple-step') || couple);
+    };
+    const refreshCopy = () => {
+      const couple = profileType() === 'couple';
+      form.querySelectorAll('[data-couple-only]').forEach((node) => {
+        node.hidden = !couple;
+        node.querySelectorAll('input,select,textarea').forEach((field) => {
+          field.disabled = !couple;
+        });
+      });
+      const nameLabel = form.querySelector('[data-name-label]');
+      if (nameLabel) nameLabel.textContent = couple
+        ? 'Nom ou pseudonyme du couple'
+        : 'Ton prénom ou ton pseudonyme';
+      const descriptionLabel = form.querySelector('[data-description-label]');
+      if (descriptionLabel) descriptionLabel.textContent = couple
+        ? 'Description du couple'
+        : 'Ta description principale';
+      submit.textContent = couple ? 'Inviter ma moitié' : 'Découvrir Velvet';
+    };
+
+    const display = () => {
+      const visibleSteps = activeSteps();
+      current = Math.min(current, visibleSteps.length - 1);
+      steps.forEach((step) => { step.hidden = true; });
+      visibleSteps[current].hidden = false;
+      back.hidden = current === 0;
+      next.hidden = current === visibleSteps.length - 1;
+      submit.hidden = current !== visibleSteps.length - 1;
+      progress.textContent = String(current + 1);
+      progressTotal.textContent = String(visibleSteps.length);
+      bar.style.width = `${((current + 1) / visibleSteps.length) * 100}%`;
+      refreshCopy();
+      const focusable = visibleSteps[current].querySelector('input:not([type=hidden]),select,textarea');
+      window.setTimeout(() => focusable?.focus({ preventScroll: true }), 80);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const validateCurrent = () => {
+      const step = activeSteps()[current];
+      const fields = [...step.querySelectorAll('input,select,textarea')].filter((field) => !field.disabled);
+      const radioGroups = new Set(fields.filter((field) => field.type === 'radio').map((field) => field.name));
+      for (const group of radioGroups) {
+        if (!form.querySelector(`input[name="${group}"]:checked`)) {
+          form.querySelector(`input[name="${group}"]`)?.reportValidity();
+          return false;
+        }
+      }
+      for (const field of fields) {
+        if (!field.checkValidity()) {
+          field.reportValidity();
+          return false;
+        }
+      }
+      return true;
+    };
+
+    form.addEventListener('change', (event) => {
+      refreshCopy();
+      if (event.target.name === 'profile_type') display();
+    });
+    next.addEventListener('click', () => {
+      if (!validateCurrent()) return;
+      current = Math.min(activeSteps().length - 1, current + 1);
+      display();
+    });
+    back.addEventListener('click', () => {
+      current = Math.max(0, current - 1);
+      display();
+    });
+    form.addEventListener('submit', (event) => {
+      if (!validateCurrent()) {
+        event.preventDefault();
+        return;
+      }
+      saveProfile(event);
+    });
+    display();
+  }
+
+  function bindReferenceFields(scope = document) {
+    scope.querySelectorAll('[data-multi-choice]').forEach((details) => {
+      if (details.dataset.bound) return;
+      details.dataset.bound = 'true';
+      details.addEventListener('change', () => {
+        const count = details.querySelectorAll('input:checked').length;
+        details.querySelector('summary').textContent = count
+          ? `${count} choix sélectionné${count > 1 ? 's' : ''}`
+          : 'Ouvrir la liste';
+      });
+    });
+
+    scope.querySelectorAll('[data-commune-input]').forEach((input) => {
+      if (input.dataset.bound) return;
+      input.dataset.bound = 'true';
+      const resultsNode = input.closest('.commune-input').querySelector('[data-commune-results]');
+      let timer;
+      let requestNumber = 0;
+      input.addEventListener('input', () => {
+        window.clearTimeout(timer);
+        const query = input.value.trim();
+        if (query.length < 2) {
+          resultsNode.hidden = true;
+          resultsNode.innerHTML = '';
+          return;
+        }
+        const currentRequest = ++requestNumber;
+        timer = window.setTimeout(async () => {
+          try {
+            const result = await api(`/api/reference/communes?q=${encodeURIComponent(query)}`);
+            if (currentRequest !== requestNumber) return;
+            resultsNode.innerHTML = list(result.results).length
+              ? result.results.map((commune, index) => `<button type="button" role="option" data-commune-index="${index}"><strong>${e(commune.postalCode)}</strong><span>${e(commune.city)}</span><small>Département ${e(commune.departmentCode)}</small></button>`).join('')
+              : '<p>Aucune commune trouvée.</p>';
+            resultsNode.hidden = false;
+            resultsNode.querySelectorAll('[data-commune-index]').forEach((button) => {
+              button.addEventListener('click', () => {
+                const commune = result.results[Number(button.dataset.communeIndex)];
+                input.value = commune.label;
+                resultsNode.hidden = true;
+                resultsNode.innerHTML = '';
+              });
+            });
+          } catch {
+            resultsNode.innerHTML = '<p>Référentiel momentanément indisponible.</p>';
+            resultsNode.hidden = false;
+          }
+        }, 260);
+      });
+      input.addEventListener('blur', () => window.setTimeout(() => {
+        resultsNode.hidden = true;
+      }, 180));
+    });
+    bindVenueFields(scope);
+    bindAiWriters(scope);
+  }
+
+  function bindVenueFields(scope = document) {
+    scope.querySelectorAll('[data-venue-field]').forEach((field) => {
+      if (field.dataset.bound) return;
+      field.dataset.bound = 'true';
+      const input = field.querySelector('[data-venue-input]');
+      const results = field.querySelector('[data-venue-results]');
+      const selectedNode = field.querySelector('[data-selected-venues]');
+      let timer;
+      let venues = [];
+
+      const selectedNames = () => [...field.querySelectorAll('input[name=favorite_places]')].map((node) => node.value);
+      const addVenue = (venue) => {
+        if (selectedNames().some((name) => name.toLocaleLowerCase('fr') === venue.name.toLocaleLowerCase('fr'))) return;
+        const item = document.createElement('span');
+        item.className = 'selected-venue';
+        item.innerHTML = `<span>${e(venue.name)}</span><button type="button" aria-label="Retirer ${e(venue.name)}">×</button><input type="hidden" name="favorite_places" value="${e(venue.name)}">`;
+        item.querySelector('button').addEventListener('click', () => item.remove());
+        selectedNode.appendChild(item);
+        input.value = '';
+        results.hidden = true;
+      };
+      field.querySelectorAll('[data-remove-venue]').forEach((button) => {
+        button.addEventListener('click', () => button.closest('.selected-venue').remove());
+      });
+      input.addEventListener('input', () => {
+        window.clearTimeout(timer);
+        const query = input.value.trim();
+        if (query.length < 2) {
+          results.hidden = true;
+          return;
+        }
+        timer = window.setTimeout(async () => {
+          try {
+            const response = await api(`/api/reference/venues?q=${encodeURIComponent(query)}`);
+            venues = list(response.results);
+            results.innerHTML = venues.length
+              ? `${venues.map((venue, index) => `<button type="button" data-venue-index="${index}"><strong>${e(venue.name)}</strong><span>${e([venue.city,venue.country_code].filter(Boolean).join(' · '))}</span><small>${e(venue.kind)}</small></button>`).join('')}<p>${e(response.attribution || '')}</p>`
+              : '<p>Aucun établissement vérifié ne correspond. Le référencement sera enrichi progressivement.</p>';
+            results.hidden = false;
+            results.querySelectorAll('[data-venue-index]').forEach((button) => {
+              button.addEventListener('click', () => addVenue(venues[Number(button.dataset.venueIndex)]));
+            });
+          } catch {
+            results.innerHTML = '<p>Référentiel momentanément indisponible.</p>';
+            results.hidden = false;
+          }
+        }, 260);
+      });
+      input.addEventListener('blur', () => window.setTimeout(() => {
+        results.hidden = true;
+      }, 180));
+    });
+  }
+
+  function bindProfileForm() {
+    const form = document.querySelector('#profileForm');
+    const type = document.querySelector('#profileType');
+    if (!form || !type) return;
+    bindReferenceFields(form);
+    type.addEventListener('change', () => {
+      const people = profilePeople(state.profile);
+      const ownPerson = people.find((person) => person.linked_user_id === state.account?.userId) || {};
+      document.querySelector('#peopleForms').innerHTML = personForm(0, ownPerson, type.value === 'couple');
+      bindReferenceFields(document.querySelector('#peopleForms'));
+    });
+    form.addEventListener('submit', saveProfile);
+  }
+
+  async function saveProfile(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const button = form.querySelector('[type=submit]');
+    const status = document.querySelector('#profileFormStatus');
+    const data = new FormData(form);
+    const profileType = data.get('profile_type');
+    const person = {
+      first_name: data.get('p0_first_name'),
+      gender_identity: data.get('p0_gender_identity'),
+      birth_year: data.get('p0_birth_year'),
+      height_cm: data.get('p0_height_cm'),
+      weight_kg: data.get('p0_weight_kg'),
+      morphology: data.get('p0_morphology'),
+      hair_color: data.get('p0_hair_color'),
+      eye_color: data.get('p0_eye_color'),
+      children_status: data.get('p0_children_status'),
+      profession: data.get('p0_profession'),
+      profession_private: data.has('p0_profession_private'),
+      orientation: data.get('p0_orientation'),
+      frequency: data.get('p0_frequency'),
+      biography: data.get('p0_biography'),
+      attracted_to: data.getAll('p0_attracted_to'),
+      desired_practices: data.getAll('p0_desired_practices'),
+      partner_permissions: data.getAll('p0_partner_permissions')
+    };
+    const payload = {
+      profile_type: profileType,
+      display_name: data.get('display_name'),
+      city: data.get('city'),
+      location_zone: data.get('location_zone'),
+      relationship_since: data.get('relationship_since'),
+      availability_text: data.getAll('availability').join(' · '),
+      description: data.get('description'),
+      story: data.get('story'),
+      journey: data.get('journey'),
+      search_text: data.get('search_text'),
+      practices: data.getAll('practices'),
+      values_list: data.getAll('values_list'),
+      favorite_places: data.getAll('favorite_places'),
+      person
+    };
+    button.disabled = true;
+    status.hidden = false;
+    status.textContent = 'Enregistrement sécurisé dans Supabase…';
+    try {
+      const firstPublication = !state.profile;
+      const result = await api('/api/members/profile', { method: 'POST', body: JSON.stringify(payload) });
+      state.profile = result.profile;
+      await refreshData();
+      state.editing = false;
+      toast('Profil enregistré dans la mémoire Velvet.');
+      if (firstPublication && profileType === 'couple') {
+        prepareCoupleInvitation(true);
+      } else if (state.profile?.admission_status !== 'approved') {
+        renderAdmission();
+      } else {
+        route('me');
+      }
+    } catch (error) {
+      status.textContent = errorMessages[error.message] || `Enregistrement impossible : ${error.message}`;
+      toast(error.message, true);
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  function admissionLabel(status) {
+    return ({
+      profile_pending: 'Profil à compléter',
+      partner_required: 'Partenaire attendu',
+      photos_required: 'Photos à compléter',
+      ai_review: 'Analyse en cours',
+      changes_required: 'Photos à remplacer',
+      approved: 'Admission validée',
+      suspended: 'Admission suspendue'
+    })[status] || 'Admission en cours';
+  }
+
+  function photoStatus(photo) {
+    if (photo.moderation_status === 'approved') return '<span class="photo-state approved">Validée par Velvet Intelligence</span>';
+    if (photo.moderation_status === 'rejected') return `<span class="photo-state rejected">À remplacer</span><small>${e(photo.rejection_reason || photo.ai_assessment?.summary || 'Les critères ne sont pas remplis.')}</small>`;
+    return `<span class="photo-state pending">Analyse ou contrôle en cours</span><small>${e(photo.ai_assessment?.summary || 'La photo reste privée pendant le contrôle.')}</small>`;
+  }
+
+  function admissionPhotoCard(photo) {
+    return `<article class="admission-photo">
+      <div class="admission-photo-preview">${photo.previewUrl ? `<img src="${e(photo.previewUrl)}" alt="">` : '<span>Photo privée</span>'}</div>
+      <div>${photoStatus(photo)}</div>
+      ${photo.owner_user_id === state.account?.userId ? `<button class="text-button" type="button" data-delete-photo="${e(photo.id)}">Supprimer</button>` : '<small>Publiée par ton/ta partenaire</small>'}
+    </article>`;
+  }
+
+  function renderAdmission() {
+    lockApplication();
+    const profile = state.profile;
+    if (!profile) return renderOnboarding();
+    const people = profilePeople(profile);
+    const ownPerson = people.find((person) => person.linked_user_id === state.account?.userId);
+    const galleryRole = profile.profile_type === 'couple' ? 'couple_gallery' : 'individual_gallery';
+    const gallery = state.photos.filter((photo) => photo.media_role === galleryRole);
+    const portraits = state.photos.filter((photo) => photo.media_role === 'individual_portrait');
+    const approvedGallery = gallery.filter((photo) => photo.moderation_status === 'approved').length;
+    const approvedPortraits = new Set(
+      portraits.filter((photo) => photo.moderation_status === 'approved').map((photo) => photo.individual_profile_id)
+    ).size;
+    const requiredPeople = profile.profile_type === 'couple' ? 2 : 1;
+    const requiredPortraits = profile.profile_type === 'couple' ? 2 : 0;
+    const partnerMissing = profile.profile_type === 'couple' && people.length < 2;
+    const canInvite = partnerMissing && state.membership?.member_slot === 'partner_a';
+
+    content.innerHTML = `<div class="page admission-page">
+      <header class="admission-brand">
+        <span class="brand-mark">V</span><span><strong>Velvet</strong><small>SAS D’ADMISSION</small></span>
+        <button class="text-button" id="admissionLogout" type="button">Se déconnecter</button>
+      </header>
+      ${pageHead(
+        'Authenticité · confiance · discrétion',
+        'Finalisons votre admission.',
+        'La navigation reste volontairement inaccessible tant que les photos publiques obligatoires ne sont pas validées.'
+      )}
+      <section class="admission-progress">
+        <article class="card"><small>Profil</small><strong>✓</strong><span>Informations enregistrées</span></article>
+        <article class="card"><small>Fiche partagée</small><strong>${profile.profile_type === 'couple' ? `${people.length}/2` : '1/1'}</strong><span>${partnerMissing ? 'Partenaire à rattacher' : 'Personne(s) rattachée(s)'}</span></article>
+        <article class="card"><small>Galerie publique</small><strong>${approvedGallery}/3</strong><span>Photos validées</span></article>
+        <article class="card"><small>${profile.profile_type === 'couple' ? 'Portraits' : 'Netteté'}</small><strong>${profile.profile_type === 'couple' ? `${approvedPortraits}/${requiredPortraits}` : 'IA'}</strong><span>${profile.profile_type === 'couple' ? 'Fiches personnelles' : 'Contrôle des 3 photos'}</span></article>
+      </section>
+      <section class="card admission-status">
+        <div><p class="eyebrow">État actuel</p><h2>${e(admissionLabel(profile.admission_status))}</h2></div>
+        <span class="pill ${profile.admission_status === 'approved' ? 'gold' : ''}">${e(profile.admission_status)}</span>
+      </section>
+      ${canInvite ? `<section class="card admission-partner">
+        <div><p class="eyebrow">Profil couple</p><h2>Ton ou ta partenaire doit compléter sa fiche.</h2><p>Le couple ne sera admis qu’après son inscription et la validation de son portrait individuel.</p></div>
+        <button class="primary" data-couple-invite>Créer ou renouveler son invitation</button>
+      </section>` : ''}
+      <section class="admission-grid ${profile.profile_type === 'couple' ? '' : 'single'}">
+        <article class="card">
+          <p class="eyebrow">${profile.profile_type === 'couple' ? 'Photos du couple' : 'Photos du profil'}</p>
+          <h2>3 photos publiques obligatoires</h2>
+          <p>${profile.profile_type === 'couple' ? 'Vous devez être visibles tous les deux' : 'Tu dois être clairement visible'}, avec le visage et au minimum la moitié du corps, sans brouillage excessif.</p>
+          <form class="photo-upload-form" data-photo-role="${galleryRole}">
+            <label class="photo-drop">${gallery.length < 3 ? `Ajouter au moins ${3 - gallery.length} photo(s)` : 'Ajouter des photos au carrousel'}
+              <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required>
+            </label>
+            <button class="primary" type="submit">Ajouter et analyser</button>
+            <p class="photo-upload-status" role="status"></p>
+          </form>
+          <div class="admission-photos">${gallery.length ? gallery.map(admissionPhotoCard).join('') : '<p class="muted">Aucune photo transmise.</p>'}</div>
+        </article>
+        ${profile.profile_type === 'couple' ? `<article class="card">
+          <p class="eyebrow">Ta fiche personnelle</p>
+          <h2>1 portrait individuel obligatoire</h2>
+          <p>Cette photo doit te montrer seul(e), visage visible et cadrage à mi-corps minimum. Chaque partenaire publie uniquement son propre portrait.</p>
+          ${ownPerson ? `<form class="photo-upload-form" data-photo-role="individual_portrait" data-individual-profile="${e(ownPerson.id)}">
+            <label class="photo-drop">${portraits.some((photo) => photo.individual_profile_id === ownPerson.id) ? 'Ajouter une photo individuelle' : 'Choisir mon premier portrait'}
+              <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" required>
+            </label>
+            <button class="primary" type="submit">Ajouter et analyser</button>
+            <p class="photo-upload-status" role="status"></p>
+          </form>` : '<p class="status-box">Complète d’abord ta fiche personnelle.</p>'}
+          <div class="admission-photos">${portraits.length ? portraits.map(admissionPhotoCard).join('') : '<p class="muted">Aucun portrait transmis.</p>'}</div>
+        </article>` : ''}
+      </section>
+      <section class="card ai-notice">
+        <p class="eyebrow">Velvet Intelligence</p>
+        <h2>Ce qui est analysé — et ce qui ne l’est pas</h2>
+        <p>L’analyse vérifie le nombre de personnes, le cadrage au minimum à mi-corps, la visibilité et la netteté suffisante. Elle n’identifie personne, ne compare aucun visage et ne crée aucun gabarit biométrique. Une décision incertaine est transmise à un contrôle humain.</p>
+        <p>Les photos restent privées et inaccessibles aux autres membres tant qu’elles ne sont pas approuvées.</p>
+      </section>
+      <section class="community-teaser" aria-label="Aperçu verrouillé">
+        <p class="eyebrow">Après validation</p><h2>La communauté Velvet se dévoilera ici.</h2>
+        <div class="blurred-community">${[1,2,3].map(() => '<article><span></span><strong>Profil protégé</strong><small>Contact verrouillé</small></article>').join('')}</div>
+      </section>
+    </div>`;
+    bindAdmission();
+  }
+
+  async function optimizePhoto(file) {
+    if (!file.type.startsWith('image/')) throw new Error('invalid_photo_file');
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.86));
+    if (!blob || blob.size > 4 * 1024 * 1024) throw new Error('invalid_photo_file');
+    return new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.jpg`, { type: 'image/jpeg' });
+  }
+
+  function bindAdmission() {
+    document.querySelector('#admissionLogout')?.addEventListener('click', async () => {
+      await api('/api/auth/logout', { method: 'POST', body: '{}' }).catch(() => {});
+      window.location.href = '/';
+    });
+    document.querySelectorAll('.photo-upload-form').forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = form.querySelector('button');
+        const status = form.querySelector('.photo-upload-status');
+        const files = [...form.querySelector('input[type=file]').files].slice(0, 3);
+        button.disabled = true;
+        try {
+          for (let index = 0; index < files.length; index += 1) {
+            status.textContent = `Préparation et analyse ${index + 1}/${files.length}…`;
+            const photo = await optimizePhoto(files[index]);
+            const body = new FormData();
+            body.set('photo', photo);
+            body.set('mediaRole', form.dataset.photoRole);
+            if (form.dataset.individualProfile) {
+              body.set('individualProfileId', form.dataset.individualProfile);
+            }
+            await api('/api/members/photos', { method: 'POST', body });
+          }
+          await loadAll();
+        } catch (error) {
+          status.textContent = errorMessages[error.message] || error.message;
+          button.disabled = false;
+        }
+      });
+    });
+    document.querySelectorAll('[data-delete-photo]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        button.disabled = true;
+        try {
+          await api(`/api/members/photos?id=${encodeURIComponent(button.dataset.deletePhoto)}`, { method: 'DELETE' });
+          await loadAll();
+        } catch (error) {
+          toast(error.message, true);
+          button.disabled = false;
+        }
+      });
+    });
+  }
+
+  function parisDayKey(value = new Date()) {
+    return new Intl.DateTimeFormat('fr-CA', {
+      timeZone: 'Europe/Paris',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date(value));
+  }
+
+  function profileAudienceLabel(profile) {
+    const type = discoverProfileType(profile);
+    return ({ couple: 'Couples', woman: 'Femmes', man: 'Hommes', other: 'Personnes non binaires' })[type] || '';
+  }
+
+  function profileMatchesOwnPreferences(profile) {
+    const preferences = new Set(profilePeople(state.profile).flatMap((person) => list(person.attracted_to)));
+    if (!preferences.size || preferences.has('Selon le feeling') || preferences.has('Information privée')) return true;
+    return preferences.has(profileAudienceLabel(profile));
+  }
+
+  function nearbyHomeEvents(radiusKm = 50) {
+    if (state.mapData?.center?.source !== 'private_approximate_location') return [];
+    const eventsById = new Map(list(state.directory.events).map((event) => [event.id, event]));
+    return list(state.mapData?.events)
+      .map((marker) => {
+        const event = eventsById.get(marker.id);
+        if (!event) return null;
+        return {
+          ...event,
+          distance_km: Math.round(mapDistanceKm(state.mapData.center, marker)),
+          mapMarker: marker
+        };
+      })
+      .filter((event) => event && event.distance_km <= radiusKm)
+      .sort((left, right) => new Date(left.starts_at) - new Date(right.starts_at));
+  }
+
+  function homeFeedItems() {
+    const locationEnabled = state.mapData?.center?.source === 'private_approximate_location';
+    const profiles = list(state.directory.profiles)
+      .filter((profile) => profile.id !== state.profile.id)
+      .filter((profile) => state.following.includes(profile.id) || profileMatchesOwnPreferences(profile))
+      .filter((profile) => state.following.includes(profile.id) || !locationEnabled || (profileDistance(profile) ?? Infinity) <= 50);
+    const profileItems = profiles.map((profile) => {
+      const createdAt = new Date(profile.created_at || 0);
+      const updatedAt = new Date(profile.updated_at || profile.created_at || 0);
+      const photo = approvedProfilePhotos(profile)
+        .sort((left, right) => new Date(right.created_at || 0) - new Date(left.created_at || 0))[0];
+      const photoAt = new Date(photo?.created_at || 0);
+      if (photo && photoAt > new Date(createdAt.getTime() + 60 * 60 * 1000)) {
+        return {
+          id: `photo-${photo.id}`,
+          type: 'photo',
+          date: photo.created_at,
+          profile,
+          photo
+        };
+      }
+      return {
+        id: `profile-${profile.id}`,
+        type: 'profile',
+        date: updatedAt > new Date(createdAt.getTime() + 12 * 60 * 60 * 1000)
+          ? profile.updated_at
+          : profile.created_at,
+        activity: updatedAt > new Date(createdAt.getTime() + 12 * 60 * 60 * 1000)
+          ? `${profile.display_name} a enrichi son profil`
+          : `${profile.display_name} vient de rejoindre Velvet`,
+        profile
+      };
+    });
+    const eventItems = nearbyHomeEvents(50).map((event) => ({
+      id: `event-${event.id}`,
+      type: 'event',
+      date: event.created_at || event.updated_at || event.starts_at,
+      event
+    }));
+    const followedPlans = [
+      ...list(state.plans.travelPlans).filter((plan) => plan.profile_id !== state.profile.id).map((plan) => ({
+        id: `travel-${plan.id}`,
+        type: 'plan',
+        date: plan.created_at,
+        profile: list(state.directory.profiles).find((profile) => profile.id === plan.profile_id),
+        title: plan.title,
+        detail: `${plan.location_label} · du ${dateLabel(plan.starts_on)} au ${dateLabel(plan.ends_on)}`
+      })),
+      ...list(state.plans.venueVisits).filter((plan) => plan.profile_id !== state.profile.id).map((plan) => ({
+        id: `visit-${plan.id}`,
+        type: 'plan',
+        date: plan.created_at,
+        profile: list(state.directory.profiles).find((profile) => profile.id === plan.profile_id),
+        title: plan.venue_directory?.name || 'Sortie annoncée',
+        detail: dateLabel(plan.visit_date)
+      })),
+      ...list(state.plans.eventPlans).filter((plan) => plan.profile_id !== state.profile.id).map((plan) => {
+        const event = list(state.directory.events).find((row) => row.id === plan.event_id);
+        return {
+          id: `event-plan-${plan.profile_id}-${plan.event_id}`,
+          type: 'plan',
+          date: plan.created_at,
+          profile: list(state.directory.profiles).find((profile) => profile.id === plan.profile_id),
+          title: event?.title || 'Événement Velvet',
+          detail: event ? new Date(event.starts_at).toLocaleString('fr-FR') : plan.registration_status
+        };
+      })
+    ].filter((item) => item.profile);
+    return [...profileItems, ...eventItems, ...followedPlans]
+      .filter((item) => item.date)
+      .sort((left, right) => new Date(right.date) - new Date(left.date))
+      .slice(0, 30);
+  }
+
+  function homeFeedItem(item) {
+    if (item.type === 'plan') {
+      return `<article class="card home-feed-card event-feed-card">
+        <header><span class="feed-icon event">⌖</span><div><strong>${e(item.profile.display_name)} a annoncé une sortie</strong><small>${e(viewedAtLabel(item.date))}</small></div></header>
+        <button type="button" class="feed-event" data-open-profile="${e(item.profile.id)}"><span><b>${e(item.title)}</b><small>${e(item.detail)}</small></span><i>→</i></button>
+      </article>`;
+    }
+    if (item.type === 'event') {
+      const event = item.event;
+      return `<article class="card home-feed-card event-feed-card">
+        <header><span class="feed-icon event">✦</span><div><strong>Événement près de chez toi</strong><small>${e(viewedAtLabel(item.date))}</small></div></header>
+        <button type="button" class="feed-event" data-open-event="${e(event.id)}">
+          <span><b>${e(event.title)}</b><small>${e(event.location_public || 'Lieu communiqué aux inscrits')} · ${e(event.distance_km)} km</small></span><i>→</i>
+        </button>
+      </article>`;
+    }
+    const profile = item.profile;
+    const cover = approvedProfilePhotos(profile)[0];
+    if (item.type === 'photo') {
+      return `<article class="card home-feed-card photo-feed-card">
+        <header><span class="feed-avatar">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}</span><div><strong>${e(profile.display_name)} a publié une nouvelle photo</strong><small>${e(viewedAtLabel(item.date))}</small></div></header>
+        <button type="button" class="feed-photo" data-open-profile="${e(profile.id)}"><img src="${e(item.photo.previewUrl)}" alt="Nouvelle photo publique de ${e(profile.display_name)}"></button>
+      </article>`;
+    }
+    return `<article class="card home-feed-card profile-feed-card">
+      <header><span class="feed-avatar">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}</span><div><strong>${e(item.activity || `${profile.display_name} vient de rejoindre Velvet`)}</strong><small>${e(viewedAtLabel(item.date))}</small></div></header>
+      <div class="home-profile-preview">${profilePreviewCard(profile, { variant: 'feed' })}</div>
+    </article>`;
+  }
+
+  function homeDiscoveryProfiles() {
+    const rows = list(state.directory.profiles).filter((profile) => profile.id !== state.profile.id);
+    const byId = new Map(rows.map((profile) => [profile.id, profile]));
+    const recommended = list(state.directory.recommendations)
+      .filter((item) => item.target_type === 'profile')
+      .map((item) => byId.get(item.target_id))
+      .filter(Boolean);
+    const latest = [...rows].sort((left, right) =>
+      new Date(right.updated_at || right.created_at || 0) - new Date(left.updated_at || left.created_at || 0)
+    );
+    return [...new Map([...recommended, ...latest].map((profile) => [profile.id, profile])).values()].slice(0, 12);
+  }
+
+  function homeDiscoveryCard(profile) {
+    const cover = approvedProfilePhotos(profile)[0];
+    const identity = profilePreviewIdentity(profile);
+    return `<button class="home-discovery-card" type="button" data-open-profile="${e(profile.id)}">
+      <span class="home-discovery-media">
+        ${cover ? `<img src="${e(cover.previewUrl)}" alt="Photo de profil de ${e(profile.display_name)}">` : `<b>${e(initials(profile.display_name))}</b>`}
+        <i class="profile-preview-presence ${(state.presence[profile.id] || 'offline') === 'online' ? 'green' : (state.presence[profile.id] || 'offline') === 'today' ? 'orange' : 'red'}" aria-hidden="true"></i>
+      </span>
+      <span class="home-discovery-copy"><strong>${e(profile.display_name)}</strong><small>${e(identity.label)} · ${e(profileAges(profile))}</small><em>${e(profile.location_zone || 'Zone privée')}</em></span>
+    </button>`;
+  }
+
+  function renderHome() {
+    const own = state.profile;
+    const feed = homeFeedItems();
+    const discoveries = homeDiscoveryProfiles();
+    const locationEnabled = state.mapData?.center?.source === 'private_approximate_location';
+    return `<div class="page home-page">
+      <header class="ios-home-header">
+        <p class="eyebrow">Bonjour ${e(own.display_name)}</p>
+        <h1>Actualité</h1>
+        <p>Les personnes, leurs nouvelles photos et les sorties qui prennent vie autour de vous.</p>
+      </header>
+      <section class="home-discovery-section">
+        <header class="section-heading"><div><p class="eyebrow">À découvrir</p><h2>Les profils qui comptent</h2></div><button class="text-button" type="button" data-route="discover">Tout voir</button></header>
+        ${discoveries.length
+          ? `<div class="home-discovery-rail">${discoveries.map(homeDiscoveryCard).join('')}</div>`
+          : emptyState('La sélection se prépare', 'Les nouveaux profils apparaîtront ici.', '◇')}
+      </section>
+      <section class="home-feed">
+        <header class="section-heading"><div><p class="eyebrow">Fil communautaire</p><h2>Ce qui se passe maintenant</h2></div></header>
+        ${feed.length
+          ? `<div class="home-feed-list">${feed.map(homeFeedItem).join('')}</div>`
+          : emptyState(
+              'Le fil va prendre vie',
+              locationEnabled
+                ? 'Les nouveaux profils, photos publiques et événements correspondant à vos préférences apparaîtront ici.'
+                : 'Activez votre zone pour ajouter les événements situés à moins de 50 km à votre actualité.',
+              'V',
+              locationEnabled ? '' : '<button class="secondary" type="button" data-enable-location>Activer ma zone</button>'
+            )}
+      </section>
+    </div>`;
+  }
+
+  function profileViewMemory(profileId) {
+    return list(state.engagement?.views).find((row) => row.viewed_profile_id === profileId) || null;
+  }
+
+  function profileReactions(profileId) {
+    return list(state.engagement?.reactions).filter((row) => row.target_profile_id === profileId);
+  }
+
+  function reactionDetails(value) {
+    return ({
+      '-1': { icon: '🧊', label: 'Pas pour moi', tone: 'cold' },
+      1: { icon: '🔥', label: 'J’aime bien', tone: 'warm' },
+      2: { icon: '🔥🔥', label: 'J’adore', tone: 'hot' },
+      3: { icon: '🔥🔥🔥', label: 'C’est canon', tone: 'blazing' }
+    })[String(value)] || { icon: '◇', label: 'Pas encore d’avis', tone: 'neutral' };
+  }
+
+  function viewedAtLabel(value) {
+    if (!value) return '';
+    return new Intl.DateTimeFormat('fr-FR', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(new Date(value));
+  }
+
+  function seenBadge(profileId) {
+    const memory = profileViewMemory(profileId);
+    if (!memory) return '';
+    return `<span class="seen-badge" role="button" tabindex="0" data-view-info="${e(profileId)}" aria-label="Voir la dernière consultation">
+      <span>✓</span> Déjà vu
+    </span>`;
+  }
+
+  function profileAges(profile) {
+    const values = profilePeople(profile)
+      .map((person) => person.birth_year ? new Date().getFullYear() - Number(person.birth_year) : null)
+      .filter(Number.isFinite);
+    if (!values.length) return 'Âge non renseigné';
+    return `${values.join(profile.profile_type === 'couple' ? ' et ' : '')} an${values.length === 1 && values[0] === 1 ? '' : 's'}`;
+  }
+
+  function presenceBadge(profileId) {
+    const status = state.presence[profileId] || 'offline';
+    const details = {
+      online: ['En ligne', 'green'],
+      today: ['Connecté aujourd’hui', 'orange'],
+      offline: ['Pas de connexion aujourd’hui', 'red']
+    }[status] || ['Pas de connexion aujourd’hui', 'red'];
+    return `<span class="presence-badge ${details[1]}" data-profile-presence="${e(profileId)}"><i aria-hidden="true"></i>${details[0]}</span>`;
+  }
+
+  function profilePreviewIdentity(profile) {
+    const type = discoverProfileType(profile);
+    return {
+      label: ({
+        couple: 'Couple',
+        woman: 'Femme seule',
+        man: 'Homme seul',
+        other: 'Profil individuel'
+      })[type] || 'Profil Velvet',
+      icon: ({
+        couple: '⚭',
+        woman: '♀',
+        man: '♂',
+        other: '◇'
+      })[type] || '◇'
+    };
+  }
+
+  function profilePreviewCard(profile, {
+    variant = 'grid',
+    showSeen = false,
+    summary = false,
+    followed = false,
+    notification = null
+  } = {}) {
+    if (!profile) return '';
+    const cover = approvedProfilePhotos(profile)[0];
+    const identity = profilePreviewIdentity(profile);
+    const status = state.presence[profile.id] || 'offline';
+    const presence = {
+      online: ['En ligne', 'green'],
+      today: ['Connecté aujourd’hui', 'orange'],
+      offline: ['Pas de connexion aujourd’hui', 'red']
+    }[status] || ['Pas de connexion aujourd’hui', 'red'];
+    const action = notification
+      ? `data-open-notification="${e(notification.id)}"`
+      : `data-open-profile="${e(profile.id)}"`;
+    const context = notification ? `<span class="profile-preview-context">
+      <small>${e(viewedAtLabel(notification.created_at))}</small>
+      <b>${e(notification.title)}</b>
+      <em>${e(notification.body || '')}</em>
+    </span>` : '';
+    return `<button class="profile-preview-card preview-${e(variant)} ${notification && !notification.read_at ? 'unread' : ''}" type="button" ${action}>
+      <span class="profile-preview-head">
+        <span class="profile-preview-kind" aria-label="${e(identity.label)}">${identity.icon}</span>
+        <strong>${e(profile.display_name)}</strong>
+        <i class="profile-preview-presence ${presence[1]}" title="${e(presence[0])}" aria-label="${e(presence[0])}"></i>
+      </span>
+      <span class="profile-preview-media">
+        ${cover ? `<img src="${e(cover.previewUrl)}" alt="Photo de profil de ${e(profile.display_name)}">` : `<b>${e(initials(profile.display_name))}</b>`}
+        ${showSeen ? seenBadge(profile.id) : ''}
+        ${followed ? '<small class="profile-preview-followed">Suivi</small>' : ''}
+      </span>
+      <span class="profile-preview-details">
+        <b>${e(identity.label)} · ${e(profileAges(profile))}</b>
+        <em>⌖ ${e(profile.location_zone || 'Ville non renseignée')}</em>
+        ${summary ? `<small>${e(profile.description || profile.search_text || 'Présentation à compléter.')}</small>` : ''}
+      </span>
+      ${context}
+      ${notification && !notification.read_at ? '<span class="profile-preview-unread">Nouveau</span>' : ''}
+    </button>`;
+  }
+
+  function memberTile(profile) {
+    return profilePreviewCard(profile, { variant: 'grid', showSeen: true });
+  }
+
+  function discoverGridTile(profile) {
+    return profilePreviewCard(profile, {
+      variant: 'grid',
+      showSeen: true,
+      followed: state.following.includes(profile.id)
+    });
+  }
+
+  function discoverHorizontalTile(profile) {
+    return profilePreviewCard(profile, {
+      variant: 'horizontal',
+      showSeen: true,
+      summary: true,
+      followed: state.following.includes(profile.id)
+    });
+  }
+
+  function profileEngagementPanel(profile, own) {
+    if (own) return '';
+    const memory = profileViewMemory(profile.id);
+    const reactions = profileReactions(profile.id);
+    const mine = reactions.find((row) => row.reactor_user_id === state.engagement?.currentUserId);
+    const others = reactions.filter((row) => row.reactor_user_id !== state.engagement?.currentUserId);
+    const myReaction = reactionDetails(mine?.reaction);
+    const positive = reactions.filter((row) => row.reaction > 0);
+    const consensus = reactions.length < 2
+      ? 'Ta moitié n’a pas encore donné son ressenti.'
+      : positive.length === reactions.length
+        ? `Vous êtes tous les deux séduits par ce profil.`
+        : positive.length === 0
+          ? 'Vos ressentis vont dans la même direction.'
+          : 'Vos premières impressions sont différentes — à vous d’en parler.';
+    return `<section class="profile-engagement-panel">
+      <article class="memory-card">
+        <span class="memory-icon">✓</span>
+        <div><small>Votre mémoire Velvet</small><strong>${memory ? `Consulté ${memory.view_count} fois` : 'Première découverte'}</strong>
+        <p>${memory ? `Dernière visite : ${e(viewedAtLabel(memory.last_viewed_at))}` : 'Cette visite sera ajoutée à votre historique privé.'}</p></div>
+      </article>
+      <article class="reaction-card">
+        <header><div><small>Ton ressenti privé</small><strong>${e(myReaction.label)}</strong></div><span class="reaction-current ${e(myReaction.tone)}">${myReaction.icon}</span></header>
+        <div class="reaction-picker" role="group" aria-label="Donner mon ressenti">
+          ${[-1,1,2,3].map((value) => {
+            const detail = reactionDetails(value);
+            return `<button type="button" class="${mine?.reaction === value ? 'active' : ''}" data-reaction-profile="${e(profile.id)}" data-profile-reaction="${value}" title="${e(detail.label)}"><span>${detail.icon}</span><small>${e(detail.label)}</small></button>`;
+          }).join('')}
+        </div>
+        ${mine ? `<button class="text-button clear-reaction" type="button" data-reaction-profile="${e(profile.id)}" data-profile-reaction="clear">Effacer mon ressenti</button>` : ''}
+        ${state.profile?.profile_type === 'couple' ? `<div class="couple-reaction">
+          <p class="eyebrow">Le regard du couple</p>
+          <div>${reactions.map((row) => {
+            const detail = reactionDetails(row.reaction);
+            return `<span><strong>${e(row.reactor_name || 'Partenaire')}</strong><b>${detail.icon}</b><small>${e(detail.label)}</small></span>`;
+          }).join('') || '<small>Donne ton premier ressenti.</small>'}</div>
+          <p>${e(consensus)}</p>
+        </div>` : ''}
+        <p class="privacy-note">Ce ressenti reste invisible pour le profil consulté. Il sert à votre comparaison et, plus tard, aux recommandations privées de Velvet Intelligence.</p>
+      </article>
+    </section>`;
+  }
+
+  function discoverProfileType(profile) {
+    if (profile.profile_type === 'couple') return 'couple';
+    const identity = String(profilePeople(profile)[0]?.gender_identity || '').toLocaleLowerCase('fr');
+    if (identity === 'homme' || identity === 'homme trans') return 'man';
+    if (identity === 'femme' || identity === 'femme trans') return 'woman';
+    return 'other';
+  }
+
+  function discoverChoices(name, choices, selected, formatter = (value) => value) {
+    const selectedValues = new Set(list(selected));
+    return `<div class="discover-choice-list">${choices.map((value) => `
+      <label class="discover-choice">
+        <input type="checkbox" name="${e(name)}" value="${e(value)}"${selectedValues.has(value) ? ' checked' : ''}>
+        <span><i aria-hidden="true"></i>${e(formatter(value))}</span>
+      </label>`).join('')}</div>`;
+  }
+
+  function ageForPerson(person) {
+    return person?.birth_year ? new Date().getFullYear() - Number(person.birth_year) : null;
+  }
+
+  function personGenderGroup(person) {
+    const identity = String(person?.gender_identity || '').toLocaleLowerCase('fr');
+    if (identity.includes('femme')) return 'woman';
+    if (identity.includes('homme')) return 'man';
+    return 'other';
+  }
+
+  function profileMatchesAge(profile, group, minimum, maximum) {
+    const constrained = Number(minimum) > 18 || Number(maximum) < 99;
+    if (!constrained) return true;
+    const ages = profilePeople(profile)
+      .filter((person) => personGenderGroup(person) === group)
+      .map(ageForPerson)
+      .filter(Number.isFinite);
+    return ages.length > 0 && ages.some((value) => value >= Number(minimum) && value <= Number(maximum));
+  }
+
+  function profileDistance(profile) {
+    if (state.mapData?.center?.source !== 'private_approximate_location') return null;
+    const marker = list(state.mapData.members).find((item) => item.id === profile.id);
+    return marker ? mapDistanceKm(state.mapData.center, marker) : null;
+  }
+
+  function candidateSeeking(profile) {
+    return new Set(profilePeople(profile).flatMap((person) => list(person.attracted_to)));
+  }
+
+  function filteredDiscoverProfiles() {
+    const filters = state.discoverFilters;
+    const query = filters.query.toLocaleLowerCase('fr').trim();
+    const city = filters.city.toLocaleLowerCase('fr').trim();
+    const recommendationIds = new Set(list(state.directory.recommendations)
+      .filter((item) => item.target_type === 'profile')
+      .map((item) => item.target_id));
+    return list(state.directory.profiles)
+      .filter((profile) => profile.id !== state.profile.id)
+      .filter((profile) => !filters.types.length || filters.types.includes(discoverProfileType(profile)))
+      .filter((profile) => {
+        if (!filters.seeking.length) return true;
+        const seeking = candidateSeeking(profile);
+        return filters.seeking.every((value) => seeking.has(value));
+      })
+      .filter((profile) => !city || String(profile.location_zone || '').toLocaleLowerCase('fr').includes(city))
+      .filter((profile) => !filters.nearMe || (profileDistance(profile) ?? Infinity) <= 50)
+      .filter((profile) => profileMatchesAge(profile, 'man', filters.maleAgeMin, filters.maleAgeMax))
+      .filter((profile) => profileMatchesAge(profile, 'woman', filters.femaleAgeMin, filters.femaleAgeMax))
+      .filter((profile) => filters.practices.every((practice) => list(profile.practices).includes(practice)))
+      .filter((profile) => !filters.morphologies.length || filters.morphologies.some((morphology) =>
+        profilePeople(profile).some((person) => person.morphology === morphology)
+      ))
+      .filter((profile) => !filters.onlineOnly || state.presence[profile.id] === 'online')
+      .filter((profile) => !filters.withPhotos || approvedProfilePhotos(profile).length > 0)
+      .filter((profile) => !filters.withRecommendation || recommendationIds.has(profile.id))
+      .filter((profile) => !filters.createdToday || parisDayKey(profile.created_at) === parisDayKey())
+      .filter((profile) => !query || [
+        profile.display_name,
+        profile.location_zone,
+        profile.description,
+        profile.search_text,
+        ...list(profile.practices),
+        ...list(profile.values_list)
+      ].join(' ').toLocaleLowerCase('fr').includes(query));
+  }
+
+  function renderDiscoverResults() {
+    const rows = filteredDiscoverProfiles();
+    return `<div class="discover-results-heading">
+      <div><strong>${rows.length}</strong><span>profil${rows.length > 1 ? 's' : ''} correspondant${rows.length > 1 ? 's' : ''}${state.discoverFilters.createdToday ? ' · créé aujourd’hui' : ''}</span></div>
+      <div class="discover-view-actions" role="group" aria-label="Affichage des profils">
+        <button class="${state.discoverView === 'grid' ? 'active' : ''}" type="button" data-discover-view="grid" aria-pressed="${state.discoverView === 'grid'}">▦ Damier</button>
+        <button class="${state.discoverView === 'horizontal' ? 'active' : ''}" type="button" data-discover-view="horizontal" aria-pressed="${state.discoverView === 'horizontal'}">☰ Résumé</button>
+        <button class="text-button" type="button" data-reset-discover>Effacer les filtres</button>
+      </div>
+    </div>
+    ${rows.length
+      ? `<section class="discover-profile-results ${e(state.discoverView)}">${rows.map((profile) => state.discoverView === 'horizontal' ? discoverHorizontalTile(profile) : discoverGridTile(profile)).join('')}</section>`
+      : emptyState('Aucun résultat', 'Modifie les critères ou efface les filtres pour élargir la recherche.', '◇')}`;
+  }
+
+  function renderDiscover() {
+    const filters = state.discoverFilters;
+    const signature = ['signature', 'beta_full'].includes(state.access?.tier);
+    const locationReady = state.mapData?.center?.source === 'private_approximate_location';
+    const typeLabels = { couple: 'Tous les couples', woman: 'Toutes les femmes', man: 'Tous les hommes' };
+    return `<div class="page discover-page">
+      ${pageHead('Recherche sur mesure', 'Recherche', 'Combine librement les critères : chaque groupe accepte plusieurs sélections sans limite.')}
+      ${signature ? '' : '<section class="signature-notice"><div><p class="eyebrow">Velvet Découverte</p><strong>La recherche essentielle reste accessible.</strong><small>Âges, pratiques, physique, présence et recherches sauvegardées sont inclus dans Velvet Signature.</small></div><button class="secondary" type="button" data-route="settings">Voir Signature</button></section>'}
+      <section class="card saved-search-bar">
+        <label>Mes recherches
+          <select id="savedSearchSelect">
+            <option value="">Choisir une recherche sauvegardée…</option>
+            ${list(state.savedSearches).map((search) => `<option value="${e(search.id)}"${String(state.selectedSavedSearchId) === String(search.id) ? ' selected' : ''}>${e(search.name)}</option>`).join('')}
+          </select>
+        </label>
+        <label>Nom de cette recherche<input id="savedSearchName" maxlength="80" placeholder="Ex. Couples échangistes autour de Lille"></label>
+        <button class="primary" type="button" data-save-search${signature ? '' : ' disabled'}>Enregistrer</button>
+        <button class="secondary" type="button" data-delete-search${state.selectedSavedSearchId ? '' : ' disabled'}>Supprimer</button>
+        <small>${signature ? (state.savedSearchPersistenceAvailable ? 'Synchronisée avec ton compte Velvet.' : 'Enregistrée sur cet appareil jusqu’à l’installation de la migration Supabase.') : 'Disponible avec Velvet Signature.'}</small>
+      </section>
+      <div class="discover-layout">
+        <form id="discoverFilters" class="card discover-filter-panel">
+          <label class="discover-query">Recherche libre<input name="query" value="${e(filters.query)}" placeholder="Nom, zone, envie ou pratique"></label>
+          <details class="discover-filter-section${signature ? '' : ' signature-locked'}" open>
+            <summary>Nous recherchons</summary>
+            ${discoverChoices('types', ['couple', 'woman', 'man'], filters.types, (value) => typeLabels[value])}
+          </details>
+          <details class="discover-filter-section">
+            <summary>Qui recherchent</summary>
+            ${discoverChoices('seeking', ['Couples', 'Femmes', 'Hommes'], filters.seeking)}
+          </details>
+          <details class="discover-filter-section" open>
+            <summary>Localisation</summary>
+            <div class="discover-location">
+              <label>Ville ou zone publique<input name="city" value="${e(filters.city)}" placeholder="Saisissez une ville"></label>
+              <span>ou</span>
+              <label class="discover-switch">
+                <input type="checkbox" name="nearMe"${filters.nearMe ? ' checked' : ''}${locationReady ? '' : ' disabled'}>
+                <i aria-hidden="true"></i><b>Près de chez moi · 50 km</b>
+              </label>
+              ${locationReady ? '' : '<small>Active ta zone approximative pour utiliser ce filtre.</small>'}
+            </div>
+          </details>
+          <details class="discover-filter-section" open>
+            <summary>Âges</summary>
+            <div class="discover-age-grid">
+              <fieldset${signature ? '' : ' disabled'}><legend>Pour l’homme</legend><label>De<input type="number" name="maleAgeMin" min="18" max="99" value="${e(filters.maleAgeMin)}"></label><label>À<input type="number" name="maleAgeMax" min="18" max="99" value="${e(filters.maleAgeMax)}"></label></fieldset>
+              <fieldset${signature ? '' : ' disabled'}><legend>Pour la femme</legend><label>De<input type="number" name="femaleAgeMin" min="18" max="99" value="${e(filters.femaleAgeMin)}"></label><label>À<input type="number" name="femaleAgeMax" min="18" max="99" value="${e(filters.femaleAgeMax)}"></label></fieldset>
+            </div>
+          </details>
+          <details class="discover-filter-section${signature ? '' : ' signature-locked'}">
+            <summary>Pratiques <small>plusieurs choix possibles</small></summary>
+            <fieldset${signature ? '' : ' disabled'}>${discoverChoices('practices', REFERENCES.practices, filters.practices)}</fieldset>
+          </details>
+          <details class="discover-filter-section${signature ? '' : ' signature-locked'}">
+            <summary>Physique</summary>
+            <fieldset${signature ? '' : ' disabled'}>${discoverChoices('morphologies', REFERENCES.morphologies, filters.morphologies)}</fieldset>
+          </details>
+          <details class="discover-filter-section${signature ? '' : ' signature-locked'}">
+            <summary>Divers</summary>
+            <fieldset${signature ? '' : ' disabled'}>${discoverChoices('extras', ['onlineOnly', 'withPhotos', 'withRecommendation'], [
+              ...(filters.onlineOnly ? ['onlineOnly'] : []),
+              ...(filters.withPhotos ? ['withPhotos'] : []),
+              ...(filters.withRecommendation ? ['withRecommendation'] : [])
+            ], (value) => ({
+              onlineOnly: 'Actuellement connecté',
+              withPhotos: 'Avec photos publiques',
+              withRecommendation: 'Avec recommandation'
+            })[value])}</fieldset>
+          </details>
+        </form>
+        <section id="discoverResults" class="discover-results">${renderDiscoverResults()}</section>
+      </div>
+    </div>`;
+  }
+
+  function readDiscoverFilters(form) {
+    const data = new FormData(form);
+    const clampAge = (name, fallback) => Math.max(18, Math.min(99, Number(data.get(name)) || fallback));
+    const extras = new Set(data.getAll('extras'));
+    state.discoverFilters = {
+      query: String(data.get('query') || ''),
+      types: data.getAll('types'),
+      seeking: data.getAll('seeking'),
+      city: String(data.get('city') || ''),
+      nearMe: data.has('nearMe'),
+      maleAgeMin: clampAge('maleAgeMin', 18),
+      maleAgeMax: clampAge('maleAgeMax', 99),
+      femaleAgeMin: clampAge('femaleAgeMin', 18),
+      femaleAgeMax: clampAge('femaleAgeMax', 99),
+      practices: data.getAll('practices'),
+      morphologies: data.getAll('morphologies'),
+      onlineOnly: extras.has('onlineOnly'),
+      withPhotos: extras.has('withPhotos'),
+      withRecommendation: extras.has('withRecommendation'),
+      createdToday: state.discoverFilters.createdToday
+    };
+  }
+
+  function resetDiscoverFilters() {
+    state.discoverFilters = {
+      query: '',
+      types: [],
+      seeking: [],
+      city: '',
+      nearMe: false,
+      maleAgeMin: 18,
+      maleAgeMax: 99,
+      femaleAgeMin: 18,
+      femaleAgeMax: 99,
+      practices: [],
+      morphologies: [],
+      onlineOnly: false,
+      withPhotos: false,
+      withRecommendation: false,
+      createdToday: false
+    };
+    state.selectedSavedSearchId = '';
+  }
+
+  async function saveDiscoverSearch(name) {
+    const cleanName = String(name || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+    if (!cleanName) throw new Error('saved_search_name_required');
+    const filters = JSON.parse(JSON.stringify(state.discoverFilters));
+    if (state.savedSearchPersistenceAvailable) {
+      const result = await api('/api/members/discovery', {
+        method: 'POST',
+        body: JSON.stringify({ name: cleanName, filters })
+      });
+      applyDiscoveryState(result);
+      const saved = state.savedSearches.find((row) => row.name === cleanName);
+      state.selectedSavedSearchId = saved?.id || '';
+      return;
+    }
+    const existing = localSavedSearches().find((row) => row.name === cleanName);
+    const row = {
+      id: existing?.id || `local-${Date.now()}`,
+      name: cleanName,
+      filters,
+      updated_at: new Date().toISOString()
+    };
+    state.savedSearches = [row, ...localSavedSearches().filter((item) => item.name !== cleanName)];
+    saveLocalSearches(state.savedSearches);
+    state.selectedSavedSearchId = row.id;
+  }
+
+  async function deleteDiscoverSearch(id) {
+    if (!id) return;
+    if (state.savedSearchPersistenceAvailable) {
+      const result = await api(`/api/members/discovery?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      applyDiscoveryState(result);
+    } else {
+      state.savedSearches = localSavedSearches().filter((row) => String(row.id) !== String(id));
+      saveLocalSearches(state.savedSearches);
+    }
+    state.selectedSavedSearchId = '';
+  }
+
+  function bindDiscover() {
+    const form = document.querySelector('#discoverFilters');
+    if (!form) return;
+    const bindResultControls = () => {
+      document.querySelector('[data-reset-discover]')?.addEventListener('click', () => {
+        resetDiscoverFilters();
+        content.innerHTML = renderDiscover();
+        bindDiscover();
+      });
+      document.querySelectorAll('[data-discover-view]').forEach((button) => {
+        button.addEventListener('click', () => {
+          state.discoverView = button.dataset.discoverView === 'horizontal' ? 'horizontal' : 'grid';
+          try {
+            localStorage.setItem(DISCOVER_VIEW_STORAGE_KEY, state.discoverView);
+          } catch {
+            // L’affichage reste actif pour la session.
+          }
+          document.querySelector('#discoverResults').innerHTML = renderDiscoverResults();
+          bindResultControls();
+        });
+      });
+    };
+    const refreshResults = () => {
+      readDiscoverFilters(form);
+      document.querySelector('#discoverResults').innerHTML = renderDiscoverResults();
+      bindResultControls();
+    };
+    form.addEventListener('input', refreshResults);
+    form.addEventListener('change', refreshResults);
+    bindResultControls();
+    document.querySelector('#savedSearchSelect')?.addEventListener('change', (event) => {
+      const search = state.savedSearches.find((row) => String(row.id) === String(event.target.value));
+      if (!search) {
+        state.selectedSavedSearchId = '';
+        return;
+      }
+      state.selectedSavedSearchId = search.id;
+      state.discoverFilters = { ...state.discoverFilters, ...search.filters, createdToday: false };
+      content.innerHTML = renderDiscover();
+      bindDiscover();
+      toast(`Recherche « ${search.name} » appliquée.`);
+    });
+    document.querySelector('[data-save-search]')?.addEventListener('click', async (event) => {
+      readDiscoverFilters(form);
+      event.currentTarget.disabled = true;
+      try {
+        await saveDiscoverSearch(document.querySelector('#savedSearchName')?.value);
+        content.innerHTML = renderDiscover();
+        bindDiscover();
+        toast('Recherche sauvegardée.');
+      } catch (error) {
+        toast(errorMessages[error.message] || error.message, true);
+        event.currentTarget.disabled = false;
+      }
+    });
+    document.querySelector('[data-delete-search]')?.addEventListener('click', async (event) => {
+      event.currentTarget.disabled = true;
+      try {
+        await deleteDiscoverSearch(state.selectedSavedSearchId);
+        content.innerHTML = renderDiscover();
+        bindDiscover();
+        toast('Recherche supprimée.');
+      } catch (error) {
+        toast(errorMessages[error.message] || error.message, true);
+        event.currentTarget.disabled = false;
+      }
+    });
+  }
+
+  function facts(person) {
+    const profession = person.profession_private ? 'Information privée' : (person.profession || 'Non renseigné');
+    return `<div class="facts">
+      <div class="fact"><small>Âge</small><strong>${e(age(person.birth_year))}</strong></div>
+      <div class="fact"><small>Identité</small><strong>${e(person.gender_identity || 'Non renseignée')}</strong></div>
+      <div class="fact"><small>Taille</small><strong>${person.height_cm ? `${e(person.height_cm)} cm` : 'Non renseignée'}</strong></div>
+      <div class="fact"><small>Poids</small><strong>${person.weight_kg ? `${e(person.weight_kg)} kg` : 'Non renseigné'}</strong></div>
+      <div class="fact"><small>Morphologie</small><strong>${e(person.morphology || 'Non renseignée')}</strong></div>
+      <div class="fact"><small>Cheveux</small><strong>${e(person.hair_color || 'Non renseignés')}</strong></div>
+      <div class="fact"><small>Yeux</small><strong>${e(person.eye_color || 'Non renseignés')}</strong></div>
+      <div class="fact"><small>Enfants</small><strong>${e(childrenLabel(person.children_status))}</strong></div>
+      <div class="fact"><small>Profession</small><strong>${e(profession)}</strong></div>
+      <div class="fact"><small>Fréquence</small><strong>${e(person.frequency || 'Non renseignée')}</strong></div>
+    </div>`;
+  }
+
+  function personView(person, profile, own) {
+    if (!person) return emptyState('Fiche incomplète', 'Cette personne n’a pas encore complété sa fiche.', '♡');
+    const personalPhotos = list(profile.media_assets).filter(
+      (photo) => photo.media_role === 'individual_portrait'
+        && photo.individual_profile_id === person.id
+        && photo.moderation_status === 'approved'
+        && photo.previewUrl
+    );
+    const canAddPersonalPhotos = own && person.linked_user_id === state.account?.userId;
+    return `<section class="profile-layout">
+      <div>
+        <article class="card section">
+          <p class="eyebrow">Portrait personnel</p><h2>${e(person.first_name || 'Profil personnel')}</h2>
+          <p class="quote">${e(person.biography || 'Description personnelle à compléter.')}</p>
+          ${facts(person)}
+        </article>
+        <article class="card section"><h2>Attirances</h2>${chips(person.attracted_to)}</article>
+        <article class="card section"><h2>Ce que ${e(person.first_name || 'cette personne')} souhaite vivre</h2>${chips(person.desired_practices)}</article>
+        ${profile.profile_type === 'couple' ? `<article class="card section"><h2>Accords au sein du couple</h2><p>Ce que ${e(person.first_name || 'cette personne')} autorise son ou sa partenaire à pratiquer.</p>${chips(person.partner_permissions)}</article>` : ''}
+      </div>
+      <aside>
+        <article class="card"><p class="eyebrow">Orientation et attirances</p><h3>${e(person.orientation || 'Non renseignées')}</h3></article>
+        <article class="card" style="margin-top:14px"><p class="eyebrow">Photos individuelles</p>
+          ${personalPhotos.length ? `<div class="mini-gallery">${personalPhotos.map((photo) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo individuelle de ${e(person.first_name)}">${photoReactionBar(photo, own)}</figure>`).join('')}</div>` : '<h3>Aucune photo publiée</h3><p>Velvet n’affiche aucune image de substitution.</p>'}
+          ${canAddPersonalPhotos ? `<form class="profile-photo-form" data-photo-role="individual_portrait" data-individual-profile="${e(person.id)}">
+            <label>Ajouter des photos individuelles<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required></label>
+            <button class="secondary" type="submit">Ajouter</button><small class="photo-upload-status" role="status"></small>
+          </form>` : ''}
+        </article>
+      </aside>
+    </section>`;
+  }
+
+  function recommendationsFor(profile) {
+    const rows = list(state.directory.recommendations).filter((item) => item.target_type === 'profile' && item.target_id === profile.id);
+    if (!rows.length) return `<p>Aucune recommandation reçue pour le moment.</p>`;
+    return rows.map((item) => {
+      const author = list(state.directory.profiles).find((profileRow) => profileRow.id === item.author_profile_id);
+      return `<div class="card" style="margin-top:10px"><strong>${e(author?.display_name || 'Membre Velvet')}</strong><p>${e(item.body)}</p>${item.rating ? `<span class="pill gold">${e(item.rating)}/5</span>` : ''}</div>`;
+    }).join('');
+  }
+
+  function profileStoryTimeline(profile, voice) {
+    const events = [];
+    const createdAt = profile.created_at ? new Date(profile.created_at) : null;
+    if (createdAt && !Number.isNaN(createdAt.getTime())) {
+      events.push({
+        date: createdAt,
+        title: 'Le début de son histoire Velvet',
+        text: `${profile.display_name} a rejoint la communauté et posé les premiers repères de son univers.`
+      });
+    }
+    list(profile.media_assets)
+      .filter((photo) => photo.moderation_status === 'approved' && photo.created_at)
+      .sort((left, right) => new Date(left.created_at) - new Date(right.created_at))
+      .slice(0, 3)
+      .forEach((photo, index) => events.push({
+        date: new Date(photo.created_at),
+        title: index ? 'Son univers s’est enrichi' : 'Ses premières images',
+        text: 'De nouvelles photos ont rejoint son profil après validation.'
+      }));
+    list(state.directory.recommendations)
+      .filter((item) => item.target_type === 'profile' && item.target_id === profile.id && item.created_at)
+      .forEach((item) => events.push({
+        date: new Date(item.created_at),
+        title: 'Une recommandation reçue',
+        text: item.body
+      }));
+    if (!events.length) return `<p>${e(voice.storyFallback)}</p>`;
+    return `<ol class="profile-story-timeline">${events
+      .filter((item) => !Number.isNaN(item.date.getTime()))
+      .sort((left, right) => right.date - left.date)
+      .map((item) => `<li><time datetime="${e(item.date.toISOString())}">${e(new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(item.date))}</time><strong>${e(item.title)}</strong><p>${e(item.text)}</p></li>`)
+      .join('')}</ol>`;
+  }
+
+  function dateLabel(value) {
+    return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' }).format(new Date(`${value}T12:00:00`));
+  }
+
+  function travelMapPreview(plan) {
+    const latitude = Number(plan.latitude ?? (plan.destination_type === 'cap_dagde_village' ? 43.294 : NaN));
+    const longitude = Number(plan.longitude ?? (plan.destination_type === 'cap_dagde_village' ? 3.529 : NaN));
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return '';
+    const zoom = plan.precise_location_consent ? 14 : 12;
+    const point = mapPoint(latitude, longitude, zoom);
+    const tileX = Math.floor(point.x / 256);
+    const tileY = Math.floor(point.y / 256);
+    return `<div class="travel-map-preview" style="background-image:url('https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png')" aria-label="Aperçu cartographique ${e(plan.precise_location_consent ? 'précis et consenti' : 'approximatif')}"><i></i><small>${plan.precise_location_consent ? 'Localisation précise partagée' : 'Zone approximative'}</small></div>`;
+  }
+
+  const CAP_DAGDE_ZONES = [
+    { label: 'Ensemble du village', short: 'Village', x: 48, y: 48 },
+    { label: 'Entrée · Natureva · René Oltra', short: 'Entrée', x: 22, y: 63 },
+    { label: 'Port Soleil', short: 'Port Soleil', x: 38, y: 67 },
+    { label: 'Port Ambonne', short: 'Port Ambonne', x: 48, y: 55 },
+    { label: 'Port Nature', short: 'Port Nature', x: 57, y: 43 },
+    { label: 'Héliopolis', short: 'Héliopolis', x: 67, y: 32 },
+    { label: 'Plage naturiste', short: 'Plage', x: 79, y: 20 },
+    { label: 'Marina', short: 'Marina', x: 55, y: 70 }
+  ];
+
+  function capDagdePlan(selectedZone = 'Ensemble du village', interactive = false) {
+    const selected = CAP_DAGDE_ZONES.some((zone) => zone.label === selectedZone)
+      ? selectedZone
+      : 'Ensemble du village';
+    return `<div class="cap-village-plan ${interactive ? 'interactive' : ''}" data-cap-plan>
+      <div class="cap-plan-canvas">
+        <svg viewBox="0 0 720 420" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="cap-land" x1="0" x2="1" y1="1" y2="0"><stop stop-color="#2a171e"/><stop offset="1" stop-color="#473123"/></linearGradient>
+            <linearGradient id="cap-water" x1="0" x2="1"><stop stop-color="#182a32"/><stop offset="1" stop-color="#274754"/></linearGradient>
+          </defs>
+          <path class="cap-water" d="M486-20H760V440H392c40-54 75-106 92-165 23-79 16-173 2-295Z"/>
+          <path class="cap-shore" d="M486-20c14 122 21 216-2 295-17 59-52 111-92 165"/>
+          <path class="cap-land" d="M-20-20h506c14 122 21 216-2 295-17 59-52 111-92 165H-20Z"/>
+          <path class="cap-road" d="M80 350c88-56 151-117 213-183 52-55 99-89 169-120"/>
+          <path class="cap-road thin" d="M158 348c80-35 163-61 259-71M236 261c34 23 64 61 73 117M342 129c8 61 37 106 95 137"/>
+          <path class="cap-marina" d="M330 258c43-49 116-41 137 5-18 52-88 75-142 34Z"/>
+          <path class="cap-beach" d="M503 5c20 91 23 170 9 237"/>
+        </svg>
+        <span class="cap-plan-title"><b>Village naturiste</b><small>Cap d’Agde · repère de zone</small></span>
+        ${CAP_DAGDE_ZONES.map((zone) => {
+          const active = zone.label === selected;
+          const tag = interactive ? 'button' : 'span';
+          return `<${tag}${interactive ? ' type="button"' : ''} class="cap-zone-point ${active ? 'active' : ''}" style="--cap-x:${zone.x}%;--cap-y:${zone.y}%" data-cap-zone="${e(zone.label)}"${interactive ? ` aria-pressed="${active}"` : ''}><i></i><b>${e(zone.short)}</b></${tag}>`;
+        }).join('')}
+        <span class="cap-sea-label">Méditerranée</span>
+      </div>
+      <p class="cap-zone-selection"><span>Zone sélectionnée</span><strong data-cap-zone-label>${e(selected)}</strong></p>
+    </div>`;
+  }
+
+  function profilePlansView(profile, own) {
+    const today = parisDayKey();
+    const visits = list(state.plans.venueVisits).filter((row) => row.profile_id === profile.id);
+    const travels = list(state.plans.travelPlans).filter((row) => row.profile_id === profile.id);
+    const classicTravels = travels.filter((row) => row.destination_type !== 'cap_dagde_village');
+    const capTravels = travels.filter((row) => row.destination_type === 'cap_dagde_village');
+    const eventPlans = list(state.plans.eventPlans).filter((row) => row.profile_id === profile.id);
+    const eventRows = eventPlans.map((plan) => ({
+      plan,
+      event: list(state.directory.events).find((event) => event.id === plan.event_id)
+    })).filter((row) => row.event);
+    const capVenues = ['CHM René Oltra','Natureva Spa','Oz’Inn Hôtel & Spa','Glamour','Glamour Beach','Waiki Beach','Tantra','Kamasutra','Plug & Play','Histoire d’O'];
+    const hasClassicAgenda = visits.length || classicTravels.length || eventRows.length;
+    return `<article class="card section profile-plans">
+      <p class="eyebrow">Agenda public</p><h2>Sorties et séjours</h2>
+      <section class="classic-plans-block">
+        <header><span>01</span><div><p class="eyebrow">Sorties classiques</p><h3>Nos prochaines escapades</h3><small>Ville, établissement, soirée ou séjour libre.</small></div></header>
+      ${hasClassicAgenda ? `<div class="profile-plan-list">
+        ${visits.map((visit) => `<div><span>⌖</span><p><strong>${visit.visit_date < today ? 'On y est allé' : 'Nous y serons'} · ${e(visit.venue_directory?.name || 'Établissement')}</strong><small>${e(dateLabel(visit.visit_date))} · ${e(visit.venue_directory?.city || '')}</small></p>${own ? `<button type="button" data-delete-plan="${e(visit.id)}" data-plan-type="venue_visit" aria-label="Supprimer">×</button>` : ''}</div>`).join('')}
+        ${eventRows.map(({ plan, event }) => `<button type="button" data-open-event="${e(event.id)}"><span>✦</span><p><strong>${new Date(event.starts_at) < new Date() ? 'On y est allé' : 'Nous participerons'} · ${e(event.title)}</strong><small>${e(new Date(event.starts_at).toLocaleString('fr-FR'))} · ${e(plan.registration_status)}</small></p><i>→</i></button>`).join('')}
+        ${classicTravels.map((plan) => `<div class="travel-plan-card">${travelMapPreview(plan)}<p><strong>${plan.ends_on < today ? 'Nous étions' : 'Nous serons'} · ${e(plan.title)}</strong><small>Du ${e(dateLabel(plan.starts_on))} au ${e(dateLabel(plan.ends_on))} · ${e(plan.location_label)}</small>${plan.notes ? `<span>${e(plan.notes)}</span>` : ''}</p>${own ? `<button type="button" data-delete-plan="${e(plan.id)}" data-plan-type="travel_plan" aria-label="Supprimer">×</button>` : ''}</div>`).join('')}
+      </div>` : '<p class="muted classic-empty">Aucune sortie classique annoncée.</p>'}
+      ${own && !state.plans.migrationPending ? `<details class="travel-plan-editor classic-travel-editor"><summary>Ajouter une sortie classique</summary>
+        <form class="travel-plan-form classic-travel-form">
+          <input type="hidden" name="destinationType" value="general">
+          <div class="form-grid">
+            <label>Nom de la sortie<input name="title" maxlength="160" placeholder="Ex. Une soirée à Béthune" required></label>
+            <label>Destination<input name="locationLabel" maxlength="240" placeholder="Ville, lieu ou adresse publique" required></label>
+            <label>Du<input type="date" name="startsOn" required></label>
+            <label>Au<input type="date" name="endsOn" required></label>
+            <label class="wide">Note publique<textarea name="notes" maxlength="2000" placeholder="Informations utiles pour les autres membres"></textarea></label>
+          </div>
+          <details class="precise-location-consent"><summary>Ajouter une localisation précise</summary><p>Facultatif. La position n’est enregistrée que si tu donnes ton consentement explicite.</p><div class="form-grid"><label>Latitude<input type="number" step="0.000001" name="latitude"></label><label>Longitude<input type="number" step="0.000001" name="longitude"></label></div><label class="toggle"><input type="checkbox" name="preciseLocationConsent"><span>Je consens à rendre cette position précise visible aux membres autorisés.</span></label></details>
+          <button class="primary" type="submit">Publier sur mon profil</button>
+        </form>
+      </details>` : own ? '<p class="status-box">Les sorties seront activées après la migration Supabase 0024.</p>' : ''}
+      </section>
+      ${capTravels.length ? `<section class="cap-dagde-showcase">
+        <header><span>02</span><div><p class="eyebrow">Destination signature</p><h3>Nos séjours au Cap d’Agde</h3><small>Village naturiste · repère de zone partagé</small></div></header>
+        <div class="cap-showcase-layout">
+          ${capDagdePlan(capTravels.find((plan) => plan.ends_on >= today)?.cap_zone || capTravels[0].cap_zone)}
+          <div class="cap-stay-list">${capTravels.map((plan) => `<article>
+            <p class="eyebrow">${plan.ends_on < today ? 'Souvenir du Cap' : 'Prochain séjour'}</p>
+            <h4>${e(plan.title)}</h4>
+            <strong>Du ${e(dateLabel(plan.starts_on))} au ${e(dateLabel(plan.ends_on))}</strong>
+            <small>${e(plan.cap_zone || 'Ensemble du village')}${plan.cap_venue ? ` · ${e(plan.cap_venue)}` : ''}</small>
+            ${plan.notes ? `<p>${e(plan.notes)}</p>` : ''}
+            ${own ? `<button type="button" class="cap-delete-plan" data-delete-plan="${e(plan.id)}" data-plan-type="travel_plan">Retirer ce séjour</button>` : ''}
+          </article>`).join('')}</div>
+        </div>
+      </section>` : ''}
+      ${own && !state.plans.migrationPending ? `<details class="cap-travel-editor"${capTravels.length ? '' : ' data-empty-cap'}>
+        <summary><span class="cap-summary-mark">C</span><span><small>Expérience dédiée</small><strong>Préparer un séjour au Cap d’Agde</strong></span><i>Ouvrir</i></summary>
+        <form class="travel-plan-form cap-travel-form">
+          <input type="hidden" name="destinationType" value="cap_dagde_village">
+          <input type="hidden" name="locationLabel" value="Village naturiste du Cap d’Agde">
+          <input type="hidden" name="capZone" value="Ensemble du village" data-cap-zone-input>
+          <div class="cap-editor-intro"><p class="eyebrow">Choisir son repère</p><h3>Où serez-vous dans le village ?</h3><p>Sélectionne une zone sur le plan. L’emplacement reste volontairement général tant que tu ne partages pas une position précise.</p></div>
+          ${capDagdePlan('Ensemble du village', true)}
+          <div class="form-grid cap-travel-fields">
+            <label>Nom du séjour<input name="title" maxlength="160" value="Séjour au Cap d’Agde" required></label>
+            <label>Établissement ou résidence<select name="capVenue"><option value="">Non précisé</option>${capVenues.map((venue) => `<option>${e(venue)}</option>`).join('')}</select></label>
+            <label>Du<input type="date" name="startsOn" required></label>
+            <label>Au<input type="date" name="endsOn" required></label>
+            <label class="wide">Note publique<textarea name="notes" maxlength="2000" placeholder="Vos envies, les moments où vous serez disponibles…"></textarea></label>
+          </div>
+          <details class="precise-location-consent"><summary>Partager volontairement un point précis</summary><p>Ne publie jamais ton numéro d’hébergement. La photographie et la vidéo restent soumises au consentement des personnes présentes.</p><div class="form-grid"><label>Latitude<input type="number" step="0.000001" name="latitude"></label><label>Longitude<input type="number" step="0.000001" name="longitude"></label></div><label class="toggle"><input type="checkbox" name="preciseLocationConsent"><span>Je consens à rendre cette position précise visible aux membres autorisés.</span></label></details>
+          <button class="primary cap-publish-button" type="submit">Publier mon séjour au Cap</button>
+        </form>
+      </details>` : ''}
+    </article>`;
+  }
+
+  function albumsView(profile, own) {
+    const albums = list(profile.albums);
+    const profilePhotos = approvedProfilePhotos(profile);
+    const targetProfiles = list(state.directory.profiles).filter((row) => row.id !== state.profile.id);
+    return `<section>
+      <div class="page-head"><div><p class="eyebrow">Bibliothèque organisée</p><h1>Albums publics & privés</h1><p>Les albums publics sont visibles par tous les membres admis. Les albums privés ne révèlent rien sans une autorisation accordée par leur propriétaire.</p></div></div>
+      ${profilePhotos.length || albums.length ? `<div class="album-library">
+        ${profilePhotos.length ? `<details class="album-folder system-album" data-album-folder>
+          <summary class="album-folder-cover">
+            <span class="album-cover-media">
+              <img src="${e(profilePhotos[0].previewUrl)}" alt="Couverture de l’album Photos de profil de ${e(profile.display_name)}">
+              <span class="album-cover-count">${profilePhotos.length} photo${profilePhotos.length > 1 ? 's' : ''}</span>
+            </span>
+            <span class="album-cover-copy">
+              <span class="eyebrow">Album système public</span>
+              <strong>Photos de profil</strong>
+              <small>Alimenté automatiquement par le carrousel</small>
+              <span class="album-folder-meta">${profilePhotos.length} photo${profilePhotos.length > 1 ? 's' : ''}</span>
+              <span class="album-open-label"><span class="closed-label">Ouvrir le dossier</span><span class="open-label">Fermer le dossier</span> <b>⌄</b></span>
+            </span>
+          </summary>
+          <article class="card album-detail public">
+            <header><div><p class="eyebrow">Album système public</p><h2>Photos de profil</h2></div><span class="pill gold">${profilePhotos.length} photo${profilePhotos.length > 1 ? 's' : ''}</span></header>
+            <div class="album-gallery">${profilePhotos.map((photo, index) => albumPhotoFigure(
+              photo,
+              `profile-photos-${profile.id}`,
+              index,
+              `Photo de profil ${index + 1} de ${profile.display_name}`,
+              own
+            )).join('')}</div>
+            <p class="muted">Cet album est alimenté automatiquement par le carrousel public. Il reste synchronisé sans dupliquer les photos.</p>
+          </article>
+        </details>` : ''}
+        ${albums.map((album) => {
+        const photos = list(album.media_assets).filter((photo) => photo.previewUrl);
+        const coverMedia = photos.find((photo) => photo.media_type !== 'video');
+        const pendingPhotos = photos.filter((photo) => photo.moderation_status === 'pending').length;
+        const isPublic = album.confidentiality === 'public';
+        const canSee = own || isPublic || photos.length > 0;
+        const activeGrants = list(album.album_access_grants).filter(
+          (grant) => !grant.revoked_at && (!grant.expires_at || new Date(grant.expires_at) > new Date())
+        );
+        const grantedProfiles = [...new Set(activeGrants.map((grant) => grant.grantee_profile_id).filter(Boolean))];
+        const countLabel = `${photos.length} média${photos.length > 1 ? 's' : ''}`;
+        return `<details class="album-folder ${isPublic ? 'public' : 'private'}" data-album-folder>
+          <summary class="album-folder-cover">
+            <span class="album-cover-media ${canSee && photos.length ? '' : 'locked'}">
+              ${canSee && coverMedia
+                ? `<img src="${e(coverMedia.previewUrl)}" alt="Couverture de l’album ${e(album.name)}">`
+                : `<span class="album-cover-placeholder">${isPublic ? '⌑' : '◇'}</span>`}
+              <span class="album-cover-count">${canSee ? countLabel : 'Contenu privé'}</span>
+            </span>
+            <span class="album-cover-copy">
+              <span class="eyebrow">${e(confidentialityLabel(album.confidentiality))}</span>
+              <strong>${e(album.name)}</strong>
+              <small>${canSee ? 'Ouvrez le dossier pour parcourir son contenu' : 'Aucun aperçu avant autorisation'}</small>
+              <span class="album-folder-meta">${canSee ? countLabel : 'Contenu privé'}</span>
+              <span class="album-open-label"><span class="closed-label">Ouvrir le dossier</span><span class="open-label">Fermer le dossier</span> <b>⌄</b></span>
+            </span>
+          </summary>
+          <article class="card album-detail ${isPublic ? 'public' : 'private'}">
+            <header><div><p class="eyebrow">${e(confidentialityLabel(album.confidentiality))}</p><h2>${e(album.name)}</h2></div>${canSee ? `<span class="pill">${countLabel}</span>` : ''}</header>
+            ${canSee
+              ? (photos.length ? `<div class="album-gallery">${photos.map((photo, index) => albumPhotoFigure(
+                photo,
+                `album-${album.id}`,
+                index,
+                `Photo ${index + 1} de l’album ${album.name}`,
+                own
+              )).join('')}</div>` : '<p class="muted">Aucune photo visible dans cet album.</p>')
+              : '<div class="private-vault"><span>⌑</span><strong>Album privé verrouillé</strong><p>Aucune miniature ni information sur son contenu n’est révélée.</p></div>'}
+            ${own && pendingPhotos ? `<p class="status-box">${pendingPhotos} média${pendingPhotos > 1 ? 's' : ''} visible${pendingPhotos > 1 ? 's' : ''} seulement par vous, en attente de modération.</p>` : ''}
+            ${own ? `<form class="album-photo-form" data-album-id="${e(album.id)}">
+              <label>Ajouter des photos ou vidéos<input type="file" name="photos" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" multiple required></label>
+              <button class="secondary" type="submit">Ajouter à l’album</button><small class="photo-upload-status" role="status"></small>
+            </form>` : ''}
+            ${own && !isPublic ? `<div class="album-access-panel">
+              <p><strong>${grantedProfiles.length}</strong> profil${grantedProfiles.length > 1 ? 's' : ''} actuellement autorisé${grantedProfiles.length > 1 ? 's' : ''}.</p>
+              ${grantedProfiles.length ? `<div class="active-album-grants">${grantedProfiles.map((profileId) => {
+                const target = targetProfiles.find((row) => row.id === profileId);
+                const targetGrants = activeGrants.filter((grant) => grant.grantee_profile_id === profileId);
+                const permanent = targetGrants.some((grant) => !grant.expires_at);
+                const latest = targetGrants.map((grant) => grant.expires_at).filter(Boolean).sort().at(-1);
+                return `<span class="selected-venue"><span>${e(target?.display_name || 'Profil autorisé')} · ${permanent ? 'Permanent' : `jusqu’au ${e(new Date(latest).toLocaleString('fr-FR'))}`}</span><button type="button" data-revoke-album="${e(album.id)}" data-revoke-profile="${e(profileId)}" aria-label="Révoquer l’accès">×</button></span>`;
+              }).join('')}</div>` : ''}
+              <p class="muted">Les nouveaux accès se donnent depuis la fiche du membre concerné. Les accès actifs restent révocables ici.</p>
+            </div>` : ''}
+          </article>
+        </details>`;
+      }).join('')}</div>` : emptyState('Aucun album publié', own ? 'Crée un album, donne-lui un nom et choisis s’il est public ou privé.' : 'Ce membre n’a encore publié aucun album.', '⌑')}
+      ${!own && list(state.profile?.albums).some((album) => album.confidentiality !== 'public') ? `<form class="card profile-album-access-form" data-profile-id="${e(profile.id)}" style="margin-top:16px">
+        <p class="eyebrow">Partage privé</p><h2>Ouvrir mes albums à ${e(profile.display_name)}</h2>
+        <p>Choisis un ou plusieurs de tes albums privés. Pour un profil couple, l’autorisation couvre les deux comptes actifs.</p>
+        <div class="album-access-choices">${list(state.profile.albums).filter((album) => album.confidentiality !== 'public').map((album) => `<label><input type="checkbox" name="albumIds" value="${e(album.id)}"><span>${e(album.name)}</span></label>`).join('')}</div>
+        <div class="form-grid"><label>Durée<select name="duration" required><option value="1">1 heure</option><option value="4">4 heures</option><option value="12">12 heures</option><option value="24">24 heures</option><option value="permanent">Permanent</option></select></label><button class="primary" type="submit">Donner l’accès</button></div>
+      </form>` : ''}
+      ${own ? `<form id="albumForm" class="card" style="margin-top:16px">
+        <h2>Créer un album</h2>
+        <div class="form-grid">
+          <label>Nom de l’album<input name="name" maxlength="120" required></label>
+          <label>Visibilité<select name="confidentiality"><option value="public">Public — visible par tous les membres</option><option value="request">Privé — uniquement sur autorisation</option></select></label>
+        </div><button class="primary" type="submit" style="margin-top:14px">Créer l’album</button>
+      </form>` : ''}
+    </section>`;
+  }
+
+  function profileOverview(profile, own) {
+    const people = profilePeople(profile);
+    const voice = profileVoice(profile);
+    return `<section class="profile-layout">
+      <div>
+        <article class="card section"><p class="eyebrow">En quelques mots</p><h2>${voice.aboutTitle}</h2><p class="quote">${e(profile.description || voice.descriptionFallback)}</p>${chips(profile.values_list, 'Valeurs à compléter')}</article>
+        <article class="card section"><p class="eyebrow">Le récit vivant</p><h2>${voice.storyTitle}</h2>${profileStoryTimeline(profile, voice)}</article>
+        <article class="card section"><p class="eyebrow">Les rencontres souhaitées</p><h2>${voice.searchTitle}</h2><p>${e(profile.search_text || voice.searchFallback)}</p></article>
+        <article class="card section"><p class="eyebrow">${voice.practicesEyebrow}</p><h2>${voice.practicesTitle}</h2>${chips(profile.practices, 'Pratiques à compléter')}</article>
+        ${profilePlansView(profile, own)}
+        <article class="card section"><p class="eyebrow">${voice.recommendationsEyebrow}</p><h2>Recommandations</h2>${recommendationsFor(profile)}</article>
+        ${own ? `<article class="card section"><p class="eyebrow">Carrousel public</p><h2>Ajouter des photos de profil</h2><p>Ces photos complètent le carrousel principal après validation.</p><form class="profile-photo-form" data-photo-role="${profile.profile_type === 'couple' ? 'couple_gallery' : 'individual_gallery'}"><label>Choisir des photos<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required></label><button class="secondary" type="submit">Ajouter au carrousel</button><small class="photo-upload-status" role="status"></small></form></article>` : ''}
+      </div>
+      <aside>
+        <article class="card">
+          <p class="eyebrow">${voice.peopleEyebrow}</p>
+          ${people.map((person, index) => `<button class="card person-card profile-card-button" style="margin-top:10px" data-profile-tab="person${index}">
+            <span class="avatar">${e(initials(person.first_name))}</span><span><strong>${e(person.first_name || 'Fiche personnelle')}</strong><p>${e(person.biography || 'Découvrir cette personne')}</p></span><span>→</span>
+          </button>`).join('')}
+        </article>
+        <article class="card" style="margin-top:14px"><p class="eyebrow">Localisation publique</p><h3>${e(profile.location_zone || 'Privée')}</h3><p>${voice.locationCopy}</p></article>
+        <article class="card" style="margin-top:14px"><p class="eyebrow">Lieux préférés</p>${chips(profile.favorite_places, 'Aucun lieu renseigné')}</article>
+        <article class="card" style="margin-top:14px"><p class="eyebrow">Disponibilités</p><p>${e(profile.availability_text || 'Non renseignées')}</p></article>
+        ${own ? partnerInviteBox(profile, people) : ''}
+        ${own ? organizerBox() : ''}
+      </aside>
+    </section>`;
+  }
+
+  function partnerInviteBox(profile, people) {
+    if (profile.profile_type !== 'couple' || state.membership?.member_slot !== 'partner_a') return '';
+    if (people.some((person) => person.member_slot === 'partner_b' && person.linked_user_id)) {
+      return `<article class="card" style="margin-top:14px"><p class="eyebrow">Profil partagé</p><h3>Partenaire rattaché(e)</h3><p>Chaque personne contrôle désormais sa propre fiche. Les informations du couple sont communes.</p></article>`;
+    }
+    return `<article class="card" style="margin-top:14px"><p class="eyebrow">Profil partagé</p><h3>Inviter mon/ma partenaire</h3><p>L’invitation rattache son compte à cette fiche couple. Cette personne remplira elle-même sa partie personnelle.</p><button class="secondary" data-couple-invite>Préparer l’invitation</button></article>`;
+  }
+
+  function organizerBox() {
+    const request = state.organizerRequest;
+    if (request?.status === 'pending') return `<article class="card" style="margin-top:14px"><p class="eyebrow">Organisateur privé</p><h3>Demande en cours</h3><p>Un administrateur ou un modérateur doit valider l’accès.</p></article>`;
+    if (request?.status === 'approved') return `<article class="card" style="margin-top:14px"><p class="eyebrow">Organisateur privé</p><h3>Accès validé</h3><p>Le rôle sera disponible dans ton espace autorisé.</p></article>`;
+    return `<article class="card" style="margin-top:14px"><p class="eyebrow">Organisateur privé</p><h3>Vous organisez des soirées ?</h3><p>Demande l’accès Organisateur depuis ton profil membre. Ce rôle reste distinct d’un établissement professionnel.</p><button class="secondary" data-organizer-request>Demander l’accès</button></article>`;
+  }
+
+  function renderProfile(profile, own = false) {
+    if (!profile) return `<div class="page">${emptyState('Profil introuvable', 'Ce profil n’est plus visible dans la BETA.', '♡')}</div>`;
+    const people = profilePeople(profile);
+    const voice = profileVoice(profile);
+    if (state.profileTab.startsWith('person') && !people[Number(state.profileTab.replace('person', ''))]) state.profileTab = 'couple';
+    const activeContent = state.profileTab === 'albums'
+      ? albumsView(profile, own)
+      : state.profileTab.startsWith('person')
+        ? personView(people[Number(state.profileTab.replace('person', ''))], profile, own)
+        : profileOverview(profile, own);
+    return `<div class="page">
+      <section class="hero">${profileCarousel(profile)}<div class="hero-copy">
+        <p class="eyebrow">${e(voice.profileLabel)} · ${e(profile.location_zone || 'Localisation privée')}</p>
+        <h1>${e(profile.display_name)}</h1><p class="lead">${e(profile.description)}</p>
+        <div class="badges"><span class="pill gold">${e(voice.betaLabel)}</span>${profile.profile_type === 'couple' && profile.relationship_since ? `<span class="pill">Depuis ${e(profile.relationship_since)}</span>` : ''}<span class="pill">${e(profile.location_zone || 'Zone privée')}</span></div>
+        <div class="actions">${own ? '<button class="primary" data-edit-profile>Modifier mon profil</button>' : ''}${!own ? `<button class="primary" data-message-profile="${e(profile.id)}">Écrire</button><button class="secondary" data-favorite-profile="${e(profile.id)}">${state.socialActions[profile.id]?.favorite ? 'Ne plus suivre' : 'Suivre ce membre'}</button>` : ''}</div>
+      </div></section>
+      ${profileEngagementPanel(profile, own)}
+      ${own ? '' : profileSafetyPanel(profile)}
+      <nav class="profile-nav" aria-label="Sections du profil">
+        <button data-profile-tab="couple" class="${state.profileTab === 'couple' ? 'active' : ''}">${profile.profile_type === 'couple' ? 'Le couple' : 'Présentation'}</button>
+        ${people.map((person, index) => `<button data-profile-tab="person${index}" class="${state.profileTab === `person${index}` ? 'active' : ''}">${e(person.first_name || `Personne ${index + 1}`)}</button>`).join('')}
+        <button data-profile-tab="albums" class="${state.profileTab === 'albums' ? 'active' : ''}">Albums (${list(profile.albums).length + (approvedProfilePhotos(profile).length ? 1 : 0)})</button>
+      </nav>
+      ${activeContent}
+    </div>`;
+  }
+
+  function profileSafetyPanel(profile) {
+    const blocked = Boolean(state.socialActions[profile.id]?.blocked);
+    return `<details class="card profile-safety">
+      <summary>Sécurité et discrétion</summary>
+      <div class="profile-safety-grid">
+        <div><h3>${blocked ? 'Profil bloqué' : 'Bloquer ce profil'}</h3><p>${blocked ? 'Ce profil ne peut plus entrer en contact avec toi.' : 'Le blocage coupe immédiatement la possibilité de contact entre vos profils.'}</p><button class="secondary" type="button" data-block-profile="${e(profile.id)}" data-enabled="${blocked ? 'false' : 'true'}">${blocked ? 'Débloquer' : 'Bloquer'}</button></div>
+        <form id="profileReportForm" data-profile-id="${e(profile.id)}">
+          <h3>Signaler discrètement</h3>
+          <label>Motif<select name="category" required><option value="">Choisir</option><option value="fake_profile">Suspicion de faux profil</option><option value="consent">Consentement ou comportement</option><option value="harassment">Harcèlement</option><option value="spam">Spam ou démarchage</option><option value="content">Contenu inapproprié</option><option value="other">Autre</option></select></label>
+          <label>Précisions<textarea name="description" maxlength="2000" placeholder="Décris les faits, sans information inutile."></textarea></label>
+          <button class="secondary" type="submit">Envoyer à la modération</button>
+        </form>
+      </div>
+    </details>`;
+  }
+
+  function mapPoint(latitude, longitude, zoom) {
+    const scale = 256 * (2 ** zoom);
+    const sine = Math.min(Math.max(Math.sin(latitude * Math.PI / 180), -0.9999), 0.9999);
+    return {
+      x: scale * (0.5 + longitude / 360),
+      y: scale * (0.5 - Math.log((1 + sine) / (1 - sine)) / (4 * Math.PI))
+    };
+  }
+
+  function mapCoordinates(point, zoom) {
+    const scale = 256 * (2 ** zoom);
+    const x = ((point.x % scale) + scale) % scale;
+    const y = Math.max(0, Math.min(scale, point.y));
+    const longitude = x / scale * 360 - 180;
+    const mercator = Math.PI - 2 * Math.PI * y / scale;
+    const latitude = 180 / Math.PI * Math.atan(Math.sinh(mercator));
+    return { latitude, longitude };
+  }
+
+  function mapViewport(preferredCenter) {
+    const pageWidth = document.querySelector('#content .page')?.clientWidth || content.clientWidth || 900;
+    const width = Math.max(320, Math.min(1280, Math.round(pageWidth)));
+    const height = window.innerWidth <= 760 ? 520 : 600;
+    const selectedCenter = state.mapCenter || preferredCenter;
+    const center = {
+      latitude: Number(selectedCenter?.latitude ?? 46.603354),
+      longitude: Number(selectedCenter?.longitude ?? 1.888334)
+    };
+    return { width, height, center, zoom: Math.max(5, Math.min(13, Number(state.mapZoom || 10))) };
+  }
+
+  function defaultMapZoom(center) {
+    const pageWidth = document.querySelector('#content .page')?.clientWidth || content.clientWidth || 900;
+    const width = Math.max(320, Math.min(1280, Math.round(pageWidth)));
+    const latitude = Number(center?.latitude ?? 46.603354);
+    const targetMetresPerPixel = 50000 * 2 / width;
+    return Math.max(5, Math.min(13,
+      Math.log2(156543.03392 * Math.cos(latitude * Math.PI / 180) / targetMetresPerPixel)
+    ));
+  }
+
+  function venueMapCategory(venue) {
+    const kind = String(venue.kind || '').toLocaleLowerCase('fr');
+    const category = [
+      venue.categoryPrimary,
+      venue.category_primary,
+      ...list(venue.categoryTags || venue.category_tags)
+    ].join(' ').toLocaleLowerCase('fr');
+    if (/\bh[oô]tel\b|h[eé]bergement|chambre/.test(category)) return 'hotel';
+    return ['club', 'spa', 'bar', 'love_room'].includes(kind) ? kind : 'other';
+  }
+
+  function enabledMapMarkers(mapData) {
+    const members = state.mapLayers.members ? list(mapData.members) : [];
+    const venues = list(mapData.venues).filter((venue) => state.mapLayers[venueMapCategory(venue)]);
+    return [...members, ...venues];
+  }
+
+  function markerPosition(marker, view) {
+    const origin = mapPoint(view.center.latitude, view.center.longitude, view.zoom);
+    const point = mapPoint(marker.latitude, marker.longitude, view.zoom);
+    return {
+      left: point.x - origin.x + view.width / 2,
+      top: point.y - origin.y + view.height / 2
+    };
+  }
+
+  function markerInViewport(marker, view, margin = 0) {
+    const position = markerPosition(marker, view);
+    return position.left >= -margin
+      && position.left <= view.width + margin
+      && position.top >= -margin
+      && position.top <= view.height + margin;
+  }
+
+  function mapDistanceKm(from, marker) {
+    const earthRadiusKm = 6371;
+    const latitudeDelta = (Number(marker.latitude) - Number(from.latitude)) * Math.PI / 180;
+    const longitudeDelta = (Number(marker.longitude) - Number(from.longitude)) * Math.PI / 180;
+    const fromLatitude = Number(from.latitude) * Math.PI / 180;
+    const toLatitude = Number(marker.latitude) * Math.PI / 180;
+    const haversine = Math.sin(latitudeDelta / 2) ** 2
+      + Math.cos(fromLatitude) * Math.cos(toLatitude) * Math.sin(longitudeDelta / 2) ** 2;
+    return earthRadiusKm * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+  }
+
+  function mapVisibleVenues(mapData) {
+    const view = mapViewport(mapData.center);
+    return list(mapData.venues)
+      .filter((venue) => state.mapLayers[venueMapCategory(venue)])
+      .filter((venue) => markerInViewport(venue, view))
+      .map((venue) => ({ ...venue, distanceFromCenterKm: Math.round(mapDistanceKm(view.center, venue)) }))
+      .sort((left, right) => left.distanceFromCenterKm - right.distanceFromCenterKm);
+  }
+
+  function mapRadiusLabel() {
+    const view = mapViewport(state.mapData?.center);
+    const metresPerPixel = 156543.03392 * Math.cos(view.center.latitude * Math.PI / 180) / (2 ** view.zoom);
+    return Math.max(1, Math.round(metresPerPixel * view.width / 2000));
+  }
+
+  function mapCanvas(mapData) {
+    const view = mapViewport(mapData.center);
+    const markers = enabledMapMarkers(mapData).filter((marker) => markerInViewport(marker, view, 40));
+    const origin = mapPoint(view.center.latitude, view.center.longitude, view.zoom);
+    const tileZoom = Math.floor(view.zoom);
+    const tileSize = 256 * (2 ** (view.zoom - tileZoom));
+    const tileCount = 2 ** tileZoom;
+    const startX = Math.floor((origin.x - view.width / 2) / tileSize);
+    const endX = Math.floor((origin.x + view.width / 2) / tileSize);
+    const startY = Math.max(0, Math.floor((origin.y - view.height / 2) / tileSize));
+    const endY = Math.min(tileCount - 1, Math.floor((origin.y + view.height / 2) / tileSize));
+    const tiles = [];
+    for (let tileX = startX; tileX <= endX; tileX += 1) {
+      for (let tileY = startY; tileY <= endY; tileY += 1) {
+        const wrappedX = ((tileX % tileCount) + tileCount) % tileCount;
+        tiles.push(`<img class="map-tile" alt="" aria-hidden="true" src="https://tile.openstreetmap.org/${tileZoom}/${wrappedX}/${tileY}.png" style="left:${tileX * tileSize - origin.x + view.width / 2}px;top:${tileY * tileSize - origin.y + view.height / 2}px;width:${tileSize + 1}px;height:${tileSize + 1}px">`);
+      }
+    }
+    const markerHtml = markers.map((marker) => {
+      const { left, top } = markerPosition(marker, view);
+      if (marker.type === 'member') {
+        return `<button class="map-marker member-map-marker" style="left:${left}px;top:${top}px" data-open-profile="${e(marker.id)}" title="${e(marker.name)} · ${e(marker.zone)}">
+          ${marker.photoUrl ? `<img src="${e(marker.photoUrl)}" alt="">` : `<span>${e(initials(marker.name))}</span>`}<small>${e(marker.name)}</small>
+        </button>`;
+      }
+      return `<button class="map-marker venue-map-marker" style="left:${left}px;top:${top}px" data-open-venue="${e(marker.id)}" data-map-venue="true" title="${e(marker.name)} · ${e(marker.city || '')}">
+        <span>⌑</span><small>${e(marker.name)}</small>
+      </button>`;
+    }).join('');
+    return `<section class="velvet-map" data-dynamic-map data-map-width="${view.width}" tabindex="0" style="--map-width:${view.width}px;--map-height:${view.height}px" aria-label="Carte interactive. Faites glisser pour vous déplacer, utilisez la molette ou les boutons pour zoomer.">
+      <div class="map-stage" style="width:${view.width}px;height:${view.height}px">${tiles.join('')}${markerHtml}</div>
+      <div class="map-center-indicator" aria-hidden="true"><span></span></div>
+      <span class="map-gesture-hint">Glisser pour explorer · molette pour zoomer</span>
+      <div class="map-legend"><span><i class="member-dot"></i>Membres · zone approximative</span><span><i class="venue-dot"></i>Établissements · adresse publique</span></div>
+      <small class="map-credit">© contributeurs OpenStreetMap</small>
+    </section>`;
+  }
+
+  function mapVisibleVenuesPanel(mapData) {
+    const venues = mapVisibleVenues(mapData);
+    return `<section class="card map-visible-results" aria-live="polite">
+      <header><div><p class="eyebrow">Zone actuellement affichée</p><h2>${venues.length ? `Lieux visibles sur la carte (${venues.length})` : 'Aucun lieu visible dans cette zone'}</h2></div><button class="text-button" type="button" data-map-recenter>Recentrer sur moi</button></header>
+      <p>Cette liste suit automatiquement le déplacement, le zoom et les catégories actives de la carte.</p>
+      ${venues.length ? `<div class="map-visible-list">${venues.slice(0, 8).map((venue) => `<button type="button" data-open-venue="${e(venue.id)}" data-map-venue="true">
+        <span>${e(venue.distanceFromCenterKm)} km</span><div><strong>${e(venue.name)}</strong><small>${e([venue.city, venue.countryCode, venue.kind].filter(Boolean).join(' · '))}</small></div><i>→</i>
+      </button>`).join('')}</div>` : '<small class="map-data-note">Déplacez ou dézoomez la carte. Les établissements sont positionnés depuis leur adresse publique lorsqu’elle peut être localisée avec fiabilité.</small>'}
+    </section>`;
+  }
+
+  function renderMapWorkspace() {
+    return `${mapVisibleVenuesPanel(state.mapData)}${mapCanvas(state.mapData)}`;
+  }
+
+  function refreshMapWorkspace() {
+    const workspace = document.querySelector('#mapWorkspace');
+    if (!workspace || !state.mapData) return;
+    workspace.innerHTML = renderMapWorkspace();
+    const radius = document.querySelector('[data-map-radius]');
+    if (radius) radius.textContent = `Rayon d’environ ${mapRadiusLabel()} km`;
+    bindMapInteraction();
+  }
+
+  function panMapByPixels(deltaX, deltaY) {
+    const view = mapViewport(state.mapData?.center);
+    const origin = mapPoint(view.center.latitude, view.center.longitude, view.zoom);
+    state.mapCenter = mapCoordinates({
+      x: origin.x - deltaX,
+      y: origin.y - deltaY
+    }, view.zoom);
+    refreshMapWorkspace();
+  }
+
+  function bindMapInteraction() {
+    const map = document.querySelector('[data-dynamic-map]');
+    if (!map || map.dataset.interactive === 'true') return;
+    map.dataset.interactive = 'true';
+    const stage = map.querySelector('.map-stage');
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+    let deltaX = 0;
+    let deltaY = 0;
+
+    const finishDrag = (event) => {
+      if (pointerId === null || event.pointerId !== pointerId) return;
+      map.releasePointerCapture?.(pointerId);
+      map.classList.remove('dragging');
+      stage.style.transform = '';
+      pointerId = null;
+      if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) panMapByPixels(deltaX, deltaY);
+    };
+
+    map.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0 || event.target.closest('.map-marker')) return;
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      startY = event.clientY;
+      deltaX = 0;
+      deltaY = 0;
+      map.setPointerCapture?.(pointerId);
+      map.classList.add('dragging');
+      event.preventDefault();
+    });
+    map.addEventListener('pointermove', (event) => {
+      if (pointerId === null || event.pointerId !== pointerId) return;
+      deltaX = event.clientX - startX;
+      deltaY = event.clientY - startY;
+      stage.style.transform = `translate(${deltaX}px,${deltaY}px)`;
+    });
+    map.addEventListener('pointerup', finishDrag);
+    map.addEventListener('pointercancel', finishDrag);
+    map.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      state.mapZoom = Math.max(5, Math.min(13, state.mapZoom + (event.deltaY < 0 ? 1 : -1)));
+      refreshMapWorkspace();
+    }, { passive: false });
+    map.addEventListener('keydown', (event) => {
+      const movements = {
+        ArrowLeft: [80, 0],
+        ArrowRight: [-80, 0],
+        ArrowUp: [0, 80],
+        ArrowDown: [0, -80]
+      };
+      if (!movements[event.key]) return;
+      event.preventDefault();
+      panMapByPixels(...movements[event.key]);
+    });
+    document.querySelector('[data-map-recenter]')?.addEventListener('click', () => {
+      state.mapCenter = {
+        latitude: Number(state.mapData.center?.latitude ?? 46.603354),
+        longitude: Number(state.mapData.center?.longitude ?? 1.888334)
+      };
+      state.mapZoom = defaultMapZoom(state.mapCenter);
+      refreshMapWorkspace();
+    });
+
+    mapResizeObserver?.disconnect();
+    if ('ResizeObserver' in window) {
+      mapResizeObserver = new ResizeObserver((entries) => {
+        const width = Math.round(entries[0]?.contentRect?.width || 0);
+        if (width && Math.abs(width - Number(map.dataset.mapWidth)) > 8) refreshMapWorkspace();
+      });
+      mapResizeObserver.observe(map);
+    }
+  }
+
+  function renderMaps() {
+    if (!state.mapData) {
+      return `<div class="page">${pageHead('Localisation choisie', 'Maps', 'Velvet prépare la carte sans jamais exposer l’adresse ni la position exacte d’un membre.')}
+        <section class="loading-state"><span class="loader"></span><p>Chargement des zones publiques…</p></section>
+      </div>`;
+    }
+    const locationEnabled = state.mapData.center?.source === 'private_approximate_location';
+    const layerOptions = [
+      ['members', 'Membres'],
+      ['club', 'Clubs'],
+      ['spa', 'Spas'],
+      ['bar', 'Bars'],
+      ['love_room', 'Love rooms'],
+      ['hotel', 'Hôtels'],
+      ['other', 'Autres lieux']
+    ];
+    return `<div class="page">${pageHead('Zones publiques et adresses d’établissements', 'Maps', 'Les membres sont placés au centre approximatif de la zone qu’ils ont choisi d’afficher. Les établissements sont localisés depuis leur adresse publique.')}
+      <section class="card map-controls" aria-label="Réglages de la carte">
+        <div class="map-zoom-controls">
+          <button type="button" data-map-zoom="-1" aria-label="Dézoomer">−</button>
+          <span><small>Zone affichée</small><strong data-map-radius>Rayon d’environ ${e(mapRadiusLabel())} km</strong></span>
+          <button type="button" data-map-zoom="1" aria-label="Zoomer">+</button>
+        </div>
+        <fieldset><legend>Afficher sur la carte</legend><div class="map-layer-options">
+          ${layerOptions.map(([value, label]) => `<label><input type="checkbox" data-map-layer="${value}"${state.mapLayers[value] ? ' checked' : ''}><span>${e(label)}</span></label>`).join('')}
+        </div></fieldset>
+        ${locationEnabled
+          ? '<p class="proximity-note">Carte centrée sur votre localisation approximative. Le rayon initial est de 50 km.</p>'
+          : '<p class="proximity-note">Activez votre zone pour centrer la carte dans un rayon initial de 50 km autour de vous. Votre position exacte n’est jamais enregistrée.</p><button class="secondary" type="button" data-enable-location>Activer ma zone de proximité</button>'}
+      </section>
+      <div id="mapWorkspace" class="map-workspace">${renderMapWorkspace()}</div>
+    </div>`;
+  }
+
+  async function openMaps() {
+    content.innerHTML = renderMaps();
+    try {
+      state.mapData = await api('/api/members/map');
+      state.mapCenter = {
+        latitude: Number(state.mapData.center?.latitude ?? 46.603354),
+        longitude: Number(state.mapData.center?.longitude ?? 1.888334)
+      };
+      state.mapZoom = defaultMapZoom(state.mapCenter);
+      if (state.route === 'maps') {
+        content.innerHTML = renderMaps();
+        bindDynamicForms();
+      }
+    } catch (error) {
+      content.innerHTML = `<div class="page">${emptyState('Carte indisponible', `Velvet n’a pas pu charger Maps : ${errorMessages[error.message] || error.message}`, '!')}</div>`;
+    }
+  }
+
+  async function enableProximity(button) {
+    if (!navigator.geolocation) {
+      toast('La localisation n’est pas disponible sur cet appareil.', true);
+      return;
+    }
+    button.disabled = true;
+    try {
+      const position = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(
+        resolve,
+        reject,
+        { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 }
+      ));
+      state.locationData = await api('/api/members/location', {
+        method: 'POST',
+        body: JSON.stringify({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          consent: true
+        })
+      });
+      state.mapData = await api('/api/members/map');
+      state.mapCenter = {
+        latitude: Number(state.mapData.center?.latitude ?? 46.603354),
+        longitude: Number(state.mapData.center?.longitude ?? 1.888334)
+      };
+      state.mapZoom = defaultMapZoom(state.mapCenter);
+      content.innerHTML = state.route === 'maps' ? renderMaps() : renderHome();
+      bindDynamicForms();
+      toast('Votre zone approximative est activée.');
+    } catch (error) {
+      const message = error?.code
+        ? 'Autorisez la localisation dans votre navigateur pour activer la proximité.'
+        : (errorMessages[error.message] || error.message);
+      toast(message, true);
+      button.disabled = false;
+    }
+  }
+
+  function eventTile(event) {
+    const date = new Date(event.starts_at);
+    return `<button class="card event-tile" data-open-event="${e(event.id)}">
+      <time datetime="${e(event.starts_at)}"><strong>${e(date.toLocaleDateString('fr-FR', { day: '2-digit' }))}</strong><span>${e(date.toLocaleDateString('fr-FR', { month: 'short' }))}</span></time>
+      <span><small>${e(date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }))} · ${e(event.location_public || 'Lieu confidentiel')}${Number.isFinite(Number(event.distance_km)) ? ` · ${e(event.distance_km)} km` : ''}</small><b>${e(event.title)}</b><em>${e(event.capacity)} places · ${e(event.audience || 'Membres Velvet')}</em></span>
+      <i>→</i>
+    </button>`;
+  }
+
+  function venueTile(venue) {
+    const distance = Number(venue._catalogDistanceKm);
+    const visitors = venueUpcomingProfiles(venue.id);
+    return `<button class="card venue-tile" data-open-venue="${e(venue.id)}">
+      <span class="venue-tile-main"><span class="venue-symbol">⌑</span><span><small>${e(venue.kind || 'lieu Velvet')} · ${e(venue.city || 'Localisation à confirmer')}${Number.isFinite(distance) ? ` · ${e(Math.round(distance))} km` : Number.isFinite(Number(venue.distance_km)) ? ` · ${e(Math.round(Number(venue.distance_km)))} km` : ''}</small><b>${e(venue.name)}</b><em>${e(venue.claim_status === 'claimed' ? 'Fiche professionnelle reliée à Velvet Pro' : 'Référencé par Velvet · informations à confirmer')}</em></span><i>→</i></span>
+      <span class="venue-tile-community">
+        <strong>${visitors.length} profil${visitors.length > 1 ? 's' : ''} annoncé${visitors.length > 1 ? 's' : ''}</strong>
+        ${visitors.length ? `<span class="venue-presence-rail">${visitors.slice(0, 7).map((profile) => {
+          const cover = approvedProfilePhotos(profile)[0];
+          return `<span class="venue-presence-avatar" title="${e(profile.display_name)}">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}</span>`;
+        }).join('')}</span>` : '<small>La communauté apparaîtra ici.</small>'}
+      </span>
+    </button>`;
+  }
+
+  function venueUpcomingProfiles(venueId) {
+    const today = parisDayKey();
+    const rows = list(state.plans.venueVisits)
+      .filter((visit) => visit.venue_id === venueId && String(visit.visit_date || '') >= today)
+      .map((visit) => visit.profile_id === state.profile.id
+        ? state.profile
+        : list(state.directory.profiles).find((profile) => profile.id === visit.profile_id))
+      .filter(Boolean);
+    return [...new Map(rows.map((profile) => [profile.id, profile])).values()];
+  }
+
+  function renderEvents() {
+    const events = state.eventNearbyOnly ? nearbyHomeEvents(50) : list(state.directory.events);
+    const action = state.eventNearbyOnly
+      ? '<button class="secondary" type="button" data-all-events>Voir tout l’agenda</button>'
+      : '';
+    return `<div class="page">${pageHead(
+      state.eventNearbyOnly ? 'À moins de 50 km' : 'Agenda réel',
+      state.eventNearbyOnly ? 'Événements près de chez toi' : 'Sorties',
+      state.eventNearbyOnly
+        ? 'Soirées de clubs, événements professionnels et soirées privées situés dans ta zone approximative.'
+        : 'Seules les sorties effectivement publiées dans Supabase apparaissent ici.',
+      action
+    )}
+      ${events.length ? `<section class="grid two">${events.map(eventTile).join('')}</section>` : emptyState(
+        state.eventNearbyOnly ? 'Aucun événement dans un rayon de 50 km' : 'Aucune sortie publiée',
+        state.eventNearbyOnly
+          ? 'Élargis à tout l’agenda pour découvrir les autres événements publiés.'
+          : 'Aucune soirée fictive n’est conservée. Les prochaines sorties apparaîtront après leur publication par un organisateur ou un établissement validé.',
+        '✦',
+        state.eventNearbyOnly ? '<button class="secondary" type="button" data-all-events>Voir tout l’agenda</button>' : ''
+      )}
+    </div>`;
+  }
+
+  function normalizedVenueText(value) {
+    return String(value || '')
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLocaleLowerCase('fr');
+  }
+
+  function venueRegion(venue) {
+    const explicit = String(venue.region || venue.department_or_province || '').trim();
+    if (explicit && [...VENUE_REGIONS.FR, ...VENUE_REGIONS.BE].includes(explicit)) return explicit;
+    const country = venue.country_code;
+    const latitude = Number(venue.latitude);
+    const longitude = Number(venue.longitude);
+    if (venue.latitude === null || venue.latitude === ''
+      || venue.longitude === null || venue.longitude === ''
+      || !Number.isFinite(latitude) || !Number.isFinite(longitude)) return explicit;
+    if (country === 'BE') {
+      if (latitude >= 50.75 && latitude <= 50.95 && longitude >= 4.22 && longitude <= 4.52) return 'Bruxelles-Capitale';
+      return latitude >= 50.72 ? 'Flandre' : 'Wallonie';
+    }
+    const centers = VENUE_REGION_CENTERS.filter(([code]) => code === country);
+    return centers
+      .map(([, label, centerLatitude, centerLongitude]) => ({
+        label,
+        distance: mapDistanceKm(
+          { latitude: centerLatitude, longitude: centerLongitude },
+          { latitude, longitude }
+        )
+      }))
+      .sort((left, right) => left.distance - right.distance)[0]?.label || explicit;
+  }
+
+  function venueRegionOptions() {
+    const countries = state.venueCountry ? [state.venueCountry] : ['FR', 'BE'];
+    return countries.map((country) => `<optgroup label="${country === 'FR' ? 'France' : 'Belgique'}">${
+      VENUE_REGIONS[country].map((region) => `<option value="${e(region)}"${state.venueRegion === region ? ' selected' : ''}>${e(region)}</option>`).join('')
+    }</optgroup>`).join('');
+  }
+
+  function renderVenues() {
+    const query = state.venueQuery.toLocaleLowerCase('fr');
+    const locationTerm = normalizedVenueText(state.venueLocationQuery);
+    const radius = Math.max(5, Math.min(200, Number(state.venueRadius) || 50));
+    const hasCenter = Number.isFinite(Number(state.venueCenter?.latitude))
+      && Number.isFinite(Number(state.venueCenter?.longitude));
+    const venues = list(state.directory.venueDirectory)
+      .map((venue) => {
+        const latitude = Number(venue.latitude);
+        const longitude = Number(venue.longitude);
+        const hasCoordinates = venue.latitude !== null && venue.latitude !== ''
+          && venue.longitude !== null && venue.longitude !== ''
+          && Number.isFinite(latitude) && Number.isFinite(longitude);
+        return {
+          ...venue,
+          _catalogRegion: venueRegion(venue),
+          _catalogDistanceKm: hasCenter && hasCoordinates
+            ? mapDistanceKm(state.venueCenter, { latitude, longitude })
+            : null
+        };
+      })
+      .filter((venue) =>
+        (!query || `${venue.name} ${venue.city || ''} ${venue.address_public || ''}`.toLocaleLowerCase('fr').includes(query))
+        && (!state.venueKind || venue.kind === state.venueKind)
+        && (!state.venueCountry || venue.country_code === state.venueCountry)
+        && (!state.venueRegion || venue._catalogRegion === state.venueRegion)
+        && (hasCenter
+          ? Number.isFinite(venue._catalogDistanceKm) && venue._catalogDistanceKm <= radius
+          : !locationTerm || normalizedVenueText(`${venue.city || ''} ${venue.postal_code || ''} ${venue.address_public || ''}`).includes(locationTerm))
+      )
+      .sort((left, right) => hasCenter
+        ? left._catalogDistanceKm - right._catalogDistanceKm
+        : String(left.name).localeCompare(String(right.name), 'fr'));
+    const radiusHelp = hasCenter
+      ? `Dans un rayon de ${radius} km autour de ${e(state.venueCenter.label || state.venueLocationQuery)}.`
+      : 'Choisis une ville ou un code postal dans les suggestions pour activer le périmètre.';
+    return `<div class="page venues-page">${pageHead(
+      'Lieux & sorties',
+      'Clubs et établissements',
+      'Une recherche distincte des membres, avec les soirées et les profils qui ont annoncé leur présence.',
+      '<div class="page-head-actions"><button class="secondary" type="button" data-route="events">Agenda</button><button class="secondary" type="button" data-route="maps">Carte</button></div>'
+    )}
+      <section class="card venue-catalog-filters">
+        <div class="venue-catalog-grid">
+          <label>Nom ou mot-clé<input id="venueCatalogSearch" value="${e(state.venueQuery)}" placeholder="Nom ou adresse"></label>
+          <label>Type<select id="venueCatalogKind"><option value="">Tous les types</option>${[['club','Club'],['spa','Spa / sauna'],['bar','Bar'],['love_room','Love room'],['other','Autre professionnel']].map(([value,label]) => `<option value="${value}"${state.venueKind === value ? ' selected' : ''}>${label}</option>`).join('')}</select></label>
+          <label>Pays<select id="venueCatalogCountry"><option value="">France et Belgique</option><option value="FR"${state.venueCountry === 'FR' ? ' selected' : ''}>France</option><option value="BE"${state.venueCountry === 'BE' ? ' selected' : ''}>Belgique</option></select></label>
+          <label>Région<select id="venueCatalogRegion"><option value="">Toutes les régions</option>${venueRegionOptions()}</select></label>
+          <label class="venue-location-filter">Ville ou code postal
+            <span class="commune-input"><input id="venueCatalogLocation" value="${e(state.venueLocationQuery)}" autocomplete="off" placeholder="Exemple : 62400 ou Béthune"><span class="commune-results" data-venue-location-results hidden></span></span>
+          </label>
+          <label class="venue-radius-filter">Périmètre <strong data-venue-radius-label>${radius} km</strong>
+            <input id="venueCatalogRadius" type="range" min="5" max="200" step="5" value="${radius}"${hasCenter ? '' : ' disabled'}>
+            <small>${radiusHelp}</small>
+          </label>
+        </div>
+        <div class="venue-filter-footer"><p class="muted">${venues.length} résultat${venues.length > 1 ? 's' : ''} · les données marquées « à confirmer » ne constituent pas une validation professionnelle.</p>${state.venueLocationQuery ? '<button class="text-button" type="button" data-clear-venue-location>Effacer la zone</button>' : ''}</div>
+      </section>
+      ${venues.length ? `<section class="venue-directory-grid">${venues.map(venueTile).join('')}</section>` : emptyState('Aucun établissement correspondant', 'Modifie les filtres pour élargir la recherche.', '⌑')}
+    </div>`;
+  }
+
+  function notificationIcon(type) {
+    return ({
+      messages: '✉',
+      likes: '♡',
+      album_access: '◇',
+      events: '✦',
+      recommendations: '★',
+      security: '⌾'
+    })[type] || '○';
+  }
+
+  function notificationTile(notification) {
+    const actor = list(state.directory.profiles).find((profile) => profile.id === notification.actor_profile_id);
+    if (actor) {
+      return profilePreviewCard(actor, {
+        variant: 'notification',
+        notification
+      });
+    }
+    return `<button class="notification-tile ${notification.read_at ? '' : 'unread'}" data-open-notification="${e(notification.id)}">
+      <span class="notification-avatar">${notificationIcon(notification.event_type)}</span>
+      <span><small>Velvet · ${e(viewedAtLabel(notification.created_at))}</small><b>${e(notification.title)}</b><em>${e(notification.body || '')}</em></span>
+      ${notification.read_at ? '<i>→</i>' : '<i class="unread-dot" aria-label="Non lue"></i>'}
+    </button>`;
+  }
+
+  function renderNotifications() {
+    const notifications = list(state.notifications);
+    return `<div class="page">${pageHead(
+      'Activité authentique',
+      'Notifications',
+      'Chaque élément correspond à une action réellement enregistrée dans Velvet.',
+      state.unreadCount ? `<button class="secondary" data-read-all-notifications>Tout marquer comme lu · ${state.unreadCount}</button>` : ''
+    )}
+      ${notifications.length ? `<section class="notification-feed profile-preview-feed">${notifications.map(notificationTile).join('')}</section>` : emptyState('Aucune notification', 'Les messages, réactions, accès aux albums et inscriptions apparaîtront ici lorsqu’une action réelle aura lieu.', '○')}
+    </div>`;
+  }
+
+  const AUDIENCE_OPTIONS = [
+    ['couple', 'Couples', 'Profils créés et partagés à deux'],
+    ['woman', 'Femmes', 'Profils individuels féminins'],
+    ['man', 'Hommes', 'Profils individuels masculins'],
+    ['trans_nonbinary', 'Personnes trans et non binaires', 'Identités transgenres et non binaires'],
+    ['other', 'Autres identités', 'Identité privée, fluide ou non classée']
+  ];
+
+  const NOTIFICATION_EVENTS = [
+    ['messages', 'Nouveaux messages', 'Conversation privée et réponses'],
+    ['likes', 'Coups de cœur', 'Réactions sur votre profil ou vos photos'],
+    ['album_access', 'Albums privés', 'Demandes, accès accordés et expirations'],
+    ['profile_views', 'Visites du profil', 'Membres ayant découvert votre univers'],
+    ['events', 'Sorties', 'Inscriptions, rappels et changements'],
+    ['recommendations', 'Recommandations', 'Nouvelles compatibilités et recommandations'],
+    ['security', 'Sécurité du compte', 'Connexion, validation et alertes Velvet']
+  ];
+
+  function settingsChecks(name, options, selected) {
+    const values = new Set(list(selected));
+    return `<div class="settings-options">${options.map(([value, label, help]) => `
+      <label class="settings-toggle">
+        <span><strong>${e(label)}</strong><small>${e(help)}</small></span>
+        <input type="checkbox" name="${e(name)}" value="${e(value)}"${values.has(value) ? ' checked' : ''}>
+        <i aria-hidden="true"></i>
+      </label>`).join('')}</div>`;
+  }
+
+  function notificationEventChecks(events = {}) {
+    return `<div class="settings-options">${NOTIFICATION_EVENTS.map(([value, label, help]) => `
+      <label class="settings-toggle">
+        <span><strong>${e(label)}</strong><small>${e(help)}</small></span>
+        <input type="checkbox" name="event_type" value="${e(value)}"${events[value] !== false ? ' checked' : ''}>
+        <i aria-hidden="true"></i>
+      </label>`).join('')}</div>`;
+  }
+
+  function renderSettingsView(settings) {
+    const privacy = settings.privacy || {};
+    const notifications = settings.notifications || {};
+    const installed = window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone;
+    const browserPermission = 'Notification' in window ? Notification.permission : 'unsupported';
+    const lifecycleProfile = state.lifecycle?.profile || {};
+    const lifecycleAction = state.lifecycle?.action;
+    const access = state.access || {};
+    const accessFeatures = access.features || {};
+    const signature = ['signature', 'beta_full'].includes(access.tier);
+    const memberPrices = list(state.billingCatalog?.prices).filter((price) => price.plan_code === 'member_signature');
+    const priceLabel = (price) => (Number(price.amount_cents || 0) / 100).toLocaleString('fr-FR', {
+      style: 'currency',
+      currency: price.currency || 'EUR'
+    });
+    return `<div class="page settings-page">
+      ${pageHead('Confidentialité · tranquillité · contrôle', 'Paramètres', 'Décide précisément qui peut te découvrir, qui peut t’écrire et ce que Velvet est autorisé à te signaler.')}
+      <form id="settingsForm" class="settings-layout">
+        <section class="card settings-card membership-card ${signature ? 'active' : ''}">
+          <div class="membership-head"><div><p class="eyebrow">Votre accès</p><h2>${signature ? 'Velvet Signature' : 'Velvet Découverte'}</h2><p>${access.source === 'verified_woman' ? 'Accès complet offert à votre profil vérifié.' : access.source === 'founder' ? 'Accès fondateur offert pendant la période de lancement.' : signature ? 'Votre accès complet est actif.' : 'Le cœur de Velvet reste accessible gratuitement.'}</p></div><span>${signature ? 'SIGNATURE' : 'DÉCOUVERTE'}</span></div>
+          ${access.validUntil ? `<small>Accès actif jusqu’au ${e(new Date(access.validUntil).toLocaleDateString('fr-FR'))}.</small>` : ''}
+          <div class="membership-comparison">
+            <div><strong>Découverte</strong><small>Recherche essentielle</small><small>3 nouvelles conversations / semaine</small><small>10 profils suivis</small><small>1 essai Velvet IA</small></div>
+            <div><strong>Signature</strong><small>Recherche avancée et sauvegardée</small><small>Conversations et suivis illimités</small><small>20 textes IA / mois</small><small>Alertes personnalisées</small></div>
+          </div>
+          ${signature ? `<p class="membership-usage">Velvet IA : ${e(accessFeatures.profileAiUsed || 0)} / ${e(accessFeatures.profileAiLimit || '∞')} · profils suivis : ${e(accessFeatures.followingUsed || 0)}${accessFeatures.followLimit ? ` / ${e(accessFeatures.followLimit)}` : ''}</p>` : `<div class="membership-prices">${memberPrices.map((price) => `<button class="secondary" type="button" data-checkout-price="${e(price.price_code)}"><b>${e(priceLabel(price))}</b><small>${price.interval_count === 3 ? 'pour 3 mois' : price.interval_unit === 'year' ? 'par an' : 'par mois'}</small></button>`).join('')}</div>`}
+          ${state.billingCatalog?.provider?.configured ? '' : '<small>Le module est prêt. L’ouverture des paiements attend la validation écrite du partenaire bancaire spécialisé.</small>'}
+          <div class="promotion-redeem" data-promotion-redeem>
+            <label>Vous avez un code promotionnel ?<input name="code" autocomplete="off" maxlength="40" placeholder="VELVET-XXXX-XXXX-XXXX"></label>
+            <button class="secondary" type="button">Activer le code</button>
+          </div>
+        </section>
+        <section class="card settings-card appearance-card">
+          <p class="eyebrow">Apparence</p><h2>Ambiance Velvet</h2>
+          <p>Bascule tout l’espace membre entre le velours sombre et une version claire ivoire, beige, or et bordeaux.</p>
+          <div class="settings-options">
+            <label class="settings-toggle">
+              <span><strong>Mode clair</strong><small>Le choix est mémorisé sur cet appareil et appliqué immédiatement.</small></span>
+              <input type="checkbox" name="light_theme"${state.theme === 'light' ? ' checked' : ''}>
+              <i aria-hidden="true"></i>
+            </label>
+          </div>
+          <div class="theme-swatches" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        </section>
+        <section class="card settings-card">
+          <p class="eyebrow">Visibilité</p><h2>Qui peut voir votre profil ?</h2>
+          <p>Les catégories décochées ne verront plus votre fiche dans Recherche et ne pourront pas l’ouvrir directement.</p>
+          ${settingsChecks('discoverable_by', AUDIENCE_OPTIONS, privacy.discoverable_by)}
+        </section>
+        <section class="card settings-card">
+          <p class="eyebrow">Messagerie</p><h2>Qui peut vous contacter ?</h2>
+          <p>Ce réglage est contrôlé côté serveur lors de la création d’une conversation.</p>
+          ${settingsChecks('contactable_by', AUDIENCE_OPTIONS, privacy.contactable_by)}
+        </section>
+        <section class="card settings-card">
+          <p class="eyebrow">Origine des alertes</p><h2>Notifications venant de…</h2>
+          <p>Filtre les alertes sociales selon le type de profil à l’origine de l’action.</p>
+          ${settingsChecks('notify_from', AUDIENCE_OPTIONS, notifications.notify_from)}
+        </section>
+        <section class="card settings-card">
+          <p class="eyebrow">Activité</p><h2>Que souhaitez-vous recevoir ?</h2>
+          ${notificationEventChecks(notifications.event_types)}
+        </section>
+        <section class="card settings-card">
+          <p class="eyebrow">Canaux</p><h2>Où Velvet peut vous prévenir ?</h2>
+          <div class="settings-options">
+            <label class="settings-toggle"><span><strong>Dans Velvet</strong><small>Badges et centre de notifications</small></span><input type="checkbox" name="in_app_enabled"${notifications.in_app_enabled !== false ? ' checked' : ''}><i></i></label>
+            <label class="settings-toggle"><span><strong>Notifications du téléphone</strong><small>Web mobile et PWA · état : ${e(browserPermission)}</small></span><input type="checkbox" name="browser_enabled"${notifications.browser_enabled ? ' checked' : ''}${browserPermission === 'unsupported' ? ' disabled' : ''}><i></i></label>
+            <label class="settings-toggle"><span><strong>Par e-mail</strong><small>Récapitulatif et alertes choisies</small></span><input type="checkbox" name="email_enabled"${notifications.email_enabled !== false ? ' checked' : ''}><i></i></label>
+          </div>
+          <div class="quiet-hours">
+            <label>Mode silencieux à partir de<input type="time" name="quiet_hours_start" value="${e(String(notifications.quiet_hours_start || '').slice(0, 5))}"></label>
+            <label>Reprendre les alertes à<input type="time" name="quiet_hours_end" value="${e(String(notifications.quiet_hours_end || '').slice(0, 5))}"></label>
+          </div>
+          <button class="secondary" type="button" data-test-notification>Autoriser et tester une notification</button>
+        </section>
+        <section class="card settings-card mobile-app-card">
+          <p class="eyebrow">Web mobile</p><h2>Velvet sur votre écran d’accueil</h2>
+          <p>${installed ? 'Velvet est déjà ouvert comme une application sur cet appareil.' : 'Installe Velvet depuis le navigateur pour obtenir un affichage plein écran, un accès rapide et les notifications web.'}</p>
+          <button class="secondary" type="button" data-install-velvet${state.installPrompt || installed ? '' : ' hidden'}>${installed ? 'Velvet est installé' : 'Installer Velvet'}</button>
+          <small>Sur iPhone : Partager → Sur l’écran d’accueil. Sur Android : menu du navigateur → Installer l’application.</small>
+        </section>
+        <section class="card settings-card account-lifecycle-card">
+          <p class="eyebrow">Cycle de vie du profil</p><h2>Pause et suppression</h2>
+          ${state.lifecycle?.migrationPending ? '<p class="status-box">Cette fonction sera disponible dès l’application de la migration Supabase 0024.</p>'
+            : lifecycleAction ? `<p class="status-box">Une demande de ${lifecycleAction.action_type === 'delete' ? 'suppression' : 'mise en pause'} attend les confirmations par e-mail.${lifecycleAction.execute_after ? ` Suppression définitive prévue le ${e(new Date(lifecycleAction.execute_after).toLocaleDateString('fr-FR'))}.` : ''}</p><button class="secondary" type="button" data-lifecycle-action="cancel">Annuler la demande</button>`
+            : lifecycleProfile.lifecycle_state === 'paused' ? '<p>Le profil est conservé mais invisible pour les autres membres.</p><button class="primary" type="button" data-lifecycle-action="resume">Réactiver mon profil</button>'
+              : lifecycleProfile.lifecycle_state === 'deletion_pending' ? '<p>Le profil est invisible et conservé pendant 30 jours avant effacement définitif.</p><button class="primary" type="button" data-lifecycle-action="cancel">Annuler la suppression</button>'
+                : `<p>La pause conserve la fiche. La suppression la rend invisible après validation, puis efface définitivement les données 30 jours plus tard.</p><div class="lifecycle-actions"><button class="secondary" type="button" data-lifecycle-action="pause">Mettre le profil en pause</button><button class="danger" type="button" data-lifecycle-action="delete">Supprimer le compte</button></div>`}
+          <small>Pour une fiche couple, Velvet adresse un lien personnel à chaque membre actif et n’applique l’action qu’après toutes les validations.</small>
+        </section>
+        <footer class="settings-save">
+          <p id="settingsStatus" class="status-box" hidden></p>
+          <button class="primary" type="submit">Enregistrer mes paramètres</button>
+        </footer>
+      </form>
+    </div>`;
+  }
+
+  async function openSettings() {
+    content.innerHTML = `<div class="page"><section class="loading-state"><span class="loader"></span><p>Chargement de tes préférences…</p></section></div>`;
+    try {
+      [state.settings, state.lifecycle, state.billingCatalog] = await Promise.all([
+        api('/api/members/settings'),
+        api('/api/members/account-actions').catch(() => ({
+          profile: { lifecycle_state: 'active' },
+          action: null,
+          migrationPending: true
+        })),
+        api('/api/billing/catalog').catch(() => ({ prices: [], provider: { configured: false } }))
+      ]);
+      content.innerHTML = renderSettingsView(state.settings);
+      bindSettings();
+      content.focus();
+    } catch (error) {
+      content.innerHTML = `<div class="page">${emptyState('Paramètres indisponibles', errorMessages[error.message] || error.message, '!')}</div>`;
+    }
+  }
+
+  function bindSettings() {
+    const form = document.querySelector('#settingsForm');
+    if (!form) return;
+    form.querySelector('[name=light_theme]')?.addEventListener('change', (event) => {
+      state.theme = applyTheme(event.target.checked ? 'light' : 'dark');
+      storeTheme(state.theme);
+    });
+    const browserToggle = form.querySelector('[name=browser_enabled]');
+    const synchronizeBrowserNotifications = async (enabled) => {
+      if (!browserToggle || !window.VelvetPWA) return false;
+      browserToggle.disabled = true;
+      try {
+        if (!enabled) {
+          await window.VelvetPWA.disableNotifications();
+          browserToggle.checked = false;
+          toast('Notifications désactivées sur cet appareil.');
+          return true;
+        }
+        const result = await window.VelvetPWA.enableNotifications();
+        browserToggle.checked = true;
+        toast(result?.subscribed
+          ? 'Notifications Velvet activées sur cet appareil.'
+          : 'Autorisation accordée. L’envoi distant doit encore être configuré sur cet environnement.');
+        return true;
+      } catch (error) {
+        browserToggle.checked = false;
+        toast(error.message, true);
+        return false;
+      } finally {
+        browserToggle.disabled = false;
+      }
+    };
+    browserToggle?.addEventListener('change', (event) => {
+      synchronizeBrowserNotifications(event.target.checked);
+    });
+    form.querySelector('[data-promotion-redeem] button')?.addEventListener('click', async (event) => {
+      const redeem = event.currentTarget.closest('[data-promotion-redeem]');
+      const button = event.currentTarget;
+      button.disabled = true;
+      try {
+        const result = await api('/api/billing/promotion', {
+          method: 'POST',
+          body: JSON.stringify({ code: redeem.querySelector('[name=code]')?.value })
+        });
+        state.access = result.access;
+        content.innerHTML = renderSettingsView(state.settings);
+        bindSettings();
+        toast('Votre accès Velvet Signature est activé.');
+      } catch (error) {
+        toast(errorMessages[error.message] || error.message, true);
+        button.disabled = false;
+      }
+    });
+    form.querySelectorAll('[data-checkout-price]').forEach((button) => button.addEventListener('click', async () => {
+      button.disabled = true;
+      try {
+        const result = await api('/api/billing/checkout', {
+          method: 'POST',
+          body: JSON.stringify({ priceCode: button.dataset.checkoutPrice })
+        });
+        if (result.checkoutUrl) window.location.href = result.checkoutUrl;
+      } catch (error) {
+        toast(errorMessages[error.message] || error.message, true);
+        button.disabled = false;
+      }
+    }));
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const button = form.querySelector('[type=submit]');
+      const status = form.querySelector('#settingsStatus');
+      const data = new FormData(form);
+      const enabledEvents = new Set(data.getAll('event_type'));
+      state.theme = applyTheme(data.has('light_theme') ? 'light' : 'dark');
+      storeTheme(state.theme);
+      const payload = {
+        discoverable_by: data.getAll('discoverable_by'),
+        contactable_by: data.getAll('contactable_by'),
+        notify_from: data.getAll('notify_from'),
+        event_types: Object.fromEntries(NOTIFICATION_EVENTS.map(([name]) => [name, enabledEvents.has(name)])),
+        in_app_enabled: data.has('in_app_enabled'),
+        browser_enabled: data.has('browser_enabled'),
+        email_enabled: data.has('email_enabled'),
+        quiet_hours_start: data.get('quiet_hours_start'),
+        quiet_hours_end: data.get('quiet_hours_end')
+      };
+      button.disabled = true;
+      status.hidden = false;
+      status.textContent = 'Enregistrement sécurisé…';
+      try {
+        state.settings = await api('/api/members/settings', { method: 'POST', body: JSON.stringify(payload) });
+        status.textContent = 'Tes préférences sont enregistrées et appliquées.';
+        toast('Paramètres enregistrés.');
+      } catch (error) {
+        status.textContent = errorMessages[error.message] || error.message;
+        toast(error.message, true);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    form.querySelector('[data-test-notification]')?.addEventListener('click', async (event) => {
+      event.currentTarget.disabled = true;
+      await synchronizeBrowserNotifications(true);
+      event.currentTarget.disabled = false;
+    });
+
+    form.querySelectorAll('[data-lifecycle-action]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        button.disabled = true;
+        const action = button.dataset.lifecycleAction;
+        try {
+          state.lifecycle = await api('/api/members/account-actions', {
+            method: 'POST',
+            body: JSON.stringify({ action })
+          });
+          content.innerHTML = renderSettingsView(state.settings);
+          bindSettings();
+          toast(['pause','delete'].includes(action)
+            ? 'Les e-mails de confirmation ont été envoyés.'
+            : 'Le profil est de nouveau actif.');
+        } catch (error) {
+          toast(errorMessages[error.message] || error.message, true);
+          button.disabled = false;
+        }
+      });
+    });
+
+    form.querySelector('[data-install-velvet]')?.addEventListener('click', async () => {
+      if (!state.installPrompt) {
+        toast('Utilise le menu du navigateur puis « Sur l’écran d’accueil » ou « Installer ».');
+        return;
+      }
+      await state.installPrompt.prompt();
+      await state.installPrompt.userChoice;
+      state.installPrompt = null;
+    });
+  }
+
+  function renderConversations() {
+    const rows = list(state.directory.conversations);
+    return `<div class="page">${pageHead('Messagerie privée', 'Conversations', 'Seules les conversations auxquelles ton compte participe sont affichées.')}
+      ${rows.length ? `<section class="grid two">${rows.map((conversation) => {
+        const streak = list(state.engagement?.streaks).find((row) => row.conversation_id === conversation.id);
+        return `<button class="card conversation" data-open-conversation="${e(conversation.id)}">
+          <div class="conversation-heading"><p class="eyebrow">${e(conversation.kind)}</p>${streak?.current_streak ? `<span class="streak-badge" title="Série de discussion active">🔥 ${e(streak.current_streak)} j</span>` : ''}</div>
+          <h2>${e(conversation.subject || 'Conversation privée')}</h2>
+          <p>${list(conversation.conversation_members).length} participant(s)</p>
+          ${streak?.longest_streak ? `<small>Meilleure série : ${e(streak.longest_streak)} jour${streak.longest_streak > 1 ? 's' : ''}</small>` : ''}
+        </button>`;
+      }).join('')}</section>` : emptyState('Aucune conversation', 'Tes échanges réels apparaîtront ici. Aucun historique fictif n’a été conservé.', '◌')}
+    </div>`;
+  }
+
+  function conversationStreakCard(streak) {
+    const current = Number(streak?.current_streak || 0);
+    const longest = Number(streak?.longest_streak || 0);
+    const qualified = Number(streak?.qualified_days || 0);
+    if (!current && !longest) {
+      return `<aside class="conversation-streak-card dormant">
+        <span class="streak-flame">◇</span>
+        <div><small>Complicité Velvet</small><strong>Commencez votre série</strong><p>Une journée compte lorsque les deux profils échangent au moins un message.</p></div>
+      </aside>`;
+    }
+    const nextMilestone = [3, 7, 14, 30, 60, 100].find((value) => value > current);
+    return `<aside class="conversation-streak-card">
+      <span class="streak-flame">🔥</span>
+      <div><small>Série de discussion</small><strong>${e(current)} jour${current > 1 ? 's' : ''} de complicité</strong>
+        <p>${current ? `Échangez aujourd’hui pour entretenir la flamme.${nextMilestone ? ` Prochain palier : ${nextMilestone} jours.` : ''}` : `Votre meilleure série reste de ${longest} jours.`}</p>
+        <div class="streak-stats"><span><b>${e(longest)}</b> record</span><span><b>${e(qualified)}</b> jours partagés</span></div>
+      </div>
+    </aside>`;
+  }
+
+  function messageAttachments(message) {
+    const rows = list(message.attachments);
+    if (!rows.length) return '';
+    return `<div class="message-attachments">${rows.map((attachment) => {
+      if (!attachment.previewUrl) return '';
+      if (attachment.media_type === 'image') {
+        return `<a href="${e(attachment.previewUrl)}" target="_blank" rel="noopener noreferrer"><img src="${e(attachment.previewUrl)}" alt="${e(attachment.original_name)}"></a>`;
+      }
+      if (attachment.media_type === 'video') {
+        return `<video controls preload="metadata" src="${e(attachment.previewUrl)}"><a href="${e(attachment.previewUrl)}">Télécharger la vidéo</a></video>`;
+      }
+      return `<a class="message-document" href="${e(attachment.previewUrl)}" target="_blank" rel="noopener noreferrer">▤ ${e(attachment.original_name)} · ${e(Math.max(1, Math.round(Number(attachment.size_bytes || 0) / 1024)))} Ko</a>`;
+    }).join('')}</div>`;
+  }
+
+  async function openConversation(conversationId) {
+    content.innerHTML = `<div class="page"><section class="loading-state"><span class="loader"></span><p>Chargement de la conversation…</p></section></div>`;
+    try {
+      const result = await api(`/api/members/messages?conversationId=${encodeURIComponent(conversationId)}`);
+      const conversation = list(state.directory.conversations).find((row) => row.id === conversationId);
+      if (result.streak) {
+        const otherStreaks = list(state.engagement?.streaks).filter((row) => row.conversation_id !== conversationId);
+        state.engagement.streaks = [result.streak, ...otherStreaks];
+      }
+      content.innerHTML = `<div class="page">
         ${pageHead('Conversation privée', conversation?.subject || 'Conversation', 'Les messages sont enregistrés dans Supabase et protégés par les règles d’accès de la conversation.', '<button class="secondary" data-route="conversations">Retour</button>')}
         ${conversationStreakCard(result.streak)}
         <section class="card">
