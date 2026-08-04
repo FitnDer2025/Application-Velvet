@@ -123,6 +123,7 @@ import {
   onRequestGet as testAgentsGet,
   onRequestPost as testAgentsPost
 } from '../../../functions/api/control/test-agents.js';
+import { onRequestPost as studioMediaPost } from '../../../functions/api/control/studio-media.js';
 import { onRequestGet as billingCatalogGet } from '../../../functions/api/billing/catalog.js';
 import { onRequestPost as billingCheckoutPost } from '../../../functions/api/billing/checkout.js';
 import { onRequestPost as billingPromotionPost } from '../../../functions/api/billing/promotion.js';
@@ -202,6 +203,7 @@ const API_ROUTES = new Map([
   ['POST /api/control/workspace', controlWorkspacePost],
   ['GET /api/control/test-agents', testAgentsGet],
   ['POST /api/control/test-agents', testAgentsPost],
+  ['POST /api/control/studio-media', studioMediaPost],
   ['GET /api/billing/catalog', billingCatalogGet],
   ['POST /api/billing/checkout', billingCheckoutPost],
   ['POST /api/billing/promotion', billingPromotionPost]
