@@ -21,7 +21,7 @@ test('Web et PWA exécutent un seul cœur fonctionnel sous un shell V1.1', async
   assert.doesNotMatch(html, /velvet-people-first\.js/);
   assert.equal((html.match(/<nav class="bottom-nav"[\s\S]*?<\/nav>/)?.[0].match(/data-route=/g) || []).length, 5);
   assert.match(shell, /PRIMARY_ROUTES = \['home', 'discover', 'venues', 'conversations', 'me'\]/);
-  assert.match(worker, /const CACHE = 'velvet-beta-shell-v26'/);
+  assert.match(worker, /const CACHE = 'velvet-beta-shell-v27'/);
 });
 
 test('les photos Supabase alimentent le fil, les résultats et les fiches complètes', async () => {

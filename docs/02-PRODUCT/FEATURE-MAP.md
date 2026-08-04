@@ -114,6 +114,8 @@ Cycle : Découverte → Invitation Velvet → Salon Velvet → Confiance → Exp
 - Sécurité, médias privés, blocages et notifications.
 - Centre d'aide, support, conditions et politique de confidentialité.
 - Export et suppression des données conformément aux obligations applicables.
+- Changement de compte depuis Membres, Pro et Control avec retour à la connexion.
+- Sur le Web, passage direct entre les trois interfaces réservé au rôle administrateur et toujours soumis aux autorisations serveur.
 
 ## 12. Administration
 
