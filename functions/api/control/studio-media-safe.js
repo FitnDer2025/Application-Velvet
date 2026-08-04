@@ -1,6 +1,7 @@
 import { json } from '../auth/_shared.js';
 import { memberSession } from '../members/_shared.js';
 import { onRequestPost as studioMediaPost } from './studio-media.js';
+import { generateSocialPlan, SOCIAL_TEXT_MODEL } from './studio-social-plan.js';
 
 const CONTROL_ROLES = new Set(['admin', 'direction']);
 const FRENCH_VOICE_MODEL = '@cf/myshell-ai/melotts';
@@ -158,9 +159,41 @@ async function generateFrenchVoice(env, requestedText, duration) {
   }, 502);
 }
 
+function socialCapabilities(env) {
+  return {
+    version: 'social-video-v1',
+    binding: Boolean(env.AI && typeof env.AI.run === 'function'),
+    products: ['member', 'pro'],
+    formats: ['9:16', '1:1', '16:9'],
+    textModel: SOCIAL_TEXT_MODEL,
+    voiceEngine: 'browser-speech-fr',
+    recordingEngine: 'display-media-live-crop',
+    sources: ['/marketing/', '/marketing-pro/'],
+    generatedImages: false,
+    syntheticOnly: true
+  };
+}
+
 export async function onRequestPost(context) {
   const body = await context.request.clone().json().catch(() => null);
-  if (!body || body.action !== 'generate_voice') return studioMediaPost(context);
+  const action = body?.action || '';
+
+  if (action === 'capabilities') {
+    const denied = await requireControl(context.request, context.env);
+    if (denied) return denied;
+    return json(socialCapabilities(context.env));
+  }
+
+  if (action === 'plan_video' && ['member', 'pro'].includes(body?.product)) {
+    const denied = await requireControl(context.request, context.env);
+    if (denied) return denied;
+    if (!context.env.AI || typeof context.env.AI.run !== 'function') {
+      return json({ error: 'workers_ai_binding_missing', action: 'plan_video' }, 503);
+    }
+    return json({ plan: await generateSocialPlan(context.env, body) });
+  }
+
+  if (action !== 'generate_voice') return studioMediaPost(context);
 
   const denied = await requireControl(context.request, context.env);
   if (denied) return denied;
