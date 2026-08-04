@@ -2,27 +2,28 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-const clientUrl = new URL('../../beta/static/assets/velvet-studio-lite.js', import.meta.url);
+const clientUrl = new URL('../../beta/static/assets/velvet-studio-live-recorder.js', import.meta.url);
 const serverUrl = new URL('../../../functions/api/control/studio-media.js', import.meta.url);
 const captureUrl = new URL('../../beta/static/assets/velvet-capture-mode.js', import.meta.url);
 const marketingUrl = new URL('../../beta/static/assets/velvet-marketing-mode.js', import.meta.url);
 const buildUrl = new URL('../../beta/scripts/build.mjs', import.meta.url);
 
-test('le générateur léger compile côté navigateur', async () => {
+test('le générateur live compile côté navigateur', async () => {
   const source = await readFile(clientUrl, 'utf8');
   assert.doesNotThrow(() => new Function(source));
-  assert.match(source, /Décrivez la démonstration/);
-  assert.match(source, /Écrans Velvet/);
-  assert.match(source, /captureScreens/);
+  assert.match(source, /Le vrai Velvet/);
+  assert.match(source, /getDisplayMedia/);
+  assert.match(source, /MediaRecorder/);
   assert.match(source, /velvet_capture=/);
 });
 
-test('la démonstration produit ne demande aucun visuel FLUX', async () => {
+test('la démonstration produit enregistre le flux réel sans visuel FLUX', async () => {
   const source = await readFile(clientUrl, 'utf8');
   assert.doesNotMatch(source, /action:\s*['"]generate_image['"]/);
   assert.match(source, /action:\s*['"]plan_video['"]/);
   assert.match(source, /action:\s*['"]generate_voice['"]/);
-  assert.match(source, /domToImage/);
+  assert.match(source, /displayVideo/);
+  assert.doesNotMatch(source, /domToImage|fallbackScreen|toDataURL/);
 });
 
 test('le scénario Workers AI est limité aux écrans Velvet', async () => {
@@ -46,12 +47,13 @@ test('la BETA Marketing protège les données membres réelles', async () => {
   assert.doesNotMatch(marketing, /Données réelles Supabase/);
 });
 
-test('le build charge uniquement le générateur léger après le socle Studio', async () => {
+test('le build charge uniquement le Studio live après le socle', async () => {
   const source = await readFile(buildUrl, 'utf8');
   const base = source.indexOf('velvet-studio-sprint1.js');
-  const lite = source.indexOf('velvet-studio-lite.js');
+  const live = source.indexOf('velvet-studio-live-recorder.js');
   assert.ok(base >= 0);
-  assert.ok(lite > base);
+  assert.ok(live > base);
+  assert.doesNotMatch(source, /velvet-studio-lite\.js/);
   assert.doesNotMatch(source, /velvet-studio-product-demo\.js/);
   assert.doesNotMatch(source, /velvet-studio-v31-compat\.js/);
 });

@@ -3,10 +3,9 @@ import { memberSession } from '../members/_shared.js';
 import { onRequestPost as studioMediaPost } from './studio-media.js';
 
 const CONTROL_ROLES = new Set(['admin', 'direction']);
-const MELO_MODEL = '@cf/myshell-ai/melotts';
-const AURA_MODEL = '@cf/deepgram/aura-1';
+const FRENCH_VOICE_MODEL = '@cf/myshell-ai/melotts';
 
-function cleanSpeech(value, max = 240) {
+function cleanFrenchSpeech(value, max = 170) {
   const source = String(value || '')
     .normalize('NFKC')
     .replace(/[\u0000-\u001f\u007f]/g, ' ')
@@ -18,21 +17,16 @@ function cleanSpeech(value, max = 240) {
   return /[.!?…]$/.test(clipped) ? clipped : `${clipped}.`;
 }
 
-function asciiSpeech(value) {
-  return String(value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[’]/g, "'")
-    .replace(/[–—]/g, '-')
-    .replace(/[^\x20-\x7E]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+function firstSentence(value, max = 125) {
+  const clean = cleanFrenchSpeech(value, max);
+  const match = clean.match(/^.*?[.!?](?:\s|$)/);
+  return match?.[0]?.trim() || clean;
 }
 
-function fallbackSpeech(duration = 15) {
-  return Number(duration) > 20
-    ? 'Bienvenue dans Velvet. Decouvrez des profils complets, echangez en confiance, trouvez des sorties et explorez les lieux proches de vous. Velvet reunit les rencontres, les experiences et la communaute.'
-    : 'Bienvenue dans Velvet. Decouvrez les profils, les sorties et les lieux qui vous ressemblent.';
+function frenchFallback(duration = 6) {
+  return Number(duration) >= 7
+    ? 'Velvet réunit les profils, les échanges et les expériences dans un univers élégant et rassurant.'
+    : 'Découvrez Velvet, un univers élégant pour des rencontres plus sincères.';
 }
 
 async function requireControl(request, env) {
@@ -49,12 +43,20 @@ function errorCode(error) {
   return message.match(/\b(8002|5004|5007|3003|3006|3007|3036|3040)\b/)?.[1] || '';
 }
 
-async function responseFromResult(result, model, engine) {
+function decodeBase64Audio(value) {
+  const binary = atob(String(value || ''));
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  return bytes;
+}
+
+async function frenchAudioResponse(result, attempt) {
   const headers = {
     'content-type': 'audio/mpeg',
     'cache-control': 'no-store',
-    'x-velvet-studio-voice-model': model,
-    'x-velvet-studio-voice-engine': engine
+    'x-velvet-studio-voice-model': FRENCH_VOICE_MODEL,
+    'x-velvet-studio-voice-language': 'fr',
+    'x-velvet-studio-voice-attempt': attempt
   };
 
   if (result instanceof Response) {
@@ -70,60 +72,42 @@ async function responseFromResult(result, model, engine) {
   if (result instanceof ReadableStream) return new Response(result, { headers });
   if (result instanceof ArrayBuffer) return new Response(result, { headers });
   if (ArrayBuffer.isView(result)) return new Response(result.buffer, { headers });
-
-  if (typeof result?.audio === 'string' || typeof result === 'string') {
-    const encoded = typeof result === 'string' ? result : result.audio;
-    const binary = atob(encoded);
-    const bytes = new Uint8Array(binary.length);
-    for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
-    return new Response(bytes, { headers });
-  }
+  if (typeof result?.audio === 'string') return new Response(decodeBase64Audio(result.audio), { headers });
+  if (typeof result === 'string') return new Response(decodeBase64Audio(result), { headers });
   throw new Error('workers_ai_voice_missing');
 }
 
-async function melo(env, prompt, { language = true, engine = 'melotts-fr' } = {}) {
-  const payload = language ? { prompt, lang: 'fr' } : { prompt };
-  const result = await env.AI.run(MELO_MODEL, payload);
-  return responseFromResult(result, MELO_MODEL, engine);
+async function meloFrench(env, prompt, attempt) {
+  const result = await env.AI.run(FRENCH_VOICE_MODEL, { prompt, lang: 'fr' });
+  return frenchAudioResponse(result, attempt);
 }
 
-async function aura(env, text) {
-  const result = await env.AI.run(
-    AURA_MODEL,
-    { text, speaker: 'asteria', encoding: 'mp3' },
-    { returnRawResponse: true }
-  );
-  return responseFromResult(result, AURA_MODEL, 'aura-fallback');
-}
-
-async function generateVoice(env, requestedText, duration) {
-  const max = duration <= 15 ? 220 : 360;
-  const clean = cleanSpeech(requestedText, max);
-  const ascii = asciiSpeech(clean);
-  const safe = fallbackSpeech(duration);
+async function generateFrenchVoice(env, requestedText, duration) {
+  const clean = cleanFrenchSpeech(requestedText, duration <= 5 ? 125 : 170);
+  const short = firstSentence(clean, duration <= 5 ? 100 : 130);
+  const fallback = frenchFallback(duration);
   const attempts = [
-    { name: 'melotts-fr', run: () => melo(env, clean, { language: true, engine: 'melotts-fr' }) },
-    { name: 'melotts-fr-ascii', run: () => melo(env, ascii || safe, { language: true, engine: 'melotts-fr-ascii' }) },
-    { name: 'melotts-minimal', run: () => melo(env, safe, { language: false, engine: 'melotts-minimal' }) },
-    { name: 'aura-fallback', run: () => aura(env, clean || safe) }
+    { name: 'melotts-fr-scene', text: clean },
+    { name: 'melotts-fr-short', text: short },
+    { name: 'melotts-fr-safe', text: fallback }
   ];
   const failures = [];
 
   for (const attempt of attempts) {
     try {
-      const response = await attempt.run();
-      response.headers.set('x-velvet-studio-voice-attempt', attempt.name);
+      const response = await meloFrench(env, attempt.text, attempt.name);
       if (failures.length) response.headers.set('x-velvet-studio-voice-recovered', 'true');
       return response;
     } catch (error) {
-      failures.push({ engine: attempt.name, code: errorCode(error), message: String(error?.message || error).slice(0, 180) });
+      failures.push({ engine: attempt.name, code: errorCode(error) });
     }
   }
 
   return json({
-    error: 'workers_ai_voice_unavailable',
+    error: 'workers_ai_french_voice_unavailable',
     action: 'generate_voice',
-    attempts: failures.map(({ engine, code }) => ({ engine, code }))
+    language: 'fr',
+    attempts: failures
   }, 502);
 }
 
@@ -137,8 +121,8 @@ export async function onRequestPost(context) {
     return json({ error: 'workers_ai_binding_missing', action: 'generate_voice' }, 503);
   }
 
-  const duration = Math.max(10, Math.min(45, Number(body.duration || 15)));
-  const prompt = cleanSpeech(body.text || body.voiceOver, duration <= 15 ? 220 : 360);
+  const duration = Math.max(3, Math.min(12, Number(body.duration || 6)));
+  const prompt = cleanFrenchSpeech(body.text || body.voiceOver, duration <= 5 ? 125 : 170);
   if (!prompt) return json({ error: 'studio_voice_text_required', action: 'generate_voice' }, 400);
-  return generateVoice(context.env, prompt, duration);
+  return generateFrenchVoice(context.env, prompt, duration);
 }

@@ -37,16 +37,15 @@ test('le build publie un accès marketing isolé et son raccourci Control', () =
   assert.match(worker, /GET \/api\/control\/marketing-portrait/);
 });
 
-test('la voix off nettoie et réduit les entrées puis bascule entre plusieurs schémas Workers AI', () => {
+test('la voix off est exclusivement française', () => {
   assert.equal(typeof voiceModule.onRequestPost, 'function');
-  assert.match(voice, /cleanSpeech/);
-  assert.match(voice, /asciiSpeech/);
-  assert.match(voice, /fallbackSpeech/);
+  assert.match(voice, /cleanFrenchSpeech/);
+  assert.match(voice, /frenchFallback/);
   assert.match(voice, /@cf\/myshell-ai\/melotts/);
-  assert.match(voice, /@cf\/deepgram\/aura-1/);
-  assert.match(voice, /returnRawResponse/);
-  assert.match(voice, /workers_ai_voice_unavailable/);
-  assert.match(voice, /x-velvet-studio-voice-recovered/);
+  assert.match(voice, /lang:\s*'fr'/);
+  assert.match(voice, /workers_ai_french_voice_unavailable/);
+  assert.match(voice, /x-velvet-studio-voice-language/);
+  assert.doesNotMatch(voice, /deepgram|aura/i);
   assert.match(worker, /studio-media-safe\.js/);
 });
 
