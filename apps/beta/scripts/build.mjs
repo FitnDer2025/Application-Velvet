@@ -55,11 +55,11 @@ auth = auth
 await emit(resolve(output, 'index.html'), addLegalBar(auth));
 
 const membersSource = await required(sources.members);
-let members = membersSource.replace('<head>', '<head><script src="/assets/velvet-capture-mode.js?v=20260804-4"></script>');
+let members = membersSource.replace('<head>', '<head><script src="/assets/velvet-capture-mode.js?v=20260804-5"></script>');
 await emit(resolve(output, 'membres/index.html'), addLegalBar(members));
 
 let marketing = membersSource
-  .replace('<head>', '<head><script src="/assets/velvet-marketing-mode.js?v=20260804-4"></script>')
+  .replace('<head>', '<head><script src="/assets/velvet-marketing-mode.js?v=20260804-5"></script>')
   .replace('<title>Velvet Membres — BETA privée</title>', '<title>Velvet — BETA Marketing</title>')
   .replaceAll('href="/membres/"', 'href="/marketing/"')
   .replaceAll('BETA privée', 'BETA Marketing')
@@ -83,7 +83,7 @@ await emit(resolve(output, 'pro/index.html'), addLegalBar(pro));
 
 let control = await required(sources.control);
 control = control.replace('</head>', '<link rel="stylesheet" href="/assets/velvet-studio-sprint1.css?v=20260804-3"></head>');
-control = control.replace('</body>', '<script src="/assets/control-live.js?v=20260804-2"></script><script src="/assets/velvet-studio-sprint1.js?v=20260804-3"></script><script src="/assets/velvet-studio-lite.js?v=20260804-4"></script><script src="/assets/velvet-marketing-shortcut.js?v=20260804-4"></script><script src="/assets/velvet-control-scroll-recovery.js?v=20260804-1"></script><script src="/assets/account-access-menu.js?v=20260804-1"></script></body>');
+control = control.replace('</body>', '<script src="/assets/control-live.js?v=20260804-2"></script><script src="/assets/velvet-studio-sprint1.js?v=20260804-3"></script><script src="/assets/velvet-studio-live-recorder.js?v=20260804-5"></script><script src="/assets/velvet-marketing-shortcut.js?v=20260804-5"></script><script src="/assets/velvet-control-scroll-recovery.js?v=20260804-1"></script><script src="/assets/account-access-menu.js?v=20260804-1"></script></body>');
 await emit(resolve(output, 'control/index.html'), addLegalBar(control));
 await cp(sources.controlD, resolve(output, 'control/velvet-control-intelligence-d-beta.html'));
 await cp(sources.controlC, resolve(output, 'control/velvet-control-intelligence-c-beta.html'));
