@@ -13,6 +13,7 @@ Ce document retrace les décisions produit validées. Il ne remplace ni les ADR 
 - Les vidéos et les cas ambigus, incertains ou techniquement non analysables restent dans la file humaine.
 - Les modèles transactionnels et marketing utilisent une enveloppe Velvet fixe, sans HTML arbitraire ; le marketing reste sans diffusion tant que consentement et désinscription ne sont pas opérationnels.
 - Chaque modification de politique IA ou de modèle e-mail et chaque décision automatique sont auditables sans recopier de média intime dans le journal.
+- Gestion dispose d’une recherche membre par pseudonyme, e-mail ou identifiant et d’une fiche de contrôle unique par profil, regroupant les comptes liés, l’état de vérification, l’offre, les alertes et les actions auditées sans afficher les contenus privés.
 
 ### ADR-UX-060 — Compte et interfaces Web
 

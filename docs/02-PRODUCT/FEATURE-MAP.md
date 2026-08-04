@@ -120,6 +120,7 @@ Cycle : Découverte → Invitation Velvet → Salon Velvet → Confiance → Exp
 ## 12. Administration
 
 - Modération des membres, médias, événements, clubs et organisateurs.
+- Recherche des profils membres par pseudonyme, e-mail ou identifiant et fiche de contrôle regroupée par profil, avec comptes personnels liés et accès direct au profil rendu dans Community.
 - Pilotage des accès Découverte, Signature et Pro.
 - Suspension temporaire, blocage et suppression programmée à J+30.
 - Campagnes, codes promotionnels et cohortes fondatrices avec limites et audit.
