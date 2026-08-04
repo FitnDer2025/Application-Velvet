@@ -36,11 +36,15 @@ test('le build publie un accès marketing isolé et son raccourci Control', () =
   assert.match(worker, /GET \/api\/control\/marketing-portrait/);
 });
 
-test('la voix off nettoie et réduit les entrées puis retente avec un texte sûr', () => {
+test('la voix off nettoie et réduit les entrées puis bascule entre plusieurs schémas Workers AI', () => {
   assert.match(voice, /cleanSpeech/);
+  assert.match(voice, /asciiSpeech/);
   assert.match(voice, /fallbackSpeech/);
-  assert.match(voice, /workers_ai_invalid_input/);
-  assert.match(voice, /x-velvet-studio-voice-fallback/);
+  assert.match(voice, /@cf\/myshell-ai\/melotts/);
+  assert.match(voice, /@cf\/deepgram\/aura-1/);
+  assert.match(voice, /returnRawResponse/);
+  assert.match(voice, /workers_ai_voice_unavailable/);
+  assert.match(voice, /x-velvet-studio-voice-recovered/);
   assert.match(worker, /studio-media-safe\.js/);
 });
 
