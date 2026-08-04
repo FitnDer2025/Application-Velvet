@@ -458,7 +458,7 @@
         audience: 'À propos du couple', kicker: 'Votre façon de rencontrer',
         title: 'Quel type de connexion vous ressemble ?',
         guide: 'Choisissez les réponses qui vous attirent. Si aucune ne convient, écrivez la vôtre en quelques mots.',
-        body: () => checkGrid('meeting_styles', ['Échanges d’abord, rencontre ensuite', 'Sorties en club ou spa', 'Soirées privées en petit comité', 'Rencontres suivies', 'Découverte sans scénario écrit', 'Selon le feeling'], selected('meeting_styles'))
+        body: () => checkGrid('meeting_styles', ['Faire connaissance avant de se rencontrer', 'Sorties en club ou spa', 'Soirées privées en petit comité', 'Rencontres suivies', 'Découverte sans scénario écrit', 'Selon le feeling'], selected('meeting_styles'))
       },
       {
         audience: 'À propos du couple', kicker: 'Vos pratiques communes',
