@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const clientUrl = new URL('../../beta/static/assets/velvet-studio-live-recorder.js', import.meta.url);
+const directorUrl = new URL('../../beta/static/assets/velvet-studio-story-director.js', import.meta.url);
 const serverUrl = new URL('../../../functions/api/control/studio-media.js', import.meta.url);
 const captureUrl = new URL('../../beta/static/assets/velvet-capture-mode.js', import.meta.url);
 const marketingUrl = new URL('../../beta/static/assets/velvet-marketing-mode.js', import.meta.url);
@@ -26,12 +27,20 @@ test('la démonstration produit enregistre le flux réel sans visuel FLUX', asyn
   assert.doesNotMatch(source, /domToImage|fallbackScreen|toDataURL/);
 });
 
-test('le scénario Workers AI est limité aux écrans Velvet', async () => {
+test('le scénario sensuel dirige chaque écran réel Velvet', async () => {
   const source = await readFile(serverUrl, 'utf8');
-  assert.match(source, /ALLOWED_SCREENS/);
-  assert.match(source, /mode:\s*'product-demo'/);
-  assert.match(source, /aucune photographie inventée/);
-  assert.match(source, /pipeline:\s*\['plan', 'velvet-screens', 'voice', 'render'\]/);
+  const director = await readFile(directorUrl, 'utf8');
+  assert.doesNotThrow(() => new Function(director));
+  assert.match(source, /@cf\/zai-org\/glm-4\.7-flash/);
+  assert.match(source, /story-led-product-demo/);
+  assert.match(source, /une envie intime → une découverte → une attirance/);
+  assert.match(source, /Le scénario est le réalisateur/);
+  assert.match(source, /ALLOWED_ACTIONS/);
+  assert.match(source, /story-led-velvet-live-recording/);
+  assert.match(director, /state\.plan/);
+  assert.match(director, /showStoryBeat/);
+  assert.match(director, /vsd-caption/);
+  assert.match(director, /Arc narratif/);
 });
 
 test('la BETA Marketing protège les données membres réelles', async () => {
@@ -47,12 +56,12 @@ test('la BETA Marketing protège les données membres réelles', async () => {
   assert.doesNotMatch(marketing, /Données réelles Supabase/);
 });
 
-test('le build charge uniquement le Studio live après le socle', async () => {
+test('le build charge le réalisateur narratif après le Studio live', async () => {
   const source = await readFile(buildUrl, 'utf8');
   const base = source.indexOf('velvet-studio-sprint1.js');
   const live = source.indexOf('velvet-studio-live-recorder.js');
-  assert.ok(base >= 0);
-  assert.ok(live > base);
+  const director = source.indexOf('velvet-studio-story-director.js');
+  assert.ok(base >= 0 && live > base && director > live);
   assert.doesNotMatch(source, /velvet-studio-lite\.js/);
   assert.doesNotMatch(source, /velvet-studio-product-demo\.js/);
   assert.doesNotMatch(source, /velvet-studio-v31-compat\.js/);
