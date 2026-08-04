@@ -31,7 +31,7 @@ test('le serveur Workers AI conserve récit illustration et voix française', as
 test('le réalisateur narratif contrôle le parcours visible', async () => {
   const source = await readFile(directorUrl, 'utf8');
   assert.doesNotThrow(() => new Function(source));
-  assert.match(source, /Une envie\. Une histoire\. Velvet/);
+  assert.match(source, /Une envie\.<br>Une histoire\. Velvet/);
   assert.match(source, /Arc narratif/);
   assert.match(source, /showStoryBeat/);
   assert.match(source, /data-vsd-caption/);
