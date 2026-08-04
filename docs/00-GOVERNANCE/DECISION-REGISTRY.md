@@ -107,6 +107,7 @@
 - Codex livre de manière autonome les changements Velvet jusqu'à leur fusion et leur déploiement.
 - Cyril conserve exclusivement l'exécution distante des scripts et migrations SQL Supabase.
 - Velvet Contrôle est organisé en cinq destinations : Pilotage, À traiter, IA & modération, Communications et Gestion ; son accueil montre en priorité ce que fait l’IA et ce que l’humain doit décider (`ADR-UX-061`).
+- Gestion permet de rechercher un profil membre par pseudonyme, e-mail ou identifiant, puis d’ouvrir une fiche de contrôle regroupant les comptes personnels liés et les seuls éléments opérationnels nécessaires, sans afficher les contenus privés (`ADR-UX-061`).
 - Les modèles e-mail restent dans une enveloppe visuelle Velvet fixe et auditée ; aucun envoi marketing n’est autorisé sans consentement et désinscription opérationnels (`ADR-UX-061`).
 
 ## ADR récentes

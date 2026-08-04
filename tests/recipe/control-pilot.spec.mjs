@@ -28,10 +28,17 @@ function controlWorkspace() {
       { template_key: 'couple_invitation', category: 'transactional', label: 'Invitation de la moitié', status: 'active', subject: 'Votre moitié vous attend dans Velvet', preheader: 'Votre histoire vous attend.', heading: 'Votre histoire vous attend.', body_text: '{{profile_name}} a entrouvert la porte de votre espace Velvet.', cta_label: 'Poursuivre notre histoire', footer_text: 'Lien personnel valable 7 jours.', updated_at: now },
       { template_key: 'marketing_launch', category: 'marketing', label: 'Annonce du lancement Velvet', status: 'draft', subject: 'Velvet ouvre bientôt ses portes', preheader: 'Une nouvelle expérience commence.', heading: 'Une nouvelle expérience commence.', body_text: 'Velvet réunit les membres et les professionnels.', cta_label: 'Découvrir Velvet', footer_text: 'Retirez votre consentement marketing à tout moment.', updated_at: now }
     ],
-    accounts: [{ user_id: '11111111-1111-4111-8111-111111111111', email: 'membre@velvet.test', status: 'active', roles: ['member'], profile_id: '22222222-2222-4222-8222-222222222222', display_name: 'Couple de recette', profile_type: 'couple', verification_status: 'verified', access_tier: 'signature' }],
-    profiles: [{ id: '22222222-2222-4222-8222-222222222222', display_name: 'Couple de recette', profile_type: 'couple', admission_status: 'approved', verification_status: 'verified', visibility: 'visible', created_at: now }],
+    accounts: [
+      { user_id: '11111111-1111-4111-8111-111111111111', email: 'membre@velvet.test', status: 'active', roles: ['member'], profile_id: '22222222-2222-4222-8222-222222222222', display_name: 'Couple de recette', profile_type: 'couple', verification_status: 'verified', access_tier: 'signature', access_source: 'founder' },
+      { user_id: '33333333-3333-4333-8333-333333333333', email: 'partenaire@velvet.test', status: 'active', roles: ['member'], profile_id: '22222222-2222-4222-8222-222222222222', display_name: 'Couple de recette', profile_type: 'couple', verification_status: 'verified', access_tier: 'signature', access_source: 'founder' },
+      { user_id: '44444444-4444-4444-8444-444444444444', email: 'autre@velvet.test', status: 'active', roles: ['member'], profile_id: '55555555-5555-4555-8555-555555555555', display_name: 'Profil témoin', profile_type: 'individual', gender_identity: 'Femme', verification_status: 'verified', access_tier: 'signature', access_source: 'verified_woman' }
+    ],
+    profiles: [
+      { id: '22222222-2222-4222-8222-222222222222', display_name: 'Couple de recette', profile_type: 'couple', admission_status: 'approved', verification_status: 'verified', visibility: 'visible', created_at: now },
+      { id: '55555555-5555-4555-8555-555555555555', display_name: 'Profil témoin', profile_type: 'individual', admission_status: 'approved', verification_status: 'verified', visibility: 'visible', created_at: now }
+    ],
     establishments: [], venueDirectory: [], staff: [], events: [], registrations: [], organizers: [],
-    reports: [{ id: 'report-1', subject_type: 'profile', category: 'sécurité', description: 'Vérification humaine demandée.', status: 'open', created_at: now }],
+    reports: [{ id: 'report-1', subject_type: 'profile', subject_id: '22222222-2222-4222-8222-222222222222', category: 'sécurité', description: 'Vérification humaine demandée.', status: 'open', created_at: now }],
     releaseChecks: [{ check_code: 'open_reports', status: 'warning', detail: 'Un signalement reste à traiter.', affected_count: 1 }],
     pendingMedia: [], verifications: [], dataRequests: [], audits: [], billingPrices: [], promotions: [],
     generatedPromotionCode: null
@@ -100,5 +107,21 @@ test('Velvet Contrôle rend le briefing, les décisions IA et les actions sur to
   await navigation.getByRole('button', { name: /À traiter/ }).click();
   await expect(page.getByRole('heading', { name: 'À traiter' })).toBeVisible();
   await expect(page.getByText('Vérification humaine demandée.')).toBeVisible();
+
+  await navigation.getByRole('button', { name: /Gestion/ }).click();
+  await expect(page.getByRole('heading', { name: 'Gestion' })).toBeVisible();
+  const memberSearch = page.getByRole('searchbox', { name: 'Rechercher un membre' });
+  await expect(memberSearch).toBeVisible();
+  await memberSearch.fill('partenaire@velvet.test');
+  await expect(page.getByText('1 résultat pour « partenaire@velvet.test »')).toBeVisible();
+  await page.getByRole('button', { name: /Couple de recette.*Ouvrir la fiche/ }).click();
+  await expect(page.locator('[data-member-sheet]')).toBeVisible();
+  await expect(page.getByText('Fiche de contrôle')).toBeVisible();
+  await expect(page.getByText('2 comptes personnels liés')).toBeVisible();
+  await expect(page.getByText('partenaire@velvet.test')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Voir dans Membres' })).toHaveAttribute('href', '/membres/?route=members&profile=22222222-2222-4222-8222-222222222222');
+  await page.getByRole('button', { name: '← Retour aux membres' }).click();
+  await memberSearch.fill('profil introuvable');
+  await expect(page.getByText('Aucun membre trouvé')).toBeVisible();
   expect(failures).toEqual([]);
 });

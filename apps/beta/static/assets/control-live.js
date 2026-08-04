@@ -5,6 +5,8 @@
   let data = null;
   let currentView = 'pilot';
   let managementSection = 'members';
+  let memberSearchQuery = '';
+  let selectedMemberProfileId = null;
   let historyFilter = 'all';
   let selectedTemplateKey = null;
   let mediaViewer = null;
@@ -275,10 +277,149 @@
     return 'Découverte';
   }
 
+  function normalizedSearch(value) {
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('fr-FR').trim();
+  }
+
+  function memberDirectory() {
+    const entries = new Map();
+    for (const profile of data.profiles || []) {
+      entries.set(profile.id, { profile, accounts: [] });
+    }
+    for (const account of data.accounts || []) {
+      if (!account.profile_id) continue;
+      if (!entries.has(account.profile_id)) {
+        entries.set(account.profile_id, {
+          profile: {
+            id: account.profile_id,
+            display_name: account.display_name,
+            profile_type: account.profile_type,
+            verification_status: account.verification_status
+          },
+          accounts: []
+        });
+      }
+      entries.get(account.profile_id).accounts.push(account);
+    }
+    return [...entries.values()].sort((left, right) => {
+      const created = new Date(right.profile.created_at || 0) - new Date(left.profile.created_at || 0);
+      return created || String(left.profile.display_name || '').localeCompare(String(right.profile.display_name || ''), 'fr');
+    });
+  }
+
+  function memberSearchMatches(entry, query) {
+    if (!query) return true;
+    const profile = entry.profile || {};
+    const values = [
+      profile.display_name,
+      profile.id,
+      profile.profile_type,
+      profile.verification_status,
+      profile.admission_status,
+      profile.visibility,
+      ...entry.accounts.flatMap((account) => [
+        account.email,
+        account.user_id,
+        account.gender_identity,
+        account.status,
+        ...(account.roles || [])
+      ])
+    ];
+    return normalizedSearch(values.filter(Boolean).join(' ')).includes(query);
+  }
+
+  function profileTypeLabel(profile) {
+    return profile.profile_type === 'couple' ? 'Couple' : profile.profile_type === 'individual' ? 'Profil individuel' : profile.profile_type || 'Profil membre';
+  }
+
+  function readableStatus(status) {
+    return ({
+      active: 'Actif', suspended: 'Suspendu', closed: 'Fermé', verified: 'Vérifié', pending: 'En attente',
+      failed: 'Échec', revoked: 'Révoqué', approved: 'Admis', rejected: 'Refusé', beta_members: 'Visible BETA',
+      published: 'Publié', private: 'Privé', visible: 'Visible', deletion_pending: 'Suppression programmée'
+    })[status] || status || 'Non renseigné';
+  }
+
+  function statusTone(status) {
+    if (['active', 'verified', 'approved', 'beta_members', 'published', 'visible'].includes(status)) return 'ok';
+    if (['suspended', 'pending', 'review', 'deletion_pending'].includes(status)) return 'warning';
+    if (['closed', 'failed', 'revoked', 'rejected'].includes(status)) return 'danger';
+    return 'neutral';
+  }
+
+  function initials(value) {
+    return String(value || 'V').split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+  }
+
+  function aggregateAccountStatus(accounts) {
+    const statuses = accounts.map((account) => account.status).filter(Boolean);
+    if (statuses.includes('closed')) return 'closed';
+    if (statuses.includes('suspended')) return 'suspended';
+    return statuses[0] || 'unknown';
+  }
+
+  function memberResult(entry) {
+    const profile = entry.profile || {};
+    const primaryAccount = entry.accounts[0] || {};
+    const status = aggregateAccountStatus(entry.accounts);
+    const emailSummary = entry.accounts.map((account) => account.email).filter(Boolean).join(' · ');
+    return `<button class="control-member-result" type="button" data-member-profile="${safe(profile.id)}">
+      <span class="control-member-avatar" aria-hidden="true">${safe(initials(profile.display_name))}</span>
+      <span class="control-member-result-copy"><strong>${safe(profile.display_name || 'Profil sans pseudo')}</strong><small>${safe(profileTypeLabel(profile))} · ${safe(emailSummary || 'Aucun compte actif lié')}</small><span>${safe(accessLabel(primaryAccount))} · ${safe(readableStatus(profile.verification_status || primaryAccount.verification_status))}</span></span>
+      <span class="control-member-result-state">${state(readableStatus(status), statusTone(status))}<small>Ouvrir la fiche</small></span>
+    </button>`;
+  }
+
+  function controlFact(label, value, code = false) {
+    return `<div class="control-member-fact"><dt>${safe(label)}</dt><dd${code ? ' class="control-member-code"' : ''}>${safe(value || 'Non renseigné')}</dd></div>`;
+  }
+
+  function memberControlSheet(entry) {
+    const profile = entry.profile || {};
+    const primaryAccount = entry.accounts[0] || {};
+    const accountIds = new Set(entry.accounts.map((account) => account.user_id));
+    const relatedReports = (data.reports || []).filter((report) => report.subject_id === profile.id || accountIds.has(report.subject_id));
+    const openReports = relatedReports.filter((report) => ['open', 'assigned', 'appealed'].includes(report.status));
+    const pendingMedia = (data.pendingMedia || []).filter((media) => media.profile_id === profile.id);
+    const verifications = (data.verifications || []).filter((verification) => accountIds.has(verification.user_id));
+    const relatedAudits = (data.audits || []).filter((audit) => audit.entity_id === profile.id || accountIds.has(audit.entity_id)).slice(0, 12);
+    const accountStatus = aggregateAccountStatus(entry.accounts);
+    const suspendedAccount = entry.accounts.find((account) => account.status === 'suspended');
+    const canManage = data.permissions?.canConfigure && data.monetizationAvailable;
+    return `<section class="control-member-sheet" data-member-sheet="${safe(profile.id)}">
+      <header class="control-member-sheet-head">
+        <button class="control-btn ghost" type="button" data-member-back>← Retour aux membres</button>
+        <div><p class="control-eyebrow">Fiche de contrôle</p><h2>${safe(profile.display_name || 'Profil sans pseudo')}</h2><p>${safe(profileTypeLabel(profile))} · ${safe(entry.accounts.length)} compte${entry.accounts.length > 1 ? 's' : ''} personnel${entry.accounts.length > 1 ? 's' : ''} lié${entry.accounts.length > 1 ? 's' : ''}</p></div>
+        <a class="control-btn secondary" href="/membres/?route=members&amp;profile=${safe(profile.id)}" target="_blank" rel="noopener">Voir dans Membres</a>
+      </header>
+      <div class="control-metrics control-member-metrics">
+        <article class="control-metric"><small>État des comptes</small><strong>${safe(readableStatus(accountStatus))}</strong><span>${suspendedAccount?.suspended_until ? `suspension jusqu’au ${safe(date(suspendedAccount.suspended_until))}` : 'Aucune suspension active'}</span></article>
+        <article class="control-metric"><small>Identité & majorité</small><strong>${safe(readableStatus(profile.verification_status || primaryAccount.verification_status))}</strong><span>${safe(readableStatus(profile.admission_status))}</span></article>
+        <article class="control-metric"><small>Accès membre</small><strong>${safe(primaryAccount.access_tier === 'signature' ? 'Signature' : 'Découverte')}</strong><span>${primaryAccount.access_until ? `jusqu’au ${safe(date(primaryAccount.access_until, false))}` : safe(primaryAccount.access_source || 'accès standard')}</span></article>
+        <article class="control-metric${openReports.length || pendingMedia.length ? ' highlight' : ''}"><small>Points à contrôler</small><strong>${safe(openReports.length + pendingMedia.length)}</strong><span>${safe(openReports.length)} signalement${openReports.length > 1 ? 's' : ''} · ${safe(pendingMedia.length)} média${pendingMedia.length > 1 ? 's' : ''}</span></article>
+      </div>
+      <div class="control-grid equal">
+        <section class="control-card"><div class="control-section-title"><div><h2>Profil Velvet</h2><p>Identité publique et état opérationnel uniquement.</p></div>${state(readableStatus(profile.visibility), statusTone(profile.visibility))}</div><dl class="control-member-facts">${controlFact('Pseudo', profile.display_name)}${controlFact('Type', profileTypeLabel(profile))}${controlFact('Identifiant profil', profile.id, true)}${controlFact('Créé le', date(profile.created_at, false))}${controlFact('Admission', readableStatus(profile.admission_status))}${controlFact('Visibilité', readableStatus(profile.visibility))}</dl></section>
+        <section class="control-card"><div class="control-section-title"><div><h2>Contrôles en cours</h2><p>Aucun contenu privé n’est affiché dans cette fiche.</p></div>${openReports.length || pendingMedia.length ? state('Attention requise', 'warning') : state('Aucun blocage', 'ok')}</div><div class="control-member-checks"><article><strong>${safe(openReports.length)}</strong><span>signalement${openReports.length > 1 ? 's' : ''} ouvert${openReports.length > 1 ? 's' : ''}</span></article><article><strong>${safe(pendingMedia.length)}</strong><span>média${pendingMedia.length > 1 ? 's' : ''} en revue humaine</span></article><article><strong>${safe(verifications.length)}</strong><span>vérification${verifications.length > 1 ? 's' : ''} à suivre</span></article></div>${openReports.length ? '<button class="control-btn secondary" type="button" data-nav-view="actions">Ouvrir les signalements</button>' : ''}${pendingMedia.length ? '<button class="control-btn secondary" type="button" data-nav-view="intelligence">Ouvrir les médias</button>' : ''}</section>
+      </div>
+      <section class="control-card control-section"><div class="control-section-title"><div><h2>Comptes personnels liés</h2><p>Chaque accès reste individuel, y compris pour un profil Couple.</p></div>${state(`${entry.accounts.length} compte${entry.accounts.length > 1 ? 's' : ''}`, 'info')}</div><div class="control-linked-accounts">${entry.accounts.map((account) => `<article class="control-linked-account"><header><div><strong>${safe(account.email)}</strong><small>${safe((account.roles || []).join(', ') || 'membre')} · <span class="control-member-code">${safe(account.user_id)}</span></small></div>${state(readableStatus(account.status), statusTone(account.status))}</header>${account.moderation_reason ? `<p class="control-member-alert">Motif enregistré : ${safe(account.moderation_reason)}</p>` : ''}${canManage ? `<form class="control-inline-form control-member-action-form" data-account-state="${safe(account.user_id)}"><label>Action<select name="accountAction"><option value="activate">Activer</option><option value="suspend">Suspendre</option><option value="block">Bloquer</option><option value="delete">Supprimer à J+30</option></select></label><label>Durée (h)<input name="durationHours" type="number" min="1" max="8760" value="24"></label><label>Motif<input name="reason" maxlength="500" placeholder="Motif de la décision"></label><button class="control-btn ghost" type="submit">Confirmer</button></form>` : '<small class="control-card-copy">Actions réservées à l’administration et à la direction.</small>'}</article>`).join('') || emptyState('Aucun compte lié', 'Ce profil nécessite une vérification de son rattachement.')}</div></section>
+      <section class="control-card control-section"><div class="control-section-title"><div><h2>Accès & offre</h2><p>Le changement est appliqué au profil partagé et audité.</p></div>${state(accessLabel(primaryAccount), primaryAccount.access_tier === 'signature' ? 'ok' : 'neutral')}</div>${canManage ? `<form class="control-inline-form" data-member-access="${safe(profile.id)}"><label>Accès<select name="mode"><option value="discovery"${primaryAccount.access_tier === 'discovery' ? ' selected' : ''}>Découverte</option><option value="signature"${primaryAccount.access_tier === 'signature' ? ' selected' : ''}>Signature</option></select></label><label>Jours<input name="durationDays" type="number" min="1" max="3650" value="90"></label><button class="control-btn ghost" type="submit">Appliquer</button></form>` : '<p class="control-card-copy">Modification réservée à l’administration et à la direction.</p>'}</section>
+      <section class="control-card control-section"><div class="control-section-title"><div><h2>Historique lié</h2><p>Dernières actions tracées pour ce profil et ses comptes.</p></div></div>${relatedAudits.length ? relatedAudits.map((item) => `<article class="control-audit-row"><time>${safe(date(item.occurred_at))}</time><div><strong>${safe(item.action)}</strong><small>${safe(item.actor_type)} · ${safe(item.entity_type)}</small></div>${state(`#${item.sequence_number}`, item.actor_type === 'ai_agent' ? 'info' : 'neutral')}</article>`).join('') : emptyState('Aucune action liée', 'L’historique apparaîtra après la première opération auditée.')}</section>
+    </section>`;
+  }
+
   function membersManagement() {
-    if (!data.monetizationAvailable) return emptyState('Gestion des accès indisponible', 'La migration 0026 reste requise pour piloter les droits commerciaux.');
-    const accounts = (data.accounts || []).filter((account) => account.profile_id);
-    return `<div class="control-access-grid">${accounts.map((account) => `<article class="control-access-card"><header><div><h3>${safe(account.display_name || account.email)}</h3><p>${safe(account.email)} · ${safe(account.profile_type === 'couple' ? 'Couple' : account.gender_identity || 'Individuel')} · ${safe(account.verification_status || 'non vérifié')}</p></div>${state(account.status, account.status === 'active' ? 'ok' : account.status === 'suspended' ? 'warning' : 'danger')}</header><small>${safe(accessLabel(account))}${account.access_until ? ` · jusqu’au ${safe(date(account.access_until, false))}` : ''}</small><form class="control-inline-form" data-member-access="${safe(account.profile_id)}"><label>Accès<select name="mode"><option value="discovery"${account.access_tier === 'discovery' ? ' selected' : ''}>Découverte</option><option value="signature"${account.access_tier === 'signature' ? ' selected' : ''}>Signature</option></select></label><label>Jours<input name="durationDays" type="number" min="1" max="3650" value="90"></label><button class="control-btn ghost" type="submit">Appliquer</button></form><form class="control-inline-form" data-account-state="${safe(account.user_id)}"><label>Compte<select name="accountAction"><option value="activate">Activer</option><option value="suspend">Suspendre</option><option value="block">Bloquer</option><option value="delete">Supprimer à J+30</option></select></label><label>Heures<input name="durationHours" type="number" min="1" max="8760" value="24"></label><button class="control-btn ghost" type="submit">Confirmer</button></form></article>`).join('')}</div>`;
+    const directory = memberDirectory();
+    const selected = directory.find((entry) => entry.profile.id === selectedMemberProfileId);
+    if (selected) return memberControlSheet(selected);
+    if (selectedMemberProfileId) selectedMemberProfileId = null;
+    const query = normalizedSearch(memberSearchQuery);
+    const matches = directory.filter((entry) => memberSearchMatches(entry, query));
+    const visible = matches.slice(0, query ? 60 : 30);
+    const summary = query
+      ? `${matches.length} résultat${matches.length > 1 ? 's' : ''} pour « ${memberSearchQuery.trim()} »`
+      : `${visible.length} profil${visible.length > 1 ? 's' : ''} récent${visible.length > 1 ? 's' : ''} affiché${visible.length > 1 ? 's' : ''} sur ${directory.length}`;
+    return `<section class="control-member-directory"><div class="control-member-search"><label for="controlMemberSearch">Rechercher un membre</label><div class="control-member-search-field"><input id="controlMemberSearch" data-member-search type="search" inputmode="search" autocomplete="off" maxlength="180" placeholder="Pseudo, e-mail ou identifiant…" value="${safe(memberSearchQuery)}" aria-describedby="controlMemberSearchSummary">${memberSearchQuery ? '<button class="control-btn ghost" type="button" data-clear-member-search>Effacer</button>' : ''}</div><p id="controlMemberSearchSummary" aria-live="polite">${safe(summary)}</p></div><div class="control-member-results">${visible.length ? visible.map(memberResult).join('') : emptyState('Aucun membre trouvé', 'Vérifie le pseudo, l’e-mail ou l’identifiant saisi.')}</div>${matches.length > visible.length ? `<p class="control-member-limit">Affichage limité aux ${visible.length} premiers résultats. Affine la recherche pour retrouver le membre exact.</p>` : ''}</section>`;
   }
 
   function proManagement() {
@@ -297,7 +438,8 @@
   function managementView() {
     const tabs = { members: 'Membres', pro: 'Professionnels', offers: 'Accès & offres', invitations: 'Invitations' };
     const content = managementSection === 'pro' ? proManagement() : managementSection === 'offers' ? offersManagement() : managementSection === 'invitations' ? invitationsManagement() : membersManagement();
-    return `<section class="control-page" data-page="management">${pageHead('Administration structurée', 'Gestion', 'Les opérations détaillées restent accessibles sans encombrer ton briefing quotidien.')}<nav class="control-management-tabs" aria-label="Rubriques de gestion">${Object.entries(tabs).map(([key, label]) => `<button class="control-tab-button${managementSection === key ? ' active' : ''}" type="button" data-management-section="${key}">${label}</button>`).join('')}</nav><div class="control-management-panel">${content}</div><section class="control-section"><div class="control-section-title"><div><h2>Journal d’audit</h2><p>Dernières actions système, IA et Contrôle.</p></div></div><div class="control-card">${(data.audits || []).slice(0, 40).map((item) => `<article class="control-audit-row"><time>${safe(date(item.occurred_at))}</time><div><strong>${safe(item.action)}</strong><small>${safe(item.actor_type)} · ${safe(item.entity_type)} · ${safe(item.entity_id || 'système')}</small></div>${state(`#${item.sequence_number}`, item.actor_type === 'ai_agent' ? 'info' : 'neutral')}</article>`).join('') || emptyState('Aucune action auditée', 'Le journal commencera à la prochaine opération.')}</div></section></section>`;
+    const generalAudit = managementSection === 'members' && selectedMemberProfileId ? '' : `<section class="control-section"><div class="control-section-title"><div><h2>Journal d’audit</h2><p>Dernières actions système, IA et Contrôle.</p></div></div><div class="control-card">${(data.audits || []).slice(0, 40).map((item) => `<article class="control-audit-row"><time>${safe(date(item.occurred_at))}</time><div><strong>${safe(item.action)}</strong><small>${safe(item.actor_type)} · ${safe(item.entity_type)} · ${safe(item.entity_id || 'système')}</small></div>${state(`#${item.sequence_number}`, item.actor_type === 'ai_agent' ? 'info' : 'neutral')}</article>`).join('') || emptyState('Aucune action auditée', 'Le journal commencera à la prochaine opération.')}</div></section>`;
+    return `<section class="control-page" data-page="management">${pageHead('Administration structurée', 'Gestion', 'Les opérations détaillées restent accessibles sans encombrer ton briefing quotidien.')}<nav class="control-management-tabs" aria-label="Rubriques de gestion">${Object.entries(tabs).map(([key, label]) => `<button class="control-tab-button${managementSection === key ? ' active' : ''}" type="button" data-management-section="${key}">${label}</button>`).join('')}</nav><div class="control-management-panel">${content}</div>${generalAudit}</section>`;
   }
 
   function render() {
@@ -331,6 +473,17 @@
     root.querySelectorAll('[data-nav-view]').forEach((button) => button.addEventListener('click', () => setView(button.dataset.navView)));
     root.querySelectorAll('[data-history-filter]').forEach((button) => button.addEventListener('click', () => { historyFilter = button.dataset.historyFilter; render(); }));
     root.querySelectorAll('[data-management-section]').forEach((button) => button.addEventListener('click', () => { managementSection = button.dataset.managementSection; render(); if (managementSection === 'invitations' && !inviteRows.length) loadInvitations(); }));
+    root.querySelector('[data-member-search]')?.addEventListener('input', (event) => {
+      const cursor = event.currentTarget.selectionStart;
+      memberSearchQuery = event.currentTarget.value;
+      render();
+      const nextInput = root.querySelector('[data-member-search]');
+      nextInput?.focus({ preventScroll: true });
+      if (Number.isInteger(cursor)) nextInput?.setSelectionRange(cursor, cursor);
+    });
+    root.querySelector('[data-clear-member-search]')?.addEventListener('click', () => { memberSearchQuery = ''; render(); root.querySelector('[data-member-search]')?.focus(); });
+    root.querySelectorAll('[data-member-profile]').forEach((button) => button.addEventListener('click', () => { selectedMemberProfileId = button.dataset.memberProfile; render(); root.scrollTo({ top: 0, behavior: 'smooth' }); }));
+    root.querySelector('[data-member-back]')?.addEventListener('click', () => { selectedMemberProfileId = null; render(); root.querySelector('[data-member-search]')?.focus(); });
     root.querySelectorAll('[data-template-choice]').forEach((button) => button.addEventListener('click', () => { selectedTemplateKey = button.dataset.templateChoice; render(); }));
     root.querySelectorAll('input[type="range"]').forEach((input) => input.addEventListener('input', () => { const output = root.querySelector(`[data-range-output="${input.name}"]`); if (output) output.textContent = `${input.value} %`; }));
     root.querySelector('#mediaPolicyForm')?.addEventListener('submit', async (event) => {

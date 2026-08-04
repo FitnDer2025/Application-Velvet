@@ -27,6 +27,14 @@ La navigation principale est limitée à cinq destinations :
 
 Les écrans de release, services, agents ou permissions qui ne reflètent qu'un état `localStorage` sont retirés de l'interface livrée.
 
+### Recherche et fiche membre
+
+- La rubrique **Gestion > Membres** propose une recherche par pseudonyme, e-mail, identifiant de compte ou identifiant de profil.
+- Un résultat représente un profil Velvet et regroupe ses comptes personnels liés, notamment les deux accès distincts d'un profil Couple.
+- La fiche de contrôle réunit uniquement les données opérationnelles nécessaires : état du compte, vérification, admission, visibilité, offre, signalements ouverts, médias en revue, comptes liés et historique d'audit associé.
+- Les actions d'accès, de suspension, de blocage et de suppression différée restent réservées à `admin` et `direction` et conservent leur journalisation serveur.
+- La fiche n'affiche aucun album privé, contenu intime ou document d'identité ; l'accès à un média reste limité à la file de modération autorisée.
+
 ## Modération IA
 
 - L'ADR-DA-020 reste applicable : les cas nets sont traités automatiquement et les cas ambigus ou sensibles sont routés vers l'humain.

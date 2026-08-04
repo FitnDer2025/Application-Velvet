@@ -68,6 +68,10 @@ test('Velvet Contrôle ouvre un cockpit réel à cinq destinations', async () =>
   assert.match(script, /aiHistory/);
   assert.match(script, /update_media_policy/);
   assert.match(script, /update_email_template/);
+  assert.match(script, /data-member-search/);
+  assert.match(script, /data-member-profile/);
+  assert.match(script, /Fiche de contrôle/);
+  assert.match(script, /Aucun contenu privé n’est affiché dans cette fiche/);
   assert.match(api, /buildHumanActions/);
   assert.match(api, /buildAiHistory/);
   assert.match(css, /body\.velvet-control-ui\{[^}]*margin:0[^}]*overflow:hidden/);
