@@ -5,7 +5,7 @@ import { onRequestPost as studioMediaPost } from './studio-media.js';
 const CONTROL_ROLES = new Set(['admin', 'direction']);
 const FRENCH_VOICE_MODEL = '@cf/myshell-ai/melotts';
 
-function cleanFrenchSpeech(value, max = 170) {
+function cleanFrenchSpeech(value, max = 190) {
   const source = String(value || '')
     .normalize('NFKC')
     .replace(/[\u0000-\u001f\u007f]/g, ' ')
@@ -17,7 +17,7 @@ function cleanFrenchSpeech(value, max = 170) {
   return /[.!?…]$/.test(clipped) ? clipped : `${clipped}.`;
 }
 
-function firstSentence(value, max = 125) {
+function firstSentence(value, max = 135) {
   const clean = cleanFrenchSpeech(value, max);
   const match = clean.match(/^.*?[.!?](?:\s|$)/);
   return match?.[0]?.trim() || clean;
@@ -25,8 +25,8 @@ function firstSentence(value, max = 125) {
 
 function frenchFallback(duration = 6) {
   return Number(duration) >= 7
-    ? 'Velvet réunit les profils, les échanges et les expériences dans un univers élégant et rassurant.'
-    : 'Découvrez Velvet, un univers élégant pour des rencontres plus sincères.';
+    ? 'Tout commence par une envie, puis par quelques mots. Avec Velvet, une rencontre peut devenir une histoire.'
+    : 'Avec Velvet, une envie peut devenir une belle histoire.';
 }
 
 async function requireControl(request, env) {
@@ -44,62 +44,109 @@ function errorCode(error) {
 }
 
 function decodeBase64Audio(value) {
-  const binary = atob(String(value || ''));
+  const clean = String(value || '').replace(/^data:audio\/[^;]+;base64,/, '').trim();
+  const binary = atob(clean);
   const bytes = new Uint8Array(binary.length);
   for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
   return bytes;
 }
 
-async function frenchAudioResponse(result, attempt) {
-  const headers = {
-    'content-type': 'audio/mpeg',
+function audioHeaders(attempt, contentType = 'audio/mpeg') {
+  return {
+    'content-type': contentType || 'audio/mpeg',
     'cache-control': 'no-store',
     'x-velvet-studio-voice-model': FRENCH_VOICE_MODEL,
     'x-velvet-studio-voice-language': 'fr',
     'x-velvet-studio-voice-attempt': attempt
   };
+}
 
+function binaryResponse(value, attempt, contentType = 'audio/mpeg') {
+  if (value instanceof ArrayBuffer) return new Response(value, { headers: audioHeaders(attempt, contentType) });
+  if (ArrayBuffer.isView(value)) {
+    const bytes = value.byteOffset === 0 && value.byteLength === value.buffer.byteLength
+      ? value.buffer
+      : value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength);
+    return new Response(bytes, { headers: audioHeaders(attempt, contentType) });
+  }
+  if (value instanceof ReadableStream) return new Response(value, { headers: audioHeaders(attempt, contentType) });
+  return null;
+}
+
+async function frenchAudioResponse(result, attempt) {
   if (result instanceof Response) {
     if (!result.ok) {
       const detail = await result.clone().text().catch(() => 'voice_response_failed');
       throw new Error(detail || `voice_response_${result.status}`);
     }
+    const type = result.headers.get('content-type') || 'audio/mpeg';
     return new Response(result.body, {
       status: 200,
-      headers: { ...Object.fromEntries(result.headers), ...headers }
+      headers: { ...Object.fromEntries(result.headers), ...audioHeaders(attempt, type) }
     });
   }
-  if (result instanceof ReadableStream) return new Response(result, { headers });
-  if (result instanceof ArrayBuffer) return new Response(result, { headers });
-  if (ArrayBuffer.isView(result)) return new Response(result.buffer, { headers });
-  if (typeof result?.audio === 'string') return new Response(decodeBase64Audio(result.audio), { headers });
-  if (typeof result === 'string') return new Response(decodeBase64Audio(result), { headers });
-  throw new Error('workers_ai_voice_missing');
+
+  const direct = binaryResponse(result, attempt);
+  if (direct) return direct;
+
+  const candidates = [
+    result?.audio,
+    result?.audio?.data,
+    result?.data,
+    result?.result,
+    result?.result?.audio,
+    result?.result?.audio?.data,
+    result?.output,
+    result?.output?.audio,
+    result?.body
+  ];
+
+  for (const candidate of candidates) {
+    const binary = binaryResponse(candidate, attempt);
+    if (binary) return binary;
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return new Response(decodeBase64Audio(candidate), { headers: audioHeaders(attempt) });
+    }
+    if (Array.isArray(candidate) && candidate.length) {
+      return new Response(Uint8Array.from(candidate), { headers: audioHeaders(attempt) });
+    }
+  }
+
+  if (typeof result === 'string' && result.trim()) {
+    return new Response(decodeBase64Audio(result), { headers: audioHeaders(attempt) });
+  }
+  throw new Error(`workers_ai_voice_missing:${Object.keys(result || {}).slice(0, 8).join(',') || 'empty'}`);
 }
 
-async function meloFrench(env, prompt, attempt) {
-  const result = await env.AI.run(FRENCH_VOICE_MODEL, { prompt, lang: 'fr' });
+async function meloFrench(env, prompt, attempt, raw = true) {
+  const options = raw ? { returnRawResponse: true } : undefined;
+  const result = await env.AI.run(FRENCH_VOICE_MODEL, { prompt, lang: 'fr' }, options);
   return frenchAudioResponse(result, attempt);
 }
 
 async function generateFrenchVoice(env, requestedText, duration) {
-  const clean = cleanFrenchSpeech(requestedText, duration <= 5 ? 125 : 170);
-  const short = firstSentence(clean, duration <= 5 ? 100 : 130);
+  const clean = cleanFrenchSpeech(requestedText, duration <= 5 ? 135 : 190);
+  const short = firstSentence(clean, duration <= 5 ? 105 : 145);
   const fallback = frenchFallback(duration);
   const attempts = [
-    { name: 'melotts-fr-scene', text: clean },
-    { name: 'melotts-fr-short', text: short },
-    { name: 'melotts-fr-safe', text: fallback }
+    { name: 'melotts-fr-raw', text: clean, raw: true },
+    { name: 'melotts-fr-object', text: short, raw: false },
+    { name: 'melotts-fr-safe-raw', text: fallback, raw: true },
+    { name: 'melotts-fr-safe-object', text: fallback, raw: false }
   ];
   const failures = [];
 
   for (const attempt of attempts) {
     try {
-      const response = await meloFrench(env, attempt.text, attempt.name);
+      const response = await meloFrench(env, attempt.text, attempt.name, attempt.raw);
       if (failures.length) response.headers.set('x-velvet-studio-voice-recovered', 'true');
       return response;
     } catch (error) {
-      failures.push({ engine: attempt.name, code: errorCode(error) });
+      failures.push({
+        engine: attempt.name,
+        code: errorCode(error),
+        reason: String(error?.message || error).slice(0, 90)
+      });
     }
   }
 
@@ -107,7 +154,7 @@ async function generateFrenchVoice(env, requestedText, duration) {
     error: 'workers_ai_french_voice_unavailable',
     action: 'generate_voice',
     language: 'fr',
-    attempts: failures
+    attempts: failures.map(({ engine, code, reason }) => ({ engine, code, reason }))
   }, 502);
 }
 
@@ -122,7 +169,7 @@ export async function onRequestPost(context) {
   }
 
   const duration = Math.max(3, Math.min(12, Number(body.duration || 6)));
-  const prompt = cleanFrenchSpeech(body.text || body.voiceOver, duration <= 5 ? 125 : 170);
+  const prompt = cleanFrenchSpeech(body.text || body.voiceOver, duration <= 5 ? 135 : 190);
   if (!prompt) return json({ error: 'studio_voice_text_required', action: 'generate_voice' }, 400);
   return generateFrenchVoice(context.env, prompt, duration);
 }
