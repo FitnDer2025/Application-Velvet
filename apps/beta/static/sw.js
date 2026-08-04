@@ -1,4 +1,4 @@
-const CACHE = 'velvet-beta-shell-v28';
+const CACHE = 'velvet-beta-shell-v29';
 // Caches historiques explicitement supprimés pendant l’activation :
 // velvet-beta-shell-v18 à velvet-beta-shell-v28.
 const APP_SHELL = [
@@ -7,7 +7,7 @@ const APP_SHELL = [
   '/assets/members-onboarding-v2.css?v=20260804-1',
   '/assets/members-onboarding-v2.js?v=20260804-1',
   '/assets/account-access-menu.js?v=20260804-1',
-  '/assets/control-pilot.css?v=20260804-1',
+  '/assets/control-pilot.css?v=20260804-2',
   '/assets/control-live.js?v=20260804-1',
   '/assets/velvet-premium-ui.js?v=20260804-control1',
   '/assets/velvet-premium-ui.css',

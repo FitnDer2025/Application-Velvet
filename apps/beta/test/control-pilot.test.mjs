@@ -55,8 +55,9 @@ test('les modèles e-mail utilisent le visuel Velvet sans accepter de HTML libre
 });
 
 test('Velvet Contrôle ouvre un cockpit réel à cinq destinations', async () => {
-  const [html, script, api] = await Promise.all([
+  const [html, css, script, api] = await Promise.all([
     read('apps/web/velvet-control-intelligence-beta-final.html'),
+    read('apps/beta/static/assets/control-pilot.css'),
     read('apps/beta/static/assets/control-live.js'),
     read('functions/api/control/workspace.js')
   ]);
@@ -69,6 +70,9 @@ test('Velvet Contrôle ouvre un cockpit réel à cinq destinations', async () =>
   assert.match(script, /update_email_template/);
   assert.match(api, /buildHumanActions/);
   assert.match(api, /buildAiHistory/);
+  assert.match(css, /body\.velvet-control-ui\{[^}]*margin:0[^}]*overflow:hidden/);
+  assert.match(css, /\.control-top\{[^}]*display:flex[^}]*align-items:center[^}]*overflow:hidden/);
+  assert.match(css, /\.control-mobile-nav\{[^}]*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
   assert.doesNotMatch(html, /localStorage|99,\d+%|Gateway IA|24\/24/);
   assert.doesNotMatch(script, /localStorage|Gateway IA|24\/24/);
 });
