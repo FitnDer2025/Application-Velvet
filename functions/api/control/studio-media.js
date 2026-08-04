@@ -2,12 +2,13 @@ import { json, readJson } from '../auth/_shared.js';
 import { memberSession } from '../members/_shared.js';
 
 const CONTROL_ROLES = new Set(['admin', 'direction']);
-const TEXT_MODEL = '@cf/meta/llama-3.1-8b-instruct-fast';
+const TEXT_MODEL = '@cf/zai-org/glm-4.7-flash';
 const IMAGE_MODEL = '@cf/black-forest-labs/flux-1-schnell';
 const VOICE_MODEL = '@cf/myshell-ai/melotts';
 
 const ALLOWED_FORMATS = new Set(['9:16', '1:1', '16:9', '4:5']);
 const ALLOWED_SCREENS = new Set(['home', 'discover', 'profile', 'messages', 'events', 'map']);
+const ALLOWED_ACTIONS = new Set(['arrive', 'browse', 'open_profile', 'read_profile', 'open_message', 'read_message', 'open_event', 'explore_map', 'close']);
 const ALLOWED_SCENARIOS = new Set(['profil', 'recherche', 'message', 'evenement']);
 
 async function requireControl(request, env) {
@@ -33,6 +34,18 @@ function formatScreen(screen, index) {
   return ['home', 'discover', 'profile', 'messages', 'events', 'map'][index % 6];
 }
 
+function formatAction(action, screen) {
+  if (ALLOWED_ACTIONS.has(action)) return action;
+  return ({
+    home: 'arrive',
+    discover: 'browse',
+    profile: 'open_profile',
+    messages: 'open_message',
+    events: 'open_event',
+    map: 'explore_map'
+  })[screen] || 'browse';
+}
+
 function fallbackPlan(brief, duration, format) {
   const screens = duration >= 30
     ? ['home', 'discover', 'profile', 'messages', 'events', 'map']
@@ -40,34 +53,46 @@ function fallbackPlan(brief, duration, format) {
   const sceneDuration = Math.max(3, Math.floor(duration / screens.length));
   const copy = {
     home: {
-      title: 'Bienvenue dans Velvet',
-      onScreen: 'Tout l’univers Velvet, au même endroit.',
-      voice: 'Bienvenue dans Velvet, une expérience pensée pour réunir les rencontres, les échanges, les lieux et les événements.'
+      title: 'Une envie que l’on n’osait pas encore nommer',
+      onScreen: 'Tout commence par une envie.',
+      voice: 'Il y a des envies que l’on garde longtemps pour soi. Puis vient le moment de les découvrir autrement.',
+      action: 'arrive',
+      emotion: 'mystère'
     },
     discover: {
-      title: 'Découvrir',
-      onScreen: 'Trouvez les profils qui vous correspondent.',
-      voice: 'Une recherche claire et précise permet de découvrir des profils vérifiés autour de vous.'
+      title: 'Un univers attire le regard',
+      onScreen: 'Un profil. Une intuition.',
+      voice: 'Sur Velvet, on ne fait pas que défiler des visages. On découvre des univers capables de faire naître une véritable curiosité.',
+      action: 'browse',
+      emotion: 'attirance'
     },
     profile: {
-      title: 'Des profils plus complets',
-      onScreen: 'Une identité, un univers, une confiance visible.',
-      voice: 'Chaque profil présente son univers, ses envies et son niveau de confiance dans une interface élégante et lisible.'
+      title: 'Derrière les images, une histoire',
+      onScreen: 'Prendre le temps de découvrir.',
+      voice: 'Quelques photos, des mots choisis, des envies partagées. Assez pour ressentir ce petit trouble qui donne envie d’en savoir plus.',
+      action: 'open_profile',
+      emotion: 'émotion'
     },
     messages: {
-      title: 'Échanger simplement',
-      onScreen: 'Le feeling commence par quelques mots.',
-      voice: 'La messagerie sécurisée facilite les échanges tout en respectant la discrétion et le consentement.'
+      title: 'Les premiers mots',
+      onScreen: 'Le feeling commence ici.',
+      voice: 'Alors un premier message est envoyé. Sans pression. Avec cette élégance qui laisse doucement la place au feeling.',
+      action: 'open_message',
+      emotion: 'connexion'
     },
     events: {
-      title: 'Sorties et événements',
-      onScreen: 'Les expériences proches de vous.',
-      voice: 'Velvet rassemble aussi les sorties, les soirées et les événements qui font vivre la communauté.'
+      title: 'Quand l’échange devient une promesse',
+      onScreen: 'Et si la rencontre avait lieu ce soir ?',
+      voice: 'Une conversation devient une invitation. Une soirée se dessine. L’imaginaire laisse enfin place à une expérience réelle.',
+      action: 'open_event',
+      emotion: 'désir'
     },
     map: {
-      title: 'Tout un écosystème',
-      onScreen: 'Membres, lieux et événements sur une seule carte.',
-      voice: 'La carte Velvet permet de retrouver les membres, les établissements et les expériences disponibles à proximité.'
+      title: 'Tout devient plus proche',
+      onScreen: 'Les rencontres et les expériences autour de vous.',
+      voice: 'Velvet rapproche les personnes, les lieux et les événements qui partagent la même envie de vivre quelque chose de vrai.',
+      action: 'explore_map',
+      emotion: 'projection'
     }
   };
 
@@ -78,7 +103,10 @@ function fallbackPlan(brief, duration, format) {
       : sceneDuration,
     onScreen: copy[screen].onScreen,
     voice: copy[screen].voice,
-    screen
+    screen,
+    action: copy[screen].action,
+    emotion: copy[screen].emotion,
+    beat: index + 1
   }));
 
   const voiceOver = [
@@ -87,12 +115,14 @@ function fallbackPlan(brief, duration, format) {
   ].join(' ');
 
   return {
-    title: 'Découvrir Velvet',
+    title: 'Une envie devient une histoire',
     format,
     duration,
-    mode: 'product-demo',
+    mode: 'story-led-product-demo',
+    narrativeArc: 'mystère → attirance → émotion → connexion → désir → projection',
     brief,
     voiceOver,
+    closingLine: 'Velvet. Là où les plus belles rencontres commencent.',
     scenes
   };
 }
@@ -108,32 +138,44 @@ function extractModelText(result) {
 
 function parsePlan(raw, brief, duration, format) {
   const fallback = fallbackPlan(brief, duration, format);
-  const source = text(raw, 12000);
+  const source = text(raw, 16000);
   const match = source.match(/\{[\s\S]*\}/);
   if (!match) return fallback;
 
   try {
     const parsed = JSON.parse(match[0]);
-    const maxScenes = duration >= 30 ? 6 : 4;
-    const scenes = Array.isArray(parsed.scenes)
-      ? parsed.scenes.slice(0, maxScenes).map((scene, index) => ({
-          title: text(scene.title || `Étape ${index + 1}`, 100),
-          duration: integer(scene.duration, 3, 12, Math.max(3, Math.floor(duration / maxScenes))),
-          onScreen: text(scene.onScreen || scene.text || '', 140),
-          voice: text(scene.voice || '', 420),
-          screen: formatScreen(scene.screen, index)
-        }))
-      : [];
+    const requiredScreens = duration >= 30
+      ? ['home', 'discover', 'profile', 'messages', 'events', 'map']
+      : ['home', 'discover', 'profile', 'events'];
+    const generated = Array.isArray(parsed.scenes) ? parsed.scenes : [];
+    const byScreen = new Map(generated.map((scene, index) => [formatScreen(scene.screen, index), scene]));
+    const fallbackByScreen = new Map(fallback.scenes.map((scene) => [scene.screen, scene]));
+    const sceneDuration = duration / requiredScreens.length;
 
-    if (scenes.length < 3) return fallback;
+    const scenes = requiredScreens.map((screen, index) => {
+      const sourceScene = byScreen.get(screen) || {};
+      const backup = fallbackByScreen.get(screen);
+      return {
+        title: text(sourceScene.title || backup.title, 110),
+        duration: sceneDuration,
+        onScreen: text(sourceScene.onScreen || sourceScene.text || backup.onScreen, 120),
+        voice: text(sourceScene.voice || backup.voice, 230),
+        screen,
+        action: formatAction(sourceScene.action || backup.action, screen),
+        emotion: text(sourceScene.emotion || backup.emotion, 40),
+        beat: index + 1
+      };
+    });
 
     return {
       title: text(parsed.title || fallback.title, 120),
       format,
       duration,
-      mode: 'product-demo',
+      mode: 'story-led-product-demo',
+      narrativeArc: text(parsed.narrativeArc || fallback.narrativeArc, 180),
       brief,
-      voiceOver: text(parsed.voiceOver || scenes.map((scene) => scene.voice).join(' '), 1200),
+      voiceOver: text(parsed.voiceOver || scenes.map((scene) => scene.voice).join(' '), 1600),
+      closingLine: text(parsed.closingLine || fallback.closingLine, 160),
       scenes
     };
   } catch {
@@ -147,24 +189,39 @@ async function generatePlan(env, body) {
   const format = ALLOWED_FORMATS.has(body.format) ? body.format : '9:16';
   const fallback = fallbackPlan(brief, duration, format);
 
-  const prompt = [
-    'Tu es le réalisateur produit de Velvet.',
-    'Velvet est une plateforme premium de rencontres et d’expériences entre adultes.',
-    'La vidéo doit montrer exclusivement l’interface Velvet en fonctionnement : aucun couple filmé, aucune scène de vie, aucune photographie inventée.',
-    'Construis une visite fluide et fidèle du produit à partir des écrans autorisés : home, discover, profile, messages, events, map.',
-    'Le texte de voix off doit raconter une histoire simple et valoriser les fonctions réellement visibles.',
-    'Réponds exclusivement en JSON valide avec cette structure :',
-    '{"title":"...","voiceOver":"...","scenes":[{"title":"...","duration":5,"onScreen":"...","voice":"...","screen":"home"}]}.',
+  const system = [
+    'Tu es le réalisateur et concepteur-rédacteur d’une campagne française premium pour Velvet.',
+    'Velvet est un univers de rencontres et d’expériences entre adultes fondé sur la confiance, le consentement, l’élégance et la discrétion.',
+    'Tu ne réalises pas un catalogue de fonctionnalités. Tu racontes une histoire sensuelle, émotionnelle et subtile à travers la véritable interface Velvet.',
+    'La sensualité repose sur le mystère, les mots, l’attente, le feeling et la projection. Elle ne doit jamais devenir explicite, vulgaire ou sexuelle.',
+    'Le scénario est le réalisateur : chaque phrase de voix off doit déclencher l’écran et l’action qui illustrent précisément ce qui est raconté.',
+    'Utilise exclusivement les écrans réels autorisés : home, discover, profile, messages, events, map.',
+    'Arc obligatoire : une envie intime → une découverte → une attirance → les premiers mots → la projection dans une sortie → l’envie de rejoindre Velvet.',
+    'La narration doit être naturelle à l’oral, française, chaleureuse, lente, cinématographique et composée de phrases courtes.',
+    'Ne dis jamais « fonctionnalité », « plateforme », « utilisateur », « filtre » ou « application » dans la voix off.',
+    'Ne montre aucun couple filmé, aucune scène extérieure et aucune photographie inventée : l’histoire est racontée uniquement par la navigation dans Velvet.',
+    'Chaque scène doit avoir screen, action, emotion, title, onScreen, voice et duration.',
+    'Actions autorisées : arrive, browse, open_profile, read_profile, open_message, read_message, open_event, explore_map, close.',
+    'Réponds exclusivement avec un objet JSON valide, sans markdown.'
+  ].join(' ');
+
+  const user = [
     `Durée cible : ${duration} secondes.`,
     `Format : ${format}.`,
-    `Brief utilisateur : ${brief || 'Démonstration générale de Velvet.'}`
+    `Brief : ${brief || 'Faire ressentir comment une envie discrète devient une belle rencontre grâce à Velvet.'}`,
+    'Structure JSON :',
+    '{"title":"...","narrativeArc":"...","closingLine":"...","voiceOver":"...","scenes":[{"title":"...","duration":5,"onScreen":"...","voice":"...","screen":"home","action":"arrive","emotion":"mystère"}]}.'
   ].join(' ');
 
   try {
     const result = await env.AI.run(TEXT_MODEL, {
-      prompt,
-      max_tokens: 1400,
-      temperature: 0.2
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: user }
+      ],
+      max_completion_tokens: 1800,
+      temperature: 0.72,
+      top_p: 0.9
     });
     return parsePlan(extractModelText(result), brief, duration, format);
   } catch {
@@ -223,13 +280,14 @@ function aiErrorPayload(error, action) {
 
 function capabilities(env) {
   return {
-    version: 'product-demo-v1',
+    version: 'story-led-live-v2',
     binding: Boolean(env.AI && typeof env.AI.run === 'function'),
     models: { text: TEXT_MODEL, image: IMAGE_MODEL, voice: VOICE_MODEL },
-    mode: 'velvet-interface-capture',
-    pipeline: ['plan', 'velvet-screens', 'voice', 'render'],
+    mode: 'story-led-velvet-live-recording',
+    pipeline: ['story', 'directed-navigation', 'french-voice', 'live-recording'],
     formats: [...ALLOWED_FORMATS],
     screens: [...ALLOWED_SCREENS],
+    actions: [...ALLOWED_ACTIONS],
     syntheticOnly: true
   };
 }
@@ -255,7 +313,7 @@ export async function onRequestPost({ request, env }) {
     if (action === 'generate_voice') {
       const prompt = text(body.text || body.voiceOver, 1200);
       if (!prompt) return json({ error: 'studio_voice_text_required' }, 400);
-      const result = await env.AI.run(VOICE_MODEL, { prompt, lang: 'fr' });
+      const result = await env.AI.run(VOICE_MODEL, { prompt, lang: 'fr' }, { returnRawResponse: true });
       return audioResponse(result);
     }
 
