@@ -2,17 +2,17 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-const clientUrl = new URL('../../beta/static/assets/velvet-studio-product-demo.js', import.meta.url);
+const clientUrl = new URL('../../beta/static/assets/velvet-studio-lite.js', import.meta.url);
 const serverUrl = new URL('../../../functions/api/control/studio-media.js', import.meta.url);
 const captureUrl = new URL('../../beta/static/assets/velvet-capture-mode.js', import.meta.url);
 const buildUrl = new URL('../../beta/scripts/build.mjs', import.meta.url);
 
-test('le générateur de démonstration compile côté navigateur', async () => {
+test('le générateur léger compile côté navigateur', async () => {
   const source = await readFile(clientUrl, 'utf8');
   assert.doesNotThrow(() => new Function(source));
   assert.match(source, /Décrivez la démonstration/);
-  assert.match(source, /Navigation dans Velvet/);
-  assert.match(source, /captureVelvetScreens/);
+  assert.match(source, /Écrans Velvet/);
+  assert.match(source, /captureScreens/);
   assert.match(source, /velvet_capture=/);
 });
 
@@ -21,7 +21,7 @@ test('la démonstration produit ne demande aucun visuel FLUX', async () => {
   assert.doesNotMatch(source, /action:\s*['"]generate_image['"]/);
   assert.match(source, /action:\s*['"]plan_video['"]/);
   assert.match(source, /action:\s*['"]generate_voice['"]/);
-  assert.match(source, /domScreenToDataUrl/);
+  assert.match(source, /domToImage/);
 });
 
 test('le scénario Workers AI est limité aux écrans Velvet', async () => {
@@ -39,12 +39,14 @@ test('le mode synthétique protège les données membres', async () => {
   assert.match(source, /Aucune donnée membre réelle/);
 });
 
-test('le build charge le générateur après le parcours historique', async () => {
+test('le build charge uniquement le générateur léger après le socle Studio', async () => {
   const source = await readFile(buildUrl, 'utf8');
-  const legacy = source.indexOf('velvet-studio-v31-compat.js');
-  const product = source.indexOf('velvet-studio-product-demo.js');
-  assert.ok(legacy >= 0);
-  assert.ok(product > legacy);
+  const base = source.indexOf('velvet-studio-sprint1.js');
+  const lite = source.indexOf('velvet-studio-lite.js');
+  assert.ok(base >= 0);
+  assert.ok(lite > base);
+  assert.doesNotMatch(source, /velvet-studio-product-demo\.js/);
+  assert.doesNotMatch(source, /velvet-studio-v31-compat\.js/);
 });
 
 test('le mode illustration historique utilise un schéma FLUX minimal', async () => {
