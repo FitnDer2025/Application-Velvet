@@ -73,6 +73,6 @@ test('les surfaces responsive et le cache PWA utilisent le shell V1.1 actif', as
   assert.match(styles, /\.home-feed-card/);
   assert.match(styles, /\.venue-directory-grid/);
   assert.match(styles, /\.hero-copy/);
-  assert.match(worker, /const CACHE = 'velvet-beta-shell-v27'/);
+  assert.match(worker, /const CACHE = 'velvet-beta-shell-v28'/);
   assert.match(worker, /velvet-web-ios-parity\.js\?v=20260803-3/);
 });

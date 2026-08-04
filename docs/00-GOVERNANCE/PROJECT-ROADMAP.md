@@ -2,7 +2,7 @@
 
 **Statut :** source officielle de pilotage du projet Velvet.
 
-**Dernière mise à jour :** 30 juillet 2026
+**Dernière mise à jour :** 4 août 2026
 
 ## Règles de gouvernance
 
@@ -34,8 +34,8 @@
 | Clubs | 🟡 | 70 % | Intégrés à la carte, aux événements et au socle professionnel ; détails opérationnels restants. |
 | Professionnels | 🟢 | 90 % | Interface dédiée, CRM modulaire, IA métier et outils organisateur définis. |
 | Voyages Velvet | 🟢 | 90 % | Espace communautaire complet avant, pendant et après le voyage. |
-| Administration / back-office | 🟡 | 65 % | Accès commerciaux, campagnes, suspensions, blocages, suppression différée et audit intégrés à Control. |
-| IA Velvet | 🟡 | 75 % | Recommandation, Alchimie et assistants professionnels définis ; gouvernance technique restante. |
+| Administration / back-office | 🟢 | 85 % | Cockpit réel, file d’actions, droits, communications, audit et opérations courantes intégrés à Contrôle. |
+| IA Velvet | 🟡 | 80 % | Historique des décisions, seuils média et mode Observation pilotables ; gouvernance des futurs agents restante. |
 | Monétisation | 🟢 | 95 % | Offres, prix, quotas, promotions, cohortes et adaptateur définis ; prestataire et validation juridique encore requis avant encaissement. |
 | Gamification | 🟡 | 70 % | Philosophie positive et distinctions évolutives verrouillées ; règles détaillées restantes. |
 | Mobile avancé | ⚪ | 50 % | Web-first et notifications validés ; fonctions natives à prioriser. |
@@ -48,7 +48,7 @@
 
 ## Avancement global de référence
 
-**Architecture produit estimée : 80 %.**
+**Architecture produit estimée : 82 %.**
 
 Cet indicateur mesure les arbitrages structurants et non le développement logiciel.
 
@@ -59,14 +59,15 @@ Cet indicateur mesure les arbitrages structurants et non le développement logic
 - ADR-043 à ADR-044 : gamification positive et distinctions évolutives.
 - ADR-GOV-003 : autonomie complète de livraison Codex et frontière SQL Supabase.
 - ADR-MON-057 : Découverte, Signature, Pro, cohortes fondatrices et moteur de droits piloté par Control.
+- ADR-UX-061 : cockpit Contrôle, visibilité des décisions IA, actions humaines, seuils photo et modèles e-mail Velvet.
 
 ADR-037 et ADR-042 ne sont pas des décisions manquantes : leurs propositions ont été abandonnées car les sujets étaient déjà arbitrés.
 
 ## Ordre de traitement actualisé
 
-1. Finaliser la Gamification
-2. Administration / Back-office
-3. IA Velvet — gouvernance et contrôles
+1. Finaliser le cockpit Administration / Back-office
+2. IA Velvet — gouvernance et contrôles
+3. Finaliser la Gamification
 4. Paiement — validation prestataire spécialisé et revue juridique
 5. Clubs — modèle opérationnel détaillé
 6. Mobile avancé
@@ -79,11 +80,11 @@ ADR-037 et ADR-042 ne sont pas des décisions manquantes : leurs propositions on
 
 ## Domaine actif
 
-**Gamification**
+**Administration / Back-office**
 
 ### Prochain objectif
 
-Préciser l'affichage, les critères, la confidentialité et le cycle de vie des distinctions sans rouvrir ADR-043 ni ADR-044.
+Activer la configuration persistante du cockpit, vérifier les décisions réelles sur le jeu de recette et préparer les futurs connecteurs sans dépense externe.
 
 ## Discipline de mise à jour
 

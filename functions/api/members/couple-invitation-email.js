@@ -8,6 +8,53 @@ function escapeHtml(value) {
   })[character]);
 }
 
+function replaceVariables(value, variables) {
+  return String(value || '').replace(/\{\{([a-z_]+)\}\}/g, (match, key) => (
+    Object.hasOwn(variables, key) ? String(variables[key] ?? '') : match
+  ));
+}
+
+export function buildConfiguredVelvetEmail({
+  template,
+  variables = {},
+  ctaUrl,
+  logoUrl
+}) {
+  if (!template) return null;
+  const subject = replaceVariables(template.subject, variables);
+  const preview = replaceVariables(template.preheader, variables);
+  const heading = replaceVariables(template.heading, variables);
+  const bodyText = replaceVariables(template.body_text, variables);
+  const ctaLabel = replaceVariables(template.cta_label, variables);
+  const footerText = replaceVariables(template.footer_text, variables);
+  const safeUrl = escapeHtml(ctaUrl || '');
+  const safeLogo = escapeHtml(logoUrl || '');
+  const paragraphs = bodyText.split(/\n{2,}/).map((paragraph) => (
+    `<p style="margin:0 0 16px;color:#d5c8cc;font-size:15px;line-height:1.72">${escapeHtml(paragraph).replaceAll('\n','<br>')}</p>`
+  )).join('');
+  const cta = ctaLabel && safeUrl
+    ? `<a href="${safeUrl}" style="display:inline-block;margin-top:12px;padding:14px 22px;border-radius:999px;background:#641B36;color:#F4F4F2;text-decoration:none;font-weight:700">${escapeHtml(ctaLabel)}</a>`
+    : '';
+  const logo = safeLogo
+    ? `<img src="${safeLogo}" width="58" height="58" alt="Velvet" style="display:block;width:58px;height:58px;border:0;border-radius:18px">`
+    : '<strong style="color:#C6A96A;letter-spacing:4px;font-size:18px">VELVET</strong>';
+  const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>${escapeHtml(subject)}</title></head>
+  <body style="margin:0;padding:0;background:#0D0D0D;color:#F4F4F2;font-family:Arial,Helvetica,sans-serif">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">${escapeHtml(preview)}</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;background:#0D0D0D"><tr><td align="center" style="padding:34px 14px 46px">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:620px"><tr><td style="padding:0 4px 18px;color:#C6A96A;font-size:10px;letter-spacing:2.4px;text-transform:uppercase">Velvet · message privé · 18+</td></tr><tr><td style="overflow:hidden;border:1px solid #3A3637;border-radius:28px;background:#1B1B1D"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td style="padding:32px 34px 12px">${logo}</td></tr><tr><td style="padding:16px 34px 0;font-family:Georgia,'Times New Roman',serif;font-size:42px;line-height:1.08;color:#FFFAF5">${escapeHtml(heading)}</td></tr><tr><td style="padding:24px 34px 16px">${paragraphs}${cta}</td></tr><tr><td style="border-top:1px solid #3A3637;padding:20px 34px 26px;color:#9e9498;font-size:11px;line-height:1.6">${escapeHtml(footerText)}</td></tr></table></td></tr><tr><td align="center" style="padding:20px 18px 0;color:#756970;font-size:10px;line-height:1.6">Velvet — Là où les plus belles rencontres commencent.</td></tr></table>
+    </td></tr></table>
+  </body></html>`;
+  return {
+    subject,
+    preview,
+    text: [heading, '', bodyText, '', ctaLabel && ctaUrl ? `${ctaLabel} : ${ctaUrl}` : '', '', footerText]
+      .filter((line) => line !== '')
+      .join('\n'),
+    html
+  };
+}
+
 export function buildCoupleInvitationEmail({ profileName, registrationUrl }) {
   const safeName = escapeHtml(profileName || 'Votre moitié');
   const safeUrl = escapeHtml(registrationUrl);

@@ -13,6 +13,12 @@ const ALLOWED_TYPES = new Map([
 ]);
 const ROLES = new Set(['couple_gallery','individual_gallery','individual_portrait']);
 const MAX_BYTES = 4 * 1024 * 1024;
+export const DEFAULT_MEDIA_MODERATION_POLICY = Object.freeze({
+  automationMode: 'active',
+  publicAutoConfidence: 0.86,
+  privateAutoConfidence: 0.86,
+  migrationPending: true
+});
 
 async function ownedProfile(env, access) {
   const rows = await restJson(
@@ -47,6 +53,55 @@ function imageDataUrl(bytes) {
   return `data:${mime};base64,${btoa(binary)}`;
 }
 
+function boundedConfidence(value, fallback) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0.8 && parsed <= 0.98
+    ? parsed
+    : fallback;
+}
+
+export function normalizeMediaModerationPolicy(row = {}) {
+  return {
+    automationMode: row.automation_mode === 'observation' ? 'observation' : 'active',
+    publicAutoConfidence: boundedConfidence(
+      row.public_auto_confidence,
+      DEFAULT_MEDIA_MODERATION_POLICY.publicAutoConfidence
+    ),
+    privateAutoConfidence: boundedConfidence(
+      row.private_auto_confidence,
+      DEFAULT_MEDIA_MODERATION_POLICY.privateAutoConfidence
+    ),
+    updatedAt: row.updated_at || null,
+    migrationPending: false
+  };
+}
+
+export async function mediaModerationPolicy(env, session) {
+  try {
+    const result = await restJson(
+      env,
+      '/rest/v1/rpc/current_media_moderation_policy',
+      session,
+      { method: 'POST', body: '{}' }
+    );
+    return normalizeMediaModerationPolicy(Array.isArray(result) ? result[0] : result);
+  } catch {
+    return { ...DEFAULT_MEDIA_MODERATION_POLICY };
+  }
+}
+
+export function decidePublicMedia({ confidence, criteriaPassed }, policy = DEFAULT_MEDIA_MODERATION_POLICY) {
+  if (policy.automationMode === 'observation') return 'review';
+  if (confidence < policy.publicAutoConfidence) return 'review';
+  return criteriaPassed ? 'approved' : 'rejected';
+}
+
+export function decidePrivateMedia({ confidence, prohibited, uncertain }, policy = DEFAULT_MEDIA_MODERATION_POLICY) {
+  if (policy.automationMode === 'observation' || uncertain) return 'review';
+  if (confidence < policy.privateAutoConfidence) return 'review';
+  return prohibited ? 'rejected' : 'approved';
+}
+
 async function runVisionAssessment(env, bytes, question, maxTokens) {
   if (!env.AI) throw new Error('workers_ai_not_configured');
   return env.AI.run('@cf/moondream/moondream3.1-9B-A2B', {
@@ -59,7 +114,7 @@ async function runVisionAssessment(env, bytes, question, maxTokens) {
   });
 }
 
-function normalizeAssessment(raw, expectedPeople) {
+function normalizeAssessment(raw, expectedPeople, policy) {
   const peopleCount = Math.max(0, Math.min(10, Number(raw.people_count) || 0));
   const confidence = Math.max(0, Math.min(1, Number(raw.confidence) || 0));
   const assessment = {
@@ -81,19 +136,15 @@ function normalizeAssessment(raw, expectedPeople) {
     && assessment.half_body_visible_for_all
     && !assessment.blur_excessive
     && assessment.public_safe;
-  const decision = confidence < 0.78
-    ? 'review'
-    : criteriaPassed && confidence >= 0.86
-      ? 'approved'
-      : !criteriaPassed && confidence >= 0.86
-        ? 'rejected'
-        : 'review';
+  const decision = decidePublicMedia({ confidence, criteriaPassed }, policy);
+  assessment.policy_mode = policy.automationMode;
+  assessment.policy_threshold = policy.publicAutoConfidence;
   assessment.automatic_decision = decision !== 'review';
   assessment.human_review_required = decision === 'review';
   return { assessment, decision };
 }
 
-async function analyzePhoto(env, bytes, expectedPeople, mediaRole) {
+async function analyzePhoto(env, bytes, expectedPeople, mediaRole, policy) {
   const prompt = `Analyse cette photo publique de profil Velvet. Ne reconnais et n'identifie jamais les personnes. Vérifie seulement :
 - nombre exact de personnes clairement visibles : ${expectedPeople} ;
 - visage visible pour chaque personne ;
@@ -103,10 +154,10 @@ async function analyzePhoto(env, bytes, expectedPeople, mediaRole) {
 Le rôle demandé est ${mediaRole}. Réponds uniquement en JSON :
 {"people_count":0,"faces_visible":false,"half_body_visible_for_all":false,"blur_excessive":false,"public_safe":false,"confidence":0.0,"summary":"raison concise en français"}`;
   const result = await runVisionAssessment(env, bytes, prompt, 300);
-  return normalizeAssessment(parseAiJson(result), expectedPeople);
+  return normalizeAssessment(parseAiJson(result), expectedPeople, policy);
 }
 
-export async function analyzePublicAlbumPhoto(env, bytes) {
+export async function analyzePublicAlbumPhoto(env, bytes, policy = DEFAULT_MEDIA_MODERATION_POLICY) {
   const result = await runVisionAssessment(env, bytes, `Analyse cette photo destinée à un album public Velvet. Ne reconnais et n'identifie jamais les personnes. Vérifie uniquement que l'image est suffisamment nette et qu'elle ne montre ni nudité explicite, ni acte sexuel, ni personne paraissant mineure. Réponds uniquement en JSON :
 {"blur_excessive":false,"public_safe":false,"confidence":0.0,"summary":"raison concise en français"}`, 220);
   const raw = parseAiJson(result);
@@ -122,19 +173,15 @@ export async function analyzePublicAlbumPhoto(env, bytes) {
     biometric_recognition: false
   };
   const passed = !assessment.blur_excessive && assessment.public_safe;
-  const decision = confidence < 0.78
-    ? 'review'
-    : passed && confidence >= 0.86
-      ? 'approved'
-      : !passed && confidence >= 0.86
-        ? 'rejected'
-        : 'review';
+  const decision = decidePublicMedia({ confidence, criteriaPassed: passed }, policy);
+  assessment.policy_mode = policy.automationMode;
+  assessment.policy_threshold = policy.publicAutoConfidence;
   assessment.automatic_decision = decision !== 'review';
   assessment.human_review_required = decision === 'review';
   return { assessment, decision };
 }
 
-export async function analyzePrivateAlbumPhoto(env, bytes) {
+export async function analyzePrivateAlbumPhoto(env, bytes, policy = DEFAULT_MEDIA_MODERATION_POLICY) {
   const result = await runVisionAssessment(env, bytes, `Analyse cette image d'album privé Velvet sans reconnaître ni identifier les personnes. La nudité adulte consensuelle n'est pas un motif de refus. Signale comme "prohibited" toute image montrant une personne pouvant être mineure, une violence manifeste, une contrainte apparente ou un contenu manifestement illégal. Si l'âge adulte ou la situation sont incertains, indique "uncertain": true. Réponds uniquement en JSON :
 {"prohibited":false,"uncertain":false,"confidence":0.0,"summary":"raison concise en français"}`, 220);
   const raw = parseAiJson(result);
@@ -150,11 +197,13 @@ export async function analyzePrivateAlbumPhoto(env, bytes) {
     private_album_safety_review: true,
     biometric_recognition: false
   };
-  const decision = assessment.uncertain || confidence < 0.86
-    ? 'review'
-    : assessment.prohibited
-      ? 'rejected'
-      : 'approved';
+  const decision = decidePrivateMedia({
+    confidence,
+    prohibited: assessment.prohibited,
+    uncertain: assessment.uncertain
+  }, policy);
+  assessment.policy_mode = policy.automationMode;
+  assessment.policy_threshold = policy.privateAutoConfidence;
   assessment.automatic_decision = decision !== 'review';
   assessment.human_review_required = decision === 'review';
   return { assessment, decision };
@@ -328,11 +377,13 @@ export async function onRequestPost({ request, env }) {
       biometric_recognition: false
     };
     try {
+      const policy = await mediaModerationPolicy(env, access.session);
       const analyzed = await analyzePhoto(
         env,
         bytes,
         mediaRole === 'couple_gallery' ? 2 : 1,
-        mediaRole
+        mediaRole,
+        policy
       );
       aiDecision = analyzed.decision;
       aiAssessment = analyzed.assessment;
@@ -398,6 +449,7 @@ export async function onRequestPatch({ request, env }) {
       access.session
     );
     const results = [];
+    const policy = await mediaModerationPolicy(env, access.session);
 
     for (const photo of pending || []) {
       try {
@@ -412,7 +464,8 @@ export async function onRequestPatch({ request, env }) {
           env,
           new Uint8Array(await stored.arrayBuffer()),
           photo.media_role === 'couple_gallery' ? 2 : 1,
-          photo.media_role
+          photo.media_role,
+          policy
         );
         const status = await recordAiDecision(env, access.session, photo.id, analyzed);
         results.push({ id: photo.id, ok: true, decision: analyzed.decision, status });

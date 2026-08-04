@@ -8,6 +8,7 @@ import {
 import {
   analyzePrivateAlbumPhoto,
   analyzePublicAlbumPhoto,
+  mediaModerationPolicy,
   recordAiDecision,
   recordTechnicalReview
 } from './photos.js';
@@ -100,11 +101,12 @@ export async function onRequestPost({ request, env }) {
     let moderationStatus = 'pending';
     let aiAssessment = null;
     try {
+      const policy = await mediaModerationPolicy(env, access.session);
       const analyzed = fileRule.mediaType === 'video'
         ? null
         : album.confidentiality === 'public'
-          ? await analyzePublicAlbumPhoto(env, bytes)
-          : await analyzePrivateAlbumPhoto(env, bytes);
+          ? await analyzePublicAlbumPhoto(env, bytes, policy)
+          : await analyzePrivateAlbumPhoto(env, bytes, policy);
       if (!analyzed) throw new Error('video_visual_review_required');
       await recordAiDecision(env, access.session, photo.id, analyzed);
       moderationStatus = analyzed.decision === 'review' ? 'pending' : analyzed.decision;

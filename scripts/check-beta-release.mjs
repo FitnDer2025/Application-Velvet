@@ -19,7 +19,7 @@ const checks = [
   [!pro.includes('@demo-velvet.fr'), 'Aucune identité de démonstration ne doit rester dans le livrable Pro'],
   [pro.includes('if(!document.body.classList.contains("pro-live-pending"))render();'), 'Le prototype Pro ne doit pas s’afficher avant le chargement serveur'],
   [control.includes('/assets/control-live.js'), 'Velvet Control doit charger ses opérations réelles'],
-  [controlLive.includes('originalShowView') && controlLive.includes("document.querySelectorAll('.page')"), 'La navigation Control doit permettre le retour depuis Invitations'],
+  [controlLive.includes('setView') && controlLive.includes('data-management-section'), 'La navigation Control doit réunir pilotage et gestion sans démonstrateur imbriqué'],
   [controlLive.includes('controlClaimVenueForm') && controlLive.includes('data-subscription-status'), 'Control doit attribuer les fiches recensées et piloter les droits Pro'],
   [worker.includes("'GET /api/members/profile'"), 'Les API Membres doivent être routées'],
   [worker.includes("'POST /api/members/venue-relationships'"), 'Les préférences établissement doivent être routées'],

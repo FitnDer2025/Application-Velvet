@@ -36,6 +36,9 @@ test('PRO et Contrôle gardent le langage visuel Velvet', async () => {
     assert.match(html,/velvet-editorial-ui\.css/);
     assert.match(html,/velvet-premium-ui\.js/);
   }
+  assert.match(control,/control-pilot\.css/);
+  assert.match(control,/data-view="pilot"/);
+  assert.doesNotMatch(control,/localStorage/);
 });
 
 test('la direction artistique traite profils, fil et établissements', async () => {
@@ -55,7 +58,7 @@ test('la direction artistique traite profils, fil et établissements', async () 
   assert.match(premiumUi,/notifications\.innerHTML = icon\('bell'\)/);
   assert.match(premiumUi,/menuButton\.innerHTML = icon\('menu'\)/);
   assert.match(auth,/velvet-editorial-ui\.css/);
-  assert.match(sw,/const CACHE = 'velvet-beta-shell-v27'/);
+  assert.match(sw,/const CACHE = 'velvet-beta-shell-v28'/);
   assert.match(sw,/velvet-web-ios-parity\.js/);
 });
 

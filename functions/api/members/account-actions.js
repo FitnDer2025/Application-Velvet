@@ -4,6 +4,21 @@ import {
   restJson,
   withSession
 } from './_shared.js';
+import { buildConfiguredVelvetEmail } from './couple-invitation-email.js';
+
+async function configuredTemplate(env, session, templateKey) {
+  try {
+    const result = await restJson(
+      env,
+      '/rest/v1/rpc/active_email_template',
+      session,
+      { method: 'POST', body: JSON.stringify({ target_template_key: templateKey }) }
+    );
+    return Array.isArray(result) ? result[0] || null : result || null;
+  } catch {
+    return null;
+  }
+}
 
 function htmlPage(title, copy, form = '') {
   const escape = (value) => String(value || '').replace(/[&<>"']/g, (character) => ({
@@ -173,11 +188,24 @@ export async function onRequestPost({ request, env }) {
     );
     const state = await lifecycleState(env, access);
     const profileName = state.profile?.display_name || 'Votre profil';
+    const selectedTemplate = await configuredTemplate(
+      env,
+      access.session,
+      body.action === 'pause' ? 'account_pause_confirmation' : 'account_deletion_confirmation'
+    );
     for (const recipient of prepared) {
       const confirmationUrl = new URL('/api/members/account-actions', request.url);
       confirmationUrl.searchParams.set('action', body.action);
       confirmationUrl.searchParams.set('token', recipient.token);
-      const template = lifecycleEmail(body.action, confirmationUrl.toString(), profileName);
+      const template = buildConfiguredVelvetEmail({
+        template: selectedTemplate,
+        variables: {
+          profile_name: profileName,
+          confirmation_url: confirmationUrl.toString()
+        },
+        ctaUrl: confirmationUrl.toString(),
+        logoUrl: `${confirmationUrl.origin}/assets/velvet-icon-192.png`
+      }) || lifecycleEmail(body.action, confirmationUrl.toString(), profileName);
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {

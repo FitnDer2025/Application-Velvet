@@ -1,6 +1,6 @@
 # Velvet ADR Status
 
-**Dernière mise à jour :** 30 juillet 2026
+**Dernière mise à jour :** 4 août 2026
 
 Ce tableau permet de vérifier rapidement les domaines déjà arbitrés avant toute nouvelle proposition.
 
@@ -16,12 +16,13 @@ Ce tableau permet de vérifier rapidement les domaines déjà arbitrés avant to
 | Fondation iOS native | ADR-TECH-058 | ✅ Accepté | `docs/03-ADR/ADR-TECH-058-IOS-NATIVE-FOUNDATION.md` |
 | Gamification | ADR-043 à ADR-044 | ✅ Accepté | `docs/adr/ADR-GAM-043-044-positive-gamification.md` |
 | Gouvernance de livraison | ADR-GOV-003 | ✅ Accepté | `docs/adr/ADR-GOV-003-code-delivery-autonomy.md` |
+| Cockpit Velvet Contrôle | ADR-UX-061 | ✅ Accepté | `docs/03-ADR/ADR-UX-061-CONTROL-PILOTING-COCKPIT.md` |
 
 ## Domaine actif
 
-**Fondation iOS native — première tranche SwiftUI.**
+**Velvet Contrôle — cockpit de pilotage opérationnel.**
 
-Le chantier actif construit le client iOS sur le backend Web commun sans rouvrir les règles métier déjà validées. Android reste différé.
+Le chantier actif rend les décisions IA, les actions humaines et les communications directement pilotables, sans rouvrir les règles métier de modération déjà validées.
 
 ## Discipline
 
