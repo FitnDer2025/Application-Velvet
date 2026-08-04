@@ -5,6 +5,7 @@ import test from 'node:test';
 const clientUrl = new URL('../../beta/static/assets/velvet-studio-lite.js', import.meta.url);
 const serverUrl = new URL('../../../functions/api/control/studio-media.js', import.meta.url);
 const captureUrl = new URL('../../beta/static/assets/velvet-capture-mode.js', import.meta.url);
+const marketingUrl = new URL('../../beta/static/assets/velvet-marketing-mode.js', import.meta.url);
 const buildUrl = new URL('../../beta/scripts/build.mjs', import.meta.url);
 
 test('le générateur léger compile côté navigateur', async () => {
@@ -32,11 +33,17 @@ test('le scénario Workers AI est limité aux écrans Velvet', async () => {
   assert.match(source, /pipeline:\s*\['plan', 'velvet-screens', 'voice', 'render'\]/);
 });
 
-test('le mode synthétique protège les données membres', async () => {
-  const source = await readFile(captureUrl, 'utf8');
-  assert.match(source, /capture_mode_synthetic_only/);
-  assert.match(source, /Données 100 % synthétiques/);
-  assert.match(source, /Aucune donnée membre réelle/);
+test('la BETA Marketing protège les données membres réelles', async () => {
+  const capture = await readFile(captureUrl, 'utf8');
+  const marketing = await readFile(marketingUrl, 'utf8');
+  assert.match(capture, /\/marketing\//);
+  assert.match(capture, /velvet_capture/);
+  assert.doesNotMatch(capture, /document\.body\.innerHTML/);
+  assert.match(marketing, /Données fictives/);
+  assert.match(marketing, /x-velvet-marketing/);
+  assert.match(marketing, /studio_access_required/);
+  assert.match(marketing, /\/api\/members\/directory/);
+  assert.doesNotMatch(marketing, /Données réelles Supabase/);
 });
 
 test('le build charge uniquement le générateur léger après le socle Studio', async () => {
