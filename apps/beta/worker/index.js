@@ -123,7 +123,8 @@ import {
   onRequestGet as testAgentsGet,
   onRequestPost as testAgentsPost
 } from '../../../functions/api/control/test-agents.js';
-import { onRequestPost as studioMediaPost } from '../../../functions/api/control/studio-media.js';
+import { onRequestPost as studioMediaPost } from '../../../functions/api/control/studio-media-safe.js';
+import { onRequestGet as marketingPortraitGet } from '../../../functions/api/control/marketing-portrait.js';
 import { onRequestGet as billingCatalogGet } from '../../../functions/api/billing/catalog.js';
 import { onRequestPost as billingCheckoutPost } from '../../../functions/api/billing/checkout.js';
 import { onRequestPost as billingPromotionPost } from '../../../functions/api/billing/promotion.js';
@@ -204,12 +205,13 @@ const API_ROUTES = new Map([
   ['GET /api/control/test-agents', testAgentsGet],
   ['POST /api/control/test-agents', testAgentsPost],
   ['POST /api/control/studio-media', studioMediaPost],
+  ['GET /api/control/marketing-portrait', marketingPortraitGet],
   ['GET /api/billing/catalog', billingCatalogGet],
   ['POST /api/billing/checkout', billingCheckoutPost],
   ['POST /api/billing/promotion', billingPromotionPost]
 ]);
 
-const PROTECTED_PREFIXES = ['/membres', '/pro', '/control'];
+const PROTECTED_PREFIXES = ['/membres', '/marketing', '/pro', '/control'];
 
 function securityHeaders(response) {
   const secured = new Response(response.body, response);
