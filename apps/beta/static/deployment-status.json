@@ -1,0 +1,7 @@
+{
+  "application": "Velvet BETA",
+  "branch": "v1-lived-demo",
+  "studio_commit": "8a01e6b0b237d0793875a9e405994ee8f940837a",
+  "deployment_triggered_at": "2026-08-04T19:26:00Z",
+  "reason": "force-cloudflare-production-redeploy"
+}
