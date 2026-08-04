@@ -11,7 +11,7 @@ test('le module IA intégré compile côté navigateur', async () => {
   assert.match(source, /Assistant IA Velvet/);
   assert.match(source, /Créer avec l’IA/);
   assert.match(source, /Générer le scénario/);
-  assert.match(source, /Créer ce projet dans Studio/);
+  assert.match(source, /Créer, ouvrir et lire dans Studio/);
 });
 
 test('le serveur Workers AI conserve récit illustration et voix française', async () => {
@@ -44,5 +44,7 @@ test('les appels IA sont explicites, bornés et transformés en projet local', a
   assert.match(source, /data-vsai-voice/);
   assert.match(source, /createProjectFromPlan/);
   assert.match(source, /localStorage\.setItem\(STORAGE_KEY/);
+  assert.match(source, /PENDING_PROJECT_KEY/);
+  assert.match(source, /AUTOPLAY_KEY/);
   assert.doesNotMatch(source, /getDisplayMedia|MediaRecorder|<iframe/);
 });
