@@ -211,21 +211,21 @@ const API_ROUTES = new Map([
   ['POST /api/billing/promotion', billingPromotionPost]
 ]);
 
-const PROTECTED_PREFIXES = ['/membres', '/marketing', '/pro', '/control'];
+const PROTECTED_PREFIXES = ['/membres', '/marketing', '/marketing-pro', '/studio-capture', '/pro', '/control'];
 
 function securityHeaders(response) {
   const secured = new Response(response.body, response);
   secured.headers.set('x-content-type-options', 'nosniff');
   secured.headers.set('x-frame-options', 'SAMEORIGIN');
   secured.headers.set('referrer-policy', 'no-referrer');
-  secured.headers.set('permissions-policy', 'camera=(), microphone=(), geolocation=(self), payment=(), usb=()');
+  secured.headers.set('permissions-policy', 'camera=(), microphone=(), display-capture=(self), geolocation=(self), payment=(), usb=()');
   secured.headers.set('x-robots-tag', 'noindex, nofollow, noarchive');
   secured.headers.set('strict-transport-security', 'max-age=31536000; includeSubDomains');
   secured.headers.set('cross-origin-opener-policy', 'same-origin');
   secured.headers.set('cross-origin-resource-policy', 'same-origin');
   secured.headers.set(
     'content-security-policy',
-    "default-src 'self'; base-uri 'none'; frame-ancestors 'self'; form-action 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://tile.openstreetmap.org; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; upgrade-insecure-requests"
+    "default-src 'self'; base-uri 'none'; frame-ancestors 'self'; form-action 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://tile.openstreetmap.org; media-src 'self' blob: data:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; upgrade-insecure-requests"
   );
   return secured;
 }
