@@ -83,7 +83,7 @@ await emit(resolve(output, 'pro/index.html'), addLegalBar(pro));
 
 let control = await required(sources.control);
 control = control.replace('</head>', '<link rel="stylesheet" href="/assets/velvet-studio-sprint1.css?v=20260804-3"></head>');
-control = control.replace('</body>', '<script src="/assets/control-live.js?v=20260804-2"></script><script src="/assets/velvet-studio-sprint1.js?v=20260804-3"></script><script src="/assets/velvet-studio-live-recorder.js?v=20260804-6"></script><script src="/assets/velvet-studio-story-director.js?v=20260804-6"></script><script src="/assets/velvet-marketing-shortcut.js?v=20260804-5"></script><script src="/assets/velvet-control-scroll-recovery.js?v=20260804-1"></script><script src="/assets/account-access-menu.js?v=20260804-1"></script></body>');
+control = control.replace('</body>', '<script src="/assets/control-live.js?v=20260804-2"></script><script src="/assets/velvet-studio-sprint1.js?v=20260804-3"></script><script src="/assets/velvet-studio-ai-module.js?v=20260804-7"></script><script src="/assets/velvet-marketing-shortcut.js?v=20260804-5"></script><script src="/assets/velvet-control-scroll-recovery.js?v=20260804-1"></script><script src="/assets/account-access-menu.js?v=20260804-1"></script></body>');
 await emit(resolve(output, 'control/index.html'), addLegalBar(control));
 await cp(sources.controlD, resolve(output, 'control/velvet-control-intelligence-d-beta.html'));
 await cp(sources.controlC, resolve(output, 'control/velvet-control-intelligence-c-beta.html'));
