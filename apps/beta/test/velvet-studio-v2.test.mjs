@@ -44,11 +44,13 @@ test('V2 persistence is protected by RLS and audited', () => {
   assert.match(migration, /duration_seconds between 0 and 90/);
 });
 
-test('Control charge le Studio live après le socle et conserve la récupération du scroll', () => {
+test('Control charge le module IA après le Studio et conserve la récupération du scroll', () => {
   const sprint1 = build.indexOf('velvet-studio-sprint1.js');
-  const live = build.indexOf('velvet-studio-live-recorder.js');
+  const inline = build.indexOf('velvet-studio-ai-module.js');
   const recovery = build.indexOf('velvet-control-scroll-recovery.js');
-  assert.ok(sprint1 >= 0 && live > sprint1 && recovery > live);
+  assert.ok(sprint1 >= 0 && inline > sprint1 && recovery > inline);
+  assert.doesNotMatch(build, /velvet-studio-live-recorder\.js/);
+  assert.doesNotMatch(build, /velvet-studio-story-director\.js/);
   assert.doesNotMatch(build, /velvet-studio-lite\.js/);
   assert.doesNotMatch(build, /velvet-studio-v2\.js/);
   assert.doesNotMatch(build, /velvet-studio-v2\.css/);
