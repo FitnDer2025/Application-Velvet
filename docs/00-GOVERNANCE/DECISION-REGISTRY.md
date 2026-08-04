@@ -27,6 +27,7 @@
 - Identité civile privée ; pseudonyme comme identité publique.
 - Nom d'affichage libre et `@username` unique et stable.
 - Profils Couple dynamiques avec identité commune et partenaires activables individuellement.
+- Les trois interfaces Web proposent « Changer de compte » ; seul le rôle `admin` peut passer directement entre Membres, Pro et Control sans fermer sa session (`ADR-UX-060`).
 
 ### Modération, activité et confidentialité
 
@@ -117,6 +118,7 @@
 - `ADR-MON-057` : offres Découverte, Signature et Pro, cohortes fondatrices, promotions et moteur de droits.
 - `ADR-TECH-058` : fondation iOS native SwiftUI après stabilisation du socle Web.
 - `ADR-AI-059` : profils IA de recette strictement internes, isolés par liste blanche, kill switch, nettoyage et blocage de publication.
+- `ADR-UX-060` : changement de compte commun et sélecteur Web des trois interfaces réservé à `admin`.
 - `ADR-GOV-001` : documentation et commit immédiats après acceptation.
 - `ADR-GOV-002` : pilotage continu par roadmap, métriques et changelog.
 - `ADR-GOV-003` : autonomie complète de livraison Codex, avec exécution SQL Supabase réservée à Cyril.

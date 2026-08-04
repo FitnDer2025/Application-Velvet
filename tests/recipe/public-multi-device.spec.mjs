@@ -1,10 +1,21 @@
 import { expect, test } from '@playwright/test';
 
 async function mockMemberApis(page) {
+  let loggedOut = false;
   await page.route('**/api/**', async (route) => {
     const path = new URL(route.request().url()).pathname;
     let payload = {};
-    if (path === '/api/members/profile') {
+    let status = 200;
+    if (path === '/api/auth/logout') {
+      loggedOut = true;
+    } else if (path === '/api/auth/status') {
+      if (loggedOut) {
+        status = 401;
+        payload = { authenticated: false };
+      } else {
+        payload = { authenticated: true, account: { email: 'admin-recette@velvet.test', status: 'active', roles: ['admin'] } };
+      }
+    } else if (path === '/api/members/profile') {
       payload = {
         account: { userId: '11111111-1111-4111-8111-111111111111' },
         profile: {
@@ -31,7 +42,7 @@ async function mockMemberApis(page) {
     } else if (path === '/api/members/notifications') {
       payload = { notifications: [], unreadCount: 0 };
     }
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(payload) });
+    await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(payload) });
   });
 }
 
@@ -74,4 +85,20 @@ test('le menu tactile mobile s’ouvre au-dessus du voile et se referme', async 
   const scrimBox = await page.locator('.nav-scrim').boundingBox();
   await page.touchscreen.tap(scrimBox.x + scrimBox.width - 4, scrimBox.y + 100);
   await expect(sidebar).not.toHaveClass(/open/);
+});
+
+test('le compte admin change d’espace ou revient à la connexion sans modifier iOS', async ({ page }, testInfo) => {
+  await mockMemberApis(page);
+  await page.goto('/membres/');
+  if (testInfo.project.name !== 'desktop-chromium') {
+    await page.locator('#mobileMenuButton').tap();
+  }
+  const access = page.locator('.velvet-account-access');
+  await expect(access).toBeVisible();
+  await expect(access.getByRole('link', { name: 'Membres' })).toHaveAttribute('aria-current', 'page');
+  await expect(access.getByRole('link', { name: 'Velvet Pro' })).toHaveAttribute('href', '/pro/');
+  await expect(access.getByRole('link', { name: 'Velvet Control' })).toHaveAttribute('href', '/control/');
+  await access.getByRole('button', { name: 'Changer de compte' }).click();
+  await expect(page).toHaveURL(/\/\?mode=login$/);
+  await expect(page.locator('#vg-login')).toBeVisible();
 });

@@ -2,6 +2,15 @@
 
 Ce document retrace les décisions produit validées. Il ne remplace ni les ADR ni l'historique technique Git.
 
+## 4 août 2026
+
+### ADR-UX-060 — Compte et interfaces Web
+
+- Membres, Velvet Pro et Velvet Control proposent désormais la même action « Changer de compte » avec révocation de session et retour à la connexion.
+- Le rôle `admin` peut passer directement entre les trois interfaces Web sans se déconnecter.
+- Les raccourcis ne donnent aucun droit supplémentaire : chaque destination reste protégée côté serveur.
+- Les autres rôles ne voient pas le sélecteur transversal et l’application iOS reste inchangée.
+
 ## 30 juillet 2026
 
 ### Qualité perçue et navigation applicative

@@ -4977,11 +4977,6 @@
     if (conversationButton) openConversation(conversationButton.dataset.openConversation);
   });
 
-  document.querySelector('#logoutButton').addEventListener('click', async () => {
-    await api('/api/auth/logout', { method: 'POST', body: '{}' }).catch(() => {});
-    window.location.href = '/';
-  });
-
   async function refreshPresence() {
     if (!state.profile || state.profile.admission_status !== 'approved' || document.hidden) return;
     try {
