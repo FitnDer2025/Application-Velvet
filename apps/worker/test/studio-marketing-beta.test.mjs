@@ -9,6 +9,7 @@ const voice = await readFile('functions/api/control/studio-media-safe.js', 'utf8
 const portraits = await readFile('functions/api/control/marketing-portrait.js', 'utf8');
 const build = await readFile('apps/beta/scripts/build.mjs', 'utf8');
 const worker = await readFile('apps/beta/worker/index.js', 'utf8');
+const voiceModule = await import('../../../functions/api/control/studio-media-safe.js');
 
 test('la BETA Marketing utilise le vrai shell Membres avec des données fictives', () => {
   assert.doesNotThrow(() => new Function(marketing));
@@ -37,6 +38,7 @@ test('le build publie un accès marketing isolé et son raccourci Control', () =
 });
 
 test('la voix off nettoie et réduit les entrées puis bascule entre plusieurs schémas Workers AI', () => {
+  assert.equal(typeof voiceModule.onRequestPost, 'function');
   assert.match(voice, /cleanSpeech/);
   assert.match(voice, /asciiSpeech/);
   assert.match(voice, /fallbackSpeech/);
