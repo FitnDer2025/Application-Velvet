@@ -37,12 +37,16 @@ test('le build publie un accès marketing isolé et son raccourci Control', () =
   assert.match(worker, /GET \/api\/control\/marketing-portrait/);
 });
 
-test('la voix off est exclusivement française', () => {
+test('la voix off est exclusivement française et accepte la réponse binaire officielle', () => {
   assert.equal(typeof voiceModule.onRequestPost, 'function');
   assert.match(voice, /cleanFrenchSpeech/);
   assert.match(voice, /frenchFallback/);
   assert.match(voice, /@cf\/myshell-ai\/melotts/);
   assert.match(voice, /lang:\s*'fr'/);
+  assert.match(voice, /returnRawResponse:\s*true/);
+  assert.match(voice, /result\?\.audio\?\.data/);
+  assert.match(voice, /ArrayBuffer\.isView/);
+  assert.match(voice, /Uint8Array\.from/);
   assert.match(voice, /workers_ai_french_voice_unavailable/);
   assert.match(voice, /x-velvet-studio-voice-language/);
   assert.doesNotMatch(voice, /deepgram|aura/i);
