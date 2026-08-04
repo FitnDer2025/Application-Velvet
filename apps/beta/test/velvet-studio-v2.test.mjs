@@ -44,12 +44,13 @@ test('V2 persistence is protected by RLS and audited', () => {
   assert.match(migration, /duration_seconds between 0 and 90/);
 });
 
-test('Control build loads V2 after Sprint 1 and keeps scroll recovery', () => {
+test('Control charge le Studio léger après le socle et conserve la récupération du scroll', () => {
   const sprint1 = build.indexOf('velvet-studio-sprint1.js');
-  const v2 = build.indexOf('velvet-studio-v2.js');
+  const lite = build.indexOf('velvet-studio-lite.js');
   const recovery = build.indexOf('velvet-control-scroll-recovery.js');
-  assert.ok(sprint1 >= 0 && v2 > sprint1 && recovery > v2);
-  assert.match(build, /velvet-studio-v2\.css/);
+  assert.ok(sprint1 >= 0 && lite > sprint1 && recovery > lite);
+  assert.doesNotMatch(build, /velvet-studio-v2\.js/);
+  assert.doesNotMatch(build, /velvet-studio-v2\.css/);
   assert.match(styles, /body\.vs2-open/);
   assert.match(styles, /@media\(max-width:600px\)/);
 });
