@@ -10,6 +10,39 @@
   }
 
   const currentPath = window.location.pathname;
+
+  function loadScript(src, marker, callback) {
+    const existing = document.querySelector(`script[${marker}]`);
+    if (existing) {
+      if (callback) {
+        if (existing.dataset.loaded === 'true') callback();
+        else existing.addEventListener('load', callback, { once: true });
+      }
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = src;
+    script.defer = true;
+    script.setAttribute(marker, 'true');
+    script.addEventListener('load', () => {
+      script.dataset.loaded = 'true';
+      callback?.();
+    }, { once: true });
+    (document.head || document.documentElement).appendChild(script);
+  }
+
+  function loadProMarketing() {
+    if (!currentPath.startsWith('/pro/') && !currentPath.startsWith('/marketing-pro/')) return;
+    const loadCockpit = () => loadScript('/assets/velvet-pro-marketing.js?v=20260805-1', 'data-velvet-pro-marketing');
+    if (currentPath.startsWith('/marketing-pro/')) {
+      loadScript('/assets/velvet-marketing-pro-campaign-bridge.js?v=20260805-1', 'data-velvet-marketing-campaign-bridge', loadCockpit);
+    } else {
+      loadCockpit();
+    }
+  }
+
+  loadProMarketing();
+
   const spaces = [
     { href: '/membres/', label: 'Membres', path: '/membres/' },
     { href: '/pro/', label: 'Velvet Pro', path: '/pro/' },
