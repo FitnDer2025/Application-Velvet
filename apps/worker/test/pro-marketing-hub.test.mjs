@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const client = await readFile('apps/beta/static/assets/velvet-pro-marketing.js', 'utf8');
+const runtime = await readFile('apps/beta/static/assets/velvet-pro-marketing-runtime.js', 'utf8');
 const bridge = await readFile('apps/beta/static/assets/velvet-marketing-pro-campaign-bridge.js', 'utf8');
 const accountMenu = await readFile('apps/beta/static/assets/account-access-menu.js', 'utf8');
 const api = await readFile('functions/api/pro/marketing.js', 'utf8');
@@ -13,6 +14,7 @@ const setup = await readFile('docs/VELVET_PRO_MARKETING_SETUP.md', 'utf8');
 
 test('le cockpit Velvet Marketing compile et reste dans le portail Pro', () => {
   assert.doesNotThrow(() => new Function(client));
+  assert.doesNotThrow(() => new Function(runtime));
   assert.match(client, /VELVET PRO · CONCENTRATEUR MARKETING/);
   assert.match(client, /data-pro-marketing-nav/);
   assert.match(client, /Créer une campagne/);
@@ -20,7 +22,16 @@ test('le cockpit Velvet Marketing compile et reste dans le portail Pro', () => {
   assert.match(client, /Publications/);
   assert.match(client, /Résultats/);
   assert.match(client, /Connexions/);
+  assert.match(accountMenu, /velvet-pro-marketing-runtime\.js/);
   assert.match(accountMenu, /velvet-pro-marketing\.js/);
+});
+
+test('le runtime garantit un onglet actif et des messages compréhensibles', () => {
+  assert.match(runtime, /data-vpm-tab="create"/);
+  assert.match(runtime, /marketing_preview_external_publish_disabled/);
+  assert.match(runtime, /La diffusion externe s’active depuis le portail Pro/);
+  assert.match(runtime, /response\.clone\(\)\.json/);
+  assert.doesNotMatch(runtime, /META_APP_SECRET|TIKTOK_CLIENT_SECRET|SUPABASE_SERVICE_ROLE_KEY/);
 });
 
 test('la campagne part de l’agenda et d’un rendu réellement créé dans Studio', () => {
