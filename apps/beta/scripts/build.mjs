@@ -88,7 +88,7 @@ pro = pro
   .replace(/<div class="sidebar-foot">[\s\S]*?<\/div><\/div>\s*<\/aside>/, '<div class="sidebar-foot"><div class="account"><div><b>Compte Velvet Pro</b><small>Session sécurisée</small></div></div></div></aside>')
   .replace(/\nrender\(\);\n<\/script>/, '\nif(!document.body.classList.contains("pro-live-pending"))render();\n</script>')
   .replace('<body>', '<body class="pro-live-pending"><style>.pro-live-pending .shell,.pro-live-pending .mobile-nav{visibility:hidden}.pro-live-pending:after{content:"VELVET PRO · Connexion au CRM…";position:fixed;inset:0;display:grid;place-items:center;background:#09090b;color:#d5b477;font:500 16px Georgia;letter-spacing:.14em}</style>')
-  .replace('</body>', '<script src="/assets/pro-live.js"></script><script src="/assets/account-access-menu.js?v=20260804-1"></script></body>');
+  .replace('</body>', '<script src="/assets/pro-live.js"></script><script src="/assets/velvet-pro-studio-ai.js?v=20260805-1"></script><script src="/assets/account-access-menu.js?v=20260804-1"></script></body>');
 await emit(resolve(output, 'pro/index.html'), addLegalBar(pro));
 
 let marketingPro = pro
