@@ -116,6 +116,10 @@ import {
   onRequestPost as proWorkspacePost
 } from '../../../functions/api/pro/workspace.js';
 import {
+  onRequestGet as proStudioGet,
+  onRequestPost as proStudioPost
+} from '../../../functions/api/pro/studio-ai.js';
+import {
   onRequestGet as controlWorkspaceGet,
   onRequestPost as controlWorkspacePost
 } from '../../../functions/api/control/workspace.js';
@@ -200,6 +204,8 @@ const API_ROUTES = new Map([
   ['POST /api/members/venue-relationships', venueRelationshipsPost],
   ['GET /api/pro/workspace', proWorkspaceGet],
   ['POST /api/pro/workspace', proWorkspacePost],
+  ['GET /api/pro/studio-ai', proStudioGet],
+  ['POST /api/pro/studio-ai', proStudioPost],
   ['GET /api/control/workspace', controlWorkspaceGet],
   ['POST /api/control/workspace', controlWorkspacePost],
   ['GET /api/control/test-agents', testAgentsGet],
