@@ -118,7 +118,7 @@ import {
 import {
   onRequestGet as proStudioGet,
   onRequestPost as proStudioPost
-} from '../../../functions/api/pro/studio-ai.js';
+} from '../../../functions/api/pro/studio-ai-secure.js';
 import {
   onRequestGet as controlWorkspaceGet,
   onRequestPost as controlWorkspacePost
