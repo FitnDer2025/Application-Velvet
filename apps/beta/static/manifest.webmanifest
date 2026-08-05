@@ -1,7 +1,7 @@
 {
-  "name": "Velvet — BETA privée",
+  "name": "Velvet",
   "short_name": "Velvet",
-  "description": "L’expérience membre privée de Velvet.",
+  "description": "Velvet, l’écosystème premium des membres et des professionnels.",
   "id": "/membres/",
   "start_url": "/membres/",
   "scope": "/",
