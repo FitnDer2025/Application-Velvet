@@ -1,4 +1,14 @@
 (() => {
+  'use strict';
+
+  if (!document.querySelector('script[data-velvet-production-surface]')) {
+    const productionSurface = document.createElement('script');
+    productionSurface.src = '/assets/velvet-production-surface.js?v=20260805-1';
+    productionSurface.defer = true;
+    productionSurface.dataset.velvetProductionSurface = 'true';
+    (document.head || document.documentElement).appendChild(productionSurface);
+  }
+
   let authConfig = {};
   let turnstileLoader = null;
 
@@ -27,14 +37,14 @@
     human_verification_failed: 'La vérification de sécurité a expiré. Recommence.',
     invalid_recovery_link: 'Ce lien de récupération est incomplet.',
     invalid_or_expired_recovery_link: 'Ce lien de récupération est invalide ou expiré.',
-    required_consents_missing: 'Les quatre validations sont obligatoires pour cette BETA.',
+    required_consents_missing: 'Les quatre validations sont obligatoires pour activer ton accès.',
     activation_failed: 'L’activation n’a pas abouti. Contacte l’équipe Velvet.'
   };
 
   function shell(content) {
     return `<div class="vg-card">
       <div class="vg-mark"><img src="/assets/velvet-icon-192.png" alt="" width="54" height="54"></div>
-      <p class="vg-kicker">BETA PRIVÉE · 18+</p>
+      <p class="vg-kicker">ACCÈS PRIVÉ · 18+</p>
       <h1>Velvet</h1>
       ${content}
       <p class="vg-legal"><a href="/legal/privacy/">Confidentialité</a> · <a href="/legal/terms/">Conditions</a> · <a href="/legal/safety/">Sécurité</a></p>
@@ -89,7 +99,7 @@
 
   function loginView() {
     gate.innerHTML = shell(`
-      <p class="vg-intro">Accès réservé aux personnes invitées à tester les quatre univers Velvet.</p>
+      <p class="vg-intro">Connecte-toi pour accéder aux espaces Velvet autorisés pour ton compte.</p>
       <form id="vg-login">
         <label>E-mail<input name="email" type="email" autocomplete="email" required></label>
         <label>Mot de passe<input name="password" type="password" autocomplete="current-password" required></label>
@@ -216,7 +226,7 @@
       <p class="vg-intro">Avant l’accès, Velvet doit enregistrer tes choix séparément.</p>
       <form id="vg-consent" class="vg-consents">
         <label><input name="adult" type="checkbox" required> Je déclare avoir 18 ans ou plus.</label>
-        <label><input name="terms" type="checkbox" required> J’accepte les conditions de la BETA.</label>
+        <label><input name="terms" type="checkbox" required> J’accepte les conditions d’utilisation de Velvet.</label>
         <label><input name="privacy" type="checkbox" required> J’ai lu l’information de confidentialité.</label>
         <label><input name="sensitiveProfile" type="checkbox" required> Je consens explicitement au traitement des données sensibles que je choisirai de publier sur mon profil. Je pourrai retirer ce consentement.</label>
         <button type="submit">Activer mon accès</button>
@@ -257,7 +267,7 @@
     }
     const links = [{ href: '/membres/', label: 'Velvet Membres', roles: [] }];
     links.push({ href: '/pro/', label: 'Velvet Pro', roles: ['organizer', 'pro_owner', 'pro_staff', 'direction', 'admin'] });
-    links.push({ href: '/control/', label: 'Velvet Control', roles: ['moderator', 'support', 'auditor', 'direction', 'admin'] });
+    links.push({ href: '/control/', label: 'Velvet Contrôle', roles: ['moderator', 'support', 'auditor', 'direction', 'admin'] });
     const allowed = links.filter((link) => !link.roles.length || link.roles.some((role) => roles.includes(role)));
     gate.innerHTML = shell(`
       <p class="vg-intro">Bienvenue ${escape(account.email)}. Choisis ton espace autorisé.</p>
