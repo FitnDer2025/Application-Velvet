@@ -3,5 +3,8 @@
   "name": "velvet-beta",
   "pages_build_output_dir": "./dist",
   "compatibility_date": "2026-07-28",
-  "send_metrics": false
+  "send_metrics": false,
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  }
 }

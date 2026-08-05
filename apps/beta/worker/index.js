@@ -120,6 +120,16 @@ import {
   onRequestPost as proStudioPost
 } from '../../../functions/api/pro/studio-ai-secure.js';
 import {
+  onMetaCallback as proMarketingMetaCallback,
+  onMetaStart as proMarketingMetaStart,
+  onRequestGet as proMarketingGet,
+  onRequestMedia as proMarketingMediaGet,
+  onRequestPost as proMarketingPost,
+  onTikTokCallback as proMarketingTikTokCallback,
+  onTikTokStart as proMarketingTikTokStart,
+  processDuePublications
+} from '../../../functions/api/pro/marketing.js';
+import {
   onRequestGet as controlWorkspaceGet,
   onRequestPost as controlWorkspacePost
 } from '../../../functions/api/control/workspace.js';
@@ -206,6 +216,13 @@ const API_ROUTES = new Map([
   ['POST /api/pro/workspace', proWorkspacePost],
   ['GET /api/pro/studio-ai', proStudioGet],
   ['POST /api/pro/studio-ai', proStudioPost],
+  ['GET /api/pro/marketing', proMarketingGet],
+  ['POST /api/pro/marketing', proMarketingPost],
+  ['GET /api/pro/marketing/oauth/meta/start', proMarketingMetaStart],
+  ['GET /api/pro/marketing/oauth/meta/callback', proMarketingMetaCallback],
+  ['GET /api/pro/marketing/oauth/tiktok/start', proMarketingTikTokStart],
+  ['GET /api/pro/marketing/oauth/tiktok/callback', proMarketingTikTokCallback],
+  ['GET /api/pro/marketing/media', proMarketingMediaGet],
   ['GET /api/control/workspace', controlWorkspaceGet],
   ['POST /api/control/workspace', controlWorkspacePost],
   ['GET /api/control/test-agents', testAgentsGet],
@@ -263,5 +280,11 @@ export default {
       : await env.ASSETS.fetch(request);
 
     return securityHeaders(response);
+  },
+
+  async scheduled(_controller, env, ctx) {
+    ctx.waitUntil(processDuePublications(env).catch((error) => {
+      console.error('Velvet Marketing scheduler failed', error?.message || error);
+    }));
   }
 };
