@@ -4,6 +4,11 @@
   if (!location.pathname.startsWith('/marketing-pro')) return;
   window.__VELVET_MARKETING_PRO_MODE__ = true;
 
+  const studioBridge = document.createElement('script');
+  studioBridge.src = '/assets/velvet-marketing-pro-studio-bridge.js?v=20260805-1';
+  studioBridge.async = false;
+  document.head.appendChild(studioBridge);
+
   const nativeFetch = window.fetch.bind(window);
   const now = new Date();
   const uuid = (group, index) => `${String(group).padStart(8, '0')}-0000-4000-8000-${String(index).padStart(12, '0')}`;
