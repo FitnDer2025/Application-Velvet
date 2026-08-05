@@ -34,10 +34,11 @@
   function loadProMarketing() {
     if (!currentPath.startsWith('/pro/') && !currentPath.startsWith('/marketing-pro/')) return;
     const loadCockpit = () => loadScript('/assets/velvet-pro-marketing.js?v=20260805-1', 'data-velvet-pro-marketing');
+    const loadRuntime = () => loadScript('/assets/velvet-pro-marketing-runtime.js?v=20260805-1', 'data-velvet-pro-marketing-runtime', loadCockpit);
     if (currentPath.startsWith('/marketing-pro/')) {
-      loadScript('/assets/velvet-marketing-pro-campaign-bridge.js?v=20260805-1', 'data-velvet-marketing-campaign-bridge', loadCockpit);
+      loadScript('/assets/velvet-marketing-pro-campaign-bridge.js?v=20260805-1', 'data-velvet-marketing-campaign-bridge', loadRuntime);
     } else {
-      loadCockpit();
+      loadRuntime();
     }
   }
 
