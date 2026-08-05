@@ -1,9 +1,19 @@
 (() => {
+  'use strict';
+
+  if (!document.querySelector('script[data-velvet-production-surface]')) {
+    const productionSurface = document.createElement('script');
+    productionSurface.src = '/assets/velvet-production-surface.js?v=20260805-1';
+    productionSurface.defer = true;
+    productionSurface.dataset.velvetProductionSurface = 'true';
+    (document.head || document.documentElement).appendChild(productionSurface);
+  }
+
   const currentPath = window.location.pathname;
   const spaces = [
     { href: '/membres/', label: 'Membres', path: '/membres/' },
     { href: '/pro/', label: 'Velvet Pro', path: '/pro/' },
-    { href: '/control/', label: 'Velvet Control', path: '/control/' }
+    { href: '/control/', label: 'Velvet Contrôle', accessibleLabel: 'Velvet Control', path: '/control/' }
   ];
 
   const escape = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
@@ -47,7 +57,7 @@
     root.innerHTML = `${isAdmin ? `
       <p class="velvet-account-kicker">ACCÈS ADMINISTRATEUR</p>
       <nav aria-label="Changer d’interface">
-        ${spaces.map((space) => `<a href="${space.href}"${currentPath.startsWith(space.path) ? ' aria-current="page"' : ''}>${escape(space.label)}</a>`).join('')}
+        ${spaces.map((space) => `<a href="${space.href}"${space.accessibleLabel ? ` aria-label="${escape(space.accessibleLabel)}"` : ''}${currentPath.startsWith(space.path) ? ' aria-current="page"' : ''}>${escape(space.label)}</a>`).join('')}
       </nav>` : ''}
       <button class="velvet-change-account" type="button">Changer de compte</button>`;
 
