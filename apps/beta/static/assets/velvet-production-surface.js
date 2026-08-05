@@ -85,27 +85,8 @@
     return phraseRules.reduce((copy, [pattern, replacement]) => copy.replace(pattern, replacement), source);
   }
 
-  function isPresentationBadge(element) {
-    if (!(element instanceof HTMLElement)) return false;
-    const copy = normalized(element.textContent).toLowerCase();
-    if (!copy || copy.length > 90) return false;
-    const badgeLike = /badge|status|pill|chip|tag|eyebrow|kicker/i.test(element.className || '')
-      || /badge|status/i.test(element.id || '')
-      || ['SPAN', 'SMALL'].includes(element.tagName);
-    return badgeLike && (
-      copy.includes('bêta')
-      || copy.includes('beta')
-      || copy.includes('données fictives')
-      || copy.includes('environnement marketing')
-    );
-  }
-
   function cleanElement(element) {
     if (!(element instanceof Element)) return;
-    if (isPresentationBadge(element)) {
-      element.remove();
-      return;
-    }
     for (const attribute of ['title', 'aria-label', 'placeholder', 'alt']) {
       if (!element.hasAttribute(attribute)) continue;
       const current = element.getAttribute(attribute);
