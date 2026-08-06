@@ -88,7 +88,7 @@ Le module `/marketing/acces-prive/` fournit :
 
 ## Dépendance de déploiement
 
-La migration `supabase/migrations/20260806111500_velvet_waiting_room.sql` doit être exécutée manuellement par Cyril dans Supabase. Tant qu’elle n’est pas appliquée, les surfaces peuvent être déployées mais le formulaire indique que la liste d’accès est en cours d’activation et le cockpit affiche une alerte de migration.
+La migration canonique `infra/supabase/migrations/0040_velvet_waiting_room.sql` doit être exécutée manuellement par Cyril dans Supabase. Le fichier horodaté `supabase/migrations/20260806111500_velvet_waiting_room.sql` est son miroir pour l’outillage Supabase : **un seul des deux scripts doit être exécuté**. Tant que la migration n’est pas appliquée, les surfaces peuvent être déployées mais le formulaire indique que la liste d’accès est en cours d’activation et le cockpit affiche une alerte de migration.
 
 ## Critères de succès
 
