@@ -48,6 +48,11 @@ jobs:
             rsvg-convert -w "$WIDTH" -h "$HEIGHT" "$SOURCE" -o "$IOS_MARK"
           fi
 
+          APP_ICON="ios/Velvet/Resources/Assets.xcassets/AppIcon.appiconset/ZwitAppIcon.png"
+          TEMP_ICON="${RUNNER_TEMP}/zwit-app-icon.png"
+          rsvg-convert -w 1024 -h 1024 "$SOURCE" -o "$TEMP_ICON"
+          convert "$TEMP_ICON" -alpha off "$APP_ICON"
+
       - name: Commit generated rebrand
         run: |
           if git diff --quiet && [ -z "$(git status --porcelain)" ]; then
