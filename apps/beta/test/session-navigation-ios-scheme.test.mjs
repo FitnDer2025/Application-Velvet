@@ -55,7 +55,7 @@ test('Xcode expose un schéma partagé lançant l’application Zwit', async () 
 
   assert.match(scheme, /BlueprintIdentifier = "100000000000000000000040"/);
   assert.match(scheme, /BuildableName = "Velvet\.app"/);
-  assert.match(scheme, /BlueprintName = "Zwit"/);
+  assert.match(scheme, /BlueprintName = "Velvet"/);
   assert.match(scheme, /<LaunchAction/);
   assert.doesNotMatch(scheme, /VelvetWidget\.appex/);
 });
