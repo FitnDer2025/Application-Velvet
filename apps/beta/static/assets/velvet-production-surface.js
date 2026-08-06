@@ -4,6 +4,7 @@
   if (window.__VELVET_PRODUCTION_SURFACE__) return;
   window.__VELVET_PRODUCTION_SURFACE__ = true;
 
+  const OFFICIAL_LOGO = '/assets/zwit-logo-transparent.png?v=20260806-7';
   const path = window.location.pathname;
   const title = path.startsWith('/control')
     ? 'Zwit Contrôle'
@@ -80,6 +81,18 @@
     return phraseRules.reduce((copy, [pattern, replacement]) => copy.replace(pattern, replacement), source);
   };
 
+  const isLegacyBrandAsset = (value) => /(?:zwit-logo-1024\.jpg|zwit-logo\.svg|zwit-icon\.svg|velvet-icon\.svg|velvet-icon-(?:180|192|512)\.png)(?:[?#].*)?$/i.test(String(value || ''));
+
+  function normalizeBrandImage(element) {
+    if (!(element instanceof HTMLImageElement)) return;
+    const current = element.getAttribute('src') || element.currentSrc || '';
+    if (!isLegacyBrandAsset(current)) return;
+    if (element.getAttribute('src') !== OFFICIAL_LOGO) element.setAttribute('src', OFFICIAL_LOGO);
+    element.removeAttribute('srcset');
+    element.style.background = 'transparent';
+    element.style.objectFit = 'contain';
+  }
+
   function cleanControlValue(element) {
     if (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)) return;
     const current = element.value;
@@ -95,6 +108,7 @@
 
   function cleanElement(element) {
     if (!(element instanceof Element)) return;
+    normalizeBrandImage(element);
     for (const attribute of ['title','aria-label','placeholder','alt','value']) {
       if (!element.hasAttribute(attribute)) continue;
       const current = element.getAttribute(attribute);
@@ -147,7 +161,12 @@
 
   const style = document.createElement('style');
   style.id = 'velvetProductionSurfaceStyles';
-  style.textContent = '#velvetMarketingBadge,#velvetMarketingProBadge,[data-beta-badge],[data-demo-badge],.beta-badge,.demo-badge{display:none!important}.zwit-opening-v2{visibility:hidden!important}.zwit-opening-v2 .zwit-word span{display:none!important}';
+  style.textContent = `
+    #velvetMarketingBadge,#velvetMarketingProBadge,[data-beta-badge],[data-demo-badge],.beta-badge,.demo-badge{display:none!important}
+    .zwit-opening-v2{visibility:visible!important}
+    .zwit-opening-v2 img,.zwit-brand img,.zwit-brand-lockup img,[data-zwit-logo]{background:transparent!important;object-fit:contain!important;filter:drop-shadow(0 18px 34px rgba(0,0,0,.48))!important}
+    .zwit-opening-v2 .zwit-word span{display:inline!important}
+  `;
   document.head.appendChild(style);
   installCanvasBrandGuard();
   installSpeechBrandGuard();
@@ -171,12 +190,12 @@
   document.addEventListener('focusin', (event) => cleanElement(event.target), true);
   document.addEventListener('submit', (event) => clean(event.target), true);
   window.addEventListener('pageshow', () => clean(document));
-  [0,250,1000].forEach((delay) => setTimeout(() => clean(document), delay));
+  [0,250,1000,2400].forEach((delay) => setTimeout(() => clean(document), delay));
 
   const loadExperience = () => {
     if (document.querySelector('script[data-zwit-experience]')) return;
     const experience = document.createElement('script');
-    experience.src = '/assets/zwit-experience.js?v=20260806-5';
+    experience.src = '/assets/zwit-experience.js?v=20260806-7';
     experience.dataset.zwitExperience = 'true';
     document.head.appendChild(experience);
   };
@@ -187,7 +206,7 @@
       return;
     }
     const refinement = document.createElement('script');
-    refinement.src = '/assets/zwit-experience-refinement.js?v=20260806-5';
+    refinement.src = '/assets/zwit-experience-refinement.js?v=20260806-7';
     refinement.dataset.zwitExperienceRefinement = 'true';
     refinement.addEventListener('load', loadExperience, { once:true });
     document.head.appendChild(refinement);
