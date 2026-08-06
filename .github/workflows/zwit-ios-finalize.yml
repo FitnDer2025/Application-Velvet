@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - fix/zwit-ios-launch-brand-final
+  pull_request:
+    branches:
+      - v1-lived-demo
+    paths:
+      - 'ios/**'
+      - '.github/workflows/zwit-ios-finalize.yml'
 
 permissions:
   contents: write
