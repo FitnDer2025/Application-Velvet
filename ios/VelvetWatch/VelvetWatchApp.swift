@@ -139,15 +139,13 @@ private struct VelvetWatchDashboard: View {
             ScrollView {
                 VStack(spacing: 12) {
                     HStack(spacing: 7) {
-                        ZStack {
-                            Circle().stroke(gold.opacity(0.75), lineWidth: 1)
-                            Text("V")
-                                .font(.system(size: 14, weight: .medium, design: .serif))
-                                .foregroundStyle(gold)
-                        }
-                        .frame(width: 28, height: 28)
+                        Image(ZwitWatchBrand.logoAsset)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 36, height: 30)
+                            .accessibilityHidden(true)
 
-                        Text("ZWIT")
+                        Text(ZwitWatchBrand.label)
                             .font(.system(size: 12, weight: .bold))
                             .tracking(2)
                         Spacer()
