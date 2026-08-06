@@ -107,3 +107,5 @@ test('aucune chaîne utilisateur des trois socles ne contient encore Velvet', ()
   }
   assert.deepEqual(findings, []);
 });
+
+// Ce contrat est exécuté sur chaque PR pour empêcher toute régression de marque visible.
