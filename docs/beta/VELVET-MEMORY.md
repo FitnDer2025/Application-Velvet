@@ -1,9 +1,9 @@
-# Mémoire Velvet — architecture et migration BETA
+# Mémoire Zwit — architecture et migration BETA
 
 ## Principe
 
-La « mémoire Velvet » est la source de vérité commune à Velvet Membres, Velvet
-Pro, Velvet Control et Velvet Intelligence. Une donnée métier n’est créée qu’une
+La « mémoire Zwit » est la source de vérité commune à Zwit Membres, Zwit
+Pro, Zwit Control et Zwit Intelligence. Une donnée métier n’est créée qu’une
 fois puis exposée selon le rôle, le consentement, la visibilité et la relation
 entre les personnes.
 
@@ -60,7 +60,7 @@ Le schéma initial est défini dans `infra/supabase/migrations/`. Il comporte
 - import des établissements après validation des droits sur les données ;
 - création des équipes Pro ;
 - événements et inscriptions ;
-- vérification croisée entre Velvet Membres et Velvet Pro.
+- vérification croisée entre Zwit Membres et Zwit Pro.
 
 ### Lot 3 — albums privés
 

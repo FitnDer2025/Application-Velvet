@@ -205,7 +205,7 @@
     container.dataset.velvetIntelligentHome = 'true';
     container.innerHTML = `
       <section class="velvet-experience-panel">
-        <header class="velvet-experience-head"><div><span class="velvet-experience-eyebrow">Velvet Intelligence</span><h2>Pour toi</h2><p>Nouveaux profils compatibles, recommandations et clubs proches.</p></div><button class="velvet-radius-pill" type="button" data-open-experience-settings>${escapeHtml(`${data.preferences.radiusKm} km · régler`)}</button></header>
+        <header class="velvet-experience-head"><div><span class="velvet-experience-eyebrow">Zwit Intelligence</span><h2>Pour toi</h2><p>Nouveaux profils compatibles, recommandations et clubs proches.</p></div><button class="velvet-radius-pill" type="button" data-open-experience-settings>${escapeHtml(`${data.preferences.radiusKm} km · régler`)}</button></header>
         <div class="velvet-horizontal-cards">${[...(data.curatedProfiles || []).slice(0, 8).map(profileCard), ...(data.nearbyClubs || []).slice(0, 5).map(clubCard)].join('') || '<p class="status-box">La sélection se prépare.</p>'}</div>
       </section>
       <section class="velvet-experience-panel">
@@ -214,7 +214,7 @@
       </section>
       ${(data.followedActivities || []).length ? `<section class="velvet-experience-panel"><header class="velvet-experience-head"><div><span class="velvet-experience-eyebrow">Profils suivis</span><h2>Leurs nouveautés</h2><p>Nouvelles photos, sorties et recommandations.</p></div></header><div class="velvet-activity-list">${data.followedActivities.slice(0, 10).map(activityRow).join('')}</div></section>` : ''}
       <section class="velvet-experience-panel">
-        <header class="velvet-experience-head"><div><span class="velvet-experience-eyebrow">Annuaire complet</span><h2>Tous les profils</h2><p>Classés par proximité par défaut, avec les filtres Velvet et votre mémoire glaçon/flammes.</p></div></header>
+        <header class="velvet-experience-head"><div><span class="velvet-experience-eyebrow">Annuaire complet</span><h2>Tous les profils</h2><p>Classés par proximité par défaut, avec les filtres Zwit et votre mémoire glaçon/flammes.</p></div></header>
         ${profileControls()}
         <div class="velvet-profile-grid" data-velvet-all-profile-grid></div>
       </section>`;
@@ -420,7 +420,7 @@
   function dialogShell(title, subtitle, body) {
     const dialog = document.createElement('dialog');
     dialog.className = 'velvet-experience-dialog';
-    dialog.innerHTML = `<div class="velvet-experience-dialog-inner"><header class="velvet-experience-head"><div><span class="velvet-experience-eyebrow">Velvet</span><h2>${escapeHtml(title)}</h2><p>${escapeHtml(subtitle)}</p></div><button class="velvet-experience-button" type="button" data-close-dialog>Fermer</button></header>${body}</div>`;
+    dialog.innerHTML = `<div class="velvet-experience-dialog-inner"><header class="velvet-experience-head"><div><span class="velvet-experience-eyebrow">Zwit</span><h2>${escapeHtml(title)}</h2><p>${escapeHtml(subtitle)}</p></div><button class="velvet-experience-button" type="button" data-close-dialog>Fermer</button></header>${body}</div>`;
     document.body.append(dialog);
     dialog.querySelector('[data-close-dialog]').addEventListener('click', () => dialog.close());
     dialog.addEventListener('close', () => dialog.remove());
@@ -434,7 +434,7 @@
     const later = new Date(Date.now() + 28 * 3600 * 1000).toISOString().slice(0, 16);
     const dialog = dialogShell(
       cap ? 'Séjour au Cap d’Agde' : 'Créer une sortie',
-      'Velvet Intelligence contrôle la cohérence et la sécurité avant publication.',
+      'Zwit Intelligence contrôle la cohérence et la sécurité avant publication.',
       `<form class="velvet-event-form" data-event-creator>
         <input type="hidden" name="eventCategory" value="${category}">
         <label>Titre<input name="title" maxlength="160" required></label>
@@ -442,7 +442,7 @@
         <label>Début<input type="datetime-local" name="startsAt" value="${tomorrow}" required></label>
         <label>Fin<input type="datetime-local" name="endsAt" value="${later}"></label>
         <label>Capacité<input type="number" name="capacity" min="2" max="500" value="20"></label>
-        <label>Public<input name="audience" value="Membres Velvet admis"></label>
+        <label>Public<input name="audience" value="Membres Zwit admis"></label>
         <label class="wide">Présentation<textarea name="description" minlength="20" maxlength="3000" required></textarea></label>
         <label>Dress code<input name="dressCode" maxlength="180"></label>
         ${cap ? `<label>Zone du village<select name="capZone"><option>Ensemble du village</option><option>Port Nature</option><option>Héliopolis</option><option>Port Ambonne</option><option>Port Soleil</option><option>Le Môle</option><option>Plage naturiste</option></select></label><label>Résidence / établissement<input name="capVenue" maxlength="160"></label>` : ''}
@@ -486,8 +486,8 @@
       `<form class="velvet-settings-grid" data-experience-form>
         <label>Rayon<select name="radius">${[10,20,30,50,75,100,150,200].map((value) => `<option value="${value}"${value === data.preferences.radiusKm ? ' selected' : ''}>${value} km</option>`).join('')}</select></label>
         <label>Classement<select name="sort"><option value="distance">Proximité</option><option value="compatibility">Compatibilité</option><option value="recent">Plus récents</option><option value="affinity">Glaçon & flammes</option></select></label>
-        <label class="wide"><span><input type="checkbox" name="ai"${data.preferences.aiPersonalizationEnabled ? ' checked' : ''}> Adapter les recommandations avec Velvet Intelligence</span></label>
-        <p class="wide">La position reste approximative. Velvet ne publie jamais vos coordonnées exactes.</p>
+        <label class="wide"><span><input type="checkbox" name="ai"${data.preferences.aiPersonalizationEnabled ? ' checked' : ''}> Adapter les recommandations avec Zwit Intelligence</span></label>
+        <p class="wide">La position reste approximative. Zwit ne publie jamais vos coordonnées exactes.</p>
         <div class="wide velvet-dialog-actions"><button type="button" class="velvet-experience-button" data-cancel>Annuler</button><button type="submit" class="velvet-experience-button primary">Enregistrer</button></div>
       </form>`
     );
@@ -522,7 +522,7 @@
     const panel = document.createElement('section');
     panel.className = 'velvet-experience-panel';
     panel.dataset.webExperienceSettings = 'true';
-    panel.innerHTML = `<header class="velvet-experience-head"><div><span class="velvet-experience-eyebrow">Expérience personnelle</span><h2>Proximité & Velvet Intelligence</h2><p>Rayon actuel : ${escapeHtml(`${data.preferences.radiusKm} km`)} · classement ${escapeHtml(data.preferences.profileSort)}</p></div><button class="velvet-experience-button" type="button">Modifier</button></header>`;
+    panel.innerHTML = `<header class="velvet-experience-head"><div><span class="velvet-experience-eyebrow">Expérience personnelle</span><h2>Proximité & Zwit Intelligence</h2><p>Rayon actuel : ${escapeHtml(`${data.preferences.radiusKm} km`)} · classement ${escapeHtml(data.preferences.profileSort)}</p></div><button class="velvet-experience-button" type="button">Modifier</button></header>`;
     content.append(panel);
     panel.querySelector('button').addEventListener('click', showExperienceDialog);
   }
@@ -542,7 +542,7 @@
       if (route === 'settings') await enhanceSettings();
       bindNavigation(content);
     } catch (error) {
-      console.warn('[Velvet Experience]', error);
+      console.warn('[Zwit Experience]', error);
     } finally {
       runtime.enhancing = false;
     }

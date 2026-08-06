@@ -5,7 +5,7 @@ import {
   hasSufficientSource
 } from '../../../functions/api/members/profile-copy.js';
 
-test('n’active Velvet IA qu’avec une matière suffisamment précise', () => {
+test('n’active Zwit IA qu’avec une matière suffisamment précise', () => {
   assert.equal(hasSufficientSource('sensuel'), false);
   assert.equal(hasSufficientSource('complice, discret, curieux'), true);
   assert.equal(hasSufficientSource('respect feeling élégance'), true);

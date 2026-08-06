@@ -12,7 +12,7 @@ Le fondateur demande explicitement de préparer une vraie application native iOS
 
 ## Décision
 
-Velvet ouvre une piste iOS native en SwiftUI dans le dépôt principal.
+Zwit ouvre une piste iOS native en SwiftUI dans le dépôt principal.
 
 - Le Web reste la plateforme de référence et le backend reste la source unique de vérité.
 - L’application iOS consomme les mêmes API, comptes, profils, consentements et permissions.

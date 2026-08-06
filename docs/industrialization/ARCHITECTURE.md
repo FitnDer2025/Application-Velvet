@@ -1,8 +1,8 @@
-# Velvet — architecture d’industrialisation
+# Zwit — architecture d’industrialisation
 
 ## Statut
 
-Ce dossier inaugure le socle technique réel. Il ne remplace pas les interfaces V1 verrouillées : il fournit la source de vérité et les contrats auxquels Velvet Membres, Velvet Pro et Velvet Control vont progressivement se connecter.
+Ce dossier inaugure le socle technique réel. Il ne remplace pas les interfaces V1 verrouillées : il fournit la source de vérité et les contrats auxquels Zwit Membres, Zwit Pro et Zwit Control vont progressivement se connecter.
 
 ## Choix structurants
 
@@ -18,10 +18,10 @@ Ce dossier inaugure le socle technique réel. Il ne remplace pas les interfaces 
 
 ```mermaid
 flowchart TB
-  M["Velvet Membres"] --> C["Client API commun"]
-  P["Velvet Pro"] --> C
-  O["Velvet Control"] --> C
-  C --> A["API Velvet /v1"]
+  M["Zwit Membres"] --> C["Client API commun"]
+  P["Zwit Pro"] --> C
+  O["Zwit Control"] --> C
+  C --> A["API Zwit /v1"]
   A --> DB["PostgreSQL"]
   A --> AU["Auth EdDSA + RBAC"]
   A --> EN["Chiffrement applicatif"]
@@ -34,9 +34,9 @@ flowchart TB
 
 Un utilisateur, un établissement, un événement ou une inscription ne doit être créé qu’une seule fois.
 
-- Velvet Membres lit et écrit les profils, sorties et inscriptions.
-- Velvet Pro gère les établissements et publie des événements.
-- Velvet Control consulte les mêmes entités, leurs droits et leur chronologie.
+- Zwit Membres lit et écrit les profils, sorties et inscriptions.
+- Zwit Pro gère les établissements et publie des événements.
+- Zwit Control consulte les mêmes entités, leurs droits et leur chronologie.
 - L’outbox enregistre les changements à propager sans créer de double écriture.
 
 ## Identité et sessions
@@ -49,7 +49,7 @@ Un utilisateur, un établissement, un événement ou une inscription ne doit êt
 - Cookie HttpOnly, `SameSite=Strict` et `Secure` en environnement non local.
 - Audience distincte : `members`, `pro` ou `control`.
 
-Un jeton émis pour Velvet Membres ne peut donc pas ouvrir Velvet Control.
+Un jeton émis pour Zwit Membres ne peut donc pas ouvrir Zwit Control.
 
 ## Autorisations
 
@@ -109,9 +109,9 @@ Cette approche empêche qu’une donnée soit modifiée sans que les autres appl
 
 ## Ordre d’intégration
 
-1. Authentification et onboarding Velvet Membres.
+1. Authentification et onboarding Zwit Membres.
 2. Profils et couples.
-3. Établissements et collaborateurs Velvet Pro.
+3. Établissements et collaborateurs Zwit Pro.
 4. Événements et inscriptions partagés.
 5. Audit et vues Control.
 6. Médias, conversations, paiements et notifications.

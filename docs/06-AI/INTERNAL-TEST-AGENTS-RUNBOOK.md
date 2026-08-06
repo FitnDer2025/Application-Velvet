@@ -1,4 +1,4 @@
-# Runbook — Agents IA de test interne Velvet
+# Runbook — Agents IA de test interne Zwit
 
 ## Portée
 
@@ -56,7 +56,7 @@ La cadence minimale du cycle est d’une minute. Chaque personnalité possède e
 
 ## 4. API Control
 
-Toutes les requêtes exigent une session Velvet Admin ou Direction. Les autres rôles internes ne voient pas les profils IA sans ajout explicite à la liste blanche.
+Toutes les requêtes exigent une session Zwit Admin ou Direction. Les autres rôles internes ne voient pas les profils IA sans ajout explicite à la liste blanche.
 
 ### Lire l’état
 

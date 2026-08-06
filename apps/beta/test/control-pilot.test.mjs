@@ -31,14 +31,14 @@ test('la politique IA distingue observation, seuil public et seuil privé', () =
   assert.equal(decidePrivateMedia({ confidence: 0.98, prohibited: false, uncertain: false }, observation), 'review');
 });
 
-test('les modèles e-mail utilisent le visuel Velvet sans accepter de HTML libre', () => {
+test('les modèles e-mail utilisent le visuel Zwit sans accepter de HTML libre', () => {
   const rendered = buildConfiguredVelvetEmail({
     template: {
       subject: 'Bonjour {{profile_name}}',
-      preheader: 'Votre message Velvet',
+      preheader: 'Votre message Zwit',
       heading: '<script>alert(1)</script>{{profile_name}}',
       body_text: 'Bienvenue {{profile_name}}.\n\nVotre espace est prêt.',
-      cta_label: 'Ouvrir Velvet',
+      cta_label: 'Ouvrir Zwit',
       footer_text: 'Vous gardez le contrôle.'
     },
     variables: { profile_name: 'Céline & Cyril' },
@@ -54,7 +54,7 @@ test('les modèles e-mail utilisent le visuel Velvet sans accepter de HTML libre
   }
 });
 
-test('Velvet Contrôle ouvre un cockpit réel à cinq destinations', async () => {
+test('Zwit Contrôle ouvre un cockpit réel à cinq destinations', async () => {
   const [html, css, script, api] = await Promise.all([
     read('apps/web/velvet-control-intelligence-beta-final.html'),
     read('apps/beta/static/assets/control-pilot.css'),

@@ -1,4 +1,4 @@
-# Velvet — Prototype interactif Phases 2 et 3
+# Zwit — Prototype interactif Phases 2 et 3
 
 ## Objectif
 

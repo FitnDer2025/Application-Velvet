@@ -1,6 +1,6 @@
-# Velvet iOS
+# Zwit iOS
 
-Application native SwiftUI de Velvet, connectée au même backend Cloudflare/Supabase que la BETA Web.
+Application native SwiftUI de Zwit, connectée au même backend Cloudflare/Supabase que la BETA Web.
 
 ## Périmètre présent dans la branche
 
@@ -12,7 +12,7 @@ Application native SwiftUI de Velvet, connectée au même backend Cloudflare/Sup
 - accueil alimenté par l’annuaire et les notifications du backend ;
 - découverte, recherche locale et fiches membres ;
 - clubs, professionnels, lieux, événements et inscription ;
-- conversations privées et Salons Velvet liés aux événements ;
+- conversations privées et Salons Zwit liés aux événements ;
 - favoris côté contrat, blocage, signalement et suppression du compte ;
 - notifications APNs natives (autorisation, jeton, routage et préférences),
   localisation approximative et préparation StoreKit 2 ;
@@ -44,7 +44,7 @@ La couche membre native reprend les choix éditoriaux de
 
 1. Cloner le dépôt et sélectionner `feat/velvet-ios-foundation`.
 2. Ouvrir `ios/Velvet.xcodeproj` avec Xcode 16 ou plus récent.
-3. Dans la cible **Velvet > Signing & Capabilities**, choisir l’équipe Apple.
+3. Dans la cible **Zwit > Signing & Capabilities**, choisir l’équipe Apple.
 4. Remplacer `com.velvetapplication.app` si cet identifiant n’est pas celui réservé dans Apple Developer.
 5. Ajouter l’icône 1024 × 1024 dans `AppIcon.appiconset`.
 6. Lancer d’abord sur un simulateur iPhone, puis sur un iPhone physique pour Photos, localisation et notifications.
@@ -66,7 +66,7 @@ L’URL de la BETA est définie dans `Config/Debug.xcconfig` et `Config/Release.
   migration `member_push_devices`, puis configurer la clé APNs `.p8` uniquement
   côté serveur. Ajouter **Background Modes > Remote notifications** seulement si
   des notifications silencieuses sont réellement nécessaires.
-- StoreKit : créer les produits dans App Store Connect et ajouter une correspondance serveur `plan Velvet ↔ product ID Apple`. Aucun identifiant de produit n’est codé en dur.
+- StoreKit : créer les produits dans App Store Connect et ajouter une correspondance serveur `plan Zwit ↔ product ID Apple`. Aucun identifiant de produit n’est codé en dur.
 - Confidentialité : aligner les réponses App Store Connect avec `Resources/PrivacyInfo.xcprivacy` et avec le comportement réel du backend.
 - Récupération : tester le schéma `velvet://recovery` sur un appareil.
 
@@ -86,7 +86,7 @@ Sur Mac :
 ```bash
 xcodebuild \
   -project ios/Velvet.xcodeproj \
-  -scheme Velvet \
+  -scheme Zwit \
   -sdk iphonesimulator \
   -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
   build

@@ -169,7 +169,7 @@ struct MainShellView: View {
             }
         }
         .alert(
-            "Velvet",
+            "Zwit",
             isPresented: Binding(
                 get: { store.errorMessage != nil },
                 set: { if !$0 { store.errorMessage = nil } }
@@ -346,7 +346,7 @@ private struct VelvetMenuView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     VelvetPageHeader(
                         "Outils & réglages",
-                        title: "Plus de Velvet",
+                        title: "Plus de Zwit",
                         subtitle: "Les profils se trouvent dans Membres. Les clubs, soirées et participants se trouvent dans Lieux."
                     )
                     .padding(.bottom, 8)
@@ -365,7 +365,7 @@ private struct VelvetMenuView: View {
                         .padding(.top, 8)
 
                     menuButton(
-                        "Studio du profil & Velvet IA",
+                        "Studio du profil & Zwit IA",
                         detail: "Plume, organisateur et outils avancés",
                         icon: "wand.and.stars",
                         action: openStudio
@@ -383,7 +383,7 @@ private struct VelvetMenuView: View {
                         action: manageMedia
                     )
                     menuButton(
-                        "Proximité & Velvet Intelligence",
+                        "Proximité & Zwit Intelligence",
                         detail: "Rayon, tri et recommandations",
                         icon: "location.circle",
                         action: openExperience

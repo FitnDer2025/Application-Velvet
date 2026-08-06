@@ -37,7 +37,7 @@ struct ExperienceSettingsView: View {
                             .pickerStyle(.segmented)
                             .labelsHidden()
 
-                            Text("Velvet utilise une position approximative. Votre adresse et vos coordonnées exactes ne sont jamais montrées aux membres.")
+                            Text("Zwit utilise une position approximative. Votre adresse et vos coordonnées exactes ne sont jamais montrées aux membres.")
                                 .experienceFootnote()
                         }
 
@@ -60,13 +60,13 @@ struct ExperienceSettingsView: View {
                         }
 
                         SettingsExperienceCard(
-                            eyebrow: "Velvet Intelligence",
+                            eyebrow: "Zwit Intelligence",
                             title: "Personnalisation autonome",
                             icon: "wand.and.stars"
                         ) {
                             Toggle("Adapter mes recommandations", isOn: $aiPersonalizationEnabled)
                                 .tint(VelvetColor.champagneGold)
-                            Text("Velvet combine vos critères déclarés, la proximité, les pratiques communes, les recommandations et vos glaçons/flammes. Aucun classement ne repose sur la popularité seule.")
+                            Text("Zwit combine vos critères déclarés, la proximité, les pratiques communes, les recommandations et vos glaçons/flammes. Aucun classement ne repose sur la popularité seule.")
                                 .experienceFootnote()
                         }
 
@@ -119,7 +119,7 @@ struct ExperienceSettingsView: View {
             radiusKm = saved.discoveryRadiusKm
             profileSort = saved.profileSort
             aiPersonalizationEnabled = saved.aiPersonalizationEnabled
-            appState.alertMessage = "Votre rayon et vos préférences Velvet Intelligence sont enregistrés."
+            appState.alertMessage = "Votre rayon et vos préférences Zwit Intelligence sont enregistrés."
             dismiss()
         } catch {
             appState.alertMessage = ErrorMessage.text(for: error)

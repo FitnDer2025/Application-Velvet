@@ -25,8 +25,8 @@ function controlWorkspace() {
     ],
     mediaPolicy: { automation_mode: 'active', public_auto_confidence: 0.86, private_auto_confidence: 0.91, updated_at: now, migration_pending: false },
     emailTemplates: [
-      { template_key: 'couple_invitation', category: 'transactional', label: 'Invitation de la moitié', status: 'active', subject: 'Votre moitié vous attend dans Velvet', preheader: 'Votre histoire vous attend.', heading: 'Votre histoire vous attend.', body_text: '{{profile_name}} a entrouvert la porte de votre espace Velvet.', cta_label: 'Poursuivre notre histoire', footer_text: 'Lien personnel valable 7 jours.', updated_at: now },
-      { template_key: 'marketing_launch', category: 'marketing', label: 'Annonce du lancement Velvet', status: 'draft', subject: 'Velvet ouvre bientôt ses portes', preheader: 'Une nouvelle expérience commence.', heading: 'Une nouvelle expérience commence.', body_text: 'Velvet réunit les membres et les professionnels.', cta_label: 'Découvrir Velvet', footer_text: 'Retirez votre consentement marketing à tout moment.', updated_at: now }
+      { template_key: 'couple_invitation', category: 'transactional', label: 'Invitation de la moitié', status: 'active', subject: 'Votre moitié vous attend dans Zwit', preheader: 'Votre histoire vous attend.', heading: 'Votre histoire vous attend.', body_text: '{{profile_name}} a entrouvert la porte de votre espace Velvet.', cta_label: 'Poursuivre notre histoire', footer_text: 'Lien personnel valable 7 jours.', updated_at: now },
+      { template_key: 'marketing_launch', category: 'marketing', label: 'Annonce du lancement Zwit', status: 'draft', subject: 'Zwit ouvre bientôt ses portes', preheader: 'Une nouvelle expérience commence.', heading: 'Une nouvelle expérience commence.', body_text: 'Zwit réunit les membres et les professionnels.', cta_label: 'Découvrir Zwit', footer_text: 'Retirez votre consentement marketing à tout moment.', updated_at: now }
     ],
     accounts: [
       { user_id: '11111111-1111-4111-8111-111111111111', email: 'membre@velvet.test', status: 'active', roles: ['member'], profile_id: '22222222-2222-4222-8222-222222222222', display_name: 'Couple de recette', profile_type: 'couple', verification_status: 'verified', access_tier: 'signature', access_source: 'founder' },
@@ -57,13 +57,13 @@ async function mockControlApis(page) {
   });
 }
 
-test('Velvet Contrôle rend le briefing, les décisions IA et les actions sur tous les appareils', async ({ page }) => {
+test('Zwit Contrôle rend le briefing, les décisions IA et les actions sur tous les appareils', async ({ page }) => {
   const failures = [];
   page.on('pageerror', (error) => failures.push(error.message));
   await mockControlApis(page);
   await page.goto('/control/');
 
-  await expect(page.getByRole('heading', { name: 'Pilotage Velvet' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Pilotage Zwit' })).toBeVisible();
   await expect(page.getByText('12', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('Signalement à traiter').first()).toBeVisible();
   await expect(page.getByText('Aucun service simulé.')).toBeVisible();
@@ -102,7 +102,7 @@ test('Velvet Contrôle rend le briefing, les décisions IA et les actions sur to
   await navigation.getByRole('button', { name: /Communications/ }).click();
   await expect(page.getByRole('heading', { name: 'Communications' })).toBeVisible();
   await expect(page.locator('#emailTemplateForm')).toBeVisible();
-  await expect(page.getByText('Aperçu Velvet')).toBeVisible();
+  await expect(page.getByText('Aperçu Zwit')).toBeVisible();
 
   await navigation.getByRole('button', { name: /À traiter/ }).click();
   await expect(page.getByRole('heading', { name: 'À traiter' })).toBeVisible();

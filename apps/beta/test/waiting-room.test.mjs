@@ -22,7 +22,7 @@ function contract(name, run) {
       run();
     } catch (error) {
       const message = String(error?.stack || error?.message || error).replaceAll('\r', '').replaceAll('\n', '%0A');
-      console.error(`::error title=Velvet waiting room · ${name}::${message}`);
+      console.error(`::error title=Zwit waiting room · ${name}::${message}`);
       throw error;
     }
   });

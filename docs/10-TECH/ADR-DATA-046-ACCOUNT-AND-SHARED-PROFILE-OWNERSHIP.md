@@ -2,17 +2,17 @@
 
 - **Statut :** Acceptée
 - **Date :** 2026-07-23
-- **Portée :** Velvet V1 — modèle de données, authentification, consentement et permissions
+- **Portée :** Zwit V1 — modèle de données, authentification, consentement et permissions
 
 ## Contexte
 
-Velvet doit permettre à une même personne de gérer plusieurs présences publiques, notamment un profil individuel et un profil Couple, sans recourir à des identifiants partagés.
+Zwit doit permettre à une même personne de gérer plusieurs présences publiques, notamment un profil individuel et un profil Couple, sans recourir à des identifiants partagés.
 
 Un compte partagé entre partenaires créerait des risques importants : absence de traçabilité individuelle, ambiguïté du consentement, difficulté de révocation des accès, faiblesse de la sécurité et impossibilité de distinguer les actions de chaque partenaire.
 
 ## Décision
 
-Chaque personne physique possède son propre compte Velvet, sa propre authentification et sa propre vérification d’identité et de majorité.
+Chaque personne physique possède son propre compte Zwit, sa propre authentification et sa propre vérification d’identité et de majorité.
 
 Un compte personnel peut être lié à plusieurs profils indépendants ou partagés.
 

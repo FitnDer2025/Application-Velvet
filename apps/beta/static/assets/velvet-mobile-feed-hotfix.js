@@ -88,7 +88,7 @@
   }
 
   function conversationAvatar(conversation) {
-    const name = conversation?.participant_display_name || conversation?.subject || 'Membre Velvet';
+    const name = conversation?.participant_display_name || conversation?.subject || 'Membre Zwit';
     return `<span class="conversation-avatar-v2">${conversation?.participant_photo_url
       ? `<img src="${e(conversation.participant_photo_url)}" alt="Photo de ${e(name)}">`
       : e(initials(name))}</span>`;
@@ -157,7 +157,7 @@
 
     const profileId = button.dataset.openProfile || '';
     const profile = profileById(profileId);
-    const title = profile?.display_name || image.alt || 'Photo Velvet';
+    const title = profile?.display_name || image.alt || 'Photo Zwit';
     const lightbox = document.createElement('section');
     lightbox.className = 'velvet-photo-lightbox';
     lightbox.setAttribute('role', 'dialog');
@@ -206,7 +206,7 @@
       const name = conversation?.participant_display_name || conversation?.subject || 'Conversation privée';
       content.innerHTML = `<div class="page velvet-direct-conversation">
         <header class="page-head"><div><p class="eyebrow">Messagerie privée</p><h1>${e(name)}</h1><p>Conversation confidentielle Velvet.</p></div><button type="button" class="secondary" data-direct-conversation-back>Retour</button></header>
-        <section class="conversation-peer-header">${conversationAvatar(conversation)}<span><strong>${e(name)}</strong><small>${conversation?.kind === 'event' ? 'Salon Velvet' : 'Échange privé'}</small></span></section>
+        <section class="conversation-peer-header">${conversationAvatar(conversation)}<span><strong>${e(name)}</strong><small>${conversation?.kind === 'event' ? 'Salon Zwit' : 'Échange privé'}</small></span></section>
         <section class="card">
           <div class="messages">${list(result.messages).length
             ? list(result.messages).map((message) => messageMarkup(message, result.currentUserId)).join('')

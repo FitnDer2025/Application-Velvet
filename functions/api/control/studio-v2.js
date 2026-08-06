@@ -36,7 +36,7 @@ function projectInput(project = {}) {
     prompt: text(scene.prompt || scene.visual, 2400),
     overlay: text(scene.text, 420),
     voice: text(scene.voice, 600),
-    transition: text(scene.transition || 'Velvet Fade', 80),
+    transition: text(scene.transition || 'Zwit Fade', 80),
     palette: Array.isArray(scene.palette) ? scene.palette.slice(0, 2).map((value) => text(value, 20)) : ['#0D0D0D', '#641B36']
   }));
   const duration = normalizedScenes.reduce((sum, scene) => sum + scene.duration, 0);
@@ -44,7 +44,7 @@ function projectInput(project = {}) {
   const format = ALLOWED_FORMATS.has(project.format) ? project.format : '9:16';
   return {
     id: text(project.id || crypto.randomUUID(), 100),
-    title: text(project.title || 'Projet Velvet Studio', 180),
+    title: text(project.title || 'Projet Zwit Studio', 180),
     objective: text(project.objective, 1200),
     audience: text(project.audience, 500),
     channel: text(project.channel || 'Instagram', 120),
@@ -82,7 +82,7 @@ function capabilities(env) {
     maxDuration: MAX_DURATION,
     formats: [...ALLOWED_FORMATS],
     providers: [
-      { id: 'browser-compositor', name: 'Compositor Velvet', status: 'ready', mode: 'local temps réel', cost: 'free' },
+      { id: 'browser-compositor', name: 'Compositor Zwit', status: 'ready', mode: 'local temps réel', cost: 'free' },
       { id: 'browser-voice', name: 'Voix navigateur', status: 'ready', mode: 'prévisualisation locale', cost: 'free' },
       { id: 'procedural-music', name: 'Musique procédurale', status: 'ready', mode: 'Web Audio', cost: 'free' },
       { id: 'media-gateway', name: 'Passerelle médias IA', status: provider.enabled ? 'configured' : 'disabled', mode: provider.enabled ? 'serveur sécurisé' : 'activation explicite requise', cost: provider.enabled ? 'provider-dependent' : 'none' }

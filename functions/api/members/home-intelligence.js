@@ -342,7 +342,7 @@ export async function onRequestGet({ request, env }) {
       nearbyEvents: nearbyEvents.slice(0, 40),
       followedActivities: followedActivities.slice(0, 30),
       allProfiles: sortedProfiles,
-      explanation: 'Velvet Intelligence combine proximité, compatibilité déclarée, pratiques communes, recommandations, nouveauté et glaçon/flammes. Les coordonnées exactes ne sont jamais exposées.'
+      explanation: 'Zwit Intelligence combine proximité, compatibilité déclarée, pratiques communes, recommandations, nouveauté et glaçon/flammes. Les coordonnées exactes ne sont jamais exposées.'
     }, token);
   } catch (error) {
     return json({ error: error.message || 'home_intelligence_failed' }, 400);

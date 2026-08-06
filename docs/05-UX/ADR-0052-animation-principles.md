@@ -2,7 +2,7 @@
 
 Décision validée.
 
-Les animations Velvet servent la fluidité et la compréhension. Elles ne doivent pas compliquer inutilement le développement ni ralentir l'application.
+Les animations Zwit servent la fluidité et la compréhension. Elles ne doivent pas compliquer inutilement le développement ni ralentir l'application.
 
 ## Règle d'arbitrage
 

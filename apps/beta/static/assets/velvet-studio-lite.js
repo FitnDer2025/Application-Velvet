@@ -10,7 +10,7 @@
     profile: 'Profil membre',
     messages: 'Messagerie',
     events: 'Sorties & événements',
-    map: 'Carte Velvet'
+    map: 'Carte Zwit'
   };
 
   const state = {
@@ -68,12 +68,12 @@
 
   function homeMarkup() {
     return `<section class="vsl-home">
-      <span class="vsl-kicker">VELVET STUDIO</span>
-      <h1>Décrivez la démonstration.<br>Velvet réalise la vidéo.</h1>
-      <p>L’IA écrit la narration et la voix off. Les images proviennent directement de l’environnement Velvet avec des données fictives internes.</p>
+      <span class="vsl-kicker">ZWIT STUDIO</span>
+      <h1>Décrivez la démonstration.<br>Zwit réalise la vidéo.</h1>
+      <p>L’IA écrit la narration et la voix off. Les images proviennent directement de l’environnement Zwit avec des données fictives internes.</p>
       <div class="vsl-compose">
         <textarea data-vsl-home-prompt placeholder="Crée une démonstration générale de Velvet. Montre l’accueil, la recherche, un profil, la messagerie, les sorties et la carte, avec une voix off française premium."></textarea>
-        <button class="vsl-primary" data-vsl-open>Créer la démonstration<small>Interface Velvet + voix off + montage</small></button>
+        <button class="vsl-primary" data-vsl-open>Créer la démonstration<small>Interface Zwit + voix off + montage</small></button>
       </div>
       <div class="vsl-points"><span>Ouverture immédiate</span><span>Aucune image inventée</span><span>Données synthétiques</span><span>Export vidéo avec voix</span></div>
     </section>`;
@@ -97,8 +97,8 @@
 
   function modalMarkup(prompt = '') {
     return `<div class="vsl-overlay" data-vsl-overlay>
-      <section class="vsl-dialog" role="dialog" aria-modal="true" aria-label="Créer une démonstration Velvet">
-        <header class="vsl-head"><div><strong>Créer une démonstration Velvet</strong><span>Le montage reste utilisable pendant toute la production.</span></div><button class="vsl-close" data-vsl-close aria-label="Fermer">×</button></header>
+      <section class="vsl-dialog" role="dialog" aria-modal="true" aria-label="Créer une démonstration Zwit">
+        <header class="vsl-head"><div><strong>Créer une démonstration Zwit</strong><span>Le montage reste utilisable pendant toute la production.</span></div><button class="vsl-close" data-vsl-close aria-label="Fermer">×</button></header>
         <div class="vsl-body">
           <section class="vsl-card">
             <span class="vsl-kicker">VOTRE DEMANDE</span><h2>Que doit montrer la vidéo ?</h2><p class="vsl-muted">Décrivez les fonctions à présenter et le ton souhaité.</p>
@@ -109,7 +109,7 @@
             </div>
             <button class="vsl-run" data-vsl-run>Produire la démonstration</button>
             <p class="vsl-note">L’export vidéo dure approximativement la durée choisie, mais la page reste fluide. La croix permet d’annuler à tout moment.</p>
-            <div class="vsl-steps">${step('plan',1,'Scénario et narration')}${step('screens',2,'Écrans Velvet')}${step('voice',3,'Voix off française')}${step('render',4,'Montage et export')}</div>
+            <div class="vsl-steps">${step('plan',1,'Scénario et narration')}${step('screens',2,'Écrans Zwit')}${step('voice',3,'Voix off française')}${step('render',4,'Montage et export')}</div>
           </section>
           <section class="vsl-card"><span class="vsl-kicker">APERÇU</span><h2 data-vsl-title>La vidéo apparaîtra ici</h2><p class="vsl-muted" data-vsl-copy>Chaque étape s’affiche sans bloquer le navigateur.</p><div class="vsl-preview" data-vsl-preview><div class="vsl-placeholder"><b>V</b><strong>Prêt à créer</strong><p>Lancez la production lorsque la demande est prête.</p></div></div><div class="vsl-actions" data-vsl-actions hidden></div></section>
         </div>
@@ -226,12 +226,12 @@
       } catch {}
       await delay(100);
     }
-    throw new Error('L’environnement Velvet ne s’est pas chargé à temps.');
+    throw new Error('L’environnement Zwit ne s’est pas chargé à temps.');
   }
 
   async function domToImage(doc, width, height) {
     const source = doc.querySelector('.vc-shell');
-    if (!source) throw new Error('Écran Velvet introuvable.');
+    if (!source) throw new Error('Écran Zwit introuvable.');
     const clone = source.cloneNode(true);
     clone.querySelector('.vc-demo')?.remove();
     const css = [...doc.querySelectorAll('style')].map((node) => node.textContent || '').join('\n') + '\n.vc-nav{top:0!important}.vc-shell{width:100%!important;min-height:100%!important}.vc-main{min-height:100%!important}';
@@ -257,8 +257,8 @@
     ctx.fillStyle = '#0D0D0D'; ctx.fillRect(0,0,width,height);
     const grad = ctx.createLinearGradient(0,0,width,height*.3); grad.addColorStop(0,'#171317'); grad.addColorStop(1,'#5a1935');
     ctx.fillStyle = grad; ctx.fillRect(0,0,width,height*.24);
-    ctx.fillStyle = '#C6A96A'; ctx.font = `600 ${Math.max(24,width*.045)}px Georgia`; ctx.fillText('VELVET',width*.06,height*.09);
-    ctx.fillStyle = '#F4F4F2'; ctx.font = `500 ${Math.max(30,width*.065)}px Georgia`; ctx.fillText(labels[view] || 'Velvet',width*.06,height*.19);
+    ctx.fillStyle = '#C6A96A'; ctx.font = `600 ${Math.max(24,width*.045)}px Georgia`; ctx.fillText('ZWIT',width*.06,height*.09);
+    ctx.fillStyle = '#F4F4F2'; ctx.font = `500 ${Math.max(30,width*.065)}px Georgia`; ctx.fillText(labels[view] || 'Zwit',width*.06,height*.19);
     const cols = width > height ? 3 : 2; const gap = width*.025; const cardWidth = (width*.88-gap*(cols-1))/cols;
     for (let index=0; index<6; index+=1) {
       const x = width*.06 + (index%cols)*(cardWidth+gap); const y = height*.3 + Math.floor(index/cols)*(height*.22);
@@ -279,7 +279,7 @@
     try {
       await Promise.race([
         new Promise((resolve) => iframe.addEventListener('load', resolve, { once:true })),
-        delay(8000).then(() => { throw new Error('Chargement de Velvet trop long.'); })
+        delay(8000).then(() => { throw new Error('Chargement de Zwit trop long.'); })
       ]);
       const doc = await waitForCapture(iframe);
       const frames = [];
@@ -320,9 +320,9 @@
     ctx.fillStyle='#0D0D0D';ctx.fillRect(0,0,w,h);if(current)cover(ctx,current,w,h,1+progress*.025,(progress-.5)*.4,(progress-.5)*-.25);
     const grad=ctx.createLinearGradient(0,h*.55,0,h);grad.addColorStop(0,'rgba(0,0,0,0)');grad.addColorStop(1,'rgba(0,0,0,.78)');ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
     const panelH=h*.15,panelY=h-panelH-h*.035;ctx.fillStyle='rgba(9,9,11,.82)';rounded(ctx,w*.045,panelY,w*.91,panelH,Math.max(18,w*.025));ctx.fill();
-    ctx.fillStyle='#C6A96A';ctx.font=`750 ${Math.max(10,w*.015)}px Inter,Arial`;ctx.fillText((labels[scene.screen]||'VELVET').toUpperCase(),w*.075,panelY+panelH*.28);
-    ctx.fillStyle='#F7F3EF';ctx.font=`600 ${Math.max(23,w*.037)}px Georgia`;ctx.fillText(String(scene.onScreen||scene.title||'Découvrir Velvet').slice(0,55),w*.075,panelY+panelH*.68);
-    if(seconds>totalDuration-2){const alpha=Math.min(1,(seconds-(totalDuration-2))/.6);ctx.save();ctx.globalAlpha=alpha;ctx.fillStyle='rgba(13,13,13,.95)';ctx.fillRect(0,0,w,h);ctx.textAlign='center';ctx.fillStyle='#C6A96A';ctx.font=`600 ${Math.max(44,w*.07)}px Georgia`;ctx.fillText('VELVET',w/2,h*.48);ctx.fillStyle='#F5F1ED';ctx.font=`500 ${Math.max(16,w*.024)}px Inter,Arial`;ctx.fillText('Là où les plus belles rencontres commencent.',w/2,h*.55);ctx.restore();}
+    ctx.fillStyle='#C6A96A';ctx.font=`750 ${Math.max(10,w*.015)}px Inter,Arial`;ctx.fillText((labels[scene.screen]||'ZWIT').toUpperCase(),w*.075,panelY+panelH*.28);
+    ctx.fillStyle='#F7F3EF';ctx.font=`600 ${Math.max(23,w*.037)}px Georgia`;ctx.fillText(String(scene.onScreen||scene.title||'Découvrir Zwit').slice(0,55),w*.075,panelY+panelH*.68);
+    if(seconds>totalDuration-2){const alpha=Math.min(1,(seconds-(totalDuration-2))/.6);ctx.save();ctx.globalAlpha=alpha;ctx.fillStyle='rgba(13,13,13,.95)';ctx.fillRect(0,0,w,h);ctx.textAlign='center';ctx.fillStyle='#C6A96A';ctx.font=`600 ${Math.max(44,w*.07)}px Georgia`;ctx.fillText('ZWIT',w/2,h*.48);ctx.fillStyle='#F5F1ED';ctx.font=`500 ${Math.max(16,w*.024)}px Inter,Arial`;ctx.fillText('Là où les plus belles rencontres commencent.',w/2,h*.55);ctx.restore();}
     ctx.fillStyle='rgba(255,255,255,.18)';rounded(ctx,w*.06,h*.975,w*.88,Math.max(4,h*.004),99);ctx.fill();ctx.fillStyle='#C6A96A';rounded(ctx,w*.06,h*.975,w*.88*(seconds/totalDuration),Math.max(4,h*.004),99);ctx.fill();
   }
 
@@ -358,9 +358,9 @@
     state.running=true;state.cancelled=false;state.controller=new AbortController();const audioContext=new Audio();await audioContext.resume();
     const button=overlay.querySelector('[data-vsl-run]');const title=overlay.querySelector('[data-vsl-title]');const copy=overlay.querySelector('[data-vsl-copy]');const actions=overlay.querySelector('[data-vsl-actions]');button.disabled=true;button.textContent='Production en cours…';actions.hidden=true;resetSteps();
     try{
-      setStep('plan','active','L’IA écrit');title.textContent='Préparation de la démonstration';copy.textContent='Velvet choisit les écrans et rédige la narration.';await yieldToBrowser();
+      setStep('plan','active','L’IA écrit');title.textContent='Préparation de la démonstration';copy.textContent='Zwit choisit les écrans et rédige la narration.';await yieldToBrowser();
       const plan=await generatePlan(brief,format,duration);if(state.cancelled)throw new Error('studio_cancelled');setStep('plan','done','Scénario prêt');title.textContent=plan.title;copy.textContent=plan.voiceOver;
-      setStep('screens','active','Ouverture de Velvet');setStep('voice','active','En parallèle');const voicePromise=generateVoice(plan.voiceOver);
+      setStep('screens','active','Ouverture de Zwit');setStep('voice','active','En parallèle');const voicePromise=generateVoice(plan.voiceOver);
       const frames=await captureScreens(plan,format,(current,total,dataUrl,view)=>{setStep('screens','active',`${current} / ${total}`);const preview=document.querySelector('[data-vsl-preview]');if(preview)preview.innerHTML=`<img src="${dataUrl}" alt="Écran ${esc(labels[view]||view)}"><div class="vsl-status">${esc(labels[view]||view)} · ${current}/${total}</div>`;});
       setStep('screens','done',`${frames.length} écrans`);const voice=await voicePromise;setStep('voice','done','Voix prête');if(state.cancelled)throw new Error('studio_cancelled');
       setStep('render','active','0 %');status('Montage fluide en cours…');const rendered=await renderVideo(plan,frames,voice,format,duration,audioContext,(pct)=>{setStep('render','active',`${pct} %`);status(`Montage et synchronisation · ${pct} %`);});setStep('render','done','Vidéo prête');

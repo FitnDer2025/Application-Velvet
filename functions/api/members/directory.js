@@ -101,11 +101,11 @@ function conversationSummaries(conversations, messages, profiles, currentUserId)
       && new Date(message.created_at).getTime() > lastReadAt
     ).length;
     const participantDisplayName = conversation.kind === 'event'
-      ? conversation.subject || 'Salon Velvet'
+      ? conversation.subject || 'Salon Zwit'
       : participant?.display_name
         || otherMembers.map((member) => member.display_identity).filter(Boolean).join(' & ')
         || conversation.subject
-        || 'Membre Velvet';
+        || 'Membre Zwit';
 
     return {
       ...conversation,

@@ -1,4 +1,4 @@
-# Déploiement Cloudflare Workers + Static Assets — Velvet BETA
+# Déploiement Cloudflare Workers + Static Assets — Zwit BETA
 
 Les nouveaux comptes Cloudflare sont orientés vers Workers avec Static Assets
 plutôt que vers l’ancien formulaire Pages. Cette architecture publie les mêmes
@@ -23,9 +23,9 @@ de renouvellement Supabase est conservé dans un cookie `HttpOnly`, `Secure` et
 ## Routes
 
 - `/` : connexion et onboarding ;
-- `/membres/` : Velvet Membres V6 verrouillée ;
-- `/pro/` : Velvet Pro ;
-- `/control/` : Velvet Control et Intelligence ;
+- `/membres/` : Zwit Membres V6 verrouillée ;
+- `/pro/` : Zwit Pro ;
+- `/control/` : Zwit Control et Intelligence ;
 - `/legal/` : documents BETA.
 
 ## Sécurité

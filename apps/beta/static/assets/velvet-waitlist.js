@@ -139,7 +139,7 @@
           invalid_email: 'Cette adresse e-mail ne semble pas valide.',
           invalid_waitlist_request: 'Certaines informations doivent être corrigées.',
           launch_consent_required: 'Votre accord est nécessaire pour vous prévenir de l’ouverture.',
-          adult_attestation_required: 'Velvet est exclusivement réservé aux personnes majeures.',
+          adult_attestation_required: 'Zwit est exclusivement réservé aux personnes majeures.',
           human_verification_required: 'Validez la vérification anti-robot.',
           human_verification_failed: 'La vérification anti-robot a échoué. Merci de recommencer.',
           waitlist_not_configured: 'La liste d’accès est en cours d’activation. Revenez très prochainement.'

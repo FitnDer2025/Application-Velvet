@@ -12,7 +12,7 @@ const worker = await readFile('apps/beta/worker/index.js', 'utf8');
 const wrangler = await readFile('apps/beta/wrangler.jsonc', 'utf8');
 const setup = await readFile('docs/VELVET_PRO_MARKETING_SETUP.md', 'utf8');
 
-test('le cockpit Velvet Marketing compile et reste dans le portail Pro', () => {
+test('le cockpit Zwit Marketing compile et reste dans le portail Pro', () => {
   assert.doesNotThrow(() => new Function(client));
   assert.doesNotThrow(() => new Function(runtime));
   assert.match(client, /VELVET PRO · CONCENTRATEUR MARKETING/);
@@ -45,13 +45,13 @@ test('la campagne part de l’agenda et d’un rendu réellement créé dans Stu
   assert.match(api, /pro_marketing_campaigns/);
 });
 
-test('Velvet prépare Facebook Instagram TikTok et la séquence éditoriale', () => {
+test('Zwit prépare Facebook Instagram TikTok et la séquence éditoriale', () => {
   for (const network of ['facebook', 'instagram', 'tiktok']) {
     assert.match(client, new RegExp(network));
     assert.match(api, new RegExp(network));
   }
   for (const milestone of ['j-21', 'j-10', 'j-3', 'jour-j']) assert.match(client, new RegExp(milestone));
-  assert.match(client, /Rédiger avec Velvet IA/);
+  assert.match(client, /Rédiger avec Zwit IA/);
   assert.match(api, /@cf\/zai-org\/glm-4\.7-flash/);
   assert.match(api, /generateCopy/);
   assert.match(api, /conservativeCompliance/);

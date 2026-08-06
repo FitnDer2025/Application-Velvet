@@ -47,7 +47,7 @@ const project = await readFile(resolve(root, 'Velvet.xcodeproj/project.pbxproj')
 assert.match(project, /productType = "com\.apple\.product-type\.application"/);
 assert.match(project, /IPHONEOS_DEPLOYMENT_TARGET = 17\.0/);
 assert.match(project, /PRODUCT_BUNDLE_IDENTIFIER = com\.velvetapplication\.app/);
-assert.match(project, /INFOPLIST_FILE = Velvet\/Resources\/Info\.plist/);
+assert.match(project, /INFOPLIST_FILE = Zwit\/Resources\/Info\.plist/);
 
 const tokens = await readFile(resolve(root, 'Velvet/DesignSystem/VelvetTokens.swift'), 'utf8');
 for (const color of ['0x0B080A', '0x7E2045', '0xD9B879', '0xF6EEE6']) {
@@ -94,7 +94,7 @@ const projectEntitlements = await readFile(
   'utf8'
 );
 assert.match(projectEntitlements, /aps-environment/);
-assert.match(project, /CODE_SIGN_ENTITLEMENTS = Velvet\/Resources\/Velvet\.entitlements/);
+assert.match(project, /CODE_SIGN_ENTITLEMENTS = Zwit\/Resources\/Velvet\.entitlements/);
 
 const swiftFiles = requiredFiles.filter((file) => file.endsWith('.swift'));
 for (const file of swiftFiles) {
@@ -102,4 +102,4 @@ for (const file of swiftFiles) {
   assert(!source.includes('PlaceholderDestination'), `${file} contient encore un écran placeholder`);
 }
 
-console.log('Velvet iOS: structure et contrats natifs validés.');
+console.log('Zwit iOS: structure et contrats natifs validés.');

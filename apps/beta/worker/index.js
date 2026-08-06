@@ -269,7 +269,7 @@ export default {
       return securityHeaders(await apiHandler({ request, env }));
     }
     if (url.pathname.startsWith('/api/')) {
-      return securityHeaders(new Response('API Velvet inconnue.', {
+      return securityHeaders(new Response('API Zwit inconnue.', {
         status: 404,
         headers: {
           'content-type': 'text/plain; charset=utf-8',
@@ -292,7 +292,7 @@ export default {
 
   async scheduled(_controller, env, ctx) {
     ctx.waitUntil(processDuePublications(env).catch((error) => {
-      console.error('Velvet Marketing scheduler failed', error?.message || error);
+      console.error('Zwit Marketing scheduler failed', error?.message || error);
     }));
   }
 };

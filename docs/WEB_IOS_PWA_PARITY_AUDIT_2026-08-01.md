@@ -1,7 +1,7 @@
-# Audit de parité Velvet — iOS, Web desktop et Web mobile/PWA
+# Audit de parité Zwit — iOS, Web desktop et Web mobile/PWA
 
 Date : mise à jour du 3 août 2026
-Périmètre : espace Membres Velvet, environnement BETA privé.
+Périmètre : espace Membres Zwit, environnement BETA privé.
 
 ## Conclusion
 

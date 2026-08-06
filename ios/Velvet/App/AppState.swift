@@ -82,7 +82,7 @@ final class AppState: ObservableObject {
     func refreshProfile() async {
         await perform {
             guard let profile = try await session.profile().profile else {
-                throw APIError.transport("Le profil Velvet est introuvable.")
+                throw APIError.transport("Le profil Zwit est introuvable.")
             }
             phase = profile.isAdmitted ? .home(profile) : .profileSetup(profile)
         }

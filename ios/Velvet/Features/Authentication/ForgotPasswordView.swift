@@ -19,7 +19,7 @@ struct ForgotPasswordView: View {
                         VelvetSectionHeader(
                             "Accès",
                             title: "Réinitialise ton mot de passe.",
-                            subtitle: "La réponse reste volontairement neutre : Velvet ne révèle jamais si une adresse existe."
+                            subtitle: "La réponse reste volontairement neutre : Zwit ne révèle jamais si une adresse existe."
                         )
                         VelvetField(
                             title: "E-mail",

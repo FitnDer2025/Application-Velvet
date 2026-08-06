@@ -1,8 +1,8 @@
-# Velvet — socle de sécurité
+# Zwit — socle de sécurité
 
 ## Principes
 
-Velvet manipule des données intimes. La confidentialité n’est pas une option visuelle : elle doit être garantie par le serveur, la base, les clés et les procédures.
+Zwit manipule des données intimes. La confidentialité n’est pas une option visuelle : elle doit être garantie par le serveur, la base, les clés et les procédures.
 
 ## Protections déjà intégrées au socle
 

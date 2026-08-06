@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
-  title: Velvet Platform API
+  title: Zwit Platform API
   version: 0.1.0
-  description: Contrat commun à Velvet Membres, Velvet Pro et Velvet Control.
+  description: Contrat commun à Zwit Membres, Zwit Pro et Zwit Control.
 servers:
   - url: https://api.velvet.example/v1
     description: Production placeholder

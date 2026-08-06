@@ -26,7 +26,7 @@
 
   const venueId = uuid(72000000, 1);
   const events = [
-    { id: uuid(82000000, 1), establishment_id: venueId, owner_type: 'establishment', title: 'Nuit Velvet · Élégance & Connexions', description: 'Une soirée premium pensée pour les échanges naturels et les rencontres choisies.', starts_at: isoIn(4), ends_at: isoIn(5, 3), capacity: 120, location_public: 'Lille · adresse communiquée aux participants', audience: 'Couples et femmes', visibility: 'published', price_cents: 6000, currency: 'EUR', registration_open: true, dress_code: 'Élégant et soigné', created_at: isoAgo(34), updated_at: isoAgo(1) },
+    { id: uuid(82000000, 1), establishment_id: venueId, owner_type: 'establishment', title: 'Nuit Zwit · Élégance & Connexions', description: 'Une soirée premium pensée pour les échanges naturels et les rencontres choisies.', starts_at: isoIn(4), ends_at: isoIn(5, 3), capacity: 120, location_public: 'Lille · adresse communiquée aux participants', audience: 'Couples et femmes', visibility: 'published', price_cents: 6000, currency: 'EUR', registration_open: true, dress_code: 'Élégant et soigné', created_at: isoAgo(34), updated_at: isoAgo(1) },
     { id: uuid(82000000, 2), establishment_id: venueId, owner_type: 'establishment', title: 'Cocktail Première Rencontre', description: 'Un rendez-vous doux et rassurant pour découvrir l’établissement et la communauté.', starts_at: isoIn(11, 20), ends_at: isoIn(12, 1), capacity: 80, location_public: 'Lille', audience: 'Nouveaux membres et couples', visibility: 'published', price_cents: 4500, currency: 'EUR', registration_open: true, dress_code: 'Chic décontracté', created_at: isoAgo(22), updated_at: isoAgo(2) },
     { id: uuid(82000000, 3), establishment_id: venueId, owner_type: 'establishment', title: 'Parenthèse Couples', description: 'Une ambiance intimiste, musicale et raffinée.', starts_at: isoIn(18, 21), ends_at: isoIn(19, 3), capacity: 56, location_public: 'Lille', audience: 'Couples uniquement', visibility: 'draft', price_cents: 7000, currency: 'EUR', registration_open: false, dress_code: 'Noir et or', created_at: isoAgo(8), updated_at: isoAgo(1) }
   ];
@@ -60,7 +60,7 @@
       id: venueId,
       directory_venue_id: uuid(70000000, 1),
       slug: 'maison-velvet-lille',
-      name: 'Maison Velvet Lille',
+      name: 'Maison Zwit Lille',
       kind: 'club',
       description: 'Une adresse élégante et contemporaine qui place l’accueil, la discrétion et la qualité des rencontres au centre de chaque soirée.',
       city: 'Lille',
@@ -93,7 +93,7 @@
 
   function accessDenied() {
     document.documentElement.classList.remove('velvet-marketing-pro-pending');
-    document.body.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;padding:30px;background:#0d0d0d;color:#f5f1ed;font-family:Inter,Arial"><section style="max-width:620px;text-align:center"><p style="color:#d5b477;letter-spacing:.16em">VELVET PRO MARKETING</p><h1 style="font:500 48px Georgia">Accès réservé</h1><p>Cet environnement de démonstration est réservé à Velvet Control.</p><a href="/control/" style="display:inline-block;margin-top:18px;padding:13px 18px;border-radius:999px;background:#d5b477;color:#17120b;text-decoration:none;font-weight:800">Retour à Velvet Control</a></section></main>';
+    document.body.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;padding:30px;background:#0d0d0d;color:#f5f1ed;font-family:Inter,Arial"><section style="max-width:620px;text-align:center"><p style="color:#d5b477;letter-spacing:.16em">ZWIT PRO MARKETING</p><h1 style="font:500 48px Georgia">Accès réservé</h1><p>Cet environnement de démonstration est réservé à Zwit Control.</p><a href="/control/" style="display:inline-block;margin-top:18px;padding:13px 18px;border-radius:999px;background:#d5b477;color:#17120b;text-decoration:none;font-weight:800">Retour à Zwit Control</a></section></main>';
   }
 
   document.documentElement.classList.add('velvet-marketing-pro-pending');
@@ -124,8 +124,8 @@
   };
 
   function installIdentity() {
-    document.title = 'Velvet Pro — BETA Marketing';
-    document.querySelectorAll('.brand b').forEach((node) => { node.textContent = 'VELVET'; });
+    document.title = 'Zwit Pro — BETA Marketing';
+    document.querySelectorAll('.brand b').forEach((node) => { node.textContent = 'ZWIT'; });
     document.querySelectorAll('.brand .pro').forEach((node) => { node.textContent = 'PRO MARKETING'; });
     if (!document.querySelector('#velvetMarketingProBadge')) {
       const badge = document.createElement('div');

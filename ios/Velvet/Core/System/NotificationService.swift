@@ -215,7 +215,7 @@ enum NotificationService {
         UserDefaults.standard.set(token, forKey: tokenKey)
 
         #if DEBUG
-        print("Velvet APNs device token (sandbox): \(token)")
+        print("Zwit APNs device token (sandbox): \(token)")
         #endif
 
         Task {
@@ -233,7 +233,7 @@ enum NotificationService {
 
     static func handleRegistrationFailure(_ error: Error) {
         #if DEBUG
-        print("Velvet APNs registration failed: \(error.localizedDescription)")
+        print("Zwit APNs registration failed: \(error.localizedDescription)")
         #endif
     }
 

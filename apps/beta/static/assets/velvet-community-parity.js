@@ -91,7 +91,7 @@
   }
 
   function displayName(profile) {
-    return text(pick(profile, 'displayName', 'display_name', 'name')) || 'Membre Velvet';
+    return text(pick(profile, 'displayName', 'display_name', 'name')) || 'Membre Zwit';
   }
 
   function profilePhotos(profile) {
@@ -157,7 +157,7 @@
   }
 
   function venueName(venue) {
-    return text(pick(venue, 'name', 'displayName', 'display_name')) || 'Établissement Velvet';
+    return text(pick(venue, 'name', 'displayName', 'display_name')) || 'Établissement Zwit';
   }
 
   function venueCity(venue) {
@@ -238,10 +238,10 @@
     return `<button class="velvet-parity-recommendation" type="button" data-parity-profile="${escapeHtml(candidate.id)}">
       <span class="velvet-parity-recommendation-media">
         ${image(candidate.photoUrl, candidate.displayName)}
-        <span class="velvet-parity-score">${Number.isFinite(score) ? `${score}%` : 'Velvet IA'}</span>
+        <span class="velvet-parity-score">${Number.isFinite(score) ? `${score}%` : 'Zwit IA'}</span>
       </span>
       <span class="velvet-parity-recommendation-copy">
-        <strong>${escapeHtml(candidate.displayName || 'Membre Velvet')}</strong>
+        <strong>${escapeHtml(candidate.displayName || 'Membre Zwit')}</strong>
         <small>${escapeHtml(meta)}</small>
       </span>
     </button>`;
@@ -301,7 +301,7 @@
         items.push({
           id: `profile-created-${id}`,
           kind: 'newProfile',
-          title: profileType(member) === 'couple' ? 'vient de rejoindre la communauté' : 'vient de rejoindre Velvet',
+          title: profileType(member) === 'couple' ? 'vient de rejoindre la communauté' : 'vient de rejoindre Zwit',
           detail: [demographic(member), ageLabel(member), memberLocation(member)].filter(Boolean).join(' · '),
           media: primaryPhoto(member),
           createdAt,
@@ -364,7 +364,7 @@
         id: `followed-${activity.id}`,
         kind: activity.type === 'recommendation' ? 'recommendation' : 'community',
         member,
-        actorName: activity.profileName || displayName(member) || 'La communauté Velvet',
+        actorName: activity.profileName || displayName(member) || 'La communauté Zwit',
         actorImage: activity.previewUrl || primaryPhoto(member),
         title: activity.type === 'photo'
           ? 'a publié une nouvelle photo'
@@ -440,7 +440,7 @@
         </header>
 
         <section class="velvet-parity-section">
-          <div class="velvet-parity-section-head"><div><h2>À découvrir</h2><p>Derniers profils et sélection Velvet Intelligence</p></div><button type="button" data-parity-open-navigation="profiles">Recherche avancée</button></div>
+          <div class="velvet-parity-section-head"><div><h2>À découvrir</h2><p>Derniers profils et sélection Zwit Intelligence</p></div><button type="button" data-parity-open-navigation="profiles">Recherche avancée</button></div>
           <div class="velvet-parity-recommendations">${recommendations.length ? recommendations.map(intelligenceProfileCard).join('') : '<div class="velvet-parity-empty">La sélection personnalisée se prépare.</div>'}</div>
         </section>
 
@@ -555,7 +555,7 @@
       content.innerHTML = `<section class="velvet-parity-page velvet-parity-navigation" data-velvet-community-parity="${PARITY_VERSION}">
         <header class="velvet-parity-community-header compact">
           <span class="velvet-parity-eyebrow">NAVIGATION</span>
-          <h1>Tout Velvet, au bon endroit</h1>
+          <h1>Tout Zwit, au bon endroit</h1>
           <p>Trouver un profil, choisir un club, annoncer une sortie et voir qui sera présent — sans détour.</p>
         </header>
 
@@ -567,7 +567,7 @@
         </section>
 
         <section class="velvet-parity-secondary-actions">
-          <button type="button" data-parity-route="maps">⌖ Carte Velvet</button>
+          <button type="button" data-parity-route="maps">⌖ Carte Zwit</button>
           <button type="button" data-parity-route="events">☀ Cap d’Agde</button>
           <button type="button" data-parity-route="events">▣ Agenda complet</button>
         </section>

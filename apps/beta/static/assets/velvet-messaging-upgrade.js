@@ -53,7 +53,7 @@
   }
 
   function avatar(conversation) {
-    const name = conversation.participant_display_name || conversation.subject || 'Velvet';
+    const name = conversation.participant_display_name || conversation.subject || 'Zwit';
     return `<span class="conversation-avatar-v2">${conversation.participant_photo_url
       ? `<img src="${e(conversation.participant_photo_url)}" alt="Photo de ${e(name)}">`
       : e(conversation.kind === 'event' ? '✦' : initials(name))}</span>`;
@@ -88,7 +88,7 @@
       if (!conversation) return;
       const count = Number(conversation.unread_count || 0);
       const name = conversation.participant_display_name || conversation.subject
-        || (conversation.kind === 'event' ? 'Salon Velvet' : 'Membre Velvet');
+        || (conversation.kind === 'event' ? 'Salon Zwit' : 'Membre Zwit');
       const date = shortDate(conversation.last_message_at || conversation.updated_at);
       const preview = conversation.last_message_body || 'Commencez la conversation…';
       const signature = JSON.stringify([
@@ -107,7 +107,7 @@
         <span class="conversation-copy-v2">
           <span class="conversation-title-v2"><strong>${e(name)}</strong><time>${e(date)}</time></span>
           <p>${e(preview)}</p>
-          <small>${conversation.kind === 'event' ? 'Salon Velvet' : 'Échange privé'}</small>
+          <small>${conversation.kind === 'event' ? 'Salon Zwit' : 'Échange privé'}</small>
         </span>
         ${count ? `<span class="conversation-count-v2" aria-label="${count} messages non lus">${count > 99 ? '99+' : count}</span>` : '<span class="conversation-chevron-v2">›</span>'}`;
     });
@@ -119,10 +119,10 @@
     const page = form.closest('.page');
     if (!conversation || !page || page.querySelector('.conversation-peer-header')) return;
     const name = conversation.participant_display_name || conversation.subject
-      || (conversation.kind === 'event' ? 'Salon Velvet' : 'Membre Velvet');
+      || (conversation.kind === 'event' ? 'Salon Zwit' : 'Membre Zwit');
     const header = document.createElement('section');
     header.className = 'conversation-peer-header';
-    header.innerHTML = `${avatar(conversation)}<span><strong>${e(name)}</strong><small>${conversation.kind === 'event' ? 'Salon Velvet' : 'Conversation privée'}</small></span>`;
+    header.innerHTML = `${avatar(conversation)}<span><strong>${e(name)}</strong><small>${conversation.kind === 'event' ? 'Salon Zwit' : 'Conversation privée'}</small></span>`;
     page.querySelector('.page-head')?.insertAdjacentElement('afterend', header);
   }
 
@@ -182,7 +182,7 @@
     const registration = await navigator.serviceWorker?.ready.catch(() => null);
     registration?.active?.postMessage({
       type: 'VELVET_NOTIFICATION',
-      title: `${conversation.participant_display_name || 'Un membre Velvet'} vous a écrit`,
+      title: `${conversation.participant_display_name || 'Un membre Zwit'} vous a écrit`,
       body: conversation.last_message_body || 'Un nouveau message vous attend.',
       tag: `velvet-message-${conversation.id}`,
       url: '/membres/'

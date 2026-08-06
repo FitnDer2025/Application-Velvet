@@ -28,7 +28,7 @@ struct LoginView: View {
                 VStack(spacing: VelvetSpacing.md) {
                     VelvetMark(size: 74)
 
-                    Text("VELVET")
+                    Text("ZWIT")
                         .font(VelvetTypography.brand(size: 28))
                         .tracking(8)
                         .foregroundStyle(VelvetColor.champagneGold)

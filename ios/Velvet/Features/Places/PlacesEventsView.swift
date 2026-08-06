@@ -108,8 +108,8 @@ struct PlacesEventsView: View {
                                     .compactMap { $0 }
                                     .joined(separator: " · "),
                                 detail: venue.verificationStatus == "verified"
-                                    ? "Fiche professionnelle reliée à Velvet"
-                                    : "Référencé par Velvet · informations à confirmer",
+                                    ? "Fiche professionnelle reliée à Zwit"
+                                    : "Référencé par Zwit · informations à confirmer",
                                 verified: venue.verificationStatus == "verified"
                             )
                         }
@@ -234,7 +234,7 @@ private struct EventDetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 26) {
                     VelvetPageHeader(
-                        "Événement Velvet",
+                        "Événement Zwit",
                         title: event.title,
                         subtitle: event.startsAt.velvetDateLabel
                     )

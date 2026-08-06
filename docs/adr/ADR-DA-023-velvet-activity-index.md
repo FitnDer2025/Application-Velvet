@@ -1,10 +1,10 @@
-# ADR-DA-023 – Velvet Activity Index
+# ADR-DA-023 – Zwit Activity Index
 
 Status: Accepted
 
 ## Decision
 
-Velvet does not expose an exact public “last seen” timestamp. It replaces that signal with an intelligent activity indicator that helps members identify living profiles without revealing precise connection habits.
+Zwit does not expose an exact public “last seen” timestamp. It replaces that signal with an intelligent activity indicator that helps members identify living profiles without revealing precise connection habits.
 
 ## Activity levels
 
@@ -46,4 +46,4 @@ The member controls whether the profile remains visible during the absence. Reco
 
 ## Response behaviour
 
-Velvet may show a privacy-preserving response indicator such as “usually replies quickly”, “usually replies during the day” or “replies occasionally”. It is calculated over a rolling period and only from genuine conversation contexts. It must never reveal exact connection or reading times.
+Zwit may show a privacy-preserving response indicator such as “usually replies quickly”, “usually replies during the day” or “replies occasionally”. It is calculated over a rolling period and only from genuine conversation contexts. It must never reveal exact connection or reading times.

@@ -1,4 +1,4 @@
-# Parité Velvet Web → iOS
+# Parité Zwit Web → iOS
 
 Audit réalisé le 30 juillet 2026 à partir des routes membres et des contrats
 `/api/members/*` du Web.
@@ -23,12 +23,12 @@ retours haptiques, permissions au bon moment et contenu privé masqué en arriè
 | Réactions | photo-reactions, engagement | Réactions natives depuis une fiche |
 | Albums | albums, album-media | Création, ajout compressé et suppression de médias |
 | Partage d’albums privés | album-access | Sélection des albums et durée d’accès |
-| Messagerie et Salons | conversations, messages | Conversations privées et Salons Velvet |
+| Messagerie et Salons | conversations, messages | Conversations privées et Salons Zwit |
 | Sorties | event-registrations, plans | Inscription, voyages, visites et agenda personnel |
 | Établissements | venue-relationships | Fiche distincte de Maps, favoris et projets de visite |
 | Maps | map, location | Carte et localisation approximative |
 | Notifications | notifications, settings, push-devices | Centre interne, réglages et jeton APNs |
-| Profil éditorial | profile-copy | Plume Velvet native |
+| Profil éditorial | profile-copy | Plume Zwit native |
 | Organisateur | organizer-request | Demande et suivi natifs |
 | Sécurité membre | social-actions | Blocage et signalement |
 | Cycle du profil | account-actions | Pause, reprise et suppression différée |
@@ -37,7 +37,7 @@ retours haptiques, permissions au bon moment et contenu privé masqué en arriè
 
 ## Face ID
 
-Face ID est utilisé comme verrou local de la session déjà authentifiée. Velvet
+Face ID est utilisé comme verrou local de la session déjà authentifiée. Zwit
 ne stocke jamais le mot de passe. L’activation exige une authentification réussie,
 le contenu est recouvert dès que l’application devient inactive et le code de
 l’iPhone reste le mécanisme de secours Apple.

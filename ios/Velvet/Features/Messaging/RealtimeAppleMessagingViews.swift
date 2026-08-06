@@ -42,7 +42,7 @@ struct RealtimeAppleConversationsView: View {
             VelvetEmptyState(
                 symbol: "bubble.left.and.bubble.right",
                 title: "Aucune conversation",
-                message: "Écris depuis un profil ou rejoins un Salon Velvet lié à une sortie."
+                message: "Écris depuis un profil ou rejoins un Salon Zwit lié à une sortie."
             )
         } else {
             LazyVStack(spacing: 10) {
@@ -382,7 +382,7 @@ struct RealtimeAppleConversationView: View {
     }
 
     private var defaultConversationSubtitle: String {
-        conversation.kind == "event" ? "Salon Velvet" : "Conversation privée"
+        conversation.kind == "event" ? "Salon Zwit" : "Conversation privée"
     }
 
     private var typingLabel: String {
@@ -872,7 +872,7 @@ private struct RealtimeMessageBubble: View {
                 MessageReactionGroup(
                     reaction: key,
                     count: value.count,
-                    names: value.map { $0.displayIdentity ?? "Membre Velvet" }
+                    names: value.map { $0.displayIdentity ?? "Membre Zwit" }
                 )
             }
             .sorted { $0.reaction < $1.reaction }

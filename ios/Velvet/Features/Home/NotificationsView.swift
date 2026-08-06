@@ -235,7 +235,7 @@ struct NotificationsView: View {
                             .clipShape(Circle())
 
                             VStack(alignment: .leading, spacing: 3) {
-                                Text(item.profile?.displayName ?? "Profil Velvet")
+                                Text(item.profile?.displayName ?? "Profil Zwit")
                                     .font(VelvetTypography.body(size: 13, weight: .semibold))
                                     .foregroundStyle(VelvetColor.ivory)
                                 Text("\(item.history.viewCount ?? 1) consultation\((item.history.viewCount ?? 1) > 1 ? "s" : "") · dernière visite \(item.history.lastViewedAt.velvetRelativeDate)")
@@ -321,7 +321,7 @@ struct NotificationsView: View {
     }
 
     private func sourceName(for notification: VelvetNotification) -> String {
-        actorProfile(for: notification)?.displayName ?? "Membre Velvet"
+        actorProfile(for: notification)?.displayName ?? "Membre Zwit"
     }
 }
 

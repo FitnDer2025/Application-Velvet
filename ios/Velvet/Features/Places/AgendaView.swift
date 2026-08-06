@@ -55,7 +55,7 @@ struct AgendaView: View {
                 if let eventPlans = state?.eventPlans, !eventPlans.isEmpty {
                     VelvetCard {
                         Label(
-                            "\(eventPlans.count) sortie\(eventPlans.count > 1 ? "s" : "") Velvet inscrite\(eventPlans.count > 1 ? "s" : "")",
+                            "\(eventPlans.count) sortie\(eventPlans.count > 1 ? "s" : "") Zwit inscrite\(eventPlans.count > 1 ? "s" : "")",
                             systemImage: "sparkles"
                         )
                         .font(VelvetTypography.body(size: 14, weight: .semibold))
@@ -124,7 +124,7 @@ struct AgendaView: View {
                         .background(VelvetColor.champagneGold.opacity(0.08))
                         .clipShape(Circle())
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(visit.venueDirectory?.name ?? "Établissement Velvet")
+                        Text(visit.venueDirectory?.name ?? "Établissement Zwit")
                             .font(VelvetTypography.body(size: 14, weight: .semibold))
                             .foregroundStyle(VelvetColor.ivory)
                         Text(visit.visitDate.velvetShortDate)

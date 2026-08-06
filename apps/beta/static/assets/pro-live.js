@@ -55,7 +55,7 @@
         id: row.id, venue: row.establishment_id, name: row.title, date: row.starts_at,
         day: String(date.getDate()).padStart(2, '0'),
         month: date.toLocaleDateString('fr-FR', { month: 'short' }).toUpperCase(),
-        audience: row.audience || 'Membres Velvet', capacity: row.capacity,
+        audience: row.audience || 'Membres Zwit', capacity: row.capacity,
         booked: registrations.filter((item) => !['cancelled', 'declined'].includes(item.registration_status)).reduce((sum, item) => sum + item.places, 0),
         price: Number(row.price_cents || 0) / 100, revenue: 0, status: row.visibility,
         description: row.description || ''
@@ -63,7 +63,7 @@
     });
     const uniqueProfiles = [...new Map(data.registrations.filter((row) => row.profile_id).map((row) => [row.profile_id, row])).values()];
     MEMBERS.splice(0, MEMBERS.length, ...uniqueProfiles.map((row) => ({
-      id: row.profile_id, name: row.display_name || 'Membre Velvet',
+      id: row.profile_id, name: row.display_name || 'Membre Zwit',
       type: row.profile_type === 'couple' ? 'Couple' : 'Individuel',
       city: row.location_zone || 'Zone privée', img: avatar(row.display_name),
       trust: '—', visits: 0, spend: 0, last: 'Inscription récente', tags: ['Participant'], note: ''
@@ -93,14 +93,14 @@
   }
 
   function neutral(title, text) {
-    return `<section class="card" style="max-width:760px;margin:8vh auto"><div class="ey">Velvet Pro connecté</div><h1>${esc(title)}</h1><p class="lead">${esc(text)}</p></section>`;
+    return `<section class="card" style="max-width:760px;margin:8vh auto"><div class="ey">Zwit Pro connecté</div><h1>${esc(title)}</h1><p class="lead">${esc(text)}</p></section>`;
   }
 
   function proPaywall() {
     const prices = workspace?.billingPrices || [];
     return `<section class="card" style="max-width:820px;margin:8vh auto;background:radial-gradient(circle at 92% 0,rgba(213,180,119,.16),transparent 38%),var(--panel)">
-      <div class="ey">Velvet Pro · un établissement</div><h1>Activez votre espace professionnel</h1>
-      <p class="lead">La fiche factuelle reste visible gratuitement. La gestion de la page, les événements et le CRM sont inclus dans Velvet Pro, sans commission sur les soirées au lancement.</p>
+      <div class="ey">Zwit Pro · un établissement</div><h1>Activez votre espace professionnel</h1>
+      <p class="lead">La fiche factuelle reste visible gratuitement. La gestion de la page, les événements et le CRM sont inclus dans Zwit Pro, sans commission sur les soirées au lancement.</p>
       <div class="grid g2" style="margin:24px 0">${prices.map((price) => `<button class="btn secondary" data-pro-checkout="${esc(price.price_code)}" style="display:grid;gap:5px;padding:18px"><b style="font-size:22px">${esc((Number(price.amount_cents) / 100).toLocaleString('fr-FR', { style: 'currency', currency: price.currency }))}</b><small>${price.interval_unit === 'year' ? 'par an' : 'par mois'}</small></button>`).join('')}</div>
       <small>Le module est prêt. Le paiement s’ouvrira après validation écrite du partenaire bancaire spécialisé.</small>
     </section>`;
@@ -131,7 +131,7 @@
     hydrate(workspace);
     document.body.classList.remove('pro-live-pending');
     if (!S.venues.length) {
-      content.innerHTML = neutral('Aucun établissement attribué', 'Votre compte Pro est actif, mais aucun établissement ne lui est encore rattaché. Velvet Control doit valider le lieu et vous attribuer un rôle avant l’ouverture du CRM.');
+      content.innerHTML = neutral('Aucun établissement attribué', 'Votre compte Pro est actif, mais aucun établissement ne lui est encore rattaché. Zwit Control doit valider le lieu et vous attribuer un rôle avant l’ouverture du CRM.');
       venueSelect.innerHTML = '<option>Aucun établissement</option>';
       return;
     }
@@ -158,7 +158,7 @@
   const prototypeGo = go;
   go = (next) => {
     if (venue() && !['trial', 'active'].includes(venue().subscription)) {
-      content.innerHTML = neutral('Abonnement Velvet Pro requis', 'La fiche référencée reste consultable par les membres, mais seules les entreprises abonnées peuvent publier des soirées, des photos ou modifier leur mini-site.');
+      content.innerHTML = neutral('Abonnement Zwit Pro requis', 'La fiche référencée reste consultable par les membres, mais seules les entreprises abonnées peuvent publier des soirées, des photos ou modifier leur mini-site.');
       return;
     }
     prototypeGo(next);
@@ -175,7 +175,7 @@
   previewVenueDraft = async () => { await saveVenueDraft(); openPublicPreview(true); };
   publishVenue = async () => {
     await api({ method: 'POST', body: JSON.stringify({ action: 'publish_venue', venueId: S.activeVenue, venue: venueInput() }) });
-    await reload(); toastMsg('Fiche publiée sur Velvet Membres');
+    await reload(); toastMsg('Fiche publiée sur Zwit Membres');
   };
   createEvent = async (status) => {
     if (!evName.value.trim() || !evDate.value || Number(evCapacity.value) < 2) return toastMsg('Complétez le nom, la date et la capacité');
@@ -183,7 +183,7 @@
       action: 'create_event', venueId: S.activeVenue,
       event: { title: evName.value, starts_at: evDate.value, capacity: Number(evCapacity.value), price: Number(evPrice.value), audience: evAudience.value, visibility: status, description: evDesc.value, location_public: venue().address }
     }) });
-    closeEventModal(); await reload(); go('events'); toastMsg(status === 'published' ? 'Soirée publiée sur Velvet' : 'Brouillon enregistré');
+    closeEventModal(); await reload(); go('events'); toastMsg(status === 'published' ? 'Soirée publiée sur Zwit' : 'Brouillon enregistré');
   };
   toggleCheckin = async (id) => {
     const booking = S.bookings.find((item) => item.id === id);
@@ -193,6 +193,6 @@
 
   reload().catch((error) => {
     document.body.classList.remove('pro-live-pending');
-    content.innerHTML = neutral(error.message === 'pro_access_required' ? 'Accès Pro nécessaire' : 'Connexion impossible', error.message === 'pro_access_required' ? 'Ce compte ne possède pas encore de rôle Velvet Pro.' : 'La mémoire Velvet Pro est momentanément indisponible.');
+    content.innerHTML = neutral(error.message === 'pro_access_required' ? 'Accès Pro nécessaire' : 'Connexion impossible', error.message === 'pro_access_required' ? 'Ce compte ne possède pas encore de rôle Zwit Pro.' : 'La mémoire Zwit Pro est momentanément indisponible.');
   });
 })();

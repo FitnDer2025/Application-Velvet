@@ -33,4 +33,4 @@ const v31 = build.indexOf('velvet-studio-v31-media.js');
 const recovery = build.indexOf('velvet-control-scroll-recovery.js');
 assert.ok(sprint1 < v2 && v2 < v3 && v3 < v31 && v31 < recovery, 'ordre de chargement Studio invalide');
 
-console.log('Velvet Studio V3.1 media: 13 contrôles réussis.');
+console.log('Zwit Studio V3.1 media: 13 contrôles réussis.');

@@ -1,4 +1,4 @@
-# Velvet BETA deployment
+# Zwit BETA deployment
 
 - Cloudflare Worker: `velvet-beta`
 - Production branch: `v1-lived-demo`

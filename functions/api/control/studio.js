@@ -28,34 +28,34 @@ function assertCaptureEnvironment(env) {
 
 function localPrompt(brief = {}) {
   const audience = String(brief.audience || 'membres et professionnels');
-  const objective = String(brief.objective || 'présenter la valeur de Velvet');
+  const objective = String(brief.objective || 'présenter la valeur de Zwit');
   const feature = String(brief.feature || 'confiance, événements et expérience unifiée');
   const channel = String(brief.channel || 'Instagram');
   const format = String(brief.format || '9:16');
   const tone = String(brief.tone || 'premium');
   return {
-    title: 'Velvet — Là où les plus belles rencontres commencent',
-    hook: 'Le libertinage évolue. Velvet réunit enfin les personnes, les lieux et les expériences dans un même écosystème de confiance.',
+    title: 'Zwit — Là où les plus belles rencontres commencent',
+    hook: 'Le libertinage évolue. Zwit réunit enfin les personnes, les lieux et les expériences dans un même écosystème de confiance.',
     masterPrompt: [
       `Créer une publicité sociale ${format} pour ${channel}, destinée à ${audience}.`,
       `Objectif : ${objective}.`,
       `Mettre en avant : ${feature}.`,
       `Ton : ${tone}, cinématographique, élégant, humain, jamais vulgaire.`,
-      'Montrer prioritairement la véritable interface Velvet : profils, recherche, carte, événements, messagerie, établissements et Velvet Pro.',
-      'Respecter la palette Noir Velvet #0D0D0D, Bordeaux Velvet #641B36, Or Champagne #C6A96A et Blanc cassé #F4F4F2.',
+      'Montrer prioritairement la véritable interface Zwit : profils, recherche, carte, événements, messagerie, établissements et Zwit Pro.',
+      'Respecter la palette Noir Zwit #0D0D0D, Bordeaux Zwit #641B36, Or Champagne #C6A96A et Blanc cassé #F4F4F2.',
       'Principes obligatoires : confiance avant les fonctionnalités, qualité plutôt que quantité, consentement intégré, discrétion et promesses vérifiables.',
       'Personnes fictives majeures uniquement. Aucun contenu explicite, aucune donnée réelle, aucun logo tiers, aucun texte déformé.',
       'Rythme fluide, transitions sobres, lumière chaude et premium, profondeur légère, sous-titres lisibles.',
-      'Terminer sur le logo Velvet et la signature : Là où les plus belles rencontres commencent.'
+      'Terminer sur le logo Zwit et la signature : Là où les plus belles rencontres commencent.'
     ].join(' '),
     negativePrompt: 'nudité, sexualité explicite, vulgarité, mineur, personne réelle identifiable, interface inventée, promesse non disponible, couleurs criardes, texte illisible, watermark, logo tiers',
-    voiceOver: 'Pendant des années, les rencontres se sont limitées à des profils et des messages. Velvet réunit enfin les personnes, les établissements et les événements dans une expérience pensée autour de la confiance, de la discrétion et du consentement. Velvet. Là où les plus belles rencontres commencent.',
+    voiceOver: 'Pendant des années, les rencontres se sont limitées à des profils et des messages. Zwit réunit enfin les personnes, les établissements et les événements dans une expérience pensée autour de la confiance, de la discrétion et du consentement. Velvet. Là où les plus belles rencontres commencent.',
     scenes: [
-      { seconds: '0–4', visual: 'Ruban bordeaux formant le V Velvet sur fond noir', message: 'Le libertinage évolue.' },
+      { seconds: '0–4', visual: 'Ruban bordeaux formant le V Zwit sur fond noir', message: 'Le libertinage évolue.' },
       { seconds: '4–12', visual: 'Capture réelle de la découverte et de la recherche membres', message: 'Des rencontres de qualité.' },
       { seconds: '12–20', visual: 'Carte, établissements et événements proches', message: 'Des lieux et des expériences.' },
       { seconds: '20–29', visual: 'Messagerie, albums privés et indice de confiance', message: 'La confiance intégrée.' },
-      { seconds: '29–38', visual: 'Velvet Pro : événement, réservations et pilotage', message: 'Un écosystème complet.' },
+      { seconds: '29–38', visual: 'Zwit Pro : événement, réservations et pilotage', message: 'Un écosystème complet.' },
       { seconds: '38–45', visual: 'Logo et signature officielle', message: 'Là où les plus belles rencontres commencent.' }
     ],
     provider: 'velvet-local-brand-engine'
@@ -66,7 +66,7 @@ async function openAiPrompt(env, brief) {
   const key = String(env.OPENAI_API_KEY || '');
   if (!key) return null;
   const model = String(env.VELVET_STUDIO_TEXT_MODEL || 'gpt-5-mini');
-  const instructions = `Tu es le directeur créatif de Velvet, réseau social premium français dédié aux rencontres libres. Réponds uniquement en JSON valide avec les clés title, hook, masterPrompt, negativePrompt, voiceOver, scenes. scenes est un tableau d'objets seconds, visual, message. Respecte impérativement confiance, consentement, discrétion, élégance, personnes fictives majeures, absence de contenu explicite et fidélité aux capacités réelles du produit.`;
+  const instructions = `Tu es le directeur créatif de Zwit, réseau social premium français dédié aux rencontres libres. Réponds uniquement en JSON valide avec les clés title, hook, masterPrompt, negativePrompt, voiceOver, scenes. scenes est un tableau d'objets seconds, visual, message. Respecte impérativement confiance, consentement, discrétion, élégance, personnes fictives majeures, absence de contenu explicite et fidélité aux capacités réelles du produit.`;
   const response = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },

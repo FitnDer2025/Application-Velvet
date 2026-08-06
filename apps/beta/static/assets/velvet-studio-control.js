@@ -13,15 +13,15 @@
   };
 
   const campaignTemplates = [
-    { id: 'manifesto', label: 'Film manifeste', audience: 'Membres + Pros', objective: 'Faire comprendre la vision Velvet', duration: 45 },
-    { id: 'members', label: 'Velvet Membres', audience: 'Particuliers', objective: 'Donner envie de rejoindre la communauté', duration: 35 },
-    { id: 'pro', label: 'Velvet Pro', audience: 'Établissements', objective: 'Démontrer le gain de temps et de chiffre', duration: 40 },
+    { id: 'manifesto', label: 'Film manifeste', audience: 'Membres + Pros', objective: 'Faire comprendre la vision Zwit', duration: 45 },
+    { id: 'members', label: 'Zwit Membres', audience: 'Particuliers', objective: 'Donner envie de rejoindre la communauté', duration: 35 },
+    { id: 'pro', label: 'Zwit Pro', audience: 'Établissements', objective: 'Démontrer le gain de temps et de chiffre', duration: 40 },
     { id: 'feature', label: 'Fonctionnalité', audience: 'Ciblée', objective: 'Expliquer une capacité forte', duration: 20 },
     { id: 'event', label: 'Événement', audience: 'Local', objective: 'Remplir une soirée ou un lancement', duration: 15 }
   ];
 
   const providerCatalog = [
-    { id: 'captures', name: 'Captures Velvet', type: 'Gratuit', status: 'ready', detail: 'Parcours réels Web, Pro et Control' },
+    { id: 'captures', name: 'Captures Zwit', type: 'Gratuit', status: 'ready', detail: 'Parcours réels Web, Pro et Control' },
     { id: 'ffmpeg', name: 'FFmpeg / Remotion', type: 'Gratuit', status: 'ready', detail: 'Montage, sous-titres et exports multi-formats' },
     { id: 'local', name: 'Moteur local', type: 'Gratuit', status: 'planned', detail: 'Images et clips générés sur machine compatible' },
     { id: 'free-tier', name: 'Fournisseur quota gratuit', type: 'Gratuit-first', status: 'planned', detail: 'Connecteur interchangeable selon disponibilité' },
@@ -34,7 +34,7 @@
     channel: 'instagram',
     format: '9:16',
     tone: 'premium',
-    objective: 'Présenter Velvet comme la nouvelle référence des rencontres libres',
+    objective: 'Présenter Zwit comme la nouvelle référence des rencontres libres',
     feature: 'Confiance, événements, établissements et expérience unifiée',
     campaigns: loadCampaigns(),
     draft: null
@@ -66,7 +66,7 @@
     button.type = 'button';
     button.className = anchor.className;
     button.dataset.velvetStudioNav = 'true';
-    button.innerHTML = '<span aria-hidden="true">✦</span><span>Velvet Studio</span>';
+    button.innerHTML = '<span aria-hidden="true">✦</span><span>Zwit Studio</span>';
     anchor.parentElement.appendChild(button);
     button.addEventListener('click', () => {
       state.view = 'dashboard';
@@ -105,15 +105,15 @@
   }
 
   function pageHead(title, lead, actions = '') {
-    return `<header class="vs-head"><div><p class="vs-eyebrow">Velvet Control · Marketing Intelligence</p><h1>${safe(title)}</h1><p>${safe(lead)}</p></div><div class="vs-actions">${actions}</div></header>`;
+    return `<header class="vs-head"><div><p class="vs-eyebrow">Zwit Control · Marketing Intelligence</p><h1>${safe(title)}</h1><p>${safe(lead)}</p></div><div class="vs-actions">${actions}</div></header>`;
   }
 
   function dashboard() {
     const ready = state.campaigns.filter(c => c.status === 'ready').length;
     const production = state.campaigns.filter(c => c.status === 'production').length;
-    return `${pageHead('Velvet Studio','Le cockpit photo et vidéo IA qui transforme les capacités réelles de Velvet en campagnes cohérentes, premium et mesurables.','<button class="vs-btn" data-vs-view="create">Créer une campagne</button>')}${tabs()}
+    return `${pageHead('Zwit Studio','Le cockpit photo et vidéo IA qui transforme les capacités réelles de Zwit en campagnes cohérentes, premium et mesurables.','<button class="vs-btn" data-vs-view="create">Créer une campagne</button>')}${tabs()}
       <div class="vs-metrics">${metric('Campagnes',state.campaigns.length,'dans la bibliothèque')}${metric('Prêtes',ready,'validées et exportables')}${metric('En production',production,'assets ou montage en cours')}${metric('Coût engagé','0 €','gratuit-first actif')}</div>
-      <div class="vs-grid two"><section class="vs-card"><h2>Campagne prioritaire</h2><p>Film social vertical : stratégie Velvet, vraie interface, confiance, événements et écosystème Pro.</p><div class="vs-template-list">${campaignTemplates.slice(0,3).map(t=>`<article class="vs-template"><button data-vs-template="${t.id}"><strong>${safe(t.label)}</strong><span>${safe(t.objective)} · ${t.duration}s</span></button><span class="vs-badge ok">Prêt à briefer</span></article>`).join('')}</div></section>
+      <div class="vs-grid two"><section class="vs-card"><h2>Campagne prioritaire</h2><p>Film social vertical : stratégie Zwit, vraie interface, confiance, événements et écosystème Pro.</p><div class="vs-template-list">${campaignTemplates.slice(0,3).map(t=>`<article class="vs-template"><button data-vs-template="${t.id}"><strong>${safe(t.label)}</strong><span>${safe(t.objective)} · ${t.duration}s</span></button><span class="vs-badge ok">Prêt à briefer</span></article>`).join('')}</div></section>
       <aside class="vs-card"><h2>Brand Guard</h2><div style="display:flex;gap:18px;align-items:center"><div class="vs-score"><strong>92</strong></div><div><strong>Identité maîtrisée</strong><p>Confiance, consentement, discrétion, qualité et promesses vérifiables.</p></div></div><button class="vs-btn secondary" data-vs-view="brand">Voir les contrôles</button></aside></div>
       <section class="vs-card" style="margin-top:16px"><h2>Dernières campagnes</h2>${state.campaigns.length?`<div class="vs-campaign-list">${state.campaigns.slice(0,5).map(c=>campaignRow(c)).join('')}</div>`:'<div class="vs-empty">Aucune campagne enregistrée. Le premier film manifeste peut être créé maintenant.</div>'}</section>`;
   }
@@ -124,30 +124,30 @@
 
   function createView() {
     const selected = campaignTemplates.find(t=>t.id===state.selectedTemplate) || campaignTemplates[0];
-    return `${pageHead('Créer une campagne','Définis le résultat attendu. Velvet Studio construit ensuite le concept, le script, le storyboard et les déclinaisons.','<button class="vs-btn secondary" data-vs-view="dashboard">Retour</button>')}${tabs()}
+    return `${pageHead('Créer une campagne','Définis le résultat attendu. Zwit Studio construit ensuite le concept, le script, le storyboard et les déclinaisons.','<button class="vs-btn secondary" data-vs-view="dashboard">Retour</button>')}${tabs()}
       <div class="vs-grid two"><section class="vs-card"><h2>Brief</h2><div class="vs-form">
       <div class="vs-field"><label>Type de campagne</label><select data-vs-input="template">${campaignTemplates.map(t=>`<option value="${t.id}" ${t.id===state.selectedTemplate?'selected':''}>${safe(t.label)}</option>`).join('')}</select></div>
       <div class="vs-grid three"><div class="vs-field"><label>Canal</label><select data-vs-input="channel"><option>Instagram</option><option>TikTok</option><option>Facebook</option><option>LinkedIn</option><option>YouTube Shorts</option></select></div><div class="vs-field"><label>Format</label><select data-vs-input="format"><option>9:16</option><option>1:1</option><option>16:9</option></select></div><div class="vs-field"><label>Ton</label><select data-vs-input="tone"><option>Premium</option><option>Émotionnel</option><option>Business</option><option>Pédagogique</option></select></div></div>
       <div class="vs-field"><label>Objectif</label><textarea data-vs-input="objective">${safe(state.objective)}</textarea></div>
       <div class="vs-field"><label>Capacités à mettre en avant</label><textarea data-vs-input="feature">${safe(state.feature)}</textarea></div>
       <button class="vs-btn" type="button" data-vs-generate>Générer le concept</button></div></section>
-      <aside class="vs-card"><h2>${safe(selected.label)}</h2><p><strong>Cible :</strong> ${safe(selected.audience)}</p><p><strong>Objectif modèle :</strong> ${safe(selected.objective)}</p><p><strong>Durée conseillée :</strong> ${selected.duration} secondes</p><p>Le moteur utilise d’abord les captures réelles Velvet, puis complète uniquement les plans impossibles à filmer.</p></aside></div>${state.draft?draftView(state.draft):''}`;
+      <aside class="vs-card"><h2>${safe(selected.label)}</h2><p><strong>Cible :</strong> ${safe(selected.audience)}</p><p><strong>Objectif modèle :</strong> ${safe(selected.objective)}</p><p><strong>Durée conseillée :</strong> ${selected.duration} secondes</p><p>Le moteur utilise d’abord les captures réelles Zwit, puis complète uniquement les plans impossibles à filmer.</p></aside></div>${state.draft?draftView(state.draft):''}`;
   }
 
   function generateDraft() {
     const template = campaignTemplates.find(t=>t.id===state.selectedTemplate) || campaignTemplates[0];
     const duration = template.duration;
     state.draft = {
-      title: template.id === 'manifesto' ? 'Le libertinage évolue' : `${template.label} · Velvet`,
+      title: template.id === 'manifesto' ? 'Le libertinage évolue' : `${template.label} · Zwit`,
       hook: template.id === 'pro' ? 'Votre établissement mérite mieux qu’une organisation dispersée.' : 'Pendant des années, les rencontres se sont limitées à des profils et des messages.',
-      promise: 'Velvet réunit les personnes, les événements, les établissements et les outils de confiance dans une expérience unique.',
+      promise: 'Zwit réunit les personnes, les événements, les établissements et les outils de confiance dans une expérience unique.',
       duration,
       scenes: [
-        ['00–04 s','Logo Velvet','Le ruban forme le V sur fond Noir Velvet.','Le libertinage évolue.'],
+        ['00–04 s','Logo Zwit','Le ruban forme le V sur fond Noir Velvet.','Le libertinage évolue.'],
         ['04–11 s','Problème actuel','Plans rapides : recherches dispersées, échanges sans contexte, organisation complexe.','Les rencontres libres méritaient une expérience plus humaine.'],
-        ['11–22 s','Velvet en action','Captures réelles : recherche, profils, messagerie, carte et événements.','Découvrir, échanger et préparer une rencontre dans un même univers.'],
-        ['22–32 s','Confiance','Pacte Velvet, vérification, albums privés, contrôle du consentement.','La confiance n’est pas une option. Elle est intégrée à chaque étape.'],
-        ['32–40 s','Écosystème','Velvet Pro : événement, réservations, participants, statistiques.','Et pour les professionnels, une gestion plus simple et une communauté mieux engagée.'],
+        ['11–22 s','Zwit en action','Captures réelles : recherche, profils, messagerie, carte et événements.','Découvrir, échanger et préparer une rencontre dans un même univers.'],
+        ['22–32 s','Confiance','Pacte Zwit, vérification, albums privés, contrôle du consentement.','La confiance n’est pas une option. Elle est intégrée à chaque étape.'],
+        ['32–40 s','Écosystème','Zwit Pro : événement, réservations, participants, statistiques.','Et pour les professionnels, une gestion plus simple et une communauté mieux engagée.'],
         ['40–45 s','Signature','Logo, application et appel à l’action.','Velvet. Là où les plus belles rencontres commencent.']
       ]
     };
@@ -163,7 +163,7 @@
   }
 
   function providersView() {
-    return `${pageHead('Moteurs média','Velvet Studio choisit le fournisseur selon la qualité, le coût, la confidentialité et la disponibilité.','')}${tabs()}<section class="vs-card"><div class="vs-provider-list">${providerCatalog.map(p=>`<article class="vs-provider"><div><strong>${safe(p.name)}</strong><span>${safe(p.detail)}</span></div><div><span class="vs-badge ${p.status==='ready'?'ok':p.status==='disabled'?'off':'warn'}">${safe(p.type)} · ${safe(p.status==='ready'?'Actif':p.status==='planned'?'À connecter':'Désactivé')}</span></div></article>`).join('')}</div></section>`;
+    return `${pageHead('Moteurs média','Zwit Studio choisit le fournisseur selon la qualité, le coût, la confidentialité et la disponibilité.','')}${tabs()}<section class="vs-card"><div class="vs-provider-list">${providerCatalog.map(p=>`<article class="vs-provider"><div><strong>${safe(p.name)}</strong><span>${safe(p.detail)}</span></div><div><span class="vs-badge ${p.status==='ready'?'ok':p.status==='disabled'?'off':'warn'}">${safe(p.type)} · ${safe(p.status==='ready'?'Actif':p.status==='planned'?'À connecter':'Désactivé')}</span></div></article>`).join('')}</div></section>`;
   }
 
   function brandView() {
@@ -172,7 +172,7 @@
       ['Confiance avant volume','Aucune logique de catalogue de profils','ok'],
       ['Consentement intégré','Le consentement est visible dans le récit','ok'],
       ['Discrétion','Aucun contenu explicite ou notification intrusive','ok'],
-      ['Cohérence visuelle','Noir Velvet, Bordeaux et Or Champagne','ok'],
+      ['Cohérence visuelle','Noir Zwit, Bordeaux et Or Champagne','ok'],
       ['Validation humaine','Aucune publication automatique','ok']
     ];
     return `${pageHead('Brand Guard','Avant tout export, la campagne est contrôlée contre les règles produit, visuelles, légales et éthiques de Velvet.','')}${tabs()}<section class="vs-card"><div class="vs-provider-list">${checks.map(c=>`<article class="vs-provider"><div><strong>${safe(c[0])}</strong><span>${safe(c[1])}</span></div><span class="vs-badge ok">Conforme</span></article>`).join('')}</div></section>`;

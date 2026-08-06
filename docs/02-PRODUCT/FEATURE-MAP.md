@@ -1,4 +1,4 @@
-# Velvet — Carte fonctionnelle canonique
+# Zwit — Carte fonctionnelle canonique
 
 **Statut : DOCUMENT DE NAVIGATION**  
 Ce document facilite le travail de CODEX. Il ne remplace pas les ADR.
@@ -8,7 +8,7 @@ Ce document facilite le travail de CODEX. Il ne remplace pas les ADR.
 - Animation d'ouverture avec logo ruban Velvet.
 - Connexion et inscription.
 - Choix du type de compte : Membre, Organisateur privé, Professionnel.
-- Acceptation du Pacte Velvet et des règles de communauté.
+- Acceptation du Pacte Zwit et des règles de communauté.
 - Création guidée du profil et réglages initiaux de confidentialité.
 
 ## 2. Profils
@@ -45,13 +45,13 @@ Ce document facilite le travail de CODEX. Il ne remplace pas les ADR.
 ## 4. Moments et contenus sociaux
 
 - Publication de moments et contenus communautaires.
-- Réactions Velvet : J'aime, Flamme, Magnifique, Élégant, J'adore, Inspirant.
+- Réactions Zwit : J'aime, Flamme, Magnifique, Élégant, J'adore, Inspirant.
 - Commentaires, sauvegardes et signalements selon les règles de visibilité.
 - Contenus temporaires lorsque spécifiés.
 
 ## 5. Conversations
 
-Cycle : Découverte → Invitation Velvet → Salon Velvet → Confiance → Expériences → Souvenirs → Relation durable.
+Cycle : Découverte → Invitation Zwit → Salon Zwit → Confiance → Expériences → Souvenirs → Relation durable.
 
 - Aucun Salon avant acceptation d'une Invitation Velvet.
 - Pas de relance automatique d'invitation.
@@ -64,14 +64,14 @@ Cycle : Découverte → Invitation Velvet → Salon Velvet → Confiance → Exp
 - Participants évolutifs par consentement unanime.
 - Notification de capture uniquement lorsque la plateforme le permet réellement.
 
-## 6. Salon Velvet et Carnet Velvet
+## 6. Salon Zwit et Carnet Zwit
 
-- Salon Velvet : espace partagé entre participants.
-- Mon Carnet Velvet : espace strictement privé du membre.
+- Salon Zwit : espace partagé entre participants.
+- Mon Carnet Zwit : espace strictement privé du membre.
 - Première rencontre réelle ajoutée à l'histoire seulement après confirmation indépendante des participants concernés.
 - Aucune donnée du Carnet ne doit être exposée aux autres membres.
 
-## 7. Pacte Velvet
+## 7. Pacte Zwit
 
 - Préférences et limites personnelles modifiables.
 - Contexte de rencontre propre à chaque Salon.
@@ -91,7 +91,7 @@ Cycle : Découverte → Invitation Velvet → Salon Velvet → Confiance → Exp
 ## 9. Confiance et sécurité
 
 - Vérification d'identité et authenticité.
-- Velvet Trust Index fondé sur plusieurs signaux, sans devenir un score de popularité.
+- Zwit Trust Index fondé sur plusieurs signaux, sans devenir un score de popularité.
 - Signalement, blocage, masquage et assistance.
 - Modération humaine assistée par des outils automatisés.
 - Confidentialité par défaut et traçabilité des actions sensibles.
@@ -108,7 +108,7 @@ Cycle : Découverte → Invitation Velvet → Salon Velvet → Confiance → Exp
 ## 11. Paramètres
 
 - Compte et informations personnelles.
-- Thème sombre ou clair avec palette Velvet ivoire, beige, pastel, or et bordeaux.
+- Thème sombre ou clair avec palette Zwit ivoire, beige, pastel, or et bordeaux.
 - Abonnement.
 - Confidentialité et visibilité.
 - Sécurité, médias privés, blocages et notifications.
@@ -127,11 +127,11 @@ Cycle : Découverte → Invitation Velvet → Salon Velvet → Confiance → Exp
 
 ## 13. Monétisation
 
-- Velvet Découverte gratuit et fonctionnel.
-- Velvet Signature : recherche avancée et sauvegardée, conversations et suivis illimités, vingt générations IA mensuelles et alertes personnalisées.
+- Zwit Découverte gratuit et fonctionnel.
+- Zwit Signature : recherche avancée et sauvegardée, conversations et suivis illimités, vingt générations IA mensuelles et alertes personnalisées.
 - Signature offert aux profils individuels vérifiés déclarés `Femme`.
 - Un abonnement unique par fiche Couple.
-- Velvet Pro par établissement, sans commission événement au lancement.
+- Zwit Pro par établissement, sans commission événement au lancement.
 - Paiement hébergé et indépendant du prestataire ; aucune donnée de carte conservée par Velvet.
 - Vente réelle bloquée avant accord écrit du prestataire et validation juridique.
 - Gestion des signalements et sanctions graduées.

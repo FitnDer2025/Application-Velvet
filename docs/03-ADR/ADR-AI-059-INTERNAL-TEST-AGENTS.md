@@ -3,17 +3,17 @@
 **Statut : ACCEPTED**  
 **Date : 2026-08-01**  
 **Décideur produit : Cyril GAY**  
-**Domaines : Community, Admin & Trust, Platform Core, Velvet Intelligence**
+**Domaines : Community, Admin & Trust, Platform Core, Zwit Intelligence**
 
 ## Contexte
 
-La recette interne de Velvet exige des interactions réelles entre plusieurs profils pour vérifier la découverte, les visites de profil, les favoris, les réactions aux photos, les conversations, les notifications et les états de lecture. Une équipe humaine réduite ne permet pas de reproduire en continu la diversité des comportements nécessaires.
+La recette interne de Zwit exige des interactions réelles entre plusieurs profils pour vérifier la découverte, les visites de profil, les favoris, les réactions aux photos, les conversations, les notifications et les états de lecture. Une équipe humaine réduite ne permet pas de reproduire en continu la diversité des comportements nécessaires.
 
 Cyril valide la création de profils fictifs pilotés par IA uniquement dans l’environnement interne de développement. Ces profils ne doivent jamais être visibles par des bêta-testeurs externes ni par des utilisateurs réels et doivent être supprimés avant toute ouverture externe.
 
 ## Décision
 
-Velvet dispose d’agents IA de test qui utilisent les mêmes tables métier que les membres afin de produire une recette représentative, avec les limites suivantes :
+Zwit dispose d’agents IA de test qui utilisent les mêmes tables métier que les membres afin de produire une recette représentative, avec les limites suivantes :
 
 1. Ils fonctionnent uniquement dans un environnement explicitement identifié comme `development`, `staging`, `preview`, `internal` ou `test`.
 2. Le runtime exige en plus `VELVET_INTERNAL_TEST_AGENTS=enabled`.

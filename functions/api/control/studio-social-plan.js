@@ -21,16 +21,16 @@ function memberFallback(brief, duration, format) {
   const screens = duration >= 30 ? MEMBER_SCREENS : ['home', 'discover', 'profile', 'events'];
   const copy = {
     home: ['Une envie que l’on gardait pour soi', 'Tout commence par une envie.', 'Il y a des envies que l’on garde longtemps pour soi. Puis vient le moment de les découvrir autrement.', 'mystère'],
-    discover: ['Un univers retient le regard', 'Une intuition. Une possibilité.', 'Sur Velvet, chaque profil raconte une personnalité, une histoire et une façon unique de vivre les rencontres.', 'attirance'],
+    discover: ['Un univers retient le regard', 'Une intuition. Une possibilité.', 'Sur Zwit, chaque profil raconte une personnalité, une histoire et une façon unique de vivre les rencontres.', 'attirance'],
     profile: ['Prendre le temps de découvrir', 'Derrière le profil, une histoire.', 'Quelques mots, des envies partagées et cette impression subtile que quelque chose pourrait commencer.', 'émotion'],
     messages: ['Les premiers mots', 'Le feeling commence ici.', 'Alors un premier message est envoyé. Sans pression. Avec cette élégance qui laisse doucement la place au feeling.', 'connexion'],
     events: ['Quand l’échange devient une promesse', 'Une soirée commence à se dessiner.', 'La conversation devient une invitation. Une sortie se prépare. L’imaginaire laisse enfin place à une expérience réelle.', 'projection'],
-    map: ['Tout devient plus proche', 'Les rencontres et les lieux autour de vous.', 'Velvet rapproche les personnes, les événements et les établissements qui partagent la même envie de vivre quelque chose de vrai.', 'désir']
+    map: ['Tout devient plus proche', 'Les rencontres et les lieux autour de vous.', 'Zwit rapproche les personnes, les événements et les établissements qui partagent la même envie de vivre quelque chose de vrai.', 'désir']
   };
   const sceneDuration = duration / screens.length;
   return {
     product: 'member', title: 'Une envie devient une histoire', format, duration, brief,
-    narrativeArc: 'mystère → attirance → émotion → connexion → projection → désir de rejoindre Velvet',
+    narrativeArc: 'mystère → attirance → émotion → connexion → projection → désir de rejoindre Zwit',
     closingLine: 'Velvet. Là où les plus belles rencontres commencent.',
     scenes: screens.map((screen, index) => ({
       screen, action: screen, title: copy[screen][0], onScreen: copy[screen][1], voice: copy[screen][2], emotion: copy[screen][3], duration: sceneDuration, beat: index + 1
@@ -41,7 +41,7 @@ function memberFallback(brief, duration, format) {
 function proFallback(brief, duration, format) {
   const screens = PRO_SCREENS;
   const copy = {
-    pro_dashboard: ['Un lieu mérite plus qu’une simple présence', 'Votre activité, enfin lisible.', 'Chaque soirée demande de l’énergie. Velvet Pro transforme cette énergie en une vision claire, élégante et immédiatement exploitable.', 'maîtrise'],
+    pro_dashboard: ['Un lieu mérite plus qu’une simple présence', 'Votre activité, enfin lisible.', 'Chaque soirée demande de l’énergie. Zwit Pro transforme cette énergie en une vision claire, élégante et immédiatement exploitable.', 'maîtrise'],
     pro_venue: ['Votre univers prend toute sa valeur', 'Une vitrine à votre image.', 'Votre établissement se raconte avec justesse. Son ambiance, ses services et sa singularité deviennent visibles auprès d’une communauté déjà engagée.', 'fierté'],
     pro_events: ['Chaque soirée trouve son public', 'Créer. Publier. Remplir.', 'Vous préparez vos événements, choisissez votre audience et donnez envie de réserver, depuis un seul espace pensé pour votre métier.', 'impact'],
     pro_bookings: ['Vous gardez toujours une longueur d’avance', 'Les inscriptions sous contrôle.', 'Les réservations, les participants et les arrivées sont réunis au même endroit. Moins d’incertitude, plus de temps pour l’expérience que vous offrez.', 'sérénité']
@@ -49,8 +49,8 @@ function proFallback(brief, duration, format) {
   const sceneDuration = duration / screens.length;
   return {
     product: 'pro', title: 'Votre établissement monte d’un cran', format, duration, brief,
-    narrativeArc: 'charge quotidienne → maîtrise → visibilité → impact → sérénité → envie de rejoindre Velvet Pro',
-    closingLine: 'Velvet Pro. Donnez à votre établissement la visibilité qu’il mérite.',
+    narrativeArc: 'charge quotidienne → maîtrise → visibilité → impact → sérénité → envie de rejoindre Zwit Pro',
+    closingLine: 'Zwit Pro. Donnez à votre établissement la visibilité qu’il mérite.',
     scenes: screens.map((screen, index) => ({
       screen, action: screen, title: copy[screen][0], onScreen: copy[screen][1], voice: copy[screen][2], emotion: copy[screen][3], duration: sceneDuration, beat: index + 1
     }))
@@ -107,8 +107,8 @@ function parse(raw, product, brief, duration, format) {
 
 function memberSystem() {
   return [
-    'Tu es la réalisatrice d’une publicité française premium pour Velvet Membre.',
-    'La vidéo montre uniquement la véritable interface Velvet en action : accueil, découverte, profil, messages, sorties et carte.',
+    'Tu es la réalisatrice d’une publicité française premium pour Zwit Membre.',
+    'La vidéo montre uniquement la véritable interface Zwit en action : accueil, découverte, profil, messages, sorties et carte.',
     'Tu racontes une histoire sensuelle, émotionnelle et élégante qui donne envie de rejoindre Velvet.',
     'La sensualité vient du mystère, des mots, de la confiance, du feeling et de la projection. Jamais de contenu explicite ou vulgaire.',
     'Chaque phrase doit correspondre précisément à l’écran réel affiché.',
@@ -121,8 +121,8 @@ function memberSystem() {
 
 function proSystem() {
   return [
-    'Tu es la réalisatrice d’une publicité française premium pour Velvet Pro.',
-    'La vidéo montre uniquement la véritable interface Velvet Pro en action : tableau de bord, établissement, événements et inscriptions.',
+    'Tu es la réalisatrice d’une publicité française premium pour Zwit Pro.',
+    'La vidéo montre uniquement la véritable interface Zwit Pro en action : tableau de bord, établissement, événements et inscriptions.',
     'Tu racontes l’histoire d’un professionnel qui retrouve visibilité, maîtrise et sérénité.',
     'Le récit doit être humain, élégant, concret et donner envie de souscrire, sans jargon logiciel.',
     'Chaque phrase doit correspondre précisément à l’écran réel affiché.',
@@ -142,7 +142,7 @@ export async function generateSocialPlan(env, body) {
   const screens = product === 'pro' ? PRO_SCREENS : (duration >= 30 ? MEMBER_SCREENS : ['home', 'discover', 'profile', 'events']);
   const system = product === 'pro' ? proSystem() : memberSystem();
   const user = [
-    `Produit : ${product === 'pro' ? 'Velvet Pro' : 'Velvet Membre'}.`,
+    `Produit : ${product === 'pro' ? 'Zwit Pro' : 'Zwit Membre'}.`,
     `Durée : ${duration} secondes. Format : ${format}.`,
     `Écrans obligatoires dans cet ordre : ${screens.join(', ')}.`,
     `Brief : ${brief || backup.brief}.`,

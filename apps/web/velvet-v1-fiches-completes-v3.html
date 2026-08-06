@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Velvet — V1 profils & cercles</title>
+  <title>Zwit — V1 profils & cercles</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#09090b}
     iframe{border:0;width:100%;height:100%;display:block}
   </style>
 </head>
 <body>
-<iframe id="app" src="./velvet-v1-locked-dense-demo-v3.html" title="Velvet V1"></iframe>
+<iframe id="app" src="./velvet-v1-locked-dense-demo-v3.html" title="Zwit V1"></iframe>
 <script>
 const frame = document.getElementById('app');
 
@@ -159,7 +159,7 @@ frame.addEventListener('load', () => {
   w.S.profileVisibility = w.S.profileVisibility || {
     identity:'Public',
     physical:'Compatibles',
-    practices:'Masque Velvet',
+    practices:'Masque Zwit',
     availability:'Cercle de confiance',
     privateStory:'Cercle privé'
   };
@@ -289,7 +289,7 @@ frame.addEventListener('load', () => {
       traits:[['Élancée','Bisexuelle','Sensible']],
       desires:'Découvrir un couple complice et vivre une relation suivie où chacun trouve naturellement sa place.',
       search:'Des couples équilibrés, respectueux et capables de créer une vraie alchimie à trois.',
-      journey:[['2025','Découverte de Velvet et premiers échanges.'],['Aujourd’hui','Quelques rencontres choisies, sans précipitation.']],
+      journey:[['2025','Découverte de Zwit et premiers échanges.'],['Aujourd’hui','Quelques rencontres choisies, sans précipitation.']],
       venues:[['O’Relax','Spa · Hauts-de-France','Occasionnellement'],['Restaurants','Lille & Lens','Souvent avant une rencontre']],
       recommendations:[['O’Relax','Parfait pour faire connaissance dans une ambiance douce.']],
       people:[{bio:'Chloé est indépendante, souriante et très sensible à la complicité d’un couple. Elle aime les spas, les dîners et les échanges qui créent une vraie confiance avant la rencontre.',age:'35 ans',height:'170 cm',weight:'60 kg',hair:'Châtains',eyes:'Verts',morph:'Élancée',children:'Non',job:'Information privée',frequency:'Quelques rencontres par an',orientation:'Bisexuelle',character:'Sensible, indépendante, souriante'}]
@@ -328,7 +328,7 @@ frame.addEventListener('load', () => {
       search:p.search,
       journey:[['Aujourd’hui','Une démarche tournée vers la qualité des rencontres.']],
       venues:[['Lieux privés','Hauts-de-France','Occasionnellement']],
-      recommendations:[['Velvet','Un profil vérifié et apprécié dans les échanges.']],
+      recommendations:[['Zwit','Un profil vérifié et apprécié dans les échanges.']],
       people:names.map((name,index)=>({
         bio:`${name} souhaite se présenter librement, avec sa personnalité, ses envies et ses propres limites.`,
         age:(p.ages.split(' & ')[index]||p.ages)+' ans',
@@ -530,7 +530,7 @@ frame.addEventListener('load', () => {
       <div class="feed">
         <div class="feeditem"><img class="avatar" src="${w.I.c1}" alt=""><div><b>Album public enrichi</b><div class="muted">3 nouvelles photos dans « Nous deux »</div></div><span class="chip">2 j</span></div>
         <div class="feeditem"><img class="avatar" src="${w.I.party}" alt=""><div><b>Nouvelle sortie</b><div class="muted">Inscription à Nuit Velours confirmée à deux</div></div><span class="chip">4 j</span></div>
-        <div class="feeditem"><img class="avatar" src="${w.I.spa}" alt=""><div><b>Souvenir ajouté</b><div class="muted">Week-end spa ajouté au Livre Velvet</div></div><span class="chip">1 sem.</span></div>
+        <div class="feeditem"><img class="avatar" src="${w.I.spa}" alt=""><div><b>Souvenir ajouté</b><div class="muted">Week-end spa ajouté au Livre Zwit</div></div><span class="chip">1 sem.</span></div>
       </div>
     </section>`;
   }
@@ -538,8 +538,8 @@ frame.addEventListener('load', () => {
   function selfCircles(){
     const circles = w.S.circles;
     const people = id => w.P.find(p=>p.id===id);
-    return `<section class="premium-card"><div class="section-head"><div><div class="ey">Cercles Velvet</div><h2>La confiance se construit, elle ne s’affiche pas</h2></div><span class="status-pill ok">● Privé par conception</span></div>
-      <p class="story-copy">Vos cercles organisent vos liens, vos accès et vos souvenirs. Leur composition n’est jamais publique. Velvet peut s’en servir pour améliorer les recommandations sans révéler les membres, les rencontres certifiées ni l’origine de la confiance.</p>
+    return `<section class="premium-card"><div class="section-head"><div><div class="ey">Cercles Zwit</div><h2>La confiance se construit, elle ne s’affiche pas</h2></div><span class="status-pill ok">● Privé par conception</span></div>
+      <p class="story-copy">Vos cercles organisent vos liens, vos accès et vos souvenirs. Leur composition n’est jamais publique. Zwit peut s’en servir pour améliorer les recommandations sans révéler les membres, les rencontres certifiées ni l’origine de la confiance.</p>
       <div class="circle-grid">
         <div class="circle-card"><div class="circle-icon">✓</div><h3>Cercle de confiance</h3><p class="muted">Rencontres certifiées par les deux profils.</p>
           <div class="circle-members">${circles.trust.map(id=>people(id)).filter(Boolean).map(p=>`<img src="${p.img}" alt="">`).join('')}</div>
@@ -569,22 +569,22 @@ frame.addEventListener('load', () => {
         <div class="trust-note">Les recommandations issues de votre réseau de confiance restent anonymes : aucun nom ni compteur public.</div>
       </section>
       <section class="premium-card"><div class="ey">Albums collaboratifs</div><h3>Souvenirs de cercle</h3>
-        <p class="muted">Les médias partagés dans un cercle restent dans Velvet, avec accès révocable et sans téléchargement.</p>
+        <p class="muted">Les médias partagés dans un cercle restent dans Zwit, avec accès révocable et sans téléchargement.</p>
         <button class="btn secondary" onclick="parent.velvetToast('Album collaboratif créé dans le cercle')">Créer un album</button>
       </section>
     </aside></div>
-    <section class="premium-card"><div class="ey">Masque Velvet & audiences</div><h2>Contrôler la découverte de votre profil</h2>
+    <section class="premium-card"><div class="ey">Masque Zwit & audiences</div><h2>Contrôler la découverte de votre profil</h2>
       <div class="visibility-table">${[
         ['identity','Identité du couple','Nom, ville, photo principale'],
         ['physical','Informations physiques','Âge, taille, morphologie'],
-        ['practices','Pratiques & préférences','Découverte progressive avec le Masque Velvet'],
+        ['practices','Pratiques & préférences','Découverte progressive avec le Masque Zwit'],
         ['availability','Disponibilités','Jours et zones de déplacement'],
         ['privateStory','Histoire intime','Textes réservés à vos liens choisis']
       ].map(row=>`<div class="visibility-row"><div><b>${row[1]}</b><p>${row[2]}</p></div><span class="muted">Visible selon votre relation</span>
         <select class="visibility-select" onchange="parent.velvetProfileVisibility('${row[0]}',this.value)">
-          ${['Public','Compatibles','Masque Velvet','Cercle de confiance','Cercle privé','Favoris'].map(value=>`<option ${w.S.profileVisibility[row[0]]===value?'selected':''}>${value}</option>`).join('')}
+          ${['Public','Compatibles','Masque Zwit','Cercle de confiance','Cercle privé','Favoris'].map(value=>`<option ${w.S.profileVisibility[row[0]]===value?'selected':''}>${value}</option>`).join('')}
         </select></div>`).join('')}</div>
-      <div class="privacy-note" style="margin-top:14px"><b>Masque Velvet</b> ne rend pas le profil invisible : il montre juste assez pour susciter une découverte, puis révèle les informations selon la confiance et vos choix.</div>
+      <div class="privacy-note" style="margin-top:14px"><b>Masque Zwit</b> ne rend pas le profil invisible : il montre juste assez pour susciter une découverte, puis révèle les informations selon la confiance et vos choix.</div>
     </section>`;
   }
 
@@ -762,7 +762,7 @@ frame.addEventListener('load', () => {
     const events = w.E.filter((event,index)=>event.participants.includes(p.id)||index<2);
     return `<section class="premium-card"><div class="ey">Sorties</div><h2>Prochains rendez-vous & souvenirs</h2>
       <div class="grid g3">${events.map(w.eventCard).join('')}</div>
-    </section><section class="premium-card"><div class="ey">Livre Velvet</div><h2>Expériences partagées</h2>
+    </section><section class="premium-card"><div class="ey">Livre Zwit</div><h2>Expériences partagées</h2>
       <div class="timeline"><div class="timeline-item"><i></i><div><strong>Soirée à Lille</strong><div class="muted">Souvenir privé conservé dans leur Livre Velvet.</div></div></div>
       <div class="timeline-item"><i></i><div><strong>Week-end spa</strong><div class="muted">Album collaboratif visible uniquement par le cercle concerné.</div></div></div></div>
     </section>`;
@@ -774,7 +774,7 @@ frame.addEventListener('load', () => {
     </section>
     <section class="premium-card"><div class="ey">Lieux recommandés</div><h2>Leurs adresses préférées</h2>
       <div class="venue-list">${data.venues.map((venue,index)=>`<div class="venue-row"><img src="${index%2?w.I.spa:w.I.club}" alt=""><div><b>${esc(venue[0])}</b><div class="muted">${esc(venue[1])}</div></div><span class="status-pill gold">${esc(venue[2])}</span></div>`).join('')}</div>
-    </section></div><aside><section class="premium-card"><div class="ey">Confiance Velvet</div><h3>Une réputation positive, jamais un palmarès</h3>
+    </section></div><aside><section class="premium-card"><div class="ey">Confiance Zwit</div><h3>Une réputation positive, jamais un palmarès</h3>
       <p class="muted">Les recommandations publiques ne révèlent ni le réseau privé, ni les rencontres certifiées, ni les sources de propagation de confiance.</p>
     </section>${memberTrustCard(p)}</aside></div>`;
   }

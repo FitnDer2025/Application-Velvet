@@ -1,6 +1,6 @@
-# Velvet Database Bible
+# Zwit Database Bible
 
-This directory is the canonical source for Velvet data architecture, domain rules, permissions, constraints, security boundaries and implementation order.
+This directory is the canonical source for Zwit data architecture, domain rules, permissions, constraints, security boundaries and implementation order.
 
 ## Chapters
 

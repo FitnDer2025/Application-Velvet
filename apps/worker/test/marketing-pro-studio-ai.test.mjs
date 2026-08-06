@@ -7,7 +7,7 @@ const bridge = await readFile('apps/beta/static/assets/velvet-marketing-pro-stud
 const studio = await readFile('apps/beta/static/assets/velvet-pro-studio-ai.js', 'utf8');
 const build = await readFile('apps/beta/scripts/build.mjs', 'utf8');
 
-test('Velvet Pro Marketing charge le pont Studio IA', () => {
+test('Zwit Pro Marketing charge le pont Studio IA', () => {
   assert.doesNotThrow(() => new Function(marketing));
   assert.doesNotThrow(() => new Function(bridge));
   assert.match(marketing, /velvet-marketing-pro-studio-bridge\.js/);
@@ -17,7 +17,7 @@ test('Velvet Pro Marketing charge le pont Studio IA', () => {
 
 test('le Studio Marketing utilise un établissement fictif isolé', () => {
   assert.match(bridge, /72000000-0000-4000-8000-000000000001/);
-  assert.match(bridge, /Maison Velvet Lille/);
+  assert.match(bridge, /Maison Zwit Lille/);
   assert.match(bridge, /velvet_marketing_pro_studio_demo_v1/);
   assert.match(bridge, /marketingMode:\s*true/);
   assert.doesNotMatch(bridge, /SUPABASE_SERVICE_ROLE_KEY|\/rest\/v1\/pro_studio_/);

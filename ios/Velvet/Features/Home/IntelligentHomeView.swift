@@ -81,7 +81,7 @@ struct IntelligentHomeView: View {
             }
 
             if isLoading && intelligence == nil && directoryProfiles.isEmpty {
-                ProgressView("Velvet prépare votre espace…")
+                ProgressView("Zwit prépare votre espace…")
                     .tint(VelvetColor.champagneGold)
                     .foregroundStyle(VelvetColor.textSecondary)
                     .padding(24)
@@ -123,7 +123,7 @@ struct IntelligentHomeView: View {
                 Label(
                     preferences.locationEnabled
                         ? "Rayon actuel : \(preferences.radiusKm) km"
-                        : "Velvet fonctionne sans localisation · tri de secours actif",
+                        : "Zwit fonctionne sans localisation · tri de secours actif",
                     systemImage: preferences.locationEnabled ? "location.fill" : "location.slash"
                 )
                 .font(VelvetTypography.caption(size: 10, weight: .semibold))
@@ -228,7 +228,7 @@ struct IntelligentHomeView: View {
     private var fallbackExperience: some View {
         VStack(alignment: .leading, spacing: 26) {
             VStack(alignment: .leading, spacing: 16) {
-                sectionHeader("Continuer sur Velvet", detail: "Accès direct")
+                sectionHeader("Continuer sur Zwit", detail: "Accès direct")
                 HStack(spacing: 10) {
                     NavigationLink {
                         PremiumDiscoveryGridView(currentProfile: profile)
@@ -297,7 +297,7 @@ struct IntelligentHomeView: View {
 
     private func curatedSection(_ data: HomeIntelligenceResponse) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            sectionHeader("Pour vous", detail: "Velvet Intelligence")
+            sectionHeader("Pour vous", detail: "Zwit Intelligence")
             if data.curatedProfiles.isEmpty && data.nearbyClubs.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Votre sélection se construit")
@@ -342,7 +342,7 @@ struct IntelligentHomeView: View {
                 IntelligentShortcutRow(
                     title: "Sorties à venir",
                     detail: data.nearbyEvents.isEmpty
-                        ? "Consulter tout l’agenda Velvet"
+                        ? "Consulter tout l’agenda Zwit"
                         : "\(data.nearbyEvents.count) agenda\(data.nearbyEvents.count > 1 ? "s" : "") proche\(data.nearbyEvents.count > 1 ? "s" : "") ou fréquenté\(data.nearbyEvents.count > 1 ? "s" : "")",
                     icon: "calendar.badge.clock"
                 )

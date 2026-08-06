@@ -151,7 +151,7 @@ async function messageSocialState(env, access, conversationId, messages = []) {
         const delivered = read || dateAt(member.last_delivered_at) >= created;
         return {
           userId: member.user_id,
-          displayIdentity: member.display_identity || 'Membre Velvet',
+          displayIdentity: member.display_identity || 'Membre Zwit',
           status: read ? 'read' : (delivered ? 'delivered' : 'sent'),
           deliveredAt: delivered ? member.last_delivered_at : null,
           readAt: read ? member.last_read_at : null

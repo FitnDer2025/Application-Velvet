@@ -64,7 +64,7 @@ test('la connexion publique reste premium, locale et sans débordement', async (
 test('le shell membre se rend réellement et ne déborde sur aucun appareil', async ({ page }) => {
   await mockMemberApis(page);
   await page.goto('/membres/');
-  await expect(page.locator('.brand').first()).toContainText('Velvet');
+  await expect(page.locator('.brand').first()).toContainText('Zwit');
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 });
@@ -96,8 +96,8 @@ test('le compte admin change d’espace ou revient à la connexion sans modifier
   const access = page.locator('.velvet-account-access');
   await expect(access).toBeVisible();
   await expect(access.getByRole('link', { name: 'Membres' })).toHaveAttribute('aria-current', 'page');
-  await expect(access.getByRole('link', { name: 'Velvet Pro' })).toHaveAttribute('href', '/pro/');
-  await expect(access.getByRole('link', { name: 'Velvet Control' })).toHaveAttribute('href', '/control/');
+  await expect(access.getByRole('link', { name: 'Zwit Pro' })).toHaveAttribute('href', '/pro/');
+  await expect(access.getByRole('link', { name: 'Zwit Control' })).toHaveAttribute('href', '/control/');
   await access.getByRole('button', { name: 'Changer de compte' }).click();
   await expect(page).toHaveURL(/\/\?mode=login$/);
   await expect(page.locator('#vg-login')).toBeVisible();

@@ -1,10 +1,10 @@
-# ADR-GAM-043 et ADR-GAM-044 – Gamification positive Velvet
+# ADR-GAM-043 et ADR-GAM-044 – Gamification positive Zwit
 
 Status: Accepted
 
 ## ADR-043 — Gamification positive
 
-La gamification Velvet valorise uniquement les comportements qui renforcent la confiance, la qualité des échanges, la participation utile et la vie de la communauté.
+La gamification Zwit valorise uniquement les comportements qui renforcent la confiance, la qualité des échanges, la participation utile et la vie de la communauté.
 
 Peuvent notamment être reconnus :
 
@@ -15,15 +15,15 @@ Peuvent notamment être reconnus :
 - contribution fiable comme organisateur ;
 - parrainage d'un membre devenu réellement actif.
 
-Velvet exclut les classements publics, les récompenses fondées sur le volume de messages, le nombre de matchs, la popularité ou toute mécanique encourageant le spam et la compétition sociale.
+Zwit exclut les classements publics, les récompenses fondées sur le volume de messages, le nombre de matchs, la popularité ou toute mécanique encourageant le spam et la compétition sociale.
 
 ## ADR-044 — Distinctions évolutives
 
-Les distinctions Velvet évoluent avec le parcours du membre et racontent son implication sans constituer des niveaux compétitifs.
+Les distinctions Zwit évoluent avec le parcours du membre et racontent son implication sans constituer des niveaux compétitifs.
 
-Elles peuvent apparaître, évoluer ou disparaître lorsque leur contexte n'est plus pertinent. Leur vocabulaire reste sobre, premium et cohérent avec l'identité Velvet, par exemple : Initié, Complice, Habitué, Voyageur, Organisateur, Épicurien, Explorateur ou Confiance établie.
+Elles peuvent apparaître, évoluer ou disparaître lorsque leur contexte n'est plus pertinent. Leur vocabulaire reste sobre, premium et cohérent avec l'identité Zwit, par exemple : Initié, Complice, Habitué, Voyageur, Organisateur, Épicurien, Explorateur ou Confiance établie.
 
-Velvet n'utilise pas de hiérarchie Bronze, Argent, Or ou Diamant.
+Zwit n'utilise pas de hiérarchie Bronze, Argent, Or ou Diamant.
 
 ## Garde-fous
 

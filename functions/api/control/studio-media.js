@@ -62,7 +62,7 @@ function fallbackPlan(brief, duration, format) {
     discover: {
       title: 'Un univers attire le regard',
       onScreen: 'Un profil. Une intuition.',
-      voice: 'Sur Velvet, on ne fait pas que défiler des visages. On découvre des univers capables de faire naître une véritable curiosité.',
+      voice: 'Sur Zwit, on ne fait pas que défiler des visages. On découvre des univers capables de faire naître une véritable curiosité.',
       action: 'browse',
       emotion: 'attirance'
     },
@@ -90,7 +90,7 @@ function fallbackPlan(brief, duration, format) {
     map: {
       title: 'Tout devient plus proche',
       onScreen: 'Les rencontres et les expériences autour de vous.',
-      voice: 'Velvet rapproche les personnes, les lieux et les événements qui partagent la même envie de vivre quelque chose de vrai.',
+      voice: 'Zwit rapproche les personnes, les lieux et les événements qui partagent la même envie de vivre quelque chose de vrai.',
       action: 'explore_map',
       emotion: 'projection'
     }
@@ -191,7 +191,7 @@ async function generatePlan(env, body) {
 
   const system = [
     'Tu es le réalisateur et concepteur-rédacteur d’une campagne française premium pour Velvet.',
-    'Velvet est un univers de rencontres et d’expériences entre adultes fondé sur la confiance, le consentement, l’élégance et la discrétion.',
+    'Zwit est un univers de rencontres et d’expériences entre adultes fondé sur la confiance, le consentement, l’élégance et la discrétion.',
     'Tu ne réalises pas un catalogue de fonctionnalités. Tu racontes une histoire sensuelle, émotionnelle et subtile à travers la véritable interface Velvet.',
     'La sensualité repose sur le mystère, les mots, l’attente, le feeling et la projection. Elle ne doit jamais devenir explicite, vulgaire ou sexuelle.',
     'Le scénario est le réalisateur : chaque phrase de voix off doit déclencher l’écran et l’action qui illustrent précisément ce qui est raconté.',
@@ -263,7 +263,7 @@ function legacyImagePrompt(body) {
   const prompt = text(body.prompt, 1700);
   return [
     prompt,
-    'High-end Velvet advertising illustration.',
+    'High-end Zwit advertising illustration.',
     'Fictional adults only, no nudity, no explicit content, no text, no logo, no watermark.'
   ].filter(Boolean).join(' ').slice(0, 2048);
 }

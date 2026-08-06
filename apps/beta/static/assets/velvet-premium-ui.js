@@ -61,7 +61,7 @@
   }
 
   function brandMarkup(edition = '') {
-    return `<span class="velvet-brand-lockup"><img src="/assets/velvet-icon-192.png" alt="" width="44" height="44"><span><b>VELVET</b>${edition ? `<small>${edition}</small>` : ''}</span></span>`;
+    return `<span class="velvet-brand-lockup"><img src="/assets/velvet-icon-192.png" alt="" width="44" height="44"><span><b>ZWIT</b>${edition ? `<small>${edition}</small>` : ''}</span></span>`;
   }
 
   function directText(node) {
@@ -225,7 +225,7 @@
     if (!mobile) {
       mobile = document.createElement('nav');
       mobile.className = 'control-mobile-nav';
-      mobile.setAttribute('aria-label', 'Navigation Velvet Contrôle');
+      mobile.setAttribute('aria-label', 'Navigation Zwit Contrôle');
       document.body.append(mobile);
     }
     const key = tabs.map((tab) => tab.dataset.view).join('|');

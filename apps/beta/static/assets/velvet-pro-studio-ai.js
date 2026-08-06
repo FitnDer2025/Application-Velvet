@@ -12,7 +12,7 @@
   };
   const DEFAULT_TEMPLATES = [
     { template_code: 'neon-club', name: 'Néon Club', description: 'Rose et bleu électrique, dense et festif.', configuration: { visualStyle: 'neon club, magenta and electric blue, premium nightlife', layout: 'event' } },
-    { template_code: 'velvet-luxe', name: 'Velvet Luxe', description: 'Bordeaux, noir et champagne, sensuel et élégant.', configuration: { visualStyle: 'luxury burgundy black champagne nightlife', layout: 'balanced' } },
+    { template_code: 'velvet-luxe', name: 'Zwit Luxe', description: 'Bordeaux, noir et champagne, sensuel et élégant.', configuration: { visualStyle: 'luxury burgundy black champagne nightlife', layout: 'balanced' } },
     { template_code: 'electric-night', name: 'Electric Night', description: 'Lasers, lumière et énergie pour DJ et performers.', configuration: { visualStyle: 'electric premium club, laser and particles', layout: 'rich' } },
     { template_code: 'dark-desire', name: 'Dark Desire', description: 'Sombre, mystérieux et sophistiqué.', configuration: { visualStyle: 'dark sophisticated cinematic club', layout: 'balanced' } },
     { template_code: 'summer-pool', name: 'Summer Pool', description: 'Lumineux, estival et festif.', configuration: { visualStyle: 'premium tropical pool party nightlife', layout: 'rich' } }
@@ -164,7 +164,7 @@
     const title = $('#pageTitle');
     if (title) title.textContent = 'Studio IA';
     const content = $('#content');
-    if (content) content.innerHTML = '<section class="card" style="max-width:760px;margin:8vh auto;text-align:center"><div class="ey">Velvet Pro Studio</div><h1>Préparation du studio…</h1><p class="lead">Chargement de votre identité visuelle, de vos modèles et de votre bibliothèque.</p></section>';
+    if (content) content.innerHTML = '<section class="card" style="max-width:760px;margin:8vh auto;text-align:center"><div class="ey">Zwit Pro Studio</div><h1>Préparation du studio…</h1><p class="lead">Chargement de votre identité visuelle, de vos modèles et de votre bibliothèque.</p></section>';
     try {
       await loadSnapshot(true);
       renderStudio();
@@ -201,7 +201,7 @@
 
   function heroMarkup() {
     const venueName = $('#venueSelect option:checked')?.textContent || 'Votre établissement';
-    return `<section class="vpsai-hero"><div><div class="ey">VELVET PRO · GRAPHISTE IA INTÉGRÉ</div><h1>Vos soirées.<br>Votre identité.</h1><p>Créez des affiches professionnelles qui respectent automatiquement le logo, les couleurs et l’univers de ${esc(venueName)}. L’IA réalise le décor ; Velvet compose exactement vos textes, dates, photos et informations.</p><div class="vpsai-version"><span>V1 · Affiches HD</span><span>V2 · Kits multi-formats</span><span>V3 · Affiches animées</span><span>Textes 100 % exacts</span></div></div><div class="vpsai-hero-side"><button class="vpsai-btn gold" data-vpsai-new>Créer une nouvelle soirée</button><button class="vpsai-btn ghost" data-vpsai-tab="brand">Configurer l’identité permanente</button><div class="vpsai-note">${state.migrationPending ? '<b>Migration Supabase 0043 à appliquer.</b><br>Le Studio utilise temporairement la mémoire locale de ce navigateur.' : '<b>Mémoire Velvet active.</b><br>Votre identité, vos projets et vos rendus sont enregistrés dans votre espace professionnel privé.'}</div></div></section>`;
+    return `<section class="vpsai-hero"><div><div class="ey">ZWIT PRO · GRAPHISTE IA INTÉGRÉ</div><h1>Vos soirées.<br>Votre identité.</h1><p>Créez des affiches professionnelles qui respectent automatiquement le logo, les couleurs et l’univers de ${esc(venueName)}. L’IA réalise le décor ; Zwit compose exactement vos textes, dates, photos et informations.</p><div class="vpsai-version"><span>V1 · Affiches HD</span><span>V2 · Kits multi-formats</span><span>V3 · Affiches animées</span><span>Textes 100 % exacts</span></div></div><div class="vpsai-hero-side"><button class="vpsai-btn gold" data-vpsai-new>Créer une nouvelle soirée</button><button class="vpsai-btn ghost" data-vpsai-tab="brand">Configurer l’identité permanente</button><div class="vpsai-note">${state.migrationPending ? '<b>Migration Supabase 0043 à appliquer.</b><br>Le Studio utilise temporairement la mémoire locale de ce navigateur.' : '<b>Mémoire Zwit active.</b><br>Votre identité, vos projets et vos rendus sont enregistrés dans votre espace professionnel privé.'}</div></div></section>`;
   }
 
   function renderStudio() {
@@ -260,7 +260,7 @@
         ${textarea('Offre / promotion', 'event.promotion', event.promotion, 'ex. -10 € sur l’entrée vendredi et samedi')}
         ${textarea('Dress code', 'event.dressCode', event.dressCode, 'ex. Deux petites couettes pour entrer dans le thème')}
       </div></div>
-      <div class="vpsai-section"><h3>2. Photos à intégrer</h3><p class="lead" style="font-size:12px">Ajoutez les vraies photos des invités, du DJ ou de l’établissement. Velvet les composera sans demander à l’IA de recréer les personnes.</p><label class="vpsai-upload"><input type="file" accept="image/jpeg,image/png,image/webp" multiple data-vpsai-event-photos><span>＋ Ajouter jusqu’à 3 photos<br><small>Portraits, DJ, couple, décor ou visuel thématique</small></span></label><div class="vpsai-photo-list">${state.eventPhotos.map((item, index) => photoMarkup(item, index)).join('')}</div></div>
+      <div class="vpsai-section"><h3>2. Photos à intégrer</h3><p class="lead" style="font-size:12px">Ajoutez les vraies photos des invités, du DJ ou de l’établissement. Zwit les composera sans demander à l’IA de recréer les personnes.</p><label class="vpsai-upload"><input type="file" accept="image/jpeg,image/png,image/webp" multiple data-vpsai-event-photos><span>＋ Ajouter jusqu’à 3 photos<br><small>Portraits, DJ, couple, décor ou visuel thématique</small></span></label><div class="vpsai-photo-list">${state.eventPhotos.map((item, index) => photoMarkup(item, index)).join('')}</div></div>
       <div class="vpsai-section"><h3>3. Direction artistique</h3><div class="vpsai-form">
         <label class="vpsai-field"><span>Modèle</span><select data-path="creative.template">${templates.map((item) => `<option value="${esc(item.template_code)}" ${creative.template === item.template_code ? 'selected' : ''}>${esc(item.name)}</option>`).join('')}</select></label>
         <label class="vpsai-field"><span>Densité</span><select data-path="creative.density"><option value="minimal" ${creative.density === 'minimal' ? 'selected' : ''}>Minimaliste</option><option value="balanced" ${creative.density === 'balanced' ? 'selected' : ''}>Équilibrée</option><option value="rich" ${creative.density === 'rich' ? 'selected' : ''}>Riche</option><option value="event" ${creative.density === 'event' ? 'selected' : ''}>Très événementielle</option></select></label>
@@ -313,7 +313,7 @@
   function templatesMarkup() {
     const templates = state.snapshot?.templates?.length ? state.snapshot.templates : DEFAULT_TEMPLATES;
     const selected = projectDraft().creative_payload.template;
-    return `<section class="vpsai-panel"><div class="vpsai-library-head"><div><div class="ey">DIRECTION ARTISTIQUE</div><h2>Modèles Velvet Pro</h2><p class="lead">Choisissez un point de départ. Votre propre charte reste prioritaire.</p></div></div><div class="vpsai-template-grid">${templates.map((item,index) => `<article class="vpsai-template ${selected===item.template_code?'selected':''}" data-template="${esc(item.template_code)}" style="--accent:${['#f42a8799','#7d294c99','#2689ff99','#2c1b3299','#ef9a3d99'][index%5]}"><span class="vpsai-badge">${item.is_system===false?'Personnel':'Velvet'}</span><b>${esc(item.name)}</b><p>${esc(item.description)}</p></article>`).join('')}</div></section>`;
+    return `<section class="vpsai-panel"><div class="vpsai-library-head"><div><div class="ey">DIRECTION ARTISTIQUE</div><h2>Modèles Zwit Pro</h2><p class="lead">Choisissez un point de départ. Votre propre charte reste prioritaire.</p></div></div><div class="vpsai-template-grid">${templates.map((item,index) => `<article class="vpsai-template ${selected===item.template_code?'selected':''}" data-template="${esc(item.template_code)}" style="--accent:${['#f42a8799','#7d294c99','#2689ff99','#2c1b3299','#ef9a3d99'][index%5]}"><span class="vpsai-badge">${item.is_system===false?'Personnel':'Zwit'}</span><b>${esc(item.name)}</b><p>${esc(item.description)}</p></article>`).join('')}</div></section>`;
   }
 
   function libraryMarkup() {
@@ -321,7 +321,7 @@
     const renders = state.snapshot?.renders || [];
     return `<section class="vpsai-panel"><div class="vpsai-library-head"><div><div class="ey">HISTORIQUE</div><h2>Bibliothèque de créations</h2><p class="lead">Dupliquez une ancienne soirée et ne changez que la date, le thème ou les invités.</p></div><button class="vpsai-btn gold" data-vpsai-new>Nouvelle affiche</button></div>${projects.length ? `<div class="vpsai-variants">${projects.map((project) => {
       const render = renders.find((item) => item.project_id === project.id);
-      return `<article class="vpsai-card"><div class="vpsai-card-preview">${render?.previewUrl ? `<img src="${esc(render.previewUrl)}" alt="Affiche">` : '<div style="height:100%;display:grid;place-items:center;color:#d5b477;font:500 44px Georgia;background:radial-gradient(circle at 60% 25%,#7d294c88,#09090b 65%)">V</div>'}</div><div class="vpsai-card-copy"><span class="vpsai-badge ${project.status==='ready'?'ready':''}">${esc(project.status)}</span><h3>${esc(project.title)}</h3><p>${esc(project.theme || project.event_payload?.theme || 'Création Velvet Pro')}</p><div class="vpsai-card-actions"><button data-open-project="${project.id}">Ouvrir</button><button data-duplicate-project="${project.id}">Dupliquer</button><button data-delete-project="${project.id}">Supprimer</button></div></div></article>`;
+      return `<article class="vpsai-card"><div class="vpsai-card-preview">${render?.previewUrl ? `<img src="${esc(render.previewUrl)}" alt="Affiche">` : '<div style="height:100%;display:grid;place-items:center;color:#d5b477;font:500 44px Georgia;background:radial-gradient(circle at 60% 25%,#7d294c88,#09090b 65%)">V</div>'}</div><div class="vpsai-card-copy"><span class="vpsai-badge ${project.status==='ready'?'ready':''}">${esc(project.status)}</span><h3>${esc(project.title)}</h3><p>${esc(project.theme || project.event_payload?.theme || 'Création Zwit Pro')}</p><div class="vpsai-card-actions"><button data-open-project="${project.id}">Ouvrir</button><button data-duplicate-project="${project.id}">Dupliquer</button><button data-delete-project="${project.id}">Supprimer</button></div></div></article>`;
     }).join('')}</div>` : '<div class="vpsai-empty" style="padding:70px 20px"><b>✦</b><strong>Aucune affiche enregistrée</strong><p>Votre première création apparaîtra ici avec toutes ses déclinaisons.</p></div>'}</section>`;
   }
 
@@ -540,7 +540,7 @@
     const logo = brand.logoUrl ? await loadImage(brand.logoUrl).catch(() => null) : null;
     if (logo) drawContain(ctx, logo, margin, topSafe, canvas.width*.30, canvas.height*.09);
     else {
-      ctx.save(); ctx.fillStyle = palette.accent; ctx.font = `700 ${Math.round(canvas.width*.038)}px Georgia`; ctx.letterSpacing = `${canvas.width*.008}px`; ctx.fillText($('#venueSelect option:checked')?.textContent || 'VELVET PRO', margin, topSafe + canvas.height*.045); ctx.restore();
+      ctx.save(); ctx.fillStyle = palette.accent; ctx.font = `700 ${Math.round(canvas.width*.038)}px Georgia`; ctx.letterSpacing = `${canvas.width*.008}px`; ctx.fillText($('#venueSelect option:checked')?.textContent || 'ZWIT PRO', margin, topSafe + canvas.height*.045); ctx.restore();
     }
 
     const titleTop = topSafe + canvas.height*.105;
@@ -572,7 +572,7 @@
     ctx.textAlign = 'center';
     ctx.shadowColor = palette.primary; ctx.shadowBlur = canvas.width*.026;
     ctx.font = `900 ${Math.round(canvas.width*(vertical?.13:.09))}px Arial Black, Impact, sans-serif`;
-    const mainTitle = (event.title || event.theme || 'NUIT VELVET').toUpperCase();
+    const mainTitle = (event.title || event.theme || 'NUIT ZWIT').toUpperCase();
     fitText(ctx, mainTitle, canvas.width-margin*1.5, canvas.width*(vertical?.13:.09));
     const titleGradient = ctx.createLinearGradient(margin,0,canvas.width-margin,0); titleGradient.addColorStop(0,'#fff'); titleGradient.addColorStop(.43,palette.accent); titleGradient.addColorStop(.7,'#fff'); titleGradient.addColorStop(1,variant%2?'#4ab0ff':palette.primary);
     ctx.fillStyle = titleGradient; ctx.fillText(mainTitle, canvas.width/2, headlineY); ctx.shadowBlur = 0;

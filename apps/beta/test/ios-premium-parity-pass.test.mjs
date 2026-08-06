@@ -33,7 +33,7 @@ test('iOS shell uses compact header and translucent Apple-style people-first doc
   assert.match(shell, /PeopleFirstClubDirectoryView/);
   assert.match(shell, /ManagedConversationsView/);
   assert.match(shell, /PremiumOwnProfileOutingsView/);
-  assert.match(shell, /Studio du profil & Velvet IA/);
+  assert.match(shell, /Studio du profil & Zwit IA/);
   assert.match(shell, /Modifier mon profil/);
   assert.match(shell, /Paramètres & confidentialité/);
   assert.match(shell, /\.ultraThinMaterial/);
@@ -83,7 +83,7 @@ test('own profile reloads albums and does not duplicate album media in the hero'
   assert.doesNotMatch(ownProfile, /Photos de profil/);
 });
 
-test('profile editing and Velvet AI are directly available in native iOS', async () => {
+test('profile editing and Zwit AI are directly available in native iOS', async () => {
   const editor = await source('editor');
   assert.match(editor, /Modifier mon profil/);
   assert.match(editor, /Velvet IA/);

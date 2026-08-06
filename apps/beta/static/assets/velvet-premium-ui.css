@@ -835,7 +835,7 @@ html[data-theme="light"] .velvet-member-ui textarea {
   }
 
   .velvet-control-ui .top:after {
-    content: "VELVET CONTRÔLE";
+    content: "ZWIT CONTRÔLE";
     color: var(--velvet-gold);
     font-size: 12px;
     font-weight: 600;

@@ -472,7 +472,7 @@ struct PremiumMemberDetailView: View {
     private func recommendationAuthor(_ recommendation: Recommendation) -> String {
         store.directory?.profiles.first(where: {
             $0.id == recommendation.authorProfileId
-        })?.displayName ?? "Membre Velvet"
+        })?.displayName ?? "Membre Zwit"
     }
 
     @MainActor

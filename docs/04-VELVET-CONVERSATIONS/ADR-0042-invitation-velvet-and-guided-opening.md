@@ -1,22 +1,22 @@
-# ADR-0042 — Invitation Velvet et ouverture guidée du Salon
+# ADR-0042 — Invitation Zwit et ouverture guidée du Salon
 
 - **Statut :** Accepté
 - **Date :** 2026-07-22
-- **Domaine :** Velvet Conversations
+- **Domaine :** Zwit Conversations
 
 ## Contexte
 
-Velvet souhaite éviter les prises de contact pauvres, impersonnelles ou trop directes tout en conservant une expérience fluide et naturelle.
+Zwit souhaite éviter les prises de contact pauvres, impersonnelles ou trop directes tout en conservant une expérience fluide et naturelle.
 
 Une ouverture totalement libre favorise les messages génériques, les copier-coller et les sollicitations peu qualitatives. À l'inverse, une procédure trop rigide risquerait de casser la spontanéité.
 
 ## Décision
 
-Velvet adopte une approche combinant **demande de contact préalable** et **conversation guidée après acceptation**.
+Zwit adopte une approche combinant **demande de contact préalable** et **conversation guidée après acceptation**.
 
-### 1. Invitation Velvet
+### 1. Invitation Zwit
 
-Avant l'ouverture d'un Salon Velvet complet, l'expéditeur envoie une invitation personnalisée comprenant :
+Avant l'ouverture d'un Salon Zwit complet, l'expéditeur envoie une invitation personnalisée comprenant :
 
 - un message rédigé par l'utilisateur ;
 - une intention facultative, par exemple : faire connaissance, échanger, proposer une sortie ou se retrouver à un événement ;
@@ -30,13 +30,13 @@ Le destinataire peut :
 - demander l'ouverture d'un album ;
 - répondre sans encore ouvrir un Salon complet.
 
-Le Salon Velvet n'est créé qu'après acceptation.
+Le Salon Zwit n'est créé qu'après acceptation.
 
 ### 2. Ouverture guidée du Salon
 
 Après acceptation, la conversation devient libre.
 
-Velvet Intelligence peut proposer des accroches et formulations basées sur :
+Zwit Intelligence peut proposer des accroches et formulations basées sur :
 
 - le profil ;
 - les intentions compatibles ;
@@ -54,7 +54,7 @@ L'IA ne doit jamais envoyer automatiquement un message à la place de l'utilisat
 - Le refus doit pouvoir être discret et sans justification obligatoire.
 - La création du Salon doit être perçue comme le début d'un espace partagé, et non comme une simple autorisation technique.
 
-## Impacts Velvet Intelligence
+## Impacts Zwit Intelligence
 
 - Génération d'idées d'accroche contextualisées.
 - Détection des copier-coller répétitifs et des sollicitations génériques.

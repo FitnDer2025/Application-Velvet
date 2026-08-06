@@ -101,7 +101,7 @@ final class BiometricLockService: ObservableObject {
                 localizedReason: reason
             )
         } catch {
-            errorMessage = "Velvet reste verrouillé. Réessaie lorsque tu es prêt."
+            errorMessage = "Zwit reste verrouillé. Réessaie lorsque tu es prêt."
             return false
         }
     }
@@ -123,7 +123,7 @@ struct BiometricLockView: View {
                         .tracking(2)
                         .foregroundStyle(VelvetColor.champagneGold)
 
-                    Text("Velvet est verrouillé")
+                    Text("Zwit est verrouillé")
                         .font(VelvetTypography.title(size: 31))
                         .foregroundStyle(VelvetColor.ivory)
 
@@ -160,7 +160,7 @@ struct BiometricLockView: View {
             .padding(24)
         }
         .alert(
-            "Velvet",
+            "Zwit",
             isPresented: Binding(
                 get: { biometrics.errorMessage != nil },
                 set: { if !$0 { biometrics.errorMessage = nil } }

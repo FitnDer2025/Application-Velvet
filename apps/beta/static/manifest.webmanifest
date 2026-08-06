@@ -1,7 +1,7 @@
 {
-  "name": "Velvet",
-  "short_name": "Velvet",
-  "description": "Velvet, l’écosystème premium des membres et des professionnels.",
+  "name": "Zwit",
+  "short_name": "Zwit",
+  "description": "Zwit, l’écosystème premium des membres et des professionnels.",
   "id": "/membres/",
   "start_url": "/membres/",
   "scope": "/",

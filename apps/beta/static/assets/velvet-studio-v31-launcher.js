@@ -40,7 +40,7 @@
       let modal = document.querySelector('[data-velvet-studio-v3]');
       if (!modal) {
         const v3Button = root.querySelector('[data-open-v3]');
-        if (!v3Button) throw new Error('Ouvre d’abord un projet Velvet Studio.');
+        if (!v3Button) throw new Error('Ouvre d’abord un projet Zwit Studio.');
         v3Button.click();
         modal = await waitFor('[data-velvet-studio-v3]', 8000);
       }

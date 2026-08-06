@@ -1,6 +1,6 @@
 # Contribution
 
-Avant toute modification : lire `PROJECT_CONTEXT.md`, identifier les ADR liées, vérifier l’ADN Velvet et ne jamais écraser une décision validée sans ADR de remplacement.
+Avant toute modification : lire `PROJECT_CONTEXT.md`, identifier les ADR liées, vérifier l’ADN Zwit et ne jamais écraser une décision validée sans ADR de remplacement.
 
 ## Statuts
 `PROPOSÉE` · `EN DISCUSSION` · `VALIDÉE` · `REMPLACÉE` · `ABANDONNÉE`

@@ -79,7 +79,7 @@ async function notifyPhotoOwner(env, access, admission, mediaId, reaction) {
   if (!ownerUserIds.length) return { notified: 0 };
 
   const actor = actorRows?.[0];
-  const actorName = clean(actor?.display_name, 120) || 'Un membre Velvet';
+  const actorName = clean(actor?.display_name, 120) || 'Un membre Zwit';
   const wording = {
     like: { title: `${actorName} aime votre photo`, body: `${actorName} a ajouté un J’aime à cette photo.` },
     love: { title: `${actorName} adore votre photo`, body: `${actorName} a réagi avec un cœur à cette photo.` },

@@ -12,8 +12,8 @@ const workerSource = await readFile('apps/beta/worker/index.js', 'utf8');
 
 test('le Studio propose uniquement des vidéos Membre et Pro fondées sur les vrais sites', () => {
   assert.doesNotThrow(() => new Function(moduleSource));
-  assert.match(moduleSource, /Promouvoir Velvet Membre/);
-  assert.match(moduleSource, /Promouvoir Velvet Pro/);
+  assert.match(moduleSource, /Promouvoir Zwit Membre/);
+  assert.match(moduleSource, /Promouvoir Zwit Pro/);
   assert.match(moduleSource, /\/marketing\//);
   assert.match(moduleSource, /\/marketing-pro\//);
   assert.match(moduleSource, /Aucune image générée/);
@@ -52,7 +52,7 @@ test('le tournage enregistre le flux réel et le recadre au format social', () =
   assert.doesNotMatch(captureSource, /generate_image|flux-1|domToImage/);
 });
 
-test('Velvet Marketing Pro utilise le vrai shell Pro avec des données fictives', () => {
+test('Zwit Marketing Pro utilise le vrai shell Pro avec des données fictives', () => {
   assert.doesNotThrow(() => new Function(proMarketingSource));
   assert.match(proMarketingSource, /\/api\/pro\/workspace/);
   assert.match(proMarketingSource, /BETA MARKETING PRO · DONNÉES FICTIVES/);

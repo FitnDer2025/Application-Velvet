@@ -37,12 +37,12 @@
 
   function defaultScenes() {
     return [
-      scene('Le libertinage évolue', 'Un ruban bordeaux se déploie et dessine le V Velvet sur fond noir profond.', 'Le libertinage évolue.', 4, 'Silk Reveal', 'Créer l’arrêt visuel et installer la marque.'),
+      scene('Le libertinage évolue', 'Un ruban bordeaux se déploie et dessine le V Zwit sur fond noir profond.', 'Le libertinage évolue.', 4, 'Silk Reveal', 'Créer l’arrêt visuel et installer la marque.'),
       scene('Des rencontres qui ont du sens', 'Capture premium de la recherche membres, profils vérifiés et filtres de proximité.', 'Des rencontres de qualité.', 8, 'Glass Morph', 'Montrer la qualité de la communauté.'),
-      scene('Tout un univers à proximité', 'Carte Velvet, établissements, événements et agenda autour de Lille et de la Belgique.', 'Des lieux. Des événements. Une communauté.', 8, 'Champagne Glow', 'Présenter l’écosystème complet.'),
-      scene('La confiance intégrée', 'Messagerie, albums privés temporaires, Pacte Velvet et décisions de consentement.', 'Confiance. Discrétion. Consentement.', 9, 'Velvet Fade', 'Rassurer et différencier Velvet.'),
-      scene('Velvet Pro', 'Un responsable de club crée une soirée, suit les inscriptions et pilote son remplissage.', 'Organiser. Remplir. Fidéliser.', 9, 'Glass Morph', 'Mettre en valeur la dimension business.'),
-      scene('Signature', 'Le logo Velvet apparaît avec le ruban, une lumière champagne et la signature officielle.', 'Là où les plus belles rencontres commencent.', 7, 'Velvet Blur', 'Conclure avec une empreinte mémorable.')
+      scene('Tout un univers à proximité', 'Carte Zwit, établissements, événements et agenda autour de Lille et de la Belgique.', 'Des lieux. Des événements. Une communauté.', 8, 'Champagne Glow', 'Présenter l’écosystème complet.'),
+      scene('La confiance intégrée', 'Messagerie, albums privés temporaires, Pacte Zwit et décisions de consentement.', 'Confiance. Discrétion. Consentement.', 9, 'Zwit Fade', 'Rassurer et différencier Velvet.'),
+      scene('Zwit Pro', 'Un responsable de club crée une soirée, suit les inscriptions et pilote son remplissage.', 'Organiser. Remplir. Fidéliser.', 9, 'Glass Morph', 'Mettre en valeur la dimension business.'),
+      scene('Signature', 'Le logo Zwit apparaît avec le ruban, une lumière champagne et la signature officielle.', 'Là où les plus belles rencontres commencent.', 7, 'Zwit Blur', 'Conclure avec une empreinte mémorable.')
     ];
   }
 
@@ -56,8 +56,8 @@
       duration,
       transition,
       objective,
-      prompt: `${visual} Style Velvet premium, lumière chaude, mouvements fluides, aucun contenu explicite, personnes fictives majeures uniquement.`,
-      notes: 'Privilégier la véritable interface Velvet et des mouvements sobres.',
+      prompt: `${visual} Style Zwit premium, lumière chaude, mouvements fluides, aucun contenu explicite, personnes fictives majeures uniquement.`,
+      notes: 'Privilégier la véritable interface Zwit et des mouvements sobres.',
       voice: '',
       palette: SCENE_PALETTES[index]
     };
@@ -66,14 +66,14 @@
   function seedProject() {
     return {
       id: uid('project'),
-      title: 'Film manifeste Velvet — Réseaux sociaux',
+      title: 'Film manifeste Zwit — Réseaux sociaux',
       status: 'draft',
       channel: 'Instagram / TikTok',
       format: '9:16',
       audience: 'Couples, femmes seules et professionnels du secteur',
-      objective: 'Présenter Velvet comme la nouvelle référence premium des rencontres libres et de l’écosystème événementiel.',
-      prompt: 'Crée une publicité sociale verticale qui démontre que Velvet ne se limite pas à une liste de profils : Velvet réunit rencontres, confiance, établissements, événements et outils professionnels dans une seule expérience premium.',
-      voiceOver: 'Pendant des années, les rencontres se sont limitées à des profils et des messages. Velvet réunit enfin les personnes, les lieux et les expériences dans un même écosystème pensé autour de la confiance, de la discrétion et du consentement. Velvet. Là où les plus belles rencontres commencent.',
+      objective: 'Présenter Zwit comme la nouvelle référence premium des rencontres libres et de l’écosystème événementiel.',
+      prompt: 'Crée une publicité sociale verticale qui démontre que Zwit ne se limite pas à une liste de profils : Zwit réunit rencontres, confiance, établissements, événements et outils professionnels dans une seule expérience premium.',
+      voiceOver: 'Pendant des années, les rencontres se sont limitées à des profils et des messages. Zwit réunit enfin les personnes, les lieux et les expériences dans un même écosystème pensé autour de la confiance, de la discrétion et du consentement. Velvet. Là où les plus belles rencontres commencent.',
       music: {
         genre: 'Cinématographique premium',
         tempo: 92,
@@ -100,11 +100,11 @@
 
   function defaultAssets() {
     return [
-      { id: uid('asset'), name: 'Logo Velvet Or', type: 'Logo', source: 'brand', preview: 'V', meta: 'SVG officiel · Or Champagne' },
-      { id: uid('asset'), name: 'Ruban Velvet', type: 'Motion', source: 'brand', preview: '〰', meta: 'Transition Silk Reveal' },
+      { id: uid('asset'), name: 'Logo Zwit Or', type: 'Logo', source: 'brand', preview: 'V', meta: 'SVG officiel · Or Champagne' },
+      { id: uid('asset'), name: 'Ruban Zwit', type: 'Motion', source: 'brand', preview: '〰', meta: 'Transition Silk Reveal' },
       { id: uid('asset'), name: 'Recherche membres', type: 'Capture', source: 'product', preview: '⌕', meta: 'Interface Web · 9:16' },
       { id: uid('asset'), name: 'Carte & établissements', type: 'Capture', source: 'product', preview: '⌖', meta: 'Interface Web · 9:16' },
-      { id: uid('asset'), name: 'Velvet Pro', type: 'Capture', source: 'product', preview: 'PRO', meta: 'Cockpit professionnel' },
+      { id: uid('asset'), name: 'Zwit Pro', type: 'Capture', source: 'product', preview: 'PRO', meta: 'Cockpit professionnel' },
       { id: uid('asset'), name: 'Identité sonore', type: 'Audio', source: 'brand', preview: '♫', meta: '2,5 secondes · brouillon' }
     ];
   }
@@ -305,10 +305,10 @@
         const duration = match ? Math.max(2, Number(match[2]) - Number(match[1])) : 6;
         const next = scene(
           item.message || `Scène ${index + 1}`,
-          item.visual || 'Plan Velvet premium',
+          item.visual || 'Plan Zwit premium',
           item.message || '',
           duration,
-          ['Silk Reveal', 'Glass Morph', 'Champagne Glow', 'Velvet Fade'][index % 4],
+          ['Silk Reveal', 'Glass Morph', 'Champagne Glow', 'Zwit Fade'][index % 4],
           'Servir la promesse centrale de la campagne.'
         );
         next.voice = item.message || '';
@@ -331,17 +331,17 @@
   function buildScenesFromPrompt(current) {
     const channel = current.channel || 'Instagram';
     return [
-      scene('Hook', `Ouverture très courte pensée pour ${channel}. Ruban Velvet, contraste noir et or, mouvement immédiat.`, 'Le libertinage évolue.', 4, 'Silk Reveal', 'Stopper le défilement.'),
-      scene('Problème', 'Évoquer les plateformes classiques : profils, messages dispersés et manque de confiance, sans citer de concurrent.', 'Plus qu’une liste de profils.', 6, 'Velvet Fade', 'Créer la tension narrative.'),
-      scene('Solution Velvet', 'Montrer la recherche, les profils, l’indice de confiance et la carte dans la véritable interface.', 'Une expérience pensée autour de la confiance.', 9, 'Glass Morph', 'Démontrer la valeur membre.'),
+      scene('Hook', `Ouverture très courte pensée pour ${channel}. Ruban Zwit, contraste noir et or, mouvement immédiat.`, 'Le libertinage évolue.', 4, 'Silk Reveal', 'Stopper le défilement.'),
+      scene('Problème', 'Évoquer les plateformes classiques : profils, messages dispersés et manque de confiance, sans citer de concurrent.', 'Plus qu’une liste de profils.', 6, 'Zwit Fade', 'Créer la tension narrative.'),
+      scene('Solution Zwit', 'Montrer la recherche, les profils, l’indice de confiance et la carte dans la véritable interface.', 'Une expérience pensée autour de la confiance.', 9, 'Glass Morph', 'Démontrer la valeur membre.'),
       scene('Événements & lieux', 'Enchaîner agenda, établissements et sorties à proximité.', 'Les personnes. Les lieux. Les expériences.', 8, 'Champagne Glow', 'Présenter l’écosystème.'),
-      scene('Velvet Pro', 'Afficher la création d’événement, le suivi des inscriptions et le cockpit de pilotage.', 'Velvet accompagne aussi ceux qui créent les expériences.', 9, 'Glass Morph', 'Prouver la double proposition de valeur.'),
-      scene('Signature', 'Logo Velvet, ruban, lumière champagne et appel à découvrir la plateforme.', 'Là où les plus belles rencontres commencent.', 7, 'Velvet Blur', 'Mémorisation et conversion.')
+      scene('Zwit Pro', 'Afficher la création d’événement, le suivi des inscriptions et le cockpit de pilotage.', 'Zwit accompagne aussi ceux qui créent les expériences.', 9, 'Glass Morph', 'Prouver la double proposition de valeur.'),
+      scene('Signature', 'Logo Zwit, ruban, lumière champagne et appel à découvrir la plateforme.', 'Là où les plus belles rencontres commencent.', 7, 'Zwit Blur', 'Mémorisation et conversion.')
     ];
   }
 
   function buildVoiceOver(current) {
-    return `Le libertinage évolue. ${current.objective} Velvet réunit les personnes, les établissements et les événements dans une expérience pensée autour de la confiance, de la discrétion et du consentement. Velvet. Là où les plus belles rencontres commencent.`;
+    return `Le libertinage évolue. ${current.objective} Zwit réunit les personnes, les établissements et les événements dans une expérience pensée autour de la confiance, de la discrétion et du consentement. Velvet. Là où les plus belles rencontres commencent.`;
   }
 
   function wait(ms) {
@@ -564,8 +564,8 @@
 
   function createNewProject() {
     const next = seedProject();
-    next.title = 'Nouveau projet Velvet';
-    next.scenes = [scene('Nouvelle scène', 'Décris ici le premier plan de la campagne.', 'Votre message', 6, 'Velvet Fade', 'Définir le hook.')];
+    next.title = 'Nouveau projet Zwit';
+    next.scenes = [scene('Nouvelle scène', 'Décris ici le premier plan de la campagne.', 'Votre message', 6, 'Zwit Fade', 'Définir le hook.')];
     next.versions = [];
     state.projects.unshift(next);
     state.activeProjectId = next.id;
@@ -592,7 +592,7 @@
 
   function deleteProject(id) {
     if (state.projects.length <= 1) {
-      toast('Velvet Studio doit conserver au moins un projet', 'error');
+      toast('Zwit Studio doit conserver au moins un projet', 'error');
       return;
     }
     state.projects = state.projects.filter((item) => item.id !== id);
@@ -645,7 +645,7 @@
 
   function addScene() {
     const current = project();
-    const next = scene('Nouvelle scène', 'Décris le plan ou sélectionne un asset Velvet.', 'Nouveau message', 6, 'Velvet Fade', 'Compléter la narration.');
+    const next = scene('Nouvelle scène', 'Décris le plan ou sélectionne un asset Velvet.', 'Nouveau message', 6, 'Zwit Fade', 'Compléter la narration.');
     current.scenes.push(next);
     state.selectedSceneId = next.id;
     persist();
@@ -682,7 +682,7 @@
     button.type = 'button';
     button.dataset.velvetStudioSprint1Nav = 'true';
     button.className = communications?.className || '';
-    button.innerHTML = '<span aria-hidden="true">✦</span><span>Velvet Studio</span>';
+    button.innerHTML = '<span aria-hidden="true">✦</span><span>Zwit Studio</span>';
     button.addEventListener('click', () => {
       state.screen = 'projects';
       render();
@@ -716,7 +716,7 @@
     const production = state.projects.filter((item) => item.status === 'production').length;
     const ready = state.projects.filter((item) => item.status === 'ready').length;
     return `<section class="vs1-shell vs1-projects">
-      ${topBar('Projets', 'Agence marketing IA intégrée à Velvet', '<button class="vs1-btn primary" data-action="new-project">+ Nouveau projet</button>')}
+      ${topBar('Projets', 'Agence marketing IA intégrée à Zwit', '<button class="vs1-btn primary" data-action="new-project">+ Nouveau projet</button>')}
       <main class="vs1-project-main">
         <section class="vs1-hero-card">
           <div><span class="vs1-kicker">Sprint 1 · Studio de production</span><h1>Conçois, dirige et monte les campagnes Velvet.</h1><p>Prompt principal, visionneuse temps réel, storyboard éditable, timeline multipiste, agents IA, voix off, musique, assets et historique de versions.</p></div>
@@ -728,14 +728,14 @@
           ${metricCard('Prêts', ready, 'validés pour export')}
           ${metricCard('Moteurs payants', '0', 'gratuit-first actif')}
         </div>
-        <div class="vs1-section-head"><div><span class="vs1-kicker">Bibliothèque de projets</span><h2>Campagnes Velvet</h2></div></div>
+        <div class="vs1-section-head"><div><span class="vs1-kicker">Bibliothèque de projets</span><h2>Campagnes Zwit</h2></div></div>
         <div class="vs1-project-grid">${state.projects.map(projectCard).join('')}</div>
       </main>
     </section>`;
   }
 
   function topBar(section, subtitle, actions = '') {
-    return `<header class="vs1-topbar"><div class="vs1-brand"><span class="vs1-brand-mark">V</span><div><strong>Velvet Studio</strong><small>${esc(section)} · ${esc(subtitle)}</small></div></div><div class="vs1-top-actions">${actions}<button class="vs1-btn ghost" data-action="return-control">Retour à Control</button></div></header>`;
+    return `<header class="vs1-topbar"><div class="vs1-brand"><span class="vs1-brand-mark">V</span><div><strong>Zwit Studio</strong><small>${esc(section)} · ${esc(subtitle)}</small></div></div><div class="vs1-top-actions">${actions}<button class="vs1-btn ghost" data-action="return-control">Retour à Control</button></div></header>`;
   }
 
   function metricCard(label, value, copy) {
@@ -745,7 +745,7 @@
   function projectCard(item) {
     const duration = projectDuration(item);
     return `<article class="vs1-project-card" data-project-card="${item.id}">
-      <div class="vs1-project-poster"><div class="vs1-poster-ribbon"></div><span>${esc(item.format)}</span><strong>VELVET</strong><small>${esc(item.channel)}</small></div>
+      <div class="vs1-project-poster"><div class="vs1-poster-ribbon"></div><span>${esc(item.format)}</span><strong>ZWIT</strong><small>${esc(item.channel)}</small></div>
       <div class="vs1-project-copy"><div class="vs1-project-meta"><span class="vs1-status ${esc(item.status)}">${statusLabel(item.status)}</span><span>${formatTime(duration)}</span></div><h3>${esc(item.title)}</h3><p>${esc(item.objective)}</p><small>Mis à jour ${new Date(item.updatedAt).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}</small></div>
       <div class="vs1-project-actions"><button class="vs1-btn primary" data-open-project="${item.id}">Ouvrir</button><button class="vs1-icon-btn" title="Dupliquer" data-duplicate-project="${item.id}">⧉</button><button class="vs1-icon-btn danger" title="Supprimer" data-delete-project="${item.id}">×</button></div>
     </article>`;
@@ -799,7 +799,7 @@
   }
 
   function storyboardCard(item, index) {
-    return `<article class="vs1-story-card ${selectedScene()?.id === item.id ? 'active' : ''}" data-select-scene="${item.id}" draggable="true" data-drag-scene="${item.id}"><div class="vs1-story-thumb" style="--p1:${esc(item.palette?.[0] || '#0D0D0D')};--p2:${esc(item.palette?.[1] || '#641B36')}"><span>${index + 1}</span><b>${esc(item.text || 'VELVET')}</b></div><div><strong>${esc(item.title)}</strong><p>${esc(item.visual)}</p><small>${Number(item.duration || 0)} s · ${esc(item.transition)}</small></div></article>`;
+    return `<article class="vs1-story-card ${selectedScene()?.id === item.id ? 'active' : ''}" data-select-scene="${item.id}" draggable="true" data-drag-scene="${item.id}"><div class="vs1-story-thumb" style="--p1:${esc(item.palette?.[0] || '#0D0D0D')};--p2:${esc(item.palette?.[1] || '#641B36')}"><span>${index + 1}</span><b>${esc(item.text || 'ZWIT')}</b></div><div><strong>${esc(item.title)}</strong><p>${esc(item.visual)}</p><small>${Number(item.duration || 0)} s · ${esc(item.transition)}</small></div></article>`;
   }
 
   function agentsMarkup(current) {
@@ -810,7 +810,7 @@
   }
 
   function assetsMarkup(current) {
-    return `<div class="vs1-panel-heading"><div><span class="vs1-kicker">Bibliothèque</span><h3>Assets Velvet</h3></div><button class="vs1-icon-btn" data-action="upload-asset">+</button></div><div class="vs1-asset-grid">${current.assets.map((asset) => `<article class="vs1-asset-card" data-asset="${asset.id}"><div class="vs1-asset-preview">${asset.dataUrl && /^data:image/.test(asset.dataUrl) ? `<img src="${asset.dataUrl}" alt="">` : asset.url && asset.type === 'Vidéo' ? `<video src="${asset.url}" muted></video>` : `<span>${esc(asset.preview || '◆')}</span>`}</div><strong>${esc(asset.name)}</strong><small>${esc(asset.type)} · ${esc(asset.meta || '')}</small></article>`).join('')}</div>`;
+    return `<div class="vs1-panel-heading"><div><span class="vs1-kicker">Bibliothèque</span><h3>Assets Zwit</h3></div><button class="vs1-icon-btn" data-action="upload-asset">+</button></div><div class="vs1-asset-grid">${current.assets.map((asset) => `<article class="vs1-asset-card" data-asset="${asset.id}"><div class="vs1-asset-preview">${asset.dataUrl && /^data:image/.test(asset.dataUrl) ? `<img src="${asset.dataUrl}" alt="">` : asset.url && asset.type === 'Vidéo' ? `<video src="${asset.url}" muted></video>` : `<span>${esc(asset.preview || '◆')}</span>`}</div><strong>${esc(asset.name)}</strong><small>${esc(asset.type)} · ${esc(asset.meta || '')}</small></article>`).join('')}</div>`;
   }
 
   function versionsMarkup(current) {
@@ -828,7 +828,7 @@
     const p1 = item.palette?.[0] || '#0D0D0D';
     const p2 = item.palette?.[1] || '#641B36';
     const shift = Math.round(progress * 22);
-    return `<div class="vs1-scene-canvas" style="--scene-a:${esc(p1)};--scene-b:${esc(p2)};--scene-shift:${shift}px"><div class="vs1-scene-glow"></div><div class="vs1-scene-ribbon"></div><div class="vs1-mock-device"><div class="vs1-device-top"><span></span><b>VELVET</b><i></i></div><div class="vs1-device-body"><div class="vs1-device-card"></div><div class="vs1-device-lines"><i></i><i></i><i></i></div><div class="vs1-device-pills"><span></span><span></span><span></span></div></div></div><div class="vs1-scene-copy"><span>VELVET</span><h2>${esc(item.text || item.title)}</h2><p>${esc(item.visual)}</p></div></div>`;
+    return `<div class="vs1-scene-canvas" style="--scene-a:${esc(p1)};--scene-b:${esc(p2)};--scene-shift:${shift}px"><div class="vs1-scene-glow"></div><div class="vs1-scene-ribbon"></div><div class="vs1-mock-device"><div class="vs1-device-top"><span></span><b>ZWIT</b><i></i></div><div class="vs1-device-body"><div class="vs1-device-card"></div><div class="vs1-device-lines"><i></i><i></i><i></i></div><div class="vs1-device-pills"><span></span><span></span><span></span></div></div></div><div class="vs1-scene-copy"><span>ZWIT</span><h2>${esc(item.text || item.title)}</h2><p>${esc(item.visual)}</p></div></div>`;
   }
 
   function timelineMarkup(current) {
@@ -853,7 +853,7 @@
 
   function sceneInspector(item) {
     if (!item) return '<div class="vs1-empty">Aucune scène sélectionnée.</div>';
-    return `<div class="vs1-form"><label>Titre<input data-scene-field="title" value="${esc(item.title)}"></label><label>Texte à l’écran<textarea data-scene-field="text">${esc(item.text)}</textarea></label><label>Description visuelle<textarea data-scene-field="visual">${esc(item.visual)}</textarea></label><label>Prompt du plan<textarea class="tall" data-scene-field="prompt">${esc(item.prompt)}</textarea></label><div class="vs1-field-grid"><label>Durée (s)<input type="number" min="1" max="60" step="0.5" data-scene-field="duration" value="${Number(item.duration || 0)}"></label><label>Transition<select data-scene-field="transition">${['Velvet Fade', 'Silk Reveal', 'Champagne Glow', 'Glass Morph', 'Velvet Blur', 'Coupe franche'].map((option) => `<option ${item.transition === option ? 'selected' : ''}>${option}</option>`).join('')}</select></label></div><label>Objectif<textarea data-scene-field="objective">${esc(item.objective)}</textarea></label><label>Notes IA<textarea data-scene-field="notes">${esc(item.notes)}</textarea></label><div class="vs1-inspector-actions"><button class="vs1-icon-btn" data-move-scene="-1">←</button><button class="vs1-icon-btn" data-duplicate-scene="${item.id}">⧉</button><button class="vs1-icon-btn" data-move-scene="1">→</button><button class="vs1-btn danger small" data-delete-scene="${item.id}">Supprimer</button></div></div>`;
+    return `<div class="vs1-form"><label>Titre<input data-scene-field="title" value="${esc(item.title)}"></label><label>Texte à l’écran<textarea data-scene-field="text">${esc(item.text)}</textarea></label><label>Description visuelle<textarea data-scene-field="visual">${esc(item.visual)}</textarea></label><label>Prompt du plan<textarea class="tall" data-scene-field="prompt">${esc(item.prompt)}</textarea></label><div class="vs1-field-grid"><label>Durée (s)<input type="number" min="1" max="60" step="0.5" data-scene-field="duration" value="${Number(item.duration || 0)}"></label><label>Transition<select data-scene-field="transition">${['Zwit Fade', 'Silk Reveal', 'Champagne Glow', 'Glass Morph', 'Zwit Blur', 'Coupe franche'].map((option) => `<option ${item.transition === option ? 'selected' : ''}>${option}</option>`).join('')}</select></label></div><label>Objectif<textarea data-scene-field="objective">${esc(item.objective)}</textarea></label><label>Notes IA<textarea data-scene-field="notes">${esc(item.notes)}</textarea></label><div class="vs1-inspector-actions"><button class="vs1-icon-btn" data-move-scene="-1">←</button><button class="vs1-icon-btn" data-duplicate-scene="${item.id}">⧉</button><button class="vs1-icon-btn" data-move-scene="1">→</button><button class="vs1-btn danger small" data-delete-scene="${item.id}">Supprimer</button></div></div>`;
   }
 
   function voiceInspector(current) {
@@ -865,7 +865,7 @@
   }
 
   function projectInspector(current) {
-    return `<div class="vs1-form"><label>Audience<textarea data-project-field="audience">${esc(current.audience)}</textarea></label><label>Objectif<textarea data-project-field="objective">${esc(current.objective)}</textarea></label><label>Prompt principal<textarea class="very-tall" data-project-field="prompt">${esc(current.prompt)}</textarea></label><div class="vs1-field-grid"><label>Canal<select data-project-field="channel">${['Instagram / TikTok', 'Facebook', 'YouTube Shorts', 'LinkedIn', 'Tous réseaux'].map((option) => `<option ${current.channel === option ? 'selected' : ''}>${option}</option>`).join('')}</select></label><label>Format<select data-project-field="format">${['9:16', '1:1', '16:9'].map((option) => `<option ${current.format === option ? 'selected' : ''}>${option}</option>`).join('')}</select></label></div><label>Statut<select data-project-field="status">${['draft', 'production', 'ready', 'archived'].map((option) => `<option value="${option}" ${current.status === option ? 'selected' : ''}>${statusLabel(option)}</option>`).join('')}</select></label><button class="vs1-btn primary" data-action="run-generation">✦ Lancer l’agence IA</button><p class="vs1-help">Le brief est envoyé au moteur Studio sécurisé lorsqu’il est configuré. Sans fournisseur externe, Velvet utilise son moteur de marque local.</p></div>`;
+    return `<div class="vs1-form"><label>Audience<textarea data-project-field="audience">${esc(current.audience)}</textarea></label><label>Objectif<textarea data-project-field="objective">${esc(current.objective)}</textarea></label><label>Prompt principal<textarea class="very-tall" data-project-field="prompt">${esc(current.prompt)}</textarea></label><div class="vs1-field-grid"><label>Canal<select data-project-field="channel">${['Instagram / TikTok', 'Facebook', 'YouTube Shorts', 'LinkedIn', 'Tous réseaux'].map((option) => `<option ${current.channel === option ? 'selected' : ''}>${option}</option>`).join('')}</select></label><label>Format<select data-project-field="format">${['9:16', '1:1', '16:9'].map((option) => `<option ${current.format === option ? 'selected' : ''}>${option}</option>`).join('')}</select></label></div><label>Statut<select data-project-field="status">${['draft', 'production', 'ready', 'archived'].map((option) => `<option value="${option}" ${current.status === option ? 'selected' : ''}>${statusLabel(option)}</option>`).join('')}</select></label><button class="vs1-btn primary" data-action="run-generation">✦ Lancer l’agence IA</button><p class="vs1-help">Le brief est envoyé au moteur Studio sécurisé lorsqu’il est configuré. Sans fournisseur externe, Zwit utilise son moteur de marque local.</p></div>`;
   }
 
   function bindCommon() {

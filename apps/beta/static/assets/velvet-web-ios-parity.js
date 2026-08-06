@@ -93,13 +93,13 @@
       sidebar.setAttribute('aria-hidden', String(!open));
       sidebar.setAttribute('aria-modal', String(Boolean(open)));
       sidebar.setAttribute('role', 'dialog');
-      sidebar.setAttribute('aria-label', 'Plus de Velvet');
+      sidebar.setAttribute('aria-label', 'Plus de Zwit');
     } else if (sidebar) {
       sidebar.inert = false;
       sidebar.removeAttribute('aria-hidden');
       sidebar.removeAttribute('aria-modal');
       sidebar.setAttribute('role', 'navigation');
-      sidebar.setAttribute('aria-label', 'Navigation Velvet');
+      sidebar.setAttribute('aria-label', 'Navigation Zwit');
     }
 
     const scrim = ensureScrim();

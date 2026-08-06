@@ -1,4 +1,4 @@
-# ADR-PRO-038 à ADR-PRO-041 – Écosystème professionnel et voyages Velvet
+# ADR-PRO-038 à ADR-PRO-041 – Écosystème professionnel et voyages Zwit
 
 Status: Accepted
 
@@ -24,9 +24,9 @@ Chaque professionnel peut configurer une IA propre à son établissement ou à s
 
 Cette IA agit comme un assistant permanent pour les tâches métier et les réponses aux membres, avec traçabilité, contrôle humain et limitations d'accès.
 
-## ADR-041 — Velvet Trips
+## ADR-041 — Zwit Trips
 
-Les voyages Velvet deviennent des espaces communautaires complets, créés par des professionnels ou des organisateurs privés autorisés.
+Les voyages Zwit deviennent des espaces communautaires complets, créés par des professionnels ou des organisateurs privés autorisés.
 
 Avant le voyage : préparation, salon privé, informations pratiques, covoiturage et coordination.
 

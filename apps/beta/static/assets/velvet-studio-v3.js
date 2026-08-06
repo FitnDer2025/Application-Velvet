@@ -58,10 +58,10 @@
   }
 
   function localCampaignPack(project, brief = {}) {
-    const brand = clean(brief.brand || 'Velvet', 80) || 'Velvet';
-    const objective = clean(brief.objective || project?.objective || 'Faire connaître Velvet et déclencher des inscriptions qualifiées.', 600);
+    const brand = clean(brief.brand || 'Zwit', 80) || 'Zwit';
+    const objective = clean(brief.objective || project?.objective || 'Faire connaître Zwit et déclencher des inscriptions qualifiées.', 600);
     const audience = clean(brief.audience || project?.audience || 'Couples, femmes seules et professionnels du secteur', 500);
-    const offer = clean(brief.offer || 'Découvrir la plateforme et rejoindre la communauté Velvet', 300);
+    const offer = clean(brief.offer || 'Découvrir la plateforme et rejoindre la communauté Zwit', 300);
     const region = clean(brief.region || 'Hauts-de-France et Belgique', 160);
     const tone = clean(brief.tone || 'Premium, humain, élégant, rassurant', 160);
     const masterPrompt = clean(brief.prompt || project?.prompt || objective, 2200);
@@ -71,61 +71,61 @@
       'Les plus belles rencontres ne commencent pas par un algorithme, mais par la confiance.',
       'Profils, événements, établissements : enfin réunis dans une même expérience.',
       'Moins de bruit. Plus de qualité. Plus de liberté.',
-      'Velvet rapproche les personnes, les lieux et les expériences qui comptent.'
+      'Zwit rapproche les personnes, les lieux et les expériences qui comptent.'
     ];
-    const ctas = ['Découvrir Velvet', 'Rejoindre la communauté', 'Explorer les événements', 'Découvrir Velvet Pro', 'Créer son profil'];
+    const ctas = ['Découvrir Zwit', 'Rejoindre la communauté', 'Explorer les événements', 'Découvrir Zwit Pro', 'Créer son profil'];
     const videoDefs = [
       ['Teaser social', 15, '9:16', 'Instagram Reels / TikTok', hooks[0], ctas[0]],
       ['Film découverte', 30, '9:16', 'Instagram Reels / Facebook', hooks[2], ctas[1]],
-      ['Film manifeste', 45, '16:9', 'YouTube / site Velvet', hooks[1], ctas[0]],
+      ['Film manifeste', 45, '16:9', 'YouTube / site Zwit', hooks[1], ctas[0]],
       ['Focus confiance', 20, '1:1', 'Instagram / Facebook', hooks[3], ctas[4]],
-      ['Velvet Pro', 30, '16:9', 'LinkedIn / prospection établissements', hooks[4], ctas[3]]
+      ['Zwit Pro', 30, '16:9', 'LinkedIn / prospection établissements', hooks[4], ctas[3]]
     ];
 
     const videos = videoDefs.map(([title, duration, format, channel, hook, cta], index) => ({
       id: uid('video'), kind: 'video', title, duration, format, channel, hook, cta,
       status: 'draft',
-      objective: index === 4 ? 'Convaincre les établissements de rejoindre Velvet Pro.' : objective,
-      voiceOver: `${hook} ${index === 4 ? 'Velvet Pro centralise vos événements, vos réservations et votre visibilité auprès d’une communauté qualifiée.' : 'Velvet réunit profils, lieux, événements et outils de confiance dans une expérience premium, discrète et pensée pour des rencontres de qualité.'} ${brand}. ${signature}`,
+      objective: index === 4 ? 'Convaincre les établissements de rejoindre Zwit Pro.' : objective,
+      voiceOver: `${hook} ${index === 4 ? 'Zwit Pro centralise vos événements, vos réservations et votre visibilité auprès d’une communauté qualifiée.' : 'Zwit réunit profils, lieux, événements et outils de confiance dans une expérience premium, discrète et pensée pour des rencontres de qualité.'} ${brand}. ${signature}`,
       scenes: buildVideoScenes(project, duration, index),
       provider: 'velvet-campaign-engine-v3'
     }));
 
     const visualThemes = [
-      ['Manifeste', hooks[0], 'Ruban Velvet, fond noir et lumière champagne'],
+      ['Manifeste', hooks[0], 'Ruban Zwit, fond noir et lumière champagne'],
       ['Confiance', 'La confiance avant tout.', 'Albums privés, consentement et modération'],
       ['Découverte', 'Des rencontres qui ont du sens.', 'Recherche premium et profils de qualité'],
       ['Événements', 'Vivez plus que des conversations.', 'Agenda et sorties à proximité'],
-      ['Établissements', 'Les meilleurs lieux, au même endroit.', 'Carte Velvet et sélection d’établissements'],
+      ['Établissements', 'Les meilleurs lieux, au même endroit.', 'Carte Zwit et sélection d’établissements'],
       ['Discrétion', 'Votre liberté mérite de la discrétion.', 'Interface épurée, données protégées'],
       ['Communauté', 'Une communauté choisie.', 'Diversité adulte et bienveillance'],
-      ['Proximité', `Velvet arrive en ${region}.`, 'Carte régionale élégante'],
-      ['Velvet Pro', 'Organiser. Remplir. Fidéliser.', 'Cockpit professionnel premium'],
+      ['Proximité', `Zwit arrive en ${region}.`, 'Carte régionale élégante'],
+      ['Zwit Pro', 'Organiser. Remplir. Fidéliser.', 'Cockpit professionnel premium'],
       ['Invitation', 'Votre invitation pour découvrir Velvet.', 'Carte digitale avec ruban bordeaux'],
-      ['Fonctionnalités', 'Tout Velvet, en un seul univers.', 'Mosaïque recherche, messages, carte et événements'],
-      ['Signature', signature, 'Logo Velvet et halo champagne']
+      ['Fonctionnalités', 'Tout Zwit, en un seul univers.', 'Mosaïque recherche, messages, carte et événements'],
+      ['Signature', signature, 'Logo Zwit et halo champagne']
     ];
     const formats = ['1080×1350', '1080×1920', '1200×628', '1080×1080'];
     const visuals = visualThemes.map(([theme, headline, direction], index) => ({
       id: uid('visual'), kind: 'visual', theme, headline, direction,
       format: formats[index % formats.length], status: 'draft',
-      prompt: `${direction}. Style ${tone}, palette Velvet noir #0D0D0D, bordeaux #641B36, or #C6A96A, ivoire #F4F4F2. Aucune nudité, aucune donnée réelle, personnes fictives majeures uniquement.`,
+      prompt: `${direction}. Style ${tone}, palette Zwit noir #0D0D0D, bordeaux #641B36, or #C6A96A, ivoire #F4F4F2. Aucune nudité, aucune donnée réelle, personnes fictives majeures uniquement.`,
       cta: ctas[index % ctas.length]
     }));
 
     const postBlueprints = [
-      ['Instagram', hooks[0], 'Velvet réunit les rencontres, les événements et les établissements dans une seule expérience pensée autour de la confiance.', ctas[0]],
+      ['Instagram', hooks[0], 'Zwit réunit les rencontres, les événements et les établissements dans une seule expérience pensée autour de la confiance.', ctas[0]],
       ['Instagram', 'Des rencontres qui ont du sens.', 'Une interface premium, des profils mieux présentés et une communauté où la qualité compte davantage que la quantité.', ctas[1]],
-      ['TikTok', 'Et si les rencontres libres entraient enfin dans une nouvelle ère ?', 'Découvrez Velvet : plus fluide, plus élégant, plus humain.', ctas[0]],
-      ['Facebook', 'Velvet arrive près de chez vous.', `Le lancement commence en ${region}, avec les membres, événements et établissements de la région.`, ctas[1]],
-      ['Facebook', 'La confiance n’est pas une option.', 'Consentement, discrétion, albums privés et modération font partie de l’expérience Velvet dès le départ.', ctas[4]],
-      ['LinkedIn', 'Velvet Pro : le cockpit des établissements.', 'Créez vos événements, développez votre visibilité et fidélisez votre communauté depuis un seul espace.', ctas[3]],
+      ['TikTok', 'Et si les rencontres libres entraient enfin dans une nouvelle ère ?', 'Découvrez Zwit : plus fluide, plus élégant, plus humain.', ctas[0]],
+      ['Facebook', 'Zwit arrive près de chez vous.', `Le lancement commence en ${region}, avec les membres, événements et établissements de la région.`, ctas[1]],
+      ['Facebook', 'La confiance n’est pas une option.', 'Consentement, discrétion, albums privés et modération font partie de l’expérience Zwit dès le départ.', ctas[4]],
+      ['LinkedIn', 'Zwit Pro : le cockpit des établissements.', 'Créez vos événements, développez votre visibilité et fidélisez votre communauté depuis un seul espace.', ctas[3]],
       ['Instagram', 'Votre prochaine sortie commence ici.', 'Explorez les événements et établissements proches de vous dans un environnement premium.', ctas[2]],
-      ['TikTok', 'Moins de bruit. Plus de vraies connexions.', 'Velvet remet le feeling, le respect et la qualité au centre.', ctas[1]],
-      ['Instagram', 'Une communauté libre. Jamais sans respect.', 'Velvet accueille les envies et les identités dans un cadre adulte, bienveillant et consentant.', ctas[4]],
+      ['TikTok', 'Moins de bruit. Plus de vraies connexions.', 'Zwit remet le feeling, le respect et la qualité au centre.', ctas[1]],
+      ['Instagram', 'Une communauté libre. Jamais sans respect.', 'Zwit accueille les envies et les identités dans un cadre adulte, bienveillant et consentant.', ctas[4]],
       ['LinkedIn', 'Une plateforme pensée comme un écosystème.', 'Membres, lieux, événements et professionnels avancent enfin avec les mêmes outils.', ctas[3]]
     ];
-    const hashtags = ['#Velvet', '#RencontresLibres', '#Libertinage', '#Communauté', '#Consentement', '#Discrétion', '#Événements', '#VelvetPro', '#HautsDeFrance', '#Belgique'];
+    const hashtags = ['#Zwit', '#RencontresLibres', '#Libertinage', '#Communauté', '#Consentement', '#Discrétion', '#Événements', '#VelvetPro', '#HautsDeFrance', '#Belgique'];
     const posts = postBlueprints.map(([platform, headline, body, cta], index) => ({
       id: uid('post'), kind: 'post', platform, headline, body, cta,
       status: 'draft', hashtags: hashtags.slice(0, platform === 'LinkedIn' ? 5 : 8),
@@ -135,16 +135,16 @@
 
     const newsletter = {
       id: uid('newsletter'), kind: 'newsletter', status: 'draft',
-      subject: 'Velvet ouvre un nouvel univers pour les rencontres libres',
+      subject: 'Zwit ouvre un nouvel univers pour les rencontres libres',
       preheader: 'Une plateforme premium, plus humaine, plus fluide et pensée autour de la confiance.',
       headline: hooks[0],
-      body: `Velvet réunit enfin les profils, les événements, les établissements et les outils professionnels dans une même expérience. Notre ambition : proposer une communauté adulte où la qualité, le respect, la discrétion et le consentement sont visibles à chaque étape. Le lancement commence en ${region}.`,
+      body: `Zwit réunit enfin les profils, les événements, les établissements et les outils professionnels dans une même expérience. Notre ambition : proposer une communauté adulte où la qualité, le respect, la discrétion et le consentement sont visibles à chaque étape. Le lancement commence en ${region}.`,
       cta: ctas[0]
     };
 
     const banner = {
       id: uid('banner'), kind: 'banner', status: 'draft',
-      eyebrow: 'VELVET · NOUVELLE EXPÉRIENCE',
+      eyebrow: 'ZWIT · NOUVELLE EXPÉRIENCE',
       headline: hooks[0],
       subheadline: 'Rencontres, événements et établissements réunis dans un même univers premium.',
       cta: ctas[0], format: 'Desktop + mobile'
@@ -172,7 +172,7 @@
         score: 96,
         status: 'pass',
         checks: [
-          ['Identité Velvet', true], ['Consentement et respect', true], ['Personnes majeures uniquement', true],
+          ['Identité Zwit', true], ['Consentement et respect', true], ['Personnes majeures uniquement', true],
           ['Aucune donnée membre réelle', true], ['Promesses vérifiables', true], ['Aucun contenu explicite', true]
         ]
       },
@@ -186,8 +186,8 @@
 
   function buildVideoScenes(project, targetDuration, variantIndex) {
     const source = Array.isArray(project?.scenes) && project.scenes.length ? project.scenes : [{
-      title: 'Velvet', visual: 'Ruban Velvet sur fond noir', text: 'Le libertinage évolue.', duration: 5,
-      transition: 'Velvet Fade', prompt: 'Univers Velvet premium', palette: ['#0D0D0D', '#641B36']
+      title: 'Zwit', visual: 'Ruban Zwit sur fond noir', text: 'Le libertinage évolue.', duration: 5,
+      transition: 'Zwit Fade', prompt: 'Univers Zwit premium', palette: ['#0D0D0D', '#641B36']
     }];
     const limit = variantIndex === 0 ? 3 : variantIndex === 3 ? 4 : Math.min(6, source.length);
     const selected = source.slice(0, limit).map((scene) => deepClone(scene));
@@ -195,7 +195,7 @@
     selected.forEach((scene, index) => {
       scene.id = uid('scene');
       scene.duration = Math.max(1.5, Number((targetDuration * Math.max(0.5, Number(scene.duration || 5)) / total).toFixed(2)));
-      scene.transition = index % 2 ? 'Champagne Glow' : 'Velvet Fade';
+      scene.transition = index % 2 ? 'Champagne Glow' : 'Zwit Fade';
     });
     const adjusted = selected.reduce((sum, scene) => sum + scene.duration, 0);
     selected[selected.length - 1].duration = Math.max(1.5, Number((selected[selected.length - 1].duration + targetDuration - adjusted).toFixed(2)));
@@ -232,7 +232,7 @@
 
   function openDesk() {
     const project = currentProject();
-    if (!project) return notify('Ouvre d’abord un projet Velvet Studio.', 'error');
+    if (!project) return notify('Ouvre d’abord un projet Zwit Studio.', 'error');
     closeDesk();
     runtime.pack = readPacks().find((item) => item.projectId === project.id) || null;
     const modal = document.createElement('section');
@@ -253,7 +253,7 @@
   function deskMarkup(project) {
     return `
       <header class="vs3-head">
-        <div class="vs3-head-brand"><span class="vs3-mark">V3</span><div><strong>Velvet Studio · Campaign Engine</strong><small>${esc(project.title)} · production marketing multicanale</small></div></div>
+        <div class="vs3-head-brand"><span class="vs3-mark">V3</span><div><strong>Zwit Studio · Campaign Engine</strong><small>${esc(project.title)} · production marketing multicanale</small></div></div>
         <div class="vs3-head-actions"><button data-v3-export ${runtime.pack ? '' : 'disabled'}>Exporter le pack</button><button class="primary" data-v3-generate>${runtime.pack ? 'Régénérer' : 'Créer la campagne'}</button><button class="close" data-v3-close>×</button></div>
       </header>
       <main class="vs3-layout">
@@ -262,22 +262,22 @@
           <label>Prompt principal<textarea data-v3-field="prompt">${esc(project.prompt || project.objective || '')}</textarea></label>
           <label>Objectif<textarea data-v3-field="objective">${esc(project.objective || '')}</textarea></label>
           <div class="vs3-field-grid"><label>Audience<input data-v3-field="audience" value="${esc(project.audience || '')}"></label><label>Zone de lancement<input data-v3-field="region" value="Hauts-de-France et Belgique"></label></div>
-          <label>Offre / action attendue<input data-v3-field="offer" value="Découvrir Velvet et rejoindre la communauté"></label>
+          <label>Offre / action attendue<input data-v3-field="offer" value="Découvrir Zwit et rejoindre la communauté"></label>
           <label>Ton<select data-v3-field="tone"><option>Premium, humain, élégant</option><option>Émotionnel et cinématographique</option><option>Direct et social media</option><option>Business et performant</option></select></label>
           <button class="vs3-generate" data-v3-generate><span>✦</span><strong>${runtime.pack ? 'Régénérer le pack' : 'Générer la campagne V3'}</strong><small>Vidéos · visuels · posts · newsletter · calendrier</small></button>
-          <div class="vs3-provider"><span class="ready"></span><div><strong>Mode gratuit-first</strong><small>Moteur Velvet local. Prestataires externes désactivés.</small></div></div>
+          <div class="vs3-provider"><span class="ready"></span><div><strong>Mode gratuit-first</strong><small>Moteur Zwit local. Prestataires externes désactivés.</small></div></div>
         </aside>
         <section class="vs3-main" data-v3-main>${emptyState()}</section>
       </main>`;
   }
 
   function emptyState() {
-    return `<div class="vs3-empty"><div class="vs3-orbit"><span>V</span><i></i><b></b></div><span class="vs3-kicker">Campaign Engine V3</span><h2>Le studio attend ton brief.</h2><p>À partir d’une seule intention, Velvet prépare une campagne cohérente, déclinée sur tous les formats utiles et prête à passer dans le moteur vidéo V2.</p><div class="vs3-empty-metrics"><span>5 vidéos</span><span>12 visuels</span><span>10 publications</span><span>1 newsletter</span></div></div>`;
+    return `<div class="vs3-empty"><div class="vs3-orbit"><span>V</span><i></i><b></b></div><span class="vs3-kicker">Campaign Engine V3</span><h2>Le studio attend ton brief.</h2><p>À partir d’une seule intention, Zwit prépare une campagne cohérente, déclinée sur tous les formats utiles et prête à passer dans le moteur vidéo V2.</p><div class="vs3-empty-metrics"><span>5 vidéos</span><span>12 visuels</span><span>10 publications</span><span>1 newsletter</span></div></div>`;
   }
 
   function loadingState() {
     const tasks = ['Stratégie de campagne', 'Angles créatifs', 'Déclinaisons vidéo', 'Visuels sociaux', 'Copies multicanales', 'Calendrier éditorial', 'Brand Guard'];
-    return `<div class="vs3-loading"><div class="vs3-loader"></div><span class="vs3-kicker">Agence IA en production</span><h2>Velvet construit la campagne.</h2><div>${tasks.map((task, index) => `<article style="--delay:${index * 120}ms"><span>${String(index + 1).padStart(2, '0')}</span><strong>${task}</strong><i></i></article>`).join('')}</div></div>`;
+    return `<div class="vs3-loading"><div class="vs3-loader"></div><span class="vs3-kicker">Agence IA en production</span><h2>Zwit construit la campagne.</h2><div>${tasks.map((task, index) => `<article style="--delay:${index * 120}ms"><span>${String(index + 1).padStart(2, '0')}</span><strong>${task}</strong><i></i></article>`).join('')}</div></div>`;
   }
 
   function briefFrom(modal) {
@@ -351,7 +351,7 @@
   }
 
   function videoMarkup(items) {
-    return `<div class="vs3-section-head"><div><span class="vs3-kicker">5 variantes cohérentes</span><h3>Films de campagne</h3><p>Chaque variante peut devenir un projet autonome dans le moteur de réalisation V2.</p></div></div><div class="vs3-video-grid">${items.map((item, index) => `<article><div class="vs3-video-poster"><span>${esc(item.format)}</span><b>${String(index + 1).padStart(2, '0')}</b><strong>VELVET</strong><small>${item.duration} secondes</small></div><div class="vs3-video-copy"><span class="vs3-platform">${esc(item.channel)}</span><h4>${esc(item.title)}</h4><p>${esc(item.hook)}</p><small>${esc(item.objective)}</small><button data-v3-make-video="${item.id}">Créer dans Réalisation V2</button></div></article>`).join('')}</div>`;
+    return `<div class="vs3-section-head"><div><span class="vs3-kicker">5 variantes cohérentes</span><h3>Films de campagne</h3><p>Chaque variante peut devenir un projet autonome dans le moteur de réalisation V2.</p></div></div><div class="vs3-video-grid">${items.map((item, index) => `<article><div class="vs3-video-poster"><span>${esc(item.format)}</span><b>${String(index + 1).padStart(2, '0')}</b><strong>ZWIT</strong><small>${item.duration} secondes</small></div><div class="vs3-video-copy"><span class="vs3-platform">${esc(item.channel)}</span><h4>${esc(item.title)}</h4><p>${esc(item.hook)}</p><small>${esc(item.objective)}</small><button data-v3-make-video="${item.id}">Créer dans Réalisation V2</button></div></article>`).join('')}</div>`;
   }
 
   function visualMarkup(items) {

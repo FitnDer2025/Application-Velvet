@@ -51,13 +51,13 @@ struct ProfileEditorView: View {
                         VelvetPageHeader(
                             "Édition native",
                             title: "Modifier mon profil",
-                            subtitle: "Les mêmes informations structurantes que sur le Web, avec une aide Velvet IA qui n’invente jamais ton vécu."
+                            subtitle: "Les mêmes informations structurantes que sur le Web, avec une aide Zwit IA qui n’invente jamais ton vécu."
                         )
 
                         VelvetCard {
                             VStack(alignment: .leading, spacing: 14) {
                                 editorTitle("Identité du profil")
-                                VelvetField(title: "Nom affiché", prompt: "Notre nom Velvet", text: $displayName)
+                                VelvetField(title: "Nom affiché", prompt: "Notre nom Zwit", text: $displayName)
                                 VelvetField(title: "Ville ou zone publique", prompt: "Lens", text: $city)
                                 if profile.profileType == .couple {
                                     Text("Les fiches individuelles du couple restent indépendantes. Cette édition conserve la première fiche personnelle existante.")
@@ -145,13 +145,13 @@ struct ProfileEditorView: View {
         VelvetCard {
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
-                    editorTitle("Velvet IA")
+                    editorTitle("Zwit IA")
                     Spacer()
                     Image(systemName: "sparkles")
                         .foregroundStyle(VelvetColor.champagneGold)
                 }
 
-                Text("Dépose tes mots-clés. Velvet reformule sans ajouter de pratique, de limite ni d’expérience.")
+                Text("Dépose tes mots-clés. Zwit reformule sans ajouter de pratique, de limite ni d’expérience.")
                     .font(VelvetTypography.body(size: 12))
                     .foregroundStyle(VelvetColor.textSecondary)
 
@@ -176,7 +176,7 @@ struct ProfileEditorView: View {
                     }
 
                 VelvetPrimaryButton(
-                    "Générer avec Velvet IA",
+                    "Générer avec Zwit IA",
                     isLoading: isGenerating,
                     isDisabled: aiSource.trimmingCharacters(in: .whitespacesAndNewlines).count < 18
                 ) {

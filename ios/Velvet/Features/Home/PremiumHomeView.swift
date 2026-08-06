@@ -110,7 +110,7 @@ struct PremiumHomeView: View {
 
     private var curatedSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            sectionHeader("Pour toi", detail: "Sélection Velvet")
+            sectionHeader("Pour toi", detail: "Sélection Zwit")
             if profiles.isEmpty && events.isEmpty && establishments.isEmpty && venues.isEmpty {
                 VelvetCompactEmptyState(
                     symbol: "sparkles",
@@ -152,7 +152,7 @@ struct PremiumHomeView: View {
                         } else if let venue = venues.first {
                             NavigationLink { PlacesEventsView(initialSelection: 2) } label: {
                                 PremiumHomeEditorialCard(
-                                    eyebrow: (venue.categoryPrimary ?? venue.kind ?? "LIEU VELVET").uppercased(),
+                                    eyebrow: (venue.categoryPrimary ?? venue.kind ?? "LIEU ZWIT").uppercased(),
                                     title: venue.name,
                                     detail: venue.city ?? "Adresse privée",
                                     symbol: "mappin.and.ellipse"
@@ -174,7 +174,7 @@ struct PremiumHomeView: View {
             NavigationLink { PlacesEventsView(initialSelection: 0) } label: {
                 shortcutRow(
                     "Sorties à venir",
-                    detail: events.isEmpty ? "Découvrir l’agenda Velvet" : "\(events.count) rendez-vous publié\(events.count > 1 ? "s" : "")",
+                    detail: events.isEmpty ? "Découvrir l’agenda Zwit" : "\(events.count) rendez-vous publié\(events.count > 1 ? "s" : "")",
                     icon: "calendar",
                     color: VelvetColor.champagneGold
                 )

@@ -1,4 +1,4 @@
-# Velvet iOS — passe UX et parité du 31 juillet 2026
+# Zwit iOS — passe UX et parité du 31 juillet 2026
 
 ## Objectif
 
@@ -8,7 +8,7 @@ Rapprocher l’application native de la version Web sans transformer SwiftUI en 
 
 ### Chrome iOS
 
-- bandeau Velvet réduit à 46 points ;
+- bandeau Zwit réduit à 46 points ;
 - commandes cloche et menu dans des bulles translucides ;
 - dock inférieur flottant, arrondi et transparent ;
 - mode immersif automatique dans une conversation.
@@ -34,9 +34,9 @@ Rapprocher l’application native de la version Web sans transformer SwiftUI en 
 
 - les photos de profil restent exclusivement dans la galerie principale ;
 - seuls les véritables albums apparaissent dans l’onglet Albums ;
-- Studio du profil, Velvet IA, édition et paramètres déplacés dans le menu principal ;
+- Studio du profil, Zwit IA, édition et paramètres déplacés dans le menu principal ;
 - édition native des textes, pratiques, valeurs, lieux et informations personnelles ;
-- génération Velvet IA intégrée à l’éditeur.
+- génération Zwit IA intégrée à l’éditeur.
 
 ### Profil d’un autre membre
 

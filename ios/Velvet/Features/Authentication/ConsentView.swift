@@ -19,7 +19,7 @@ struct ConsentView: View {
                 VelvetSectionHeader(
                     "Consentement",
                     title: "Tes choix restent les tiens.",
-                    subtitle: "Avant l’accès, Velvet enregistre chaque validation séparément. Tu pourras exercer tes droits depuis les paramètres."
+                    subtitle: "Avant l’accès, Zwit enregistre chaque validation séparément. Tu pourras exercer tes droits depuis les paramètres."
                 )
 
                 VelvetCard {

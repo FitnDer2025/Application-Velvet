@@ -147,7 +147,7 @@ private struct VelvetWatchDashboard: View {
                         }
                         .frame(width: 28, height: 28)
 
-                        Text("VELVET")
+                        Text("ZWIT")
                             .font(.system(size: 12, weight: .bold))
                             .tracking(2)
                         Spacer()

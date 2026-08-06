@@ -4,7 +4,7 @@ import test from 'node:test';
 
 const read = (path) => readFile(path, 'utf8');
 
-test('la conversation mobile adopte une ergonomie de messagerie plein écran sans perdre les fonctions Velvet', async () => {
+test('la conversation mobile adopte une ergonomie de messagerie plein écran sans perdre les fonctions Zwit', async () => {
   const [script, css, html, worker, realtime] = await Promise.all([
     read('apps/beta/static/assets/velvet-chat-whatsapp.js'),
     read('apps/beta/static/assets/velvet-chat-whatsapp.css'),

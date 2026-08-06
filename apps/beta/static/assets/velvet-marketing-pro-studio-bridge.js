@@ -16,13 +16,13 @@
 
   const TEMPLATES = [
     { id: 'marketing-template-neon', establishment_id: null, template_code: 'neon-club', name: 'Néon Club', description: 'Rose et bleu électrique, dense et festif.', configuration: { visualStyle: 'neon club, magenta and electric blue, premium nightlife', layout: 'event', effects: ['neon', 'glow', 'confetti'] }, is_system: true },
-    { id: 'marketing-template-luxe', establishment_id: null, template_code: 'velvet-luxe', name: 'Velvet Luxe', description: 'Bordeaux, noir et champagne, sensuel et élégant.', configuration: { visualStyle: 'luxury burgundy black champagne nightlife', layout: 'balanced', effects: ['silk', 'gold', 'soft glow'] }, is_system: true },
+    { id: 'marketing-template-luxe', establishment_id: null, template_code: 'velvet-luxe', name: 'Zwit Luxe', description: 'Bordeaux, noir et champagne, sensuel et élégant.', configuration: { visualStyle: 'luxury burgundy black champagne nightlife', layout: 'balanced', effects: ['silk', 'gold', 'soft glow'] }, is_system: true },
     { id: 'marketing-template-electric', establishment_id: null, template_code: 'electric-night', name: 'Electric Night', description: 'Lasers, lumière et énergie pour DJ et performers.', configuration: { visualStyle: 'electric premium club, laser and particles', layout: 'rich', effects: ['laser', 'particles', 'light streaks'] }, is_system: true },
     { id: 'marketing-template-dark', establishment_id: null, template_code: 'dark-desire', name: 'Dark Desire', description: 'Sombre, mystérieux et sophistiqué.', configuration: { visualStyle: 'dark sophisticated cinematic club', layout: 'balanced', effects: ['smoke', 'rim light', 'deep contrast'] }, is_system: true },
     { id: 'marketing-template-summer', establishment_id: null, template_code: 'summer-pool', name: 'Summer Pool', description: 'Lumineux, estival et festif.', configuration: { visualStyle: 'premium tropical pool party nightlife', layout: 'rich', effects: ['water reflections', 'sunset', 'festive lights'] }, is_system: true }
   ];
 
-  const logoSvg = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="520" viewBox="0 0 1000 520"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#220d18"/><stop offset="1" stop-color="#7D294C"/></linearGradient></defs><rect width="1000" height="520" rx="70" fill="url(#g)"/><circle cx="500" cy="174" r="92" fill="none" stroke="#D5B477" stroke-width="5"/><path d="M451 139c34 77 64 77 98 0M438 205c43-35 81-35 124 0" fill="none" stroke="#D5B477" stroke-width="7" stroke-linecap="round"/><text x="500" y="354" text-anchor="middle" fill="#F7F1EB" font-family="Georgia,serif" font-size="74" letter-spacing="14">MAISON VELVET</text><text x="500" y="410" text-anchor="middle" fill="#D5B477" font-family="Arial,sans-serif" font-size="24" letter-spacing="9">LILLE</text></svg>`)}`;
+  const logoSvg = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="520" viewBox="0 0 1000 520"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#220d18"/><stop offset="1" stop-color="#7D294C"/></linearGradient></defs><rect width="1000" height="520" rx="70" fill="url(#g)"/><circle cx="500" cy="174" r="92" fill="none" stroke="#D5B477" stroke-width="5"/><path d="M451 139c34 77 64 77 98 0M438 205c43-35 81-35 124 0" fill="none" stroke="#D5B477" stroke-width="7" stroke-linecap="round"/><text x="500" y="354" text-anchor="middle" fill="#F7F1EB" font-family="Georgia,serif" font-size="74" letter-spacing="14">MAISON ZWIT</text><text x="500" y="410" text-anchor="middle" fill="#D5B477" font-family="Arial,sans-serif" font-size="24" letter-spacing="9">LILLE</text></svg>`)}`;
 
   const defaultBrand = () => ({
     establishment_id: VENUE_ID,
@@ -37,7 +37,7 @@
     typography_style: 'editorial-premium',
     visual_style: 'velvet-luxe',
     density: 'balanced',
-    brand_prompt: 'Maison Velvet Lille : club privé contemporain, chaleureux et premium. Univers bordeaux profond, noir velours et champagne. Sensualité élégante, lumière cinématographique et composition événementielle professionnelle.',
+    brand_prompt: 'Maison Zwit Lille : club privé contemporain, chaleureux et premium. Univers bordeaux profond, noir velours et champagne. Sensualité élégante, lumière cinématographique et composition événementielle professionnelle.',
     fixed_information: {
       address: 'Lille · adresse communiquée avant la soirée',
       phone: '03 20 00 00 00',
@@ -52,14 +52,14 @@
   const sampleProject = () => ({
     id: 'a1000000-0000-4000-8000-000000000001',
     establishment_id: VENUE_ID,
-    title: 'Nuit Velvet · Élégance & Connexions',
+    title: 'Nuit Zwit · Élégance & Connexions',
     status: 'draft',
-    theme: 'Velvet Luxe',
+    theme: 'Zwit Luxe',
     output_type: 'social_kit',
     event_payload: {
-      title: 'NUIT VELVET',
+      title: 'NUIT ZWIT',
       subtitle: 'Élégance & Connexions',
-      theme: 'Velvet Luxe',
+      theme: 'Zwit Luxe',
       date: '',
       endDate: '',
       startTime: '21:30',
@@ -148,7 +148,7 @@
       capabilities: {
         workersAI: true,
         imageModel: '@cf/black-forest-labs/flux-1-schnell',
-        directionModel: 'Velvet Marketing Art Director',
+        directionModel: 'Zwit Marketing Art Director',
         v1: true,
         v2: true,
         v3: true,
@@ -195,7 +195,7 @@
     const style = creative.style || brand.visual_style || 'velvet-luxe';
     const palette = `${brand.primary_color || '#7D294C'}, ${brand.secondary_color || '#0D0D0D'}, ${brand.accent_color || '#D5B477'}`;
     return {
-      artDirection: `Affiche de club privé haut de gamme pour Maison Velvet Lille. Thème ${theme}. Style ${style}. Ambiance sensuelle, festive et professionnelle, avec une hiérarchie forte et de larges zones propres pour les textes exacts.`,
+      artDirection: `Affiche de club privé haut de gamme pour Maison Zwit Lille. Thème ${theme}. Style ${style}. Ambiance sensuelle, festive et professionnelle, avec une hiérarchie forte et de larges zones propres pour les textes exacts.`,
       backgroundPrompt: [
         'Premium French private club event poster background',
         `theme ${theme}`,
@@ -208,7 +208,7 @@
       ].filter(Boolean).join(', ').slice(0, 1900),
       layout: creative.density || brand.density || 'balanced',
       contrast: 'Contraste élevé, centre lumineux et zones sombres réservées aux informations exactes.',
-      photoTreatment: 'Les photos fournies restent fidèles, cadrées proprement et composées par Velvet sans recréer les personnes.',
+      photoTreatment: 'Les photos fournies restent fidèles, cadrées proprement et composées par Zwit sans recréer les personnes.',
       effects: style.includes('neon') ? ['neon glow', 'electric particles', 'light streaks'] : ['cinematic glow', 'silk texture', 'champagne highlights'],
       warnings: []
     };

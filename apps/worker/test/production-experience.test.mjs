@@ -5,7 +5,7 @@ import test from 'node:test';
 const read = (path) => readFile(path, 'utf8');
 const PREVIEW_TERMS = /\bBETA\b|bêta|version de test|environnement de démonstration|données fictives|données réelles/i;
 
-test('la surface de production couvre les trois socles Velvet', async () => {
+test('la surface de production couvre les trois socles Zwit', async () => {
   const source = await read('apps/beta/static/assets/velvet-production-surface.js');
 
   assert.match(source, /Velvet Membres/);
@@ -42,15 +42,15 @@ test('le manifeste mobile et les pages légales ne se présentent plus comme une
   const combined = contents.join('\n');
 
   assert.doesNotMatch(combined, PREVIEW_TERMS);
-  assert.match(contents[0], /"name": "Velvet"/);
+  assert.match(contents[0], /"name": "Zwit"/);
   assert.match(contents[1], /Conditions d’utilisation/);
   assert.match(contents[2], /Politique de confidentialité/);
   assert.match(contents[3], /Sécurité et consentement/);
 });
 
-test('l’application iOS expose uniquement la marque Velvet', async () => {
+test('l’application iOS expose uniquement la marque Zwit', async () => {
   const info = await read('ios/Velvet/Resources/Info.plist');
 
-  assert.match(info, /<key>CFBundleDisplayName<\/key>\s*<string>Velvet<\/string>/);
+  assert.match(info, /<key>CFBundleDisplayName<\/key>\s*<string>Zwit<\/string>/);
   assert.doesNotMatch(info, PREVIEW_TERMS);
 });

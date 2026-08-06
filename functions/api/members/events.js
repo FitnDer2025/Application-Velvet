@@ -222,7 +222,7 @@ export async function onRequestPost({ request, env }) {
           ends_at: endsAt?.toISOString() || null,
           capacity,
           location_public: locationPublic,
-          audience: clean(body.audience, 120) || 'Membres Velvet admis',
+          audience: clean(body.audience, 120) || 'Membres Zwit admis',
           price_cents: Math.max(0, Math.round(Number(body.priceCents) || 0)),
           currency: 'EUR',
           registration_open: body.registrationOpen !== false,

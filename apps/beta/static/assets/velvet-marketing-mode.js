@@ -172,7 +172,7 @@
   ];
 
   const events = [
-    { id: uuid(80000000, 1), title: 'Nuit Velvet · Élégance & Connexions', description: 'Une soirée pensée pour favoriser les échanges dans une ambiance chic, musicale et bienveillante.', starts_at: isoIn(4, 21), ends_at: isoIn(5, 3), location_public: 'L’Only · Lille', audience: 'Couples et femmes', capacity: 120, registered_count: 84, establishment_id: venues[0].claimed_establishment_id, organizer_profile_id: profiles[4].id, latitude: venues[0].latitude, longitude: venues[0].longitude },
+    { id: uuid(80000000, 1), title: 'Nuit Zwit · Élégance & Connexions', description: 'Une soirée pensée pour favoriser les échanges dans une ambiance chic, musicale et bienveillante.', starts_at: isoIn(4, 21), ends_at: isoIn(5, 3), location_public: 'L’Only · Lille', audience: 'Couples et femmes', capacity: 120, registered_count: 84, establishment_id: venues[0].claimed_establishment_id, organizer_profile_id: profiles[4].id, latitude: venues[0].latitude, longitude: venues[0].longitude },
     { id: uuid(80000000, 2), title: 'Cocktail Découverte', description: 'Une première rencontre simple et rassurante pour découvrir la communauté Velvet.', starts_at: isoIn(7, 20), ends_at: isoIn(8, 1), location_public: 'La Tentation · Mouscron', audience: 'Couples, femmes et nouveaux membres', capacity: 90, registered_count: 62, establishment_id: venues[1].claimed_establishment_id, organizer_profile_id: profiles[2].id, latitude: venues[1].latitude, longitude: venues[1].longitude },
     { id: uuid(80000000, 3), title: 'Parenthèse Spa & Complicité', description: 'Un rendez-vous intimiste autour du bien-être et de la convivialité.', starts_at: isoIn(11, 19), ends_at: isoIn(12, 0), location_public: 'O’Pulsion · Hauts-de-France', audience: 'Couples', capacity: 36, registered_count: 28, establishment_id: venues[2].claimed_establishment_id, organizer_profile_id: profiles[0].id, latitude: venues[2].latitude, longitude: venues[2].longitude }
   ];
@@ -203,7 +203,7 @@
   const notifications = [
     { id: uuid(94000000, 1), event_type: 'messages', title: 'Nouveau message de Léa', body: 'Peut-être se croiser à la soirée de samedi ?', actor_profile_id: profiles[1].id, entity_type: 'conversation', entity_id: conversations[0].id, created_at: now.toISOString(), read_at: null },
     { id: uuid(94000000, 2), event_type: 'likes', title: 'Nina & Lucas aiment votre univers', body: 'Votre profil a reçu un nouveau coup de cœur.', actor_profile_id: profiles[4].id, entity_type: 'profile', entity_id: profiles[0].id, created_at: createdAgo(1), read_at: null },
-    { id: uuid(94000000, 3), event_type: 'events', title: 'Rappel de sortie', body: 'Nuit Velvet commence samedi à 21 h 30.', actor_profile_id: null, entity_type: 'event', entity_id: events[0].id, created_at: createdAgo(1), read_at: createdAgo(1) }
+    { id: uuid(94000000, 3), event_type: 'events', title: 'Rappel de sortie', body: 'Nuit Zwit commence samedi à 21 h 30.', actor_profile_id: null, entity_type: 'event', entity_id: events[0].id, created_at: createdAgo(1), read_at: createdAgo(1) }
   ];
 
   const access = {
@@ -300,7 +300,7 @@
 
   function accessDenied() {
     document.documentElement.classList.remove('velvet-marketing-pending');
-    document.body.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;padding:30px;background:#0d0d0d;color:#f5f1ed;font-family:Inter,Arial"><section style="max-width:620px;text-align:center"><p style="color:#c6a96a;letter-spacing:.16em">VELVET MARKETING</p><h1 style="font:500 48px Georgia">Accès réservé</h1><p>Cette démonstration est accessible uniquement depuis Velvet Control avec un rôle Direction ou Admin.</p><a href="/control/" style="display:inline-block;margin-top:18px;padding:13px 18px;border-radius:999px;background:#c6a96a;color:#17120b;text-decoration:none;font-weight:800">Retour à Velvet Control</a></section></main>';
+    document.body.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;padding:30px;background:#0d0d0d;color:#f5f1ed;font-family:Inter,Arial"><section style="max-width:620px;text-align:center"><p style="color:#c6a96a;letter-spacing:.16em">ZWIT MARKETING</p><h1 style="font:500 48px Georgia">Accès réservé</h1><p>Cette démonstration est accessible uniquement depuis Zwit Control avec un rôle Direction ou Admin.</p><a href="/control/" style="display:inline-block;margin-top:18px;padding:13px 18px;border-radius:999px;background:#c6a96a;color:#17120b;text-decoration:none;font-weight:800">Retour à Zwit Control</a></section></main>';
   }
 
   document.documentElement.classList.add('velvet-marketing-pending');
@@ -331,7 +331,7 @@
   };
 
   function installMarketingIdentity() {
-    document.title = 'Velvet — BETA Marketing';
+    document.title = 'Zwit — BETA Marketing';
     document.querySelectorAll('.brand small').forEach((node) => { node.textContent = 'BETA Marketing'; });
     const foot = document.querySelector('.sidebar-foot p');
     if (foot) foot.innerHTML = '<span class="live-dot"></span>Données fictives · environnement marketing';

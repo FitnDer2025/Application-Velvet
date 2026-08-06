@@ -11,7 +11,7 @@
     profile: 'Profil membre',
     messages: 'Messagerie',
     events: 'Sorties & événements',
-    map: 'Carte Velvet'
+    map: 'Carte Zwit'
   };
   const state = {
     running: false,
@@ -103,19 +103,19 @@
 
   function homeMarkup() {
     return `<section class="vpd-home" data-vpd-home>
-      <span class="vpd-eyebrow">VELVET STUDIO · DÉMONSTRATION PRODUIT</span>
-      <h1>Décrivez la démonstration.<br>Velvet réalise la vidéo.</h1>
-      <p>L’IA écrit l’histoire et la voix off. Les images proviennent directement de l’environnement de démonstration Velvet afin de rester fidèles au site et à son fonctionnement.</p>
+      <span class="vpd-eyebrow">ZWIT STUDIO · DÉMONSTRATION PRODUIT</span>
+      <h1>Décrivez la démonstration.<br>Zwit réalise la vidéo.</h1>
+      <p>L’IA écrit l’histoire et la voix off. Les images proviennent directement de l’environnement de démonstration Zwit afin de rester fidèles au site et à son fonctionnement.</p>
       <div class="vpd-compose">
-        <textarea data-vpd-home-prompt placeholder="Exemple : Crée une démonstration générale de Velvet. Montre l’accueil, la recherche de membres, un profil, la messagerie, les événements et la carte. Utilise uniquement l’interface Velvet avec une voix off claire et premium."></textarea>
-        <button class="vpd-main-button" data-vpd-open>Créer la démonstration<small>Interface Velvet + voix off + montage</small></button>
+        <textarea data-vpd-home-prompt placeholder="Exemple : Crée une démonstration générale de Velvet. Montre l’accueil, la recherche de membres, un profil, la messagerie, les événements et la carte. Utilise uniquement l’interface Zwit avec une voix off claire et premium."></textarea>
+        <button class="vpd-main-button" data-vpd-open>Créer la démonstration<small>Interface Zwit + voix off + montage</small></button>
       </div>
-      <div class="vpd-benefits"><span>Interface Velvet réelle</span><span>Données fictives internes</span><span>Aucune image inventée</span><span>Voix off française</span></div>
+      <div class="vpd-benefits"><span>Interface Zwit réelle</span><span>Données fictives internes</span><span>Aucune image inventée</span><span>Voix off française</span></div>
     </section>
     <section class="vpd-flow">
       <article><b>1</b><strong>Décrivez</strong><span>Une phrase suffit pour préciser les fonctions à montrer.</span></article>
       <article><b>2</b><strong>L’IA raconte</strong><span>Le scénario et la voix off sont créés automatiquement.</span></article>
-      <article><b>3</b><strong>Velvet se présente</strong><span>Les vrais écrans de démonstration sont animés.</span></article>
+      <article><b>3</b><strong>Zwit se présente</strong><span>Les vrais écrans de démonstration sont animés.</span></article>
       <article><b>4</b><strong>Téléchargez</strong><span>La vidéo finale est prête à être diffusée.</span></article>
     </section>`;
   }
@@ -152,9 +152,9 @@
 
   function overlayMarkup(prompt = '') {
     return `<div class="vpd-overlay" data-vpd-overlay>
-      <section class="vpd-dialog" role="dialog" aria-modal="true" aria-label="Créer une démonstration Velvet">
+      <section class="vpd-dialog" role="dialog" aria-modal="true" aria-label="Créer une démonstration Zwit">
         <header class="vpd-head">
-          <div><strong>Créer une démonstration Velvet</strong><span>L’IA raconte. Velvet montre son véritable environnement.</span></div>
+          <div><strong>Créer une démonstration Zwit</strong><span>L’IA raconte. Zwit montre son véritable environnement.</span></div>
           <button class="vpd-close" data-vpd-close aria-label="Fermer">×</button>
         </header>
         <div class="vpd-body">
@@ -171,7 +171,7 @@
             <p class="vpd-note">Les écrans utilisent exclusivement des données synthétiques internes. Aucune donnée d’un membre réel n’est affichée.</p>
             <div class="vpd-steps">
               ${stepMarkup('plan', 1, 'Scénario et voix off')}
-              ${stepMarkup('screens', 2, 'Navigation dans Velvet')}
+              ${stepMarkup('screens', 2, 'Navigation dans Zwit')}
               ${stepMarkup('voice', 3, 'Voix off française')}
               ${stepMarkup('render', 4, 'Montage et export')}
             </div>
@@ -179,7 +179,7 @@
           <section class="vpd-card">
             <span class="vpd-eyebrow">APERÇU</span>
             <h2 data-vpd-title>La vidéo apparaîtra ici</h2>
-            <p class="vpd-muted" data-vpd-copy>Velvet affiche les écrans au fur et à mesure de la production.</p>
+            <p class="vpd-muted" data-vpd-copy>Zwit affiche les écrans au fur et à mesure de la production.</p>
             <div class="vpd-preview" data-vpd-preview><div class="vpd-placeholder"><b>V</b><strong>Prêt à créer</strong><p>Décrivez la visite produit puis lancez la production.</p></div></div>
             <div class="vpd-actions" data-vpd-actions hidden></div>
           </section>
@@ -289,7 +289,7 @@
       } catch {}
       await sleep(120);
     }
-    throw new Error('L’environnement de démonstration Velvet ne s’est pas chargé.');
+    throw new Error('L’environnement de démonstration Zwit ne s’est pas chargé.');
   }
 
   function loadImage(src) {
@@ -303,7 +303,7 @@
 
   async function domScreenToDataUrl(doc, width, height) {
     const source = doc.querySelector('.vc-shell');
-    if (!source) throw new Error('Écran Velvet introuvable.');
+    if (!source) throw new Error('Écran Zwit introuvable.');
 
     const clone = source.cloneNode(true);
     clone.querySelector('.vc-demo')?.remove();
@@ -350,10 +350,10 @@
     ctx.fillRect(0, 0, width, height * .22);
     ctx.fillStyle = '#C6A96A';
     ctx.font = `600 ${Math.max(24, width * .035)}px Georgia`;
-    ctx.fillText('VELVET', width * .06, height * .09);
+    ctx.fillText('ZWIT', width * .06, height * .09);
     ctx.fillStyle = '#F4F4F2';
     ctx.font = `500 ${Math.max(34, width * .055)}px Georgia`;
-    ctx.fillText(VIEW_LABELS[view] || 'Velvet', width * .06, height * .18);
+    ctx.fillText(VIEW_LABELS[view] || 'Zwit', width * .06, height * .18);
     const columns = width > height ? 3 : 2;
     const gap = width * .025;
     const cardWidth = (width * .88 - gap * (columns - 1)) / columns;
@@ -380,7 +380,7 @@
   async function captureVelvetScreens(plan, format, onProgress) {
     const size = captureSize(format);
     const iframe = document.createElement('iframe');
-    iframe.title = 'Environnement Velvet de démonstration';
+    iframe.title = 'Environnement Zwit de démonstration';
     iframe.setAttribute('aria-hidden', 'true');
     Object.assign(iframe.style, {
       position: 'fixed',
@@ -398,7 +398,7 @@
     const frames = [];
     try {
       await new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error('Chargement de Velvet trop long.')), 12000);
+        const timer = setTimeout(() => reject(new Error('Chargement de Zwit trop long.')), 12000);
         iframe.addEventListener('load', () => {
           clearTimeout(timer);
           resolve();
@@ -539,7 +539,7 @@
 
     ctx.fillStyle = '#C6A96A';
     ctx.font = `750 ${Math.max(10, width * .015)}px Inter,Arial`;
-    ctx.fillText((VIEW_LABELS[scene.screen] || 'VELVET').toUpperCase(), width * .075, panelY + panelHeight * .27);
+    ctx.fillText((VIEW_LABELS[scene.screen] || 'ZWIT').toUpperCase(), width * .075, panelY + panelHeight * .27);
     ctx.fillStyle = '#F7F3EF';
     ctx.font = `600 ${Math.max(24, width * .038)}px Georgia`;
     wrapText(ctx, scene.onScreen || scene.title, width * .075, panelY + panelHeight * .61, width * .82, panelHeight * .32, 2);
@@ -553,7 +553,7 @@
       ctx.textAlign = 'center';
       ctx.fillStyle = '#C6A96A';
       ctx.font = `600 ${Math.max(46, width * .075)}px Georgia`;
-      ctx.fillText('VELVET', width / 2, height * .47);
+      ctx.fillText('ZWIT', width / 2, height * .47);
       ctx.fillStyle = '#F5F1ED';
       ctx.font = `500 ${Math.max(17, width * .026)}px Inter,Arial`;
       ctx.fillText('Là où les plus belles rencontres commencent.', width / 2, height * .54);
@@ -680,19 +680,19 @@
     try {
       setStep('plan', 'active', 'L’IA écrit');
       title.textContent = 'Écriture de la démonstration';
-      copy.textContent = 'Velvet choisit les écrans utiles et prépare la voix off.';
+      copy.textContent = 'Zwit choisit les écrans utiles et prépare la voix off.';
       const plan = await generatePlan(brief, format, duration);
       setStep('plan', 'done', 'Scénario prêt');
       title.textContent = plan.title;
       copy.textContent = plan.voiceOver;
 
-      setStep('screens', 'active', 'Ouverture de Velvet');
+      setStep('screens', 'active', 'Ouverture de Zwit');
       const frames = await captureVelvetScreens(plan, format, (current, total, dataUrl, view) => {
         setStep('screens', 'active', `${current} / ${total}`);
         const preview = overlay.querySelector('[data-vpd-preview]');
-        preview.innerHTML = `<img src="${dataUrl}" alt="Écran ${esc(VIEW_LABELS[view] || view)} de Velvet"><div class="vpd-status">${esc(VIEW_LABELS[view] || view)} · écran ${current} sur ${total}</div>`;
+        preview.innerHTML = `<img src="${dataUrl}" alt="Écran ${esc(VIEW_LABELS[view] || view)} de Zwit"><div class="vpd-status">${esc(VIEW_LABELS[view] || view)} · écran ${current} sur ${total}</div>`;
       });
-      setStep('screens', 'done', `${frames.length} écrans Velvet`);
+      setStep('screens', 'done', `${frames.length} écrans Zwit`);
 
       setStep('voice', 'active', 'Génération');
       setStatus('Création de la voix off française…');
@@ -700,7 +700,7 @@
       setStep('voice', 'done', 'Voix prête');
 
       setStep('render', 'active', 'Montage 0 %');
-      setStatus('Animation des écrans Velvet et synchronisation de la voix…');
+      setStatus('Animation des écrans Zwit et synchronisation de la voix…');
       const rendered = await renderVideo(plan, frames, voice, format, duration, (progress) => {
         setStep('render', 'active', `${progress} %`);
         setStatus(`Montage et synchronisation · ${progress} %`);
@@ -715,9 +715,9 @@
       actions.hidden = false;
       actions.innerHTML = `<a class="vpd-download" href="${state.videoUrl}" download="${esc(state.fileName)}">Télécharger la vidéo</a><button class="vpd-secondary" data-vpd-new>Créer une autre</button>`;
       title.textContent = plan.title;
-      copy.textContent = `Démonstration terminée · ${rendered.duration} secondes · interface Velvet et voix off incluses`;
+      copy.textContent = `Démonstration terminée · ${rendered.duration} secondes · interface Zwit et voix off incluses`;
       saveHistory({ title: plan.title, format, duration: rendered.duration, createdAt: new Date().toISOString(), brief });
-      notify('La démonstration Velvet est prête');
+      notify('La démonstration Zwit est prête');
     } catch (error) {
       const message = friendlyError(error);
       title.textContent = 'La production s’est arrêtée';

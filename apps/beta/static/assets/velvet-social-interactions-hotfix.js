@@ -212,7 +212,7 @@
     toast(text);
     if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
       const registration = await navigator.serviceWorker?.ready.catch(() => null);
-      registration?.showNotification(notification.title || 'Velvet', {
+      registration?.showNotification(notification.title || 'Zwit', {
         body: text,
         icon: '/assets/velvet-icon-192.png',
         badge: '/assets/velvet-icon-192.png',

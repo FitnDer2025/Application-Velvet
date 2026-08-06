@@ -1,16 +1,16 @@
-# Velvet — PWA, migration de domaine et protection des photos
+# Zwit — PWA, migration de domaine et protection des photos
 
 ## Décisions figées
 
 - L’icône iPhone utilise un `apple-touch-icon` PNG 180 × 180.
 - Le manifeste PWA utilise une icône PNG 192 × 192 et conserve le monogramme SVG maskable.
-- Les notifications iPhone sont activées uniquement depuis Velvet installé sur l’écran d’accueil, après une action explicite de l’utilisateur.
+- Les notifications iPhone sont activées uniquement depuis Zwit installé sur l’écran d’accueil, après une action explicite de l’utilisateur.
 - Une migration de domaine change l’origine de la PWA et de son abonnement Push. Chaque appareil devra donc réautoriser les notifications une fois après la bascule vers le domaine privé.
 - Le secret Cloudflare `VAPID_PUBLIC_KEY` et la clé privée d’envoi devront être finalisés avant l’ouverture de la BETA aux invités.
 
 ## Protection des photos
 
-- Toute nouvelle photo envoyée depuis l’interface Velvet reçoit un filigrane Velvet directement dans ses pixels avant l’enregistrement.
+- Toute nouvelle photo envoyée depuis l’interface Zwit reçoit un filigrane Zwit directement dans ses pixels avant l’enregistrement.
 - Les photos déjà présentes reçoivent également un filigrane d’affichage avec un code de consultation pseudonyme.
 - Le glisser-déposer et le menu contextuel d’enregistrement sont désactivés dans l’interface.
 - Ces mesures découragent et permettent de mieux tracer une réutilisation, mais ne peuvent pas empêcher une photographie de l’écran avec un autre appareil.

@@ -52,7 +52,7 @@ struct PrivacySettingsView: View {
                         VelvetPageHeader(
                             "Contrôle privé",
                             title: "Confidentialité",
-                            subtitle: "Des réglages simples, synchronisés avec Velvet et les protections natives de l’iPhone."
+                            subtitle: "Des réglages simples, synchronisés avec Zwit et les protections natives de l’iPhone."
                         )
 
                         securityCard
@@ -136,9 +136,9 @@ struct PrivacySettingsView: View {
             title: biometrics.biometryName,
             icon: "faceid"
         ) {
-            Toggle("Verrouiller Velvet", isOn: $biometricEnabled)
+            Toggle("Verrouiller Zwit", isOn: $biometricEnabled)
                 .tint(VelvetColor.champagneGold)
-            Text("Velvet masque l’espace membre à chaque passage en arrière-plan. Le mot de passe n’est jamais stocké : l’iPhone valide ton identité.")
+            Text("Zwit masque l’espace membre à chaque passage en arrière-plan. Le mot de passe n’est jamais stocké : l’iPhone valide ton identité.")
                 .settingsFootnote()
         }
     }
@@ -151,7 +151,7 @@ struct PrivacySettingsView: View {
         ) {
             Toggle("Alertes sur cet iPhone", isOn: $notificationsEnabled)
                 .tint(VelvetColor.champagneGold)
-            Toggle("Centre de notifications Velvet", isOn: $inAppEnabled)
+            Toggle("Centre de notifications Zwit", isOn: $inAppEnabled)
                 .tint(VelvetColor.champagneGold)
             Toggle("Récapitulatif par e-mail", isOn: $emailEnabled)
                 .tint(VelvetColor.champagneGold)
@@ -220,7 +220,7 @@ struct PrivacySettingsView: View {
         ) {
             Toggle("Afficher les lieux proches", isOn: $locationEnabled)
                 .tint(VelvetColor.champagneGold)
-            Text("Velvet conserve uniquement une zone approximative d’environ 10 km. Les coordonnées exactes ne sont jamais publiées.")
+            Text("Zwit conserve uniquement une zone approximative d’environ 10 km. Les coordonnées exactes ne sont jamais publiées.")
                 .settingsFootnote()
         }
     }
@@ -240,7 +240,7 @@ struct PrivacySettingsView: View {
             NavigationLink {
                 StoreKitPreparationView()
             } label: {
-                settingsRow("Abonnement Velvet", detail: "Achats gérés par l’App Store")
+                settingsRow("Abonnement Zwit", detail: "Achats gérés par l’App Store")
             }
 
             Button(role: .destructive) {
@@ -343,7 +343,7 @@ struct PrivacySettingsView: View {
                 )
             )
             eventPreferences = result.notifications.eventTypes
-            appState.alertMessage = "Tes préférences Velvet sont enregistrées."
+            appState.alertMessage = "Tes préférences Zwit sont enregistrées."
         } catch {
             appState.alertMessage = ErrorMessage.text(for: error)
         }

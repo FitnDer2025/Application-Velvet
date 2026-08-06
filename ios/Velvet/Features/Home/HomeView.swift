@@ -17,7 +17,7 @@ struct HomeView: View {
                     VelvetPageHeader(
                         "Votre espace privé",
                         title: "Bonjour \(profile.displayName)",
-                        subtitle: "Les nouvelles rencontres, sorties et attentions Velvet réunies au même endroit."
+                        subtitle: "Les nouvelles rencontres, sorties et attentions Zwit réunies au même endroit."
                     )
 
                     if !profile.isAdmitted {
@@ -44,7 +44,7 @@ struct HomeView: View {
                     .contentMargins(.horizontal, 1)
 
                     VStack(alignment: .leading, spacing: 16) {
-                        sectionTitle("L’actualité Velvet", detail: "Sélection du jour")
+                        sectionTitle("L’actualité Zwit", detail: "Sélection du jour")
 
                         if let featured = discoverableProfiles.first {
                             NavigationLink {
@@ -77,7 +77,7 @@ struct HomeView: View {
                         }
                     }
 
-                    Text("BETA PRIVÉE · DONNÉES RÉELLES DU BACKEND VELVET")
+                    Text("BETA PRIVÉE · DONNÉES RÉELLES DU BACKEND ZWIT")
                         .font(VelvetTypography.caption(size: 9, weight: .semibold))
                         .tracking(1.4)
                         .foregroundStyle(VelvetColor.textSecondary)

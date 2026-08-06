@@ -4,7 +4,7 @@ import test from 'node:test';
 
 const read = (path) => readFile(path, 'utf8');
 
-test('le système visuel premium reste synchronisé avec la marque Velvet', async () => {
+test('le système visuel premium reste synchronisé avec la marque Zwit', async () => {
   const [css, ui, manifest] = await Promise.all([
     read('apps/beta/static/assets/velvet-premium-ui.css'),
     read('apps/beta/static/assets/velvet-premium-ui.js'),
@@ -26,7 +26,7 @@ test('la navigation mobile Membres conserve cinq espaces communs avec iOS', asyn
   assert.doesNotMatch(html,/velvet-people-first\.js/);
 });
 
-test('PRO et Contrôle gardent le langage visuel Velvet', async () => {
+test('PRO et Contrôle gardent le langage visuel Zwit', async () => {
   const [pro, control] = await Promise.all([
     read('apps/web/velvet-pro-beta-rc1.html'),
     read('apps/web/velvet-control-intelligence-beta-final.html')

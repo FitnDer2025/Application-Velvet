@@ -2,7 +2,7 @@
 
 ## Mission
 
-Construire Velvet à partir de la documentation versionnée dans ce dépôt, sans remplacer une décision produit par une supposition technique. Velvet doit rester élégant, confidentiel, inclusif, sûr et simple à utiliser.
+Construire Zwit à partir de la documentation versionnée dans ce dépôt, sans remplacer une décision produit par une supposition technique. Zwit doit rester élégant, confidentiel, inclusif, sûr et simple à utiliser.
 
 La V1 est une **double plateforme cohérente** :
 
@@ -73,7 +73,7 @@ Ne jamais rouvrir silencieusement un sujet validé.
 ## Fidélité visuelle
 
 - Utiliser les tokens canoniques, jamais des couleurs approximatives.
-- Logo : V ruban bordeaux/rose, VELVET en or champagne.
+- Logo : V ruban bordeaux/rose, ZWIT en or champagne.
 - Ne pas générer un V doré générique.
 - Respecter les espaces publics plus ouverts et les espaces privés plus profonds.
 - Éviter toute imagerie vulgaire, explicite ou stéréotypée.
@@ -120,7 +120,7 @@ Une fonctionnalité n'est terminée que si :
 - les permissions serveur sont vérifiées ;
 - les tests négatifs prouvent qu'un autre rôle ne peut pas accéder aux données ;
 - les événements analytics nécessaires sont documentés ;
-- les textes sensibles respectent le ton Velvet ;
+- les textes sensibles respectent le ton Zwit ;
 - les critères d'acceptation sont couverts ;
 - l'accessibilité de base est vérifiée ;
 - aucune donnée intime n'apparaît dans les logs ou notifications ;
@@ -129,7 +129,7 @@ Une fonctionnalité n'est terminée que si :
 
 ## Modules déjà normés
 
-Le chantier `Velvet Conversations` dispose d'ADR détaillés dans `docs/04-VELVET-CONVERSATIONS/`. Les décisions de marque, profils, consentement, confiance, découverte, professionnels et notifications sont indexées dans le registre.
+Le chantier `Zwit Conversations` dispose d'ADR détaillés dans `docs/04-VELVET-CONVERSATIONS/`. Les décisions de marque, profils, consentement, confiance, découverte, professionnels et notifications sont indexées dans le registre.
 
 ## Arbitrages
 

@@ -1,7 +1,7 @@
-# Velvet BETA — audit sécurité et RGPD
+# Zwit BETA — audit sécurité et RGPD
 
 Date de l’audit initial : 28 juillet 2026  
-Périmètre : Velvet Membres V6, Velvet Pro, Velvet Control / Intelligence, connexion et onboarding, API et schéma PostgreSQL existants.
+Périmètre : Zwit Membres V6, Zwit Pro, Zwit Control / Intelligence, connexion et onboarding, API et schéma PostgreSQL existants.
 
 > Ce document est un audit technique et une préparation à la conformité. Il ne remplace pas la validation d’un avocat spécialisé, d’un DPO ni l’analyse du champ d’application du référentiel Arcom.
 
@@ -13,9 +13,9 @@ Les interfaces peuvent rester accessibles comme démonstrations avec des donnée
 
 ## Synthèse
 
-Velvet traite par nature des données révélant la vie sexuelle et l’orientation sexuelle. Elles relèvent de l’article 9 du RGPD et exigent un consentement explicite, spécifique, libre, éclairé, traçable et révocable. La combinaison de ces données avec la géolocalisation, le profilage de compatibilité, la messagerie et la modération crée un risque élevé.
+Zwit traite par nature des données révélant la vie sexuelle et l’orientation sexuelle. Elles relèvent de l’article 9 du RGPD et exigent un consentement explicite, spécifique, libre, éclairé, traçable et révocable. La combinaison de ces données avec la géolocalisation, le profilage de compatibilité, la messagerie et la modération crée un risque élevé.
 
-Une AIPD doit être réalisée avant le traitement réel. Une revue juridique doit également déterminer si certaines fonctionnalités ou certains contenus placent Velvet dans le champ des obligations françaises relatives aux contenus pornographiques et à la vérification de l’âge.
+Une AIPD doit être réalisée avant le traitement réel. Une revue juridique doit également déterminer si certaines fonctionnalités ou certains contenus placent Zwit dans le champ des obligations françaises relatives aux contenus pornographiques et à la vérification de l’âge.
 
 ## Écarts bloquants — priorité P0
 
@@ -69,7 +69,7 @@ La base légale doit être confirmée dans le registre et l’AIPD.
 | Géolocalisation précise facultative | Consentement spécifique |
 | Modération, lutte contre la fraude et sécurité | Intérêt légitime documenté ; obligations légales selon le cas |
 | Conservation de preuves de consentement et de sanctions | Obligation légale ou intérêt légitime documenté |
-| Prospection Velvet | Consentement lorsque requis |
+| Prospection Zwit | Consentement lorsque requis |
 | Prospection de partenaires | Consentement séparé, jamais déduit de l’inscription |
 
 ## Règles BETA immédiates

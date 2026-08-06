@@ -1,4 +1,4 @@
-# Velvet Database Bible — DB-03
+# Zwit Database Bible — DB-03
 
 ## Media, albums, videos and access grants
 
@@ -31,7 +31,7 @@ This document is normative. No client may directly expose storage paths or bypas
 
 ## 2. Locked principles
 
-1. A media object belongs to exactly one Velvet profile, never directly to an authentication account.
+1. A media object belongs to exactly one Zwit profile, never directly to an authentication account.
 2. Uploading a file does not make it visible.
 3. Every media object has a lifecycle independent from the album containing it.
 4. Storage objects remain private by default.
@@ -44,7 +44,7 @@ This document is normative. No client may directly expose storage paths or bypas
 11. Media moderation status is separate from profile moderation status.
 12. Original files and generated derivatives must be traceable without exposing provider internals.
 13. Deleted media must disappear from product access immediately, even when physical purge is deferred.
-14. Velvet must record sufficient evidence to investigate unauthorized access without logging sensitive file contents.
+14. Zwit must record sufficient evidence to investigate unauthorized access without logging sensitive file contents.
 
 ---
 
@@ -565,7 +565,7 @@ For couple or other shared profiles:
 - withdrawal immediately hides the asset from recipients and suspends related grants;
 - removal of a member from a shared profile triggers review of every media asset for which that member has consent evidence.
 
-Velvet must not attempt to infer which real person appears in a file using biometric identity matching as a default product feature.
+Zwit must not attempt to infer which real person appears in a file using biometric identity matching as a default product feature.
 
 ---
 
@@ -962,7 +962,7 @@ The following remain intentionally deferred and require product/legal/security v
 - screenshot-deterrence UX on supported mobile platforms;
 - automatic nudity/safety moderation provider;
 - content retention periods after account deletion;
-- whether recipients may explicitly save media inside Velvet;
+- whether recipients may explicitly save media inside Zwit;
 - end-to-end encrypted media in messaging;
 - media use in events, professional listings and reviews;
 - anti-hash abuse databases and cross-platform safety integrations.

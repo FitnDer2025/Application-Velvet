@@ -101,7 +101,7 @@ private struct VelvetNotificationWidget: Widget {
                 }
                 .widgetURL(URL(string: "velvet://notifications"))
         }
-        .configurationDisplayName("Activité Velvet")
+        .configurationDisplayName("Activité Zwit")
         .description("Affiche uniquement les compteurs non lus, sans contenu privé.")
         .supportedFamilies([
             .systemSmall,
@@ -129,7 +129,7 @@ private struct VelvetNotificationWidgetView: View {
         case .accessoryRectangular:
             accessoryRectangular
         case .accessoryInline:
-            Text("Velvet · \(entry.snapshot.total) activité\(entry.snapshot.total > 1 ? "s" : "")")
+            Text("Zwit · \(entry.snapshot.total) activité\(entry.snapshot.total > 1 ? "s" : "")")
         default:
             small
         }
@@ -173,7 +173,7 @@ private struct VelvetNotificationWidgetView: View {
                 Text("\(entry.snapshot.total)")
                     .font(.system(size: 52, weight: .light, design: .rounded))
                     .foregroundStyle(.white)
-                Text("À retrouver dans Velvet")
+                Text("À retrouver dans Zwit")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.64))
             }
@@ -201,14 +201,14 @@ private struct VelvetNotificationWidgetView: View {
             }
         }
         .widgetLabel {
-            Text("Velvet")
+            Text("Zwit")
         }
     }
 
     private var accessoryRectangular: some View {
         HStack(spacing: 9) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("VELVET")
+                Text("ZWIT")
                     .font(.system(size: 10, weight: .bold))
                 Text("\(entry.snapshot.total) non lu\(entry.snapshot.total > 1 ? "s" : "")")
                     .font(.system(size: 14, weight: .semibold))
@@ -264,7 +264,7 @@ private struct VelvetWidgetMark: View {
             }
             .frame(width: 25, height: 25)
 
-            Text("VELVET")
+            Text("ZWIT")
                 .font(.system(size: 10, weight: .bold))
                 .tracking(1.8)
                 .foregroundStyle(.white.opacity(0.88))

@@ -31,7 +31,7 @@ Les documents publics ne peuvent pas être finalisés sans les informations suiv
 
 - mentions légales ;
 - CGU Membres ;
-- CGU / conditions Velvet Pro ;
+- CGU / conditions Zwit Pro ;
 - politique de confidentialité ;
 - politique relative aux cookies et traceurs ;
 - charte de consentement et de comportement ;

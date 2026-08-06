@@ -26,7 +26,7 @@ struct ProfileSetupView: View {
                         VelvetSectionHeader(
                             "Admission",
                             title: "Finalise ton entrée.",
-                            subtitle: "Les vérifications restent côté serveur. Velvet ne conserve aucun document d’identité."
+                            subtitle: "Les vérifications restent côté serveur. Zwit ne conserve aucun document d’identité."
                         )
 
                         if profile.profileType == .couple {

@@ -6,42 +6,42 @@
 
   const path = window.location.pathname;
   const title = path.startsWith('/control')
-    ? 'Velvet Contrôle'
+    ? 'Zwit Contrôle'
     : path.startsWith('/pro') || path.startsWith('/marketing-pro')
-      ? 'Velvet Pro'
+      ? 'Zwit Pro'
       : path.startsWith('/studio-capture')
-        ? 'Velvet Studio'
+        ? 'Zwit Studio'
         : path.startsWith('/membres') || path.startsWith('/marketing')
-          ? 'Velvet Membres'
-          : 'Velvet — Connexion';
+          ? 'Zwit Membres'
+          : 'Zwit — Connexion';
 
   const exact = new Map([
-    ['Velvet Membres — BETA privée', 'Velvet Membres'],
-    ['Velvet — BETA Marketing', 'Velvet Membres'],
-    ['Velvet Pro — BETA Marketing', 'Velvet Pro'],
-    ['Velvet BETA — Conditions', 'Velvet — Conditions d’utilisation'],
-    ['Velvet BETA — Confidentialité', 'Velvet — Confidentialité'],
-    ['Velvet BETA — Sécurité', 'Velvet — Sécurité'],
+    ['Zwit Membres — BETA privée', 'Zwit Membres'],
+    ['Zwit — BETA Marketing', 'Zwit Membres'],
+    ['Zwit Pro — BETA Marketing', 'Zwit Pro'],
+    ['Zwit BETA — Conditions', 'Zwit — Conditions d’utilisation'],
+    ['Zwit BETA — Confidentialité', 'Zwit — Confidentialité'],
+    ['Zwit BETA — Sécurité', 'Zwit — Sécurité'],
     ['BETA PRIVÉE · 18+', 'ACCÈS PRIVÉ · 18+'],
     ['BETA privée', 'Accès privé'],
-    ['BETA Marketing', 'Velvet'],
-    ['BETA MARKETING', 'VELVET'],
+    ['BETA Marketing', 'Zwit'],
+    ['BETA MARKETING', 'ZWIT'],
     ['PRO MARKETING', 'PRO'],
     ['Données réelles · À jour', 'Synchronisation active'],
     ['Données réelles · Configuration partielle', 'Synchronisation partielle'],
     ['Données réelles Supabase', 'Synchronisation sécurisée'],
     ['Données fictives · environnement marketing', 'Espace professionnel'],
-    ['Accès BETA', 'Accès Velvet'],
+    ['Accès BETA', 'Accès Zwit'],
     ['Conditions BETA', 'Conditions d’utilisation'],
     ['J’accepte les conditions de la BETA.', 'J’accepte les conditions d’utilisation de Velvet.'],
     ['Les quatre validations sont obligatoires pour cette BETA.', 'Les quatre validations sont obligatoires pour activer ton accès.'],
     ['Accès réservé aux personnes invitées à tester les quatre univers Velvet.', 'Accès réservé aux personnes disposant d’une invitation Velvet.'],
-    ['Cet environnement de démonstration est réservé à Velvet Control.', 'Cet espace est réservé aux comptes autorisés.'],
+    ['Cet environnement de démonstration est réservé à Zwit Control.', 'Cet espace est réservé aux comptes autorisés.'],
     ['BETA MARKETING · DONNÉES FICTIVES', ''],
     ['BETA MARKETING PRO · DONNÉES FICTIVES', ''],
-    ['Velvet Marketing Membre', 'Aperçu Velvet Membre'],
-    ['Velvet Marketing Pro', 'Aperçu Velvet Pro'],
-    ['Ouvrir Velvet Marketing', 'Ouvrir l’aperçu Velvet'],
+    ['Zwit Marketing Membre', 'Aperçu Zwit Membre'],
+    ['Zwit Marketing Pro', 'Aperçu Zwit Pro'],
+    ['Ouvrir Zwit Marketing', 'Ouvrir l’aperçu Zwit'],
     ['Agents de test', 'Agents qualité'],
     ['Agent de test', 'Agent qualité'],
     ['Tests automatisés', 'Contrôles automatisés'],
@@ -50,15 +50,15 @@
 
   const phraseRules = [
     [/\bBETA PRIVÉE\b/gi, 'ACCÈS PRIVÉ'],
-    [/\bBETA MARKETING PRO\b/gi, 'VELVET PRO'],
-    [/\bBETA MARKETING\b/gi, 'VELVET'],
-    [/\bBETA fermée\b/gi, 'Velvet'],
-    [/\bAccès BETA\b/gi, 'Accès Velvet'],
-    [/\bconditions de la BETA\b/gi, 'conditions d’utilisation de Velvet'],
+    [/\bBETA MARKETING PRO\b/gi, 'ZWIT PRO'],
+    [/\bBETA MARKETING\b/gi, 'ZWIT'],
+    [/\bBETA fermée\b/gi, 'Zwit'],
+    [/\bAccès BETA\b/gi, 'Accès Zwit'],
+    [/\bconditions de la BETA\b/gi, 'conditions d’utilisation de Zwit'],
     [/\bdonnées réelles\b/gi, 'données synchronisées'],
     [/\bdonnées fictives\b/gi, 'contenus de présentation'],
     [/\benvironnement de démonstration\b/gi, 'espace sécurisé'],
-    [/\benvironnement marketing\b/gi, 'espace Velvet'],
+    [/\benvironnement marketing\b/gi, 'espace Zwit'],
     [/\bversion de test\b/gi, 'version actuelle'],
     [/\bprofil test\b/gi, 'profil qualité'],
     [/\bprofils test\b/gi, 'profils qualité']

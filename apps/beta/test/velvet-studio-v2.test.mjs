@@ -8,7 +8,7 @@ const api = await readFile('functions/api/control/studio-v2.js', 'utf8');
 const migration = await readFile('infra/supabase/migrations/0041_velvet_studio_v2.sql', 'utf8');
 const build = await readFile('apps/beta/scripts/build.mjs', 'utf8');
 
-test('Velvet Studio V2 renders a real audiovisual stream', () => {
+test('Zwit Studio V2 renders a real audiovisual stream', () => {
   assert.match(renderer, /canvas\.captureStream\(FPS\)/);
   assert.match(renderer, /new MediaRecorder/);
   assert.match(renderer, /createMediaStreamDestination/);
@@ -18,7 +18,7 @@ test('Velvet Studio V2 renders a real audiovisual stream', () => {
   assert.match(renderer, /video\/webm/);
 });
 
-test('Velvet Studio V2 remains provider agnostic and cost controlled', () => {
+test('Zwit Studio V2 remains provider agnostic and cost controlled', () => {
   assert.match(api, /VELVET_STUDIO_MEDIA_GATEWAY/);
   assert.match(api, /VELVET_STUDIO_GENERATIVE_MEDIA/);
   assert.match(api, /local_fallback/);
