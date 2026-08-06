@@ -4,7 +4,7 @@
   if (window.__VELVET_PRODUCTION_SURFACE__) return;
   window.__VELVET_PRODUCTION_SURFACE__ = true;
 
-  const OFFICIAL_LOGO = '/assets/zwit-logo-transparent.png?v=20260806-9';
+  const OFFICIAL_LOGO = '/assets/zwit-logo-transparent.png?v=20260806-10';
   const path = window.location.pathname;
   const title = path.startsWith('/control')
     ? 'Zwit Contrôle'
@@ -195,7 +195,7 @@
   const loadExperience = () => {
     if (document.querySelector('script[data-zwit-experience]')) return;
     const experience = document.createElement('script');
-    experience.src = '/assets/zwit-experience.js?v=20260806-9';
+    experience.src = '/assets/zwit-experience.js?v=20260806-10';
     experience.dataset.zwitExperience = 'true';
     document.head.appendChild(experience);
   };
@@ -206,7 +206,7 @@
       return;
     }
     const refinement = document.createElement('script');
-    refinement.src = '/assets/zwit-experience-refinement.js?v=20260806-9';
+    refinement.src = '/assets/zwit-experience-refinement.js?v=20260806-10';
     refinement.dataset.zwitExperienceRefinement = 'true';
     refinement.addEventListener('load', loadExperience, { once:true });
     document.head.appendChild(refinement);
@@ -215,7 +215,7 @@
   const loadInteractionDateFix = () => {
     if (document.querySelector('script[data-zwit-interaction-date-fix]')) return;
     const script = document.createElement('script');
-    script.src = '/assets/zwit-interaction-date-fix.js?v=20260806-9';
+    script.src = '/assets/zwit-interaction-date-fix.js?v=20260806-10';
     script.dataset.zwitInteractionDateFix = 'true';
     document.head.appendChild(script);
   };
@@ -227,7 +227,7 @@
       return;
     }
     const script = document.createElement('script');
-    script.src = '/assets/zwit-brand-system.js?v=20260806-9';
+    script.src = '/assets/zwit-brand-system.js?v=20260806-10';
     script.dataset.zwitBrandSystem = 'true';
     script.addEventListener('load', () => {
       loadRefinement();

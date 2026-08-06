@@ -13,12 +13,8 @@ final class ShellChromeState: ObservableObject {
 @MainActor
 private enum ZwitConversationDateHUD {
     private static weak var currentPill: UIView?
-    private static var hideWorkItem: DispatchWorkItem?
 
     static func setVisible(_ visible: Bool) {
-        hideWorkItem?.cancel()
-        hideWorkItem = nil
-
         guard visible else {
             hide(animated: true)
             return
@@ -81,17 +77,9 @@ private enum ZwitConversationDateHUD {
             pill.alpha = 1
             pill.transform = .identity
         }
-
-        let work = DispatchWorkItem {
-            Task { @MainActor in hide(animated: true) }
-        }
-        hideWorkItem = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: work)
     }
 
     private static func hide(animated: Bool) {
-        hideWorkItem?.cancel()
-        hideWorkItem = nil
         guard let pill = currentPill else { return }
 
         let remove = {

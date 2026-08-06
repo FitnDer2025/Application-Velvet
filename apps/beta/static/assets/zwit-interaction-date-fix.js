@@ -6,9 +6,8 @@
 
   const openingSelector = '.zwit-opening-v2,.zwit-opening-v3';
   const directMessageSelector = '[data-message-id],[data-created-at],[data-message-created-at],.message-row,.chat-message,.message-bubble';
-  const officialLogo = window.ZWIT_BRAND?.assets?.splash || '/assets/zwit-logo-transparent.png?v=20260806-9';
+  const officialLogo = window.ZWIT_BRAND?.assets?.splash || '/assets/zwit-logo-transparent.png?v=20260806-10';
   let closingOpening = false;
-  let dateTimer = 0;
   let lastSignature = '';
 
   function closeOpening() {
@@ -127,8 +126,6 @@
       : fullDate;
 
     badge.classList.add('visible');
-    clearTimeout(dateTimer);
-    dateTimer = window.setTimeout(() => badge.classList.remove('visible'), 2000);
   }
 
   function patchMessageDates(forceDate = false) {
@@ -181,8 +178,8 @@
     .zwit-opening-v2 img,.zwit-opening-v3 img{background:transparent!important;object-fit:contain!important}
     .zwit-day-separator{display:flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;width:100%!important;margin:18px auto 12px!important;color:#d8bd77!important;font:700 11px Inter,Arial!important;text-transform:capitalize!important;position:relative!important;z-index:3!important}
     .zwit-day-separator:before,.zwit-day-separator:after{content:""!important;flex:1 1 52px!important;max-width:92px!important;height:1px!important;background:#d8bd7738!important}
-    .zwit-current-message-date{position:fixed;z-index:9500;top:max(72px,calc(env(safe-area-inset-top) + 62px));left:50%;transform:translate(-50%,-8px);max-width:calc(100vw - 32px);padding:7px 14px;border:1px solid #d8bd7738;border-radius:999px;background:#111114e8;color:#d8bd77;backdrop-filter:blur(16px);box-shadow:0 10px 28px #0006;font:700 11px Inter,Arial;text-align:center;text-transform:capitalize;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .22s ease,transform .22s ease,visibility 0s linear .22s}
-    .zwit-current-message-date.visible{opacity:1;visibility:visible;transform:translate(-50%,0);transition-delay:0s}
+    .zwit-current-message-date{position:fixed;z-index:9500;top:max(72px,calc(env(safe-area-inset-top) + 62px));left:50%;transform:translate(-50%,0);max-width:calc(100vw - 32px);padding:7px 14px;border:1px solid #d8bd7738;border-radius:999px;background:#111114e8;color:#d8bd77;backdrop-filter:blur(16px);box-shadow:0 10px 28px #0006;font:700 11px Inter,Arial;text-align:center;text-transform:capitalize;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .22s ease,transform .22s ease}
+    .zwit-current-message-date.visible{opacity:1;visibility:visible;transform:translate(-50%,0)}
     @media(max-width:720px){.zwit-current-message-date{top:max(66px,calc(env(safe-area-inset-top) + 56px));font-size:10px;padding:6px 12px}}
   `;
   document.head.appendChild(style);
