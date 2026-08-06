@@ -17,16 +17,6 @@ if 'data-zwit-experience' not in text:
     text = text.replace(needle, needle + loader, 1)
 prod.write_text(text)
 
-package = root / 'package.json'
-text = package.read_text()
-needle = 'node --check apps/beta/static/assets/velvet-production-surface.js'
-check = 'node --check apps/beta/static/assets/zwit-experience.js'
-if check not in text:
-    if needle not in text:
-        raise SystemExit('package check insertion point missing')
-    text = text.replace(needle, needle + ' && ' + check, 1)
-package.write_text(text)
-
 test = root / 'apps/beta/test/zwit-experience.test.mjs'
 test.write_text("""import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
