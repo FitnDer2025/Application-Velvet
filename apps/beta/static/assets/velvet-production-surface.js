@@ -70,26 +70,15 @@
     [/\bvelvet\b/g, 'zwit']
   ];
 
-  const removableSelectors = [
-    '#velvetMarketingBadge',
-    '#velvetMarketingProBadge',
-    '[data-beta-badge]',
-    '[data-demo-badge]',
-    '.beta-badge',
-    '.demo-badge'
-  ];
-
-  function normalized(value) {
-    return String(value || '').replace(/\s+/g, ' ').trim();
-  }
-
-  function replaceCopy(value) {
+  const removableSelectors = ['#velvetMarketingBadge','#velvetMarketingProBadge','[data-beta-badge]','[data-demo-badge]','.beta-badge','.demo-badge'];
+  const normalized = (value) => String(value || '').replace(/\s+/g, ' ').trim();
+  const replaceCopy = (value) => {
     const source = String(value || '');
     const trimmed = normalized(source);
     if (!trimmed) return source;
     if (exact.has(trimmed)) return source.replace(trimmed, exact.get(trimmed));
     return phraseRules.reduce((copy, [pattern, replacement]) => copy.replace(pattern, replacement), source);
-  }
+  };
 
   function cleanControlValue(element) {
     if (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)) return;
@@ -106,7 +95,7 @@
 
   function cleanElement(element) {
     if (!(element instanceof Element)) return;
-    for (const attribute of ['title', 'aria-label', 'placeholder', 'alt', 'value']) {
+    for (const attribute of ['title','aria-label','placeholder','alt','value']) {
       if (!element.hasAttribute(attribute)) continue;
       const current = element.getAttribute(attribute);
       const next = replaceCopy(current);
@@ -125,13 +114,8 @@
   function clean(root = document) {
     document.title = title;
     removableSelectors.forEach((selector) => document.querySelectorAll(selector).forEach((node) => node.remove()));
-
-    if (root instanceof Text) {
-      cleanTextNode(root);
-      return;
-    }
+    if (root instanceof Text) return cleanTextNode(root);
     if (root instanceof Element) cleanElement(root);
-
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
     let current = walker.currentNode;
     while (current) {
@@ -146,21 +130,15 @@
     if (!prototype || prototype.__zwitBrandGuard) return;
     const fillText = prototype.fillText;
     const strokeText = prototype.strokeText;
-    prototype.fillText = function guardedFillText(text, ...args) {
-      return fillText.call(this, replaceCopy(text), ...args);
-    };
-    prototype.strokeText = function guardedStrokeText(text, ...args) {
-      return strokeText.call(this, replaceCopy(text), ...args);
-    };
+    prototype.fillText = function guardedFillText(text, ...args) { return fillText.call(this, replaceCopy(text), ...args); };
+    prototype.strokeText = function guardedStrokeText(text, ...args) { return strokeText.call(this, replaceCopy(text), ...args); };
     Object.defineProperty(prototype, '__zwitBrandGuard', { value: true });
   }
 
   function installSpeechBrandGuard() {
     const NativeUtterance = window.SpeechSynthesisUtterance;
     if (!NativeUtterance || window.__ZWIT_SPEECH_BRAND_GUARD__) return;
-    const ZwitUtterance = function ZwitUtterance(text = '') {
-      return new NativeUtterance(replaceCopy(text));
-    };
+    const ZwitUtterance = function ZwitUtterance(text = '') { return new NativeUtterance(replaceCopy(text)); };
     ZwitUtterance.prototype = NativeUtterance.prototype;
     Object.setPrototypeOf(ZwitUtterance, NativeUtterance);
     window.SpeechSynthesisUtterance = ZwitUtterance;
@@ -169,16 +147,8 @@
 
   const style = document.createElement('style');
   style.id = 'velvetProductionSurfaceStyles';
-  style.textContent = `
-    #velvetMarketingBadge,
-    #velvetMarketingProBadge,
-    [data-beta-badge],
-    [data-demo-badge],
-    .beta-badge,
-    .demo-badge{display:none!important}
-  `;
+  style.textContent = '#velvetMarketingBadge,#velvetMarketingProBadge,[data-beta-badge],[data-demo-badge],.beta-badge,.demo-badge{display:none!important}';
   document.head.appendChild(style);
-
   installCanvasBrandGuard();
   installSpeechBrandGuard();
 
@@ -197,14 +167,14 @@
   });
 
   clean(document);
-  observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true });
+  observer.observe(document.documentElement, { subtree:true, childList:true, characterData:true });
   document.addEventListener('focusin', (event) => cleanElement(event.target), true);
   document.addEventListener('submit', (event) => clean(event.target), true);
   window.addEventListener('pageshow', () => clean(document));
-  [0, 250, 1000].forEach((delay) => setTimeout(() => clean(document), delay));
+  [0,250,1000].forEach((delay) => setTimeout(() => clean(document), delay));
   if (!document.querySelector('script[data-zwit-experience]')) {
     const experience = document.createElement('script');
-    experience.src = '/assets/zwit-experience.js?v=20260806-1';
+    experience.src = '/assets/zwit-experience.js?v=20260806-2';
     experience.dataset.zwitExperience = 'true';
     document.head.appendChild(experience);
   }
