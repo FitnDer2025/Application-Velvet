@@ -3,9 +3,6 @@ name: Finalize Zwit iOS hotfix
 on:
   push:
     branches:
-      - fix/zwit-ios-launch-brand-final
-  pull_request:
-    branches:
       - v1-lived-demo
     paths:
       - 'ios/**'
@@ -15,13 +12,14 @@ permissions:
   contents: write
 
 jobs:
-  finalize:
-    runs-on: ubuntu-latest
+  finalize-and-build:
+    runs-on: macos-15
+    timeout-minutes: 35
     steps:
-      - name: Checkout branch
+      - name: Checkout deployed branch
         uses: actions/checkout@v4
         with:
-          ref: fix/zwit-ios-launch-brand-final
+          ref: v1-lived-demo
           fetch-depth: 0
 
       - name: Patch Xcode product, launch gate and message dates
@@ -124,10 +122,33 @@ jobs:
           Path('.github/workflows/zwit-ios-finalize.yml').unlink()
           PY
 
-      - name: Commit finalized sources
+      - name: Compile Zwit app for iOS Simulator
+        run: |
+          set -o pipefail
+          xcodebuild -quiet \
+            -project ios/Velvet.xcodeproj \
+            -scheme Velvet \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Compile Zwit widget for iOS Simulator
+        run: |
+          set -o pipefail
+          xcodebuild -quiet \
+            -project ios/Velvet.xcodeproj \
+            -target VelvetWidget \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Commit validated final sources
         run: |
           git config user.name "Velvet-Application"
           git config user.email "sh96hv64dj@privaterelay.appleid.com"
           git add -A
           git commit -m "fix(ios): livrer Zwit.app avec l’animation native et les dates corrigées"
-          git push origin HEAD:fix/zwit-ios-launch-brand-final
+          git push origin HEAD:v1-lived-demo
