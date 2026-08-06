@@ -93,11 +93,19 @@ private struct VelvetNotificationWidget: Widget {
         StaticConfiguration(kind: kind, provider: VelvetWidgetProvider()) { entry in
             VelvetNotificationWidgetView(entry: entry)
                 .containerBackground(for: .widget) {
-                    LinearGradient(
-                        colors: [Color(red: 0.10, green: 0.08, blue: 0.09), Color(red: 0.22, green: 0.08, blue: 0.13)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
+                    ZStack {
+                        Image("ZwitOfficialLogo")
+                            .resizable()
+                            .scaledToFill()
+                            .blur(radius: 22)
+                            .brightness(-0.48)
+                            .opacity(0.42)
+                        LinearGradient(
+                            colors: [Color.black.opacity(0.66), Color(red: 0.22, green: 0.08, blue: 0.13).opacity(0.70)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    }
                 }
                 .widgetURL(URL(string: "velvet://notifications"))
         }
@@ -193,32 +201,26 @@ private struct VelvetNotificationWidgetView: View {
     private var accessoryCircular: some View {
         ZStack {
             AccessoryWidgetBackground()
-            VStack(spacing: 1) {
-                Image(systemName: "bell.fill")
-                    .font(.system(size: 12, weight: .semibold))
-                Text("\(entry.snapshot.total)")
-                    .font(.system(size: 19, weight: .bold, design: .rounded))
-            }
+            Image("ZwitOfficialLogo")
+                .resizable()
+                .scaledToFit()
+                .padding(3)
         }
-        .widgetLabel {
-            Text("Zwit")
-        }
+        .widgetLabel { Text("Zwit") }
     }
 
     private var accessoryRectangular: some View {
         HStack(spacing: 9) {
+            Image("ZwitOfficialLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 42, height: 42)
             VStack(alignment: .leading, spacing: 2) {
-                Text("ZWIT")
-                    .font(.system(size: 10, weight: .bold))
                 Text("\(entry.snapshot.total) non lu\(entry.snapshot.total > 1 ? "s" : "")")
                     .font(.system(size: 14, weight: .semibold))
+                Text("✉︎ \(entry.snapshot.messages)  ◉ \(entry.snapshot.visits)  ♥ \(entry.snapshot.likes)")
+                    .font(.system(size: 10, weight: .semibold, design: .rounded))
             }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("✉︎ \(entry.snapshot.messages)")
-                Text("◉ \(entry.snapshot.visits)  ♥ \(entry.snapshot.likes)")
-            }
-            .font(.system(size: 10, weight: .semibold, design: .rounded))
         }
     }
 
@@ -254,20 +256,10 @@ private struct VelvetNotificationWidgetView: View {
 
 private struct VelvetWidgetMark: View {
     var body: some View {
-        HStack(spacing: 7) {
-            ZStack {
-                Circle()
-                    .stroke(Color(red: 0.84, green: 0.70, blue: 0.43).opacity(0.75), lineWidth: 1)
-                Text("V")
-                    .font(.system(size: 13, weight: .medium, design: .serif))
-                    .foregroundStyle(Color(red: 0.84, green: 0.70, blue: 0.43))
-            }
-            .frame(width: 25, height: 25)
-
-            Text("ZWIT")
-                .font(.system(size: 10, weight: .bold))
-                .tracking(1.8)
-                .foregroundStyle(.white.opacity(0.88))
-        }
+        Image("ZwitOfficialLogo")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 64, height: 38, alignment: .leading)
+            .accessibilityLabel("Zwit")
     }
 }
