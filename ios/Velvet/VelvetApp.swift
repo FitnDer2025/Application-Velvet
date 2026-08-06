@@ -14,7 +14,7 @@ struct ZwitApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                RootView()
+                ZwitRootContainer()
                     .environmentObject(appState)
                     .environmentObject(biometrics)
                     .environmentObject(screenshotProtection)
@@ -22,7 +22,7 @@ struct ZwitApp: App {
 
                 if showsLaunchExperience {
                     ZwitNativeLaunchExperience {
-                        withAnimation(.easeInOut(duration: 0.85)) {
+                        withAnimation(.easeOut(duration: 0.22)) {
                             showsLaunchExperience = false
                         }
                     }
