@@ -13,11 +13,14 @@ final class ShellChromeState: ObservableObject {
 @MainActor
 private enum ZwitConversationDateHUD {
     private static weak var currentPill: UIView?
+    private static var hideWorkItem: DispatchWorkItem?
 
     static func setVisible(_ visible: Bool) {
-        if !visible {
-            currentPill?.removeFromSuperview()
-            currentPill = nil
+        hideWorkItem?.cancel()
+        hideWorkItem = nil
+
+        guard visible else {
+            hide(animated: true)
             return
         }
 
@@ -31,47 +34,86 @@ private enum ZwitConversationDateHUD {
             return
         }
 
+        let pill: UIView
         if let currentPill, currentPill.superview != nil {
-            updateLabel(in: currentPill)
+            pill = currentPill
+            updateLabel(in: pill)
+        } else {
+            let blur = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
+            blur.translatesAutoresizingMaskIntoConstraints = false
+            blur.layer.cornerRadius = 16
+            blur.layer.cornerCurve = .continuous
+            blur.clipsToBounds = true
+            blur.layer.borderWidth = 0.7
+            blur.layer.borderColor = UIColor(red: 0.85, green: 0.74, blue: 0.47, alpha: 0.26).cgColor
+            blur.isUserInteractionEnabled = false
+            blur.accessibilityIdentifier = "zwit-conversation-date"
+
+            let label = UILabel()
+            label.translatesAutoresizingMaskIntoConstraints = false
+            label.font = .systemFont(ofSize: 11, weight: .bold)
+            label.textColor = UIColor(red: 0.85, green: 0.74, blue: 0.47, alpha: 1)
+            label.textAlignment = .center
+            label.adjustsFontForContentSizeCategory = true
+            label.tag = 7106
+            blur.contentView.addSubview(label)
+
+            window.addSubview(blur)
+            NSLayoutConstraint.activate([
+                blur.centerXAnchor.constraint(equalTo: window.centerXAnchor),
+                blur.topAnchor.constraint(equalTo: window.safeAreaLayoutGuide.topAnchor, constant: 58),
+                blur.heightAnchor.constraint(greaterThanOrEqualToConstant: 32),
+                label.leadingAnchor.constraint(equalTo: blur.contentView.leadingAnchor, constant: 14),
+                label.trailingAnchor.constraint(equalTo: blur.contentView.trailingAnchor, constant: -14),
+                label.topAnchor.constraint(equalTo: blur.contentView.topAnchor, constant: 7),
+                label.bottomAnchor.constraint(equalTo: blur.contentView.bottomAnchor, constant: -7)
+            ])
+
+            currentPill = blur
+            pill = blur
+            updateLabel(in: pill)
+        }
+
+        pill.layer.removeAllAnimations()
+        pill.alpha = 0
+        pill.transform = CGAffineTransform(translationX: 0, y: -8)
+        UIView.animate(withDuration: 0.22, delay: 0, options: [.curveEaseOut, .beginFromCurrentState]) {
+            pill.alpha = 1
+            pill.transform = .identity
+        }
+
+        let work = DispatchWorkItem {
+            Task { @MainActor in hide(animated: true) }
+        }
+        hideWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: work)
+    }
+
+    private static func hide(animated: Bool) {
+        hideWorkItem?.cancel()
+        hideWorkItem = nil
+        guard let pill = currentPill else { return }
+
+        let remove = {
+            pill.removeFromSuperview()
+            if currentPill === pill { currentPill = nil }
+        }
+
+        guard animated, pill.superview != nil else {
+            remove()
             return
         }
 
-        let blur = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
-        blur.translatesAutoresizingMaskIntoConstraints = false
-        blur.layer.cornerRadius = 16
-        blur.layer.cornerCurve = .continuous
-        blur.clipsToBounds = true
-        blur.layer.borderWidth = 0.7
-        blur.layer.borderColor = UIColor(red: 0.85, green: 0.74, blue: 0.47, alpha: 0.26).cgColor
-        blur.isUserInteractionEnabled = false
-        blur.accessibilityIdentifier = "zwit-conversation-date"
-
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 11, weight: .bold)
-        label.textColor = UIColor(red: 0.85, green: 0.74, blue: 0.47, alpha: 1)
-        label.textAlignment = .center
-        label.adjustsFontForContentSizeCategory = true
-        label.tag = 7106
-        blur.contentView.addSubview(label)
-
-        window.addSubview(blur)
-        NSLayoutConstraint.activate([
-            blur.centerXAnchor.constraint(equalTo: window.centerXAnchor),
-            blur.topAnchor.constraint(equalTo: window.safeAreaLayoutGuide.topAnchor, constant: 58),
-            blur.heightAnchor.constraint(greaterThanOrEqualToConstant: 32),
-            label.leadingAnchor.constraint(equalTo: blur.contentView.leadingAnchor, constant: 14),
-            label.trailingAnchor.constraint(equalTo: blur.contentView.trailingAnchor, constant: -14),
-            label.topAnchor.constraint(equalTo: blur.contentView.topAnchor, constant: 7),
-            label.bottomAnchor.constraint(equalTo: blur.contentView.bottomAnchor, constant: -7)
-        ])
-
-        currentPill = blur
-        updateLabel(in: blur)
-        blur.alpha = 0
-        UIView.animate(withDuration: 0.22) {
-            blur.alpha = 1
-        }
+        UIView.animate(
+            withDuration: 0.24,
+            delay: 0,
+            options: [.curveEaseIn, .beginFromCurrentState],
+            animations: {
+                pill.alpha = 0
+                pill.transform = CGAffineTransform(translationX: 0, y: -6)
+            },
+            completion: { _ in remove() }
+        )
     }
 
     private static func updateLabel(in view: UIView) {
@@ -92,8 +134,12 @@ struct CompactVelvetTopBar: View {
 
     var body: some View {
         HStack(spacing: 9) {
-            VelvetMark(size: 25)
-            Text("ZWIT")
+            Image(ZwitBrand.logoCompactAsset)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 30, height: 30)
+                .accessibilityHidden(true)
+            Text(ZwitBrand.memberLabel)
                 .font(VelvetTypography.brand(size: 14))
                 .tracking(2.8)
                 .foregroundStyle(VelvetColor.ivory)
