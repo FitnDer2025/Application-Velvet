@@ -1,305 +1,12 @@
 # Rapport de rebranding Zwit
 
-Généré automatiquement le 2026-08-06T11:49:52.013Z.
+Généré automatiquement le 2026-08-06T11:51:22.313Z.
 
-## Fichiers textuels modifiés (296)
+## Fichiers textuels modifiés (3)
 
-- `AGENTS.md`
-- `CHANGELOG.md`
-- `CODEX.md`
-- `CONTRIBUTING.md`
-- `INSTALLATION_GITHUB.md`
-- `PROJECT_CONTEXT.md`
-- `README.md`
-- `apps/api/test/studio-simple-flow.test.mjs`
-- `apps/beta/DEPLOYMENT.md`
-- `apps/beta/scripts/build.mjs`
-- `apps/beta/static/acces-prive/index.html`
-- `apps/beta/static/assets/account-access-menu.js`
-- `apps/beta/static/assets/control-live.js`
-- `apps/beta/static/assets/location-verification.js`
-- `apps/beta/static/assets/members-live.css`
-- `apps/beta/static/assets/members-live.js`
-- `apps/beta/static/assets/members-onboarding-v2.js`
-- `apps/beta/static/assets/photo-protection.js`
-- `apps/beta/static/assets/pro-live.js`
-- `apps/beta/static/assets/pwa-ios.js`
-- `apps/beta/static/assets/real-auth-gate.js`
-- `apps/beta/static/assets/velvet-atmosphere.svg`
-- `apps/beta/static/assets/velvet-chat-whatsapp.css`
-- `apps/beta/static/assets/velvet-community-parity.js`
-- `apps/beta/static/assets/velvet-experience-management.js`
 - `apps/beta/static/assets/velvet-icon.svg`
-- `apps/beta/static/assets/velvet-marketing-mode.js`
-- `apps/beta/static/assets/velvet-marketing-pro-campaign-bridge.js`
-- `apps/beta/static/assets/velvet-marketing-pro-mode.js`
-- `apps/beta/static/assets/velvet-marketing-pro-studio-bridge.js`
-- `apps/beta/static/assets/velvet-messaging-upgrade.css`
-- `apps/beta/static/assets/velvet-messaging-upgrade.js`
-- `apps/beta/static/assets/velvet-mobile-feed-hotfix.js`
-- `apps/beta/static/assets/velvet-mobile-viewport-guard.css`
-- `apps/beta/static/assets/velvet-people-first.js`
-- `apps/beta/static/assets/velvet-premium-ui.css`
-- `apps/beta/static/assets/velvet-premium-ui.js`
-- `apps/beta/static/assets/velvet-pro-marketing.js`
-- `apps/beta/static/assets/velvet-pro-studio-ai.js`
-- `apps/beta/static/assets/velvet-production-surface.js`
-- `apps/beta/static/assets/velvet-realtime-reconcile.js`
-- `apps/beta/static/assets/velvet-social-interactions-hotfix.css`
-- `apps/beta/static/assets/velvet-social-interactions-hotfix.js`
-- `apps/beta/static/assets/velvet-social-realtime.js`
-- `apps/beta/static/assets/velvet-studio-ai-module.js`
-- `apps/beta/static/assets/velvet-studio-ai.js`
-- `apps/beta/static/assets/velvet-studio-bootstrap.js`
-- `apps/beta/static/assets/velvet-studio-capture.js`
-- `apps/beta/static/assets/velvet-studio-control.js`
-- `apps/beta/static/assets/velvet-studio-lite.js`
-- `apps/beta/static/assets/velvet-studio-live-recorder.js`
-- `apps/beta/static/assets/velvet-studio-product-demo.js`
-- `apps/beta/static/assets/velvet-studio-sprint1.js`
-- `apps/beta/static/assets/velvet-studio-story-director.js`
-- `apps/beta/static/assets/velvet-studio-v2.js`
-- `apps/beta/static/assets/velvet-studio-v3.js`
-- `apps/beta/static/assets/velvet-studio-v31-compat.js`
-- `apps/beta/static/assets/velvet-studio-v31-launcher.js`
-- `apps/beta/static/assets/velvet-studio-v31-media.js`
-- `apps/beta/static/assets/velvet-waitlist.js`
-- `apps/beta/static/assets/velvet-web-ios-parity.css`
-- `apps/beta/static/assets/velvet-web-ios-parity.js`
 - `apps/beta/static/assets/zwit-icon.svg`
 - `apps/beta/static/assets/zwit-logo.svg`
-- `apps/beta/static/control/acces-prive/index.html`
-- `apps/beta/static/deployment-status.json`
-- `apps/beta/static/legal/privacy/index.html`
-- `apps/beta/static/legal/safety/index.html`
-- `apps/beta/static/legal/terms/index.html`
-- `apps/beta/static/manifest.webmanifest`
-- `apps/beta/static/marketing/acces-prive/index.html`
-- `apps/beta/static/sw.js`
-- `apps/beta/test/control-pilot.test.mjs`
-- `apps/beta/test/home-events-profile-management.test.mjs`
-- `apps/beta/test/ios-premium-parity-pass.test.mjs`
-- `apps/beta/test/premium-ui.test.mjs`
-- `apps/beta/test/profile-copy.test.mjs`
-- `apps/beta/test/session-navigation-ios-scheme.test.mjs`
-- `apps/beta/test/technical-blockers-closure.test.mjs`
-- `apps/beta/test/velvet-studio-sprint1.test.mjs`
-- `apps/beta/test/velvet-studio-v2.test.mjs`
-- `apps/beta/test/waiting-room.test.mjs`
-- `apps/beta/test/whatsapp-chat-ux.test.mjs`
-- `apps/beta/tests/velvet-studio-v3.test.mjs`
-- `apps/beta/tests/velvet-studio-v31-media.test.mjs`
-- `apps/beta/worker/index.js`
-- `apps/web/PROTOTYPE-PHASES-2-3.md`
-- `apps/web/README-V1-MESSAGING.md`
-- `apps/web/README.md`
-- `apps/web/index.html`
-- `apps/web/lived-app.js`
-- `apps/web/lived-data.js`
-- `apps/web/lived.html`
-- `apps/web/my-profile-v1.html`
-- `apps/web/prototype.html`
-- `apps/web/v1.html`
-- `apps/web/v1.js`
-- `apps/web/velvet-auth-beta-rc1.html`
-- `apps/web/velvet-auth-onboarding-v1.html`
-- `apps/web/velvet-control-intelligence-b-beta.html`
-- `apps/web/velvet-control-intelligence-b.html`
-- `apps/web/velvet-control-intelligence-beta-final.html`
-- `apps/web/velvet-control-intelligence-c-beta.html`
-- `apps/web/velvet-control-intelligence-c.html`
-- `apps/web/velvet-control-intelligence-d-beta.html`
-- `apps/web/velvet-control-intelligence-d.html`
-- `apps/web/velvet-control-intelligence-v1-1-final.html`
-- `apps/web/velvet-control-v1-1-tracking.html`
-- `apps/web/velvet-control-v1-beta.html`
-- `apps/web/velvet-control-v1.html`
-- `apps/web/velvet-email-couple-invitation-preview.html`
-- `apps/web/velvet-members-beta-live.html`
-- `apps/web/velvet-members-beta-rc1.html`
-- `apps/web/velvet-members-v6-beta-rc2.html`
-- `apps/web/velvet-pro-beta-rc1.html`
-- `apps/web/velvet-pro-crm-v1.html`
-- `apps/web/velvet-reference-demo-locked.html`
-- `apps/web/velvet-reference-demo.html`
-- `apps/web/velvet-v1-apogee.html`
-- `apps/web/velvet-v1-couple-review.html`
-- `apps/web/velvet-v1-establishments-organizer-v5.html`
-- `apps/web/velvet-v1-fiches-completes-v3.html`
-- `apps/web/velvet-v1-integrated.html`
-- `apps/web/velvet-v1-locked-dense-demo-v3.html`
-- `apps/web/velvet-v1-locked-dense.html`
-- `apps/web/velvet-v1-locked-premium.html`
-- `apps/web/velvet-v1-private-organizers-v6.html`
-- `apps/web/velvet-v1-profile-central-v4-fixed.html`
-- `apps/web/velvet-v1-profile-central-v4.html`
-- `apps/web/velvet-v1-profile-premium.html`
-- `apps/web/velvet-v1-profils-cercles-v2.html`
-- `apps/web/velvet-v1.html`
-- `apps/worker/src/test-agent-ai.mjs`
-- `apps/worker/test/marketing-pro-studio-ai.test.mjs`
-- `apps/worker/test/pro-marketing-hub.test.mjs`
-- `apps/worker/test/production-experience.test.mjs`
-- `apps/worker/test/studio-live-recording.test.mjs`
-- `apps/worker/test/studio-marketing-beta.test.mjs`
-- `apps/worker/test/studio-social-video-v1.test.mjs`
-- `docs/00-GOVERNANCE/ADR-0001-one-decision-one-commit.md`
-- `docs/00-GOVERNANCE/ADR-STATUS.md`
-- `docs/00-GOVERNANCE/CHANGELOG-PRODUCT.md`
-- `docs/00-GOVERNANCE/DECISION-REGISTRY.md`
-- `docs/00-GOVERNANCE/OPERATING-MODEL-CODEX-FIRST.md`
-- `docs/00-GOVERNANCE/PRODUCT-METRICS.md`
-- `docs/00-GOVERNANCE/PROJECT-ROADMAP.md`
-- `docs/01-BRAND/ADR-0049-opening-experience.md`
-- `docs/01-BRAND/ADR-0050-hybrid-visual-architecture.md`
-- `docs/01-BRAND/ADR-0053-hybrid-icon-system.md`
-- `docs/01-BRAND/ADR-0054-minimalist-illustrations.md`
-- `docs/01-BRAND/ADR-0055-opening-sound-signature.md`
-- `docs/01-BRAND/DESIGN-TOKENS.json`
-- `docs/01-BRAND/IMPLEMENTATION-GUIDE.md`
-- `docs/02-PRODUCT/ADR-0047-account-types.md`
-- `docs/02-PRODUCT/FEATURE-MAP.md`
-- `docs/02-PRODUCT/V1-DUAL-PLATFORM-SCOPE.md`
-- `docs/03-ADR/ADR-AI-059-INTERNAL-TEST-AGENTS.md`
-- `docs/03-ADR/ADR-GROWTH-062-VELVET-WAITING-ROOM.md`
-- `docs/03-ADR/ADR-MON-057-MEMBER-PRO-MONETIZATION.md`
-- `docs/03-ADR/ADR-TECH-045-V1-WEB-PWA.md`
-- `docs/03-ADR/ADR-TECH-058-IOS-NATIVE-FOUNDATION.md`
-- `docs/03-ADR/ADR-UX-060-WEB-ACCOUNT-AND-INTERFACE-SWITCHING.md`
-- `docs/03-ADR/ADR-UX-061-CONTROL-PILOTING-COCKPIT.md`
-- `docs/04-VELVET-CONVERSATIONS/ADR-0041-conversation-philosophy.md`
-- `docs/04-VELVET-CONVERSATIONS/ADR-0042-invitation-velvet-and-guided-opening.md`
-- `docs/04-VELVET-CONVERSATIONS/ADR-0043-no-invitation-follow-up.md`
-- `docs/04-VELVET-CONVERSATIONS/ADR-0044-message-and-invitation-statuses.md`
-- `docs/04-VELVET-CONVERSATIONS/ADR-0045-first-real-life-meeting.md`
-- `docs/04-VELVET-CONVERSATIONS/ADR-0045-screenshot-notifications.md`
-- `docs/05-UX/ADR-0051-person-first-profiles-artistic-galleries.md`
-- `docs/05-UX/ADR-0052-animation-principles.md`
-- `docs/05-UX/ADR-0056-mobile-notifications-privacy-modes.md`
-- `docs/06-AI/INTERNAL-TEST-AGENTS-RUNBOOK.md`
-- `docs/08-TRUST/ADR-0046-velvet-trust-index.md`
-- `docs/08-TRUST/ADR-0048-velvet-pact.md`
-- `docs/10-TECH/ADR-DATA-046-ACCOUNT-AND-SHARED-PROFILE-OWNERSHIP.md`
-- `docs/10-TECH/TARGET-ARCHITECTURE-V1.md`
-- `docs/10-TECH/V1-DELIVERY-BLUEPRINT.md`
-- `docs/11-ROADMAP/V1-SCOPE-AND-ACCEPTANCE.md`
-- `docs/20-DATABASE/DB-01-ACCOUNTS-PROFILES-IDENTITIES.md`
-- `docs/20-DATABASE/DB-02-PROFILE-MODULES-SEARCH-PRACTICES-LIMITS-CONSENT.md`
-- `docs/20-DATABASE/DB-03-MEDIA-ALBUMS-VIDEOS-ACCESS-GRANTS.md`
-- `docs/20-DATABASE/README.md`
-- `docs/VELVET_PRO_MARKETING_SETUP.md`
-- `docs/WEB_IOS_PWA_PARITY_AUDIT_2026-08-01.md`
-- `docs/adr/ADR-DA-020-ai-first-hybrid-moderation.md`
-- `docs/adr/ADR-DA-021-flexible-public-pseudonyms.md`
-- `docs/adr/ADR-DA-022-mandatory-identity-verification.md`
-- `docs/adr/ADR-DA-023-velvet-activity-index.md`
-- `docs/adr/ADR-DA-024-036-intelligent-discovery.md`
-- `docs/adr/ADR-GAM-043-044-positive-gamification.md`
-- `docs/adr/ADR-GOV-002-continuous-project-steering.md`
-- `docs/adr/ADR-GOV-003-code-delivery-autonomy.md`
-- `docs/adr/ADR-PRO-038-041-professional-ecosystem-and-trips.md`
-- `docs/beta/CLOUDFLARE-PAGES.md`
-- `docs/beta/DATA-PROCESSING-REGISTER.md`
-- `docs/beta/IDENTITY-AGE-VERIFICATION-RUNBOOK.md`
-- `docs/beta/LEGAL-INPUTS-REQUIRED.md`
-- `docs/beta/SECURITY-RGPD-AUDIT.md`
-- `docs/beta/USER-ACCEPTANCE-RECIPE.md`
-- `docs/beta/VELVET-MEMORY.md`
-- `docs/decisions/location-identity-age-foundation.md`
-- `docs/decisions/pwa-domain-migration-photo-protection.md`
-- `docs/industrialization/ARCHITECTURE.md`
-- `docs/industrialization/SECURITY.md`
-- `functions/api/billing/_shared.js`
-- `functions/api/control/marketing-portrait.js`
-- `functions/api/control/studio-media-safe.js`
-- `functions/api/control/studio-media.js`
-- `functions/api/control/studio-social-plan.js`
-- `functions/api/control/studio-v2.js`
-- `functions/api/control/studio-v3.js`
-- `functions/api/control/studio.js`
-- `functions/api/members/_browser-push.js`
-- `functions/api/members/_message-notifications.js`
-- `functions/api/members/account-actions.js`
-- `functions/api/members/couple-invitation-email.js`
-- `functions/api/members/directory.js`
-- `functions/api/members/engagement.js`
-- `functions/api/members/events.js`
-- `functions/api/members/home-intelligence.js`
-- `functions/api/members/media-security-events.js`
-- `functions/api/members/messages.js`
-- `functions/api/members/photo-reactions.js`
-- `functions/api/members/photos.js`
-- `functions/api/members/profile-copy.js`
-- `functions/api/pro/marketing.js`
-- `functions/api/pro/studio-ai.js`
-- `ios/APP-STORE-CHECKLIST.md`
-- `ios/ARCHITECTURE.md`
-- `ios/PARITY-UX-PASS-2026-07-31.md`
-- `ios/README.md`
-- `ios/Velvet/App/AppState.swift`
-- `ios/Velvet/App/RootView.swift`
-- `ios/Velvet/Core/Models/DirectoryModels.swift`
-- `ios/Velvet/Core/Networking/APIClient.swift`
-- `ios/Velvet/Core/Networking/APIError.swift`
-- `ios/Velvet/Core/System/BiometricLockService.swift`
-- `ios/Velvet/Core/System/NotificationService.swift`
-- `ios/Velvet/DesignSystem/AppleShellComponents.swift`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift`
-- `ios/Velvet/Features/Authentication/ConsentView.swift`
-- `ios/Velvet/Features/Authentication/ForgotPasswordView.swift`
-- `ios/Velvet/Features/Authentication/LoginView.swift`
-- `ios/Velvet/Features/Discovery/PremiumDiscoveryGridView.swift`
-- `ios/Velvet/Features/Discovery/PremiumMemberDetailView.swift`
-- `ios/Velvet/Features/Home/HomeView.swift`
-- `ios/Velvet/Features/Home/IntelligentHomeActivityView.swift`
-- `ios/Velvet/Features/Home/IntelligentHomeView.swift`
-- `ios/Velvet/Features/Home/MainShellView.swift`
-- `ios/Velvet/Features/Home/NotificationsView.swift`
-- `ios/Velvet/Features/Home/PeopleFirstHomeView.swift`
-- `ios/Velvet/Features/Home/PremiumHomeView.swift`
-- `ios/Velvet/Features/Home/PremiumProfileSummarySections.swift`
-- `ios/Velvet/Features/Home/ProfileSummaryView.swift`
-- `ios/Velvet/Features/Home/VelvetNavigationHubView.swift`
-- `ios/Velvet/Features/Messaging/AppleMessagingViews.swift`
-- `ios/Velvet/Features/Messaging/ConversationsView.swift`
-- `ios/Velvet/Features/Messaging/ManagedConversationsView.swift`
-- `ios/Velvet/Features/Messaging/RealtimeAppleMessagingViews.swift`
-- `ios/Velvet/Features/Onboarding/OnboardingFlowView.swift`
-- `ios/Velvet/Features/Onboarding/ProfileSetupView.swift`
-- `ios/Velvet/Features/Places/AgendaView.swift`
-- `ios/Velvet/Features/Places/IntelligentPlacesEventsView.swift`
-- `ios/Velvet/Features/Places/MemberMapView.swift`
-- `ios/Velvet/Features/Places/PlacesEventsView.swift`
-- `ios/Velvet/Features/Places/ProfileOutingsView.swift`
-- `ios/Velvet/Features/Places/SocialOutingsViews.swift`
-- `ios/Velvet/Features/Places/VenueDetailView.swift`
-- `ios/Velvet/Features/Profile/ExperienceSettingsView.swift`
-- `ios/Velvet/Features/Profile/MemberToolsView.swift`
-- `ios/Velvet/Features/Profile/PremiumOwnProfileView.swift`
-- `ios/Velvet/Features/Profile/PrivacySettingsView.swift`
-- `ios/Velvet/Features/Profile/ProfileEditorView.swift`
-- `ios/Velvet/Features/Profile/ProfileMediaManagementView.swift`
-- `ios/Velvet/Resources/Info.plist`
-- `ios/VelvetWatch/Info.plist`
-- `ios/VelvetWatch/VelvetWatchApp.swift`
-- `ios/VelvetWatchWidget/Info.plist`
-- `ios/VelvetWatchWidget/VelvetWatchWidget.swift`
-- `ios/VelvetWidget/Info.plist`
-- `ios/VelvetWidget/VelvetNotificationWidget.swift`
-- `ios/WEB-IOS-PARITY.md`
-- `ios/scripts/validate-foundation.mjs`
-- `packages/api-client/src/index.mjs`
-- `packages/contracts/openapi.yaml`
-- `scripts/check-beta-persistence.mjs`
-- `scripts/check-beta-release.mjs`
-- `scripts/check-beta-user-journey.mjs`
-- `scripts/check-beta-worker.mjs`
-- `scripts/check-supabase-migrations.mjs`
-- `scripts/generate-venue-address-coordinates.mjs`
-- `scripts/ops/backup-format.mjs`
-- `scripts/recipe/serve-beta.mjs`
-- `tests/recipe/control-pilot.spec.mjs`
-- `tests/recipe/public-multi-device.spec.mjs`
 
 ## Références techniques protégées
 
@@ -553,258 +260,258 @@ Ces références n’ont volontairement pas été renommées.
 - `docs/03-ADR/ADR-AI-059-INTERNAL-TEST-AGENTS.md: VELVET_TEST_AGENT_MODEL`
 - `docs/03-ADR/ADR-AI-059-INTERNAL-TEST-AGENTS.md: Velvet.`
 - `docs/03-ADR/ADR-GROWTH-062-VELVET-WAITING-ROOM.md: Velvet.`
-- `docs/04-VELVET-CONVERSATIONS/ADR-0042-invitation-velvet-and-guided-opening.md: Velvet.`
-- `docs/05-UX/ADR-0051-person-first-profiles-artistic-galleries.md: Velvet.`
-- `docs/06-AI/INTERNAL-TEST-AGENTS-RUNBOOK.md: VELVET_ENVIRONMENT`
-- `docs/06-AI/INTERNAL-TEST-AGENTS-RUNBOOK.md: VELVET_INTERNAL_TEST_AGENTS`
-- `docs/06-AI/INTERNAL-TEST-AGENTS-RUNBOOK.md: VELVET_TEST_AGENT_BATCH_SIZE`
-- `docs/06-AI/INTERNAL-TEST-AGENTS-RUNBOOK.md: VELVET_TEST_AGENT_CYCLE_MS`
-- `docs/06-AI/INTERNAL-TEST-AGENTS-RUNBOOK.md: VELVET_TEST_AGENT_MODEL`
-- `docs/10-TECH/ADR-DATA-046-ACCOUNT-AND-SHARED-PROFILE-OWNERSHIP.md: Velvet.`
-- `docs/10-TECH/V1-DELIVERY-BLUEPRINT.md: Velvet.`
-- `docs/11-ROADMAP/CODEX-FIRST-DELIVERY-PLAN.md: Velvet.`
-- `docs/VELVET_PRO_MARKETING_SETUP.md: VELVET_PUBLIC_ORIGIN`
-- `docs/VELVET_PRO_MARKETING_SETUP.md: Velvet.`
-- `docs/beta/BACKUP-RESTORE-RUNBOOK.md: VELVET_BACKUP_DATABASE_URL`
-- `docs/beta/BACKUP-RESTORE-RUNBOOK.md: VELVET_BACKUP_KEY`
-- `docs/beta/BACKUP-RESTORE-RUNBOOK.md: VELVET_BACKUP_OUTPUT`
-- `docs/beta/BACKUP-RESTORE-RUNBOOK.md: VELVET_RESTORE_CONFIRM`
-- `docs/beta/BACKUP-RESTORE-RUNBOOK.md: VELVET_RESTORE_DATABASE_URL`
-- `docs/beta/BACKUP-RESTORE-RUNBOOK.md: VELVET_RESTORE_INPUT`
-- `docs/beta/BACKUP-RESTORE-RUNBOOK.md: VELVET_RESTORE_PRODUCTION_CONFIRM`
-- `docs/beta/CLOUDFLARE-PAGES.md: Velvet-Application/Application-Velvet`
-- `docs/beta/DATA-PROCESSING-REGISTER.md: Velvet.`
-- `docs/beta/IDENTITY-AGE-VERIFICATION-RUNBOOK.md: VELVET_INTERNAL_RECIPE_USER_IDS`
-- `docs/beta/IDENTITY-AGE-VERIFICATION-RUNBOOK.md: VELVET_RUNTIME_MODE`
-- `docs/beta/IDENTITY-AGE-VERIFICATION-RUNBOOK.md: X-Velvet-Verification-Signature`
-- `docs/beta/SUPABASE-SETUP.md: Velvet.`
-- `functions/_middleware.js: Velvet.`
-- `functions/api/admin/venue-import.js: Velvet-BETA/1.0`
-- `functions/api/billing/_shared.js: env.VELVET_BILLING_PROVIDER`
-- `functions/api/control/studio-media.js: Velvet.`
-- `functions/api/control/studio-social-plan.js: Velvet.`
-- `functions/api/control/studio-v2.js: env.VELVET_STUDIO_GENERATIVE_MEDIA`
-- `functions/api/control/studio-v2.js: env.VELVET_STUDIO_MEDIA_GATEWAY`
-- `functions/api/control/studio-v2.js: env.VELVET_STUDIO_MEDIA_GATEWAY_TOKEN`
-- `functions/api/control/studio-v3.js: Velvet.`
-- `functions/api/control/studio-v3.js: VelvetPro`
-- `functions/api/control/studio-v3.js: env.VELVET_STUDIO_CAMPAIGN_AI`
-- `functions/api/control/studio-v3.js: env.VELVET_STUDIO_CAMPAIGN_GATEWAY`
-- `functions/api/control/studio-v3.js: env.VELVET_STUDIO_CAMPAIGN_GATEWAY_TOKEN`
-- `functions/api/control/studio.js: Velvet.`
-- `functions/api/control/studio.js: env.VELVET_ENVIRONMENT`
-- `functions/api/control/studio.js: env.VELVET_INTERNAL_TEST_AGENTS`
-- `functions/api/control/studio.js: env.VELVET_STUDIO_TEXT_MODEL`
-- `functions/api/control/test-agents.js: env.VELVET_ENVIRONMENT`
-- `functions/api/control/test-agents.js: env.VELVET_INTERNAL_TEST_AGENTS`
-- `functions/api/control/test-agents.js: env.VELVET_TEST_AGENT_IMAGE_MODEL`
-- `functions/api/control/test-agents.js: env.VELVET_TEST_AGENT_MODEL`
-- `functions/api/control/workspace.js: VELVET-`
-- `functions/api/control/workspace.js: env.VELVET_FROM_EMAIL`
-- `functions/api/members/_message-notifications.js: VELVET_MESSAGE`
-- `functions/api/members/_shared.js: env.VELVET_INTERNAL_RECIPE_USER_IDS`
-- `functions/api/members/_shared.js: env.VELVET_RUNTIME_MODE`
-- `functions/api/members/account-actions.js: Velvet.`
-- `functions/api/members/account-actions.js: buildConfiguredVelvetEmail`
-- `functions/api/members/account-actions.js: env.VELVET_FROM_EMAIL`
-- `functions/api/members/account-actions.js: env.VELVET_REPLY_TO_EMAIL`
-- `functions/api/members/couple-invitation-email.js: Velvet.`
-- `functions/api/members/couple-invitation-email.js: buildConfiguredVelvetEmail`
-- `functions/api/members/couple-invite.js: buildConfiguredVelvetEmail`
-- `functions/api/members/couple-invite.js: env.VELVET_FROM_EMAIL`
-- `functions/api/members/couple-invite.js: env.VELVET_REPLY_TO_EMAIL`
-- `functions/api/members/engagement.js: Velvet.`
-- `functions/api/members/events.js: Velvet.`
-- `functions/api/members/media-security-events.js: Velvet.`
-- `functions/api/members/media.js: env.VELVET_ENVIRONMENT`
-- `functions/api/members/media.js: env.VELVET_INTERNAL_TEST_AGENTS`
-- `functions/api/members/photos.js: Velvet.`
-- `functions/api/members/profile-copy.js: Velvet.`
-- `functions/api/members/settings.js: identityDocumentsStoredByVelvet:`
-- `functions/api/members/venue-geocoding.js: Velvet-BETA/1.0`
-- `functions/api/members/verification.js: documentsStoredByVelvet:`
-- `functions/api/pro/marketing.js: Velvet.`
-- `functions/api/pro/marketing.js: env.VELVET_PUBLIC_ORIGIN`
-- `functions/api/pro/studio-ai.js: Velvet.`
-- `functions/api/reference/communes.js: Velvet-BETA/1.0`
-- `ios/ARCHITECTURE.md: VelvetStore`
-- `ios/Config/Debug.xcconfig: VELVET_API_BASE_URL`
-- `ios/Config/Debug.xcconfig: VELVET_APP_GROUP`
-- `ios/Config/Debug.xcconfig: VELVET_WATCH_APP_GROUP`
-- `ios/Config/Release.xcconfig: VELVET_API_BASE_URL`
-- `ios/Config/Release.xcconfig: VELVET_APP_GROUP`
-- `ios/Config/Release.xcconfig: VELVET_WATCH_APP_GROUP`
-- `ios/README.md: ios/Velvet.xcodeproj`
-- `ios/Velvet/App/AppState.swift: VelvetNotificationSnapshotStore.clear`
-- `ios/Velvet/App/RootView.swift: Velvet.`
-- `ios/Velvet/App/RootView.swift: VelvetBackground`
-- `ios/Velvet/App/RootView.swift: VelvetColor.champagneGold`
-- `ios/Velvet/App/RootView.swift: VelvetColor.textSecondary`
-- `ios/Velvet/App/RootView.swift: VelvetMark`
-- `ios/Velvet/App/RootView.swift: VelvetMotion.normal`
-- `ios/Velvet/App/RootView.swift: VelvetPhotoWatermark:`
-- `ios/Velvet/App/RootView.swift: VelvetSpacing.lg`
-- `ios/Velvet/App/RootView.swift: VelvetSpacing.xs`
-- `ios/Velvet/App/RootView.swift: VelvetTypography.body`
-- `ios/Velvet/App/RootView.swift: VelvetTypography.brand`
-- `ios/Velvet/App/RootView.swift: VelvetTypography.caption`
-- `ios/Velvet/Core/Models/DirectoryModels.swift: VelvetEvent`
-- `ios/Velvet/Core/Models/DirectoryModels.swift: VelvetEvent:`
-- `ios/Velvet/Core/Models/DirectoryModels.swift: VelvetNotification`
-- `ios/Velvet/Core/Models/DirectoryModels.swift: VelvetNotification:`
-- `ios/Velvet/Core/Models/ParityModels.swift: identityDocumentsStoredByVelvet:`
-- `ios/Velvet/Core/Models/SetupModels.swift: documentsStoredByVelvet:`
-- `ios/Velvet/Core/Networking/APIClient.swift: Velvet-`
-- `ios/Velvet/Core/Networking/APIClient.swift: Velvet-iOS/0.1`
-- `ios/Velvet/Core/Networking/APIClient.swift: Velvet-iOS/0.2`
-- `ios/Velvet/Core/Networking/APIClient.swift: VelvetAPIBaseURL`
-- `ios/Velvet/Core/Networking/APIClient.swift: X-Velvet-Client`
-- `ios/Velvet/Core/Session/SessionService.swift: VelvetAPIBaseURL`
-- `ios/Velvet/Core/Session/VelvetStore+PeopleFirst.swift: VelvetStore`
-- `ios/Velvet/Core/Session/VelvetStore.swift: VelvetNotificationSnapshotStore.persist`
-- `ios/Velvet/Core/Session/VelvetStore.swift: VelvetStore:`
-- `ios/Velvet/Core/System/BiometricLockService.swift: Velvet.`
-- `ios/Velvet/Core/System/BiometricLockService.swift: VelvetBackground`
-- `ios/Velvet/Core/System/BiometricLockService.swift: VelvetColor.champagneGold`
-- `ios/Velvet/Core/System/BiometricLockService.swift: VelvetColor.ivory`
-- `ios/Velvet/Core/System/BiometricLockService.swift: VelvetColor.textSecondary`
-- `ios/Velvet/Core/System/BiometricLockService.swift: VelvetColor.velvetBlack`
-- `ios/Velvet/Core/System/BiometricLockService.swift: VelvetMark`
-- `ios/Velvet/Core/System/BiometricLockService.swift: VelvetRadius.medium`
-- `ios/Velvet/Core/System/BiometricLockService.swift: VelvetTypography.body`
-- `ios/Velvet/Core/System/BiometricLockService.swift: VelvetTypography.caption`
-- `ios/Velvet/Core/System/BiometricLockService.swift: VelvetTypography.title`
-- `ios/Velvet/Core/System/NotificationService.swift: VELVET_EVENT`
-- `ios/Velvet/Core/System/NotificationService.swift: VELVET_MESSAGE`
-- `ios/Velvet/Core/System/NotificationService.swift: VELVET_OPEN_EVENT`
-- `ios/Velvet/Core/System/NotificationService.swift: VELVET_OPEN_MESSAGE`
-- `ios/Velvet/Core/System/NotificationService.swift: VelvetAppDelegate:`
-- `ios/Velvet/Core/System/NotificationService.swift: VelvetNotificationRoute`
-- `ios/Velvet/Core/System/NotificationService.swift: VelvetNotificationRoute.self`
-- `ios/Velvet/Core/System/NotificationService.swift: VelvetNotificationRoute:`
-- `ios/Velvet/Core/System/NotificationService.swift: VelvetNotificationSnapshotStore.clear`
-- `ios/Velvet/Core/System/NotificationSnapshotStore.swift: VelvetAppGroup`
-- `ios/Velvet/Core/System/NotificationSnapshotStore.swift: VelvetNotificationSnapshot`
-- `ios/Velvet/Core/System/NotificationSnapshotStore.swift: VelvetNotificationSnapshot:`
-- `ios/Velvet/Core/System/NotificationSnapshotStore.swift: VelvetNotificationSnapshotStore`
-- `ios/Velvet/Core/System/NotificationSnapshotStore.swift: VelvetNotificationWidget`
-- `ios/Velvet/DesignSystem/AppleShellComponents.swift: CompactVelvetTopBar:`
-- `ios/Velvet/DesignSystem/AppleShellComponents.swift: VelvetColor.borderSubtle`
-- `ios/Velvet/DesignSystem/AppleShellComponents.swift: VelvetColor.borderSubtle.opacity`
-- `ios/Velvet/DesignSystem/AppleShellComponents.swift: VelvetColor.burgundyLight`
-- `ios/Velvet/DesignSystem/AppleShellComponents.swift: VelvetColor.ivory`
-- `ios/Velvet/DesignSystem/AppleShellComponents.swift: VelvetColor.ivory.opacity`
-- `ios/Velvet/DesignSystem/AppleShellComponents.swift: VelvetColor.velvetBlack.opacity`
-- `ios/Velvet/DesignSystem/AppleShellComponents.swift: VelvetMark`
-- `ios/Velvet/DesignSystem/AppleShellComponents.swift: VelvetTypography.brand`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetAlbumCoverCard`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetAlbumCoverCard:`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetAlbumDetailView:`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetAlbumPresentation`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetAlbumPresentation:`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetBackground`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetColor.anthracite`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetColor.borderSubtle`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetColor.champagneGold`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetColor.champagneGold.opacity`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetColor.ivory`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetColor.ivory.opacity`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetColor.softBlush`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetColor.textSecondary`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetColor.velvetBlack.opacity`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetCompactEmptyState`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetCompactEmptyState:`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetFullScreenMediaViewer`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetFullScreenMediaViewer:`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetMediaGrid`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetMediaGrid:`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetMotion.normal`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetProfileGallery:`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetRadius.editorial`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetRadius.large`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetRemoteImage`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetRemoteImage:`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetTypography.body`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetTypography.caption`
-- `ios/Velvet/DesignSystem/PremiumMediaComponents.swift: VelvetTypography.title`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetBackground:`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetCard`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetChip:`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetColor.anthracite.opacity`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetColor.borderSubtle`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetColor.burgundyLight`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetColor.champagneGold`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetColor.champagneGold.opacity`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetColor.ivory`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetColor.ivory.opacity`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetColor.panelRaised.opacity`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetColor.softBlush`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetColor.textSecondary`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetColor.velvetBlack`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetColor.velvetBlack.opacity`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetColor.velvetBurgundy`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetColor.velvetBurgundy.opacity`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetEmptyState:`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetField:`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetMark`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetMark:`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetMetricCard:`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetPageHeader:`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetPrimaryButton:`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetRadius.large`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetRadius.medium`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetSearchField:`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetSectionHeader:`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetSpacing.lg`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetSpacing.md`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetSpacing.sm`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetSpacing.xs`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetTopBar:`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetTypography.body`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetTypography.brand`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetTypography.caption`
-- `ios/Velvet/DesignSystem/VelvetComponents.swift: VelvetTypography.title`
-- `ios/Velvet/DesignSystem/VelvetTokens.swift: VelvetColor`
-- `ios/Velvet/DesignSystem/VelvetTokens.swift: VelvetMotion`
-- `ios/Velvet/DesignSystem/VelvetTokens.swift: VelvetRadius`
-- `ios/Velvet/DesignSystem/VelvetTokens.swift: VelvetSpacing`
-- `ios/Velvet/DesignSystem/VelvetTokens.swift: VelvetTypography`
-- `ios/Velvet/Features/Authentication/ConsentView.swift: VelvetCard`
-- `ios/Velvet/Features/Authentication/ConsentView.swift: VelvetColor.champagneGold`
-- `ios/Velvet/Features/Authentication/ConsentView.swift: VelvetColor.ivory`
-- `ios/Velvet/Features/Authentication/ConsentView.swift: VelvetColor.softBlush`
-- `ios/Velvet/Features/Authentication/ConsentView.swift: VelvetColor.velvetBurgundy`
-- `ios/Velvet/Features/Authentication/ConsentView.swift: VelvetMark`
-- `ios/Velvet/Features/Authentication/ConsentView.swift: VelvetPrimaryButton`
-- `ios/Velvet/Features/Authentication/ConsentView.swift: VelvetSectionHeader`
-- `ios/Velvet/Features/Authentication/ConsentView.swift: VelvetSpacing.lg`
-- `ios/Velvet/Features/Authentication/ConsentView.swift: VelvetSpacing.md`
-- `ios/Velvet/Features/Authentication/ConsentView.swift: VelvetSpacing.sm`
-- `ios/Velvet/Features/Authentication/ConsentView.swift: VelvetSpacing.xl`
-- `ios/Velvet/Features/Authentication/ConsentView.swift: VelvetTypography.body`
-- `ios/Velvet/Features/Authentication/ConsentView.swift: VelvetTypography.caption`
-- `ios/Velvet/Features/Authentication/ForgotPasswordView.swift: VelvetBackground`
-- `ios/Velvet/Features/Authentication/ForgotPasswordView.swift: VelvetCard`
-- `ios/Velvet/Features/Authentication/ForgotPasswordView.swift: VelvetColor.success`
-- `ios/Velvet/Features/Authentication/ForgotPasswordView.swift: VelvetField`
-- `ios/Velvet/Features/Authentication/ForgotPasswordView.swift: VelvetPrimaryButton`
-- `ios/Velvet/Features/Authentication/ForgotPasswordView.swift: VelvetRadius.medium`
-- `ios/Velvet/Features/Authentication/ForgotPasswordView.swift: VelvetSectionHeader`
-- `ios/Velvet/Features/Authentication/ForgotPasswordView.swift: VelvetSpacing.lg`
-- `ios/Velvet/Features/Authentication/ForgotPasswordView.swift: VelvetTypography.body`
-- `ios/Velvet/Features/Authentication/LoginView.swift: VelvetCard`
-- `ios/Velvet/Features/Authentication/LoginView.swift: VelvetColor.champagneGold`
-- `ios/Velvet/Features/Authentication/LoginView.swift: VelvetColor.danger`
-- `ios/Velvet/Features/Authentication/LoginView.swift: VelvetColor.softBlush`
-- `ios/Velvet/Features/Authentication/LoginView.swift: VelvetColor.textSecondary`
-- `ios/Velvet/Features/Authentication/LoginView.swift: VelvetField`
-- `ios/Velvet/Features/Authentication/LoginView.swift: VelvetMark`
-- `ios/Velvet/Features/Authentication/LoginView.swift: VelvetPrimaryButton`
-- `ios/Velvet/Features/Authentication/LoginView.swift: VelvetRadius.medium`
-- `ios/Velvet/Features/Authentication/LoginView.swift: VelvetSectionHeader`
-- `ios/Velvet/Features/Authentication/LoginView.swift: VelvetSpacing.lg`
-- `ios/Velvet/Features/Authentication/LoginView.swift: VelvetSpacing.md`
-- `ios/Velvet/Features/Authentication/LoginView.swift: VelvetSpacing.sm`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /CompactVelvetTopBar/`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VELVET`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VELVET_APP_GROUP`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VELVET_INTERNAL_RECIPE_USER_IDS/`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VELVET_STUDIO_GENERATIVE_MEDIA/`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VELVET_STUDIO_MEDIA_GATEWAY/`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VELVET_TEST_AGENT_IMAGE_MODEL/`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VELVET_WATCH_APP_GROUP`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /Velvet`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VelvetAppGroup/`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VelvetNotificationDestination/`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VelvetPWA`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VelvetWatch`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VelvetWatchAppGroup/`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VelvetWatchWidget`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VelvetWebV11`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: /VelvetWidget`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: CompactVelvetTopBar:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET-`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET-XXXX-XXXX-XXXX`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_API_BASE_URL`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_APP_GROUP`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_BACKUP_DATABASE_URL`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_BACKUP_KEY`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_BACKUP_OUTPUT`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_CLEAR_CACHES`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_ENVIRONMENT`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_ENVIRONMENT:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_EVENT`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_INTERNAL_RECIPE_USER_IDS`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_INTERNAL_RECIPE_USER_IDS:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_INTERNAL_TEST_AGENTS`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_INTERNAL_TEST_AGENTS:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_MESSAGE`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_NOTIFICATION`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_OPEN_EVENT`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_OPEN_MESSAGE`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_PUBLIC_ORIGIN`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_RESTORE_CONFIRM`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_RESTORE_DATABASE_URL`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_RESTORE_INPUT`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_RESTORE_PRODUCTION_CONFIRM`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_RUNTIME_MODE`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_RUNTIME_MODE:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_STUDIO_CAMPAIGN_AI`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_TEST_AGENT_BATCH_SIZE`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_TEST_AGENT_CYCLE_MS`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_TEST_AGENT_MODEL`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VELVET_WATCH_APP_GROUP`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: Velvet-`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: Velvet-Application/Application-Velvet`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: Velvet-BETA/1.0`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: Velvet-Solide-2026`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: Velvet-Strong-2026`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: Velvet-iOS/0.1`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: Velvet-iOS/0.2`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: Velvet.`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: Velvet/`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: Velvet/i`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetAPIBaseURL`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetAlbumCoverCard`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetAlbumCoverCard:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetAlbumDetailView:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetAlbumPresentation`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetAlbumPresentation:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetAppDelegate:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetAppGroup`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetBackground`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetBackground:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetCard`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetChip:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.anthracite`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.anthracite.opacity`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.borderSubtle`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.borderSubtle.opacity`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.burgundyLight`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.champagneGold`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.champagneGold.opacity`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.danger`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.ivory`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.ivory.opacity`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.panelRaised.opacity`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.softBlush`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.success`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.textSecondary`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.velvetBlack`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.velvetBlack.opacity`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.velvetBurgundy`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetColor.velvetBurgundy.opacity`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetCompactEmptyState`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetCompactEmptyState:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetEmptyState:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetEvent`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetEvent:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetField`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetField:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetFullScreenMediaViewer`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetFullScreenMediaViewer:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetMark`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetMark:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetMediaGrid`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetMediaGrid:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetMetricCard:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetMotion`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetMotion.normal`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetNotification`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetNotification:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetNotificationDestination`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetNotificationRoute`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetNotificationRoute.self`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetNotificationRoute:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetNotificationSnapshot`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetNotificationSnapshot:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetNotificationSnapshotStore`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetNotificationSnapshotStore.clear`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetNotificationSnapshotStore.persist`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetNotificationWidget`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetPageHeader:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetPhotoWatermark:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetPrimaryButton`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetPrimaryButton:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetPro`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetProfileGallery:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetRadius`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetRadius.editorial`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetRadius.large`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetRadius.medium`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetRemoteImage`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetRemoteImage:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetSearchField:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetSectionHeader`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetSectionHeader:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetSpacing`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetSpacing.lg`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetSpacing.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetSpacing.sm`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetSpacing.xl`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetSpacing.xs`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetStore`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetStore:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetTopBar:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetTypography`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetTypography.body`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetTypography.brand`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetTypography.caption`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetTypography.title`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: VelvetWatchAppGroup`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: X-Velvet-Client`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: X-Velvet-Verification-Signature`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: buildConfiguredVelvetEmail`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: button.dataset.createVelvetEvent`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: captureVelvetScreens`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/03-ADR/ADR-0008-VELVET-MEMORY.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/03-ADR/ADR-0009-VELVET-BOOK.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/03-ADR/ADR-GROWTH-062-VELVET-WAITING-ROOM.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/03-ADR/ADR-GROWTH-062-VELVET-WAITING-ROOM.md:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/04-FEATURES/VELVET_BOOK.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/04-FEATURES/VELVET_MEMORY.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/04-VELVET-CONVERSATIONS/`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/04-VELVET-CONVERSATIONS/ADR-0041-conversation-philosophy.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/04-VELVET-CONVERSATIONS/ADR-0042-invitation-velvet-and-guided-opening.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/04-VELVET-CONVERSATIONS/ADR-0042-invitation-velvet-and-guided-opening.md:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/04-VELVET-CONVERSATIONS/ADR-0043-no-invitation-follow-up.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/04-VELVET-CONVERSATIONS/ADR-0044-message-and-invitation-statuses.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/04-VELVET-CONVERSATIONS/ADR-0045-first-real-life-meeting.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/04-VELVET-CONVERSATIONS/ADR-0045-screenshot-notifications.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/05-UX/VELVET_BOOK.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/06-AI/VELVET_INTELLIGENCE.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/07-PROFESSIONALS/SIGNATURE_VELVET.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/12-FOUNDER-NOTES/001-POURQUOI-VELVET.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/VELVET_PRO_MARKETING_SETUP.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/VELVET_PRO_MARKETING_SETUP.md:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: docs/beta/VELVET-MEMORY.md`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: documentsStoredByVelvet:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_BILLING_PROVIDER`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_ENVIRONMENT`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_FROM_EMAIL`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_INTERNAL_RECIPE_USER_IDS`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_INTERNAL_TEST_AGENTS`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_PUBLIC_ORIGIN`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_REPLY_TO_EMAIL`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_RUNTIME_MODE`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_STUDIO_CAMPAIGN_AI`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_STUDIO_CAMPAIGN_GATEWAY`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_STUDIO_CAMPAIGN_GATEWAY_TOKEN`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_STUDIO_GENERATIVE_MEDIA`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_STUDIO_MEDIA_GATEWAY`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_STUDIO_MEDIA_GATEWAY_TOKEN`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_STUDIO_TEXT_MODEL`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_TEST_AGENT_BATCH_SIZE`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_TEST_AGENT_IMAGE_MODEL`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: env.VELVET_TEST_AGENT_MODEL`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: https://raw.githack.com/Velvet-Application/Application-Velvet/68bbabff136bd4fbebcaabe508973140c5de8a6a/apps/web/velvet-control-v1.html`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: https://raw.githack.com/Velvet-Application/Application-Velvet/99893644bf786d6e64677d23a99c114ed6be3a97/apps/web/velvet-v1-locked-dense-demo-v3.html`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: https://raw.githack.com/Velvet-Application/Application-Velvet/v1-lived-demo/apps/web/velvet-v1.html`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: identityDocumentsStoredByVelvet:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: installVelvetProfileV4`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet.xcodeproj`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet.xcodeproj/project.pbxproj`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet.xcodeproj/xcshareddata/xcschemes/Velvet.xcscheme`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/App/AppState.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/App/AppState.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/App/RootView.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/App/RootView.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Media/ImageCompressor.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Models/Account.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Models/DirectoryModels.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Models/DirectoryModels.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Models/ExperienceModels.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Models/MemberProfile.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Models/MemberProfilePresentation.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Models/MemberSettingsRequest`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Models/ParityModels.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Models/ParityModels.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Models/PrivacyModels.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Models/SetupModels.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Models/SetupModels.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Models/VenueVisit`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Networking/APIClient.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Networking/APIClient.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Networking/APIError.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Session/SessionService`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Session/SessionService.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Session/SessionService.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Session/VelvetStore`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Session/VelvetStore.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/Session/VelvetStore.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/System/BiometricLockService.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/System/BiometricLockService.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/System/LocationService.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/System/NotificationService.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/System/NotificationService.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/System/NotificationSnapshotStore.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/System/NotificationSnapshotStore.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Core/System/StoreKitService.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/DesignSystem/AppleShellComponents.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/DesignSystem/AppleShellComponents.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/DesignSystem/PremiumMediaComponents.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/DesignSystem/PremiumMediaComponents.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/DesignSystem/VelvetComponents.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/DesignSystem/VelvetComponents.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/DesignSystem/VelvetTokens.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/DesignSystem/VelvetTokens.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Features/Authentication/ConsentView.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Features/Authentication/ConsentView.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Features/Authentication/ForgotPasswordView.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Features/Authentication/ForgotPasswordView.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Features/Authentication/LoginView.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Features/Authentication/LoginView.swift:`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Features/Authentication/PasswordResetView.swift`
+- `docs/04-OPERATIONS/ZWIT-REBRAND-REPORT.md: ios/Velvet/Features/Authentication/SignUpView.swift`
 
 ## Assets de marque repérés
 
@@ -876,6 +583,8 @@ Ces références n’ont volontairement pas été renommées.
 - `apps/beta/static/assets/velvet-waitlist.js`
 - `apps/beta/static/assets/velvet-web-ios-parity.css`
 - `apps/beta/static/assets/velvet-web-ios-parity.js`
+- `apps/beta/static/assets/zwit-icon.svg`
+- `apps/beta/static/assets/zwit-logo.svg`
 - `apps/beta/test/velvet-studio-sprint1.test.mjs`
 - `apps/beta/test/velvet-studio-v2.test.mjs`
 - `apps/beta/tests/velvet-studio-v3.test.mjs`
