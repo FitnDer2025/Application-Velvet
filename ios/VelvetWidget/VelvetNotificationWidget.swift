@@ -94,7 +94,7 @@ private struct VelvetNotificationWidget: Widget {
             VelvetNotificationWidgetView(entry: entry)
                 .containerBackground(for: .widget) {
                     ZStack {
-                        Image("ZwitOfficialLogo")
+                        Image(ZwitWidgetBrand.logoAsset)
                             .resizable()
                             .scaledToFill()
                             .blur(radius: 22)
@@ -109,7 +109,7 @@ private struct VelvetNotificationWidget: Widget {
                 }
                 .widgetURL(URL(string: "velvet://notifications"))
         }
-        .configurationDisplayName("Activité Zwit")
+        .configurationDisplayName(ZwitWidgetBrand.activityDisplayName)
         .description("Affiche uniquement les compteurs non lus, sans contenu privé.")
         .supportedFamilies([
             .systemSmall,
@@ -137,7 +137,7 @@ private struct VelvetNotificationWidgetView: View {
         case .accessoryRectangular:
             accessoryRectangular
         case .accessoryInline:
-            Text("Zwit · \(entry.snapshot.total) activité\(entry.snapshot.total > 1 ? "s" : "")")
+            Text("\(ZwitWidgetBrand.displayName) · \(entry.snapshot.total) activité\(entry.snapshot.total > 1 ? "s" : "")")
         default:
             small
         }
@@ -181,7 +181,7 @@ private struct VelvetNotificationWidgetView: View {
                 Text("\(entry.snapshot.total)")
                     .font(.system(size: 52, weight: .light, design: .rounded))
                     .foregroundStyle(.white)
-                Text("À retrouver dans Zwit")
+                Text("À retrouver dans \(ZwitWidgetBrand.displayName)")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.64))
             }
@@ -201,17 +201,17 @@ private struct VelvetNotificationWidgetView: View {
     private var accessoryCircular: some View {
         ZStack {
             AccessoryWidgetBackground()
-            Image("ZwitOfficialLogo")
+            Image(ZwitWidgetBrand.logoAsset)
                 .resizable()
                 .scaledToFit()
                 .padding(3)
         }
-        .widgetLabel { Text("Zwit") }
+        .widgetLabel { Text(ZwitWidgetBrand.displayName) }
     }
 
     private var accessoryRectangular: some View {
         HStack(spacing: 9) {
-            Image("ZwitOfficialLogo")
+            Image(ZwitWidgetBrand.logoAsset)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 42, height: 42)
@@ -256,10 +256,10 @@ private struct VelvetNotificationWidgetView: View {
 
 private struct VelvetWidgetMark: View {
     var body: some View {
-        Image("ZwitOfficialLogo")
+        Image(ZwitWidgetBrand.logoAsset)
             .resizable()
             .scaledToFit()
             .frame(width: 64, height: 38, alignment: .leading)
-            .accessibilityLabel("Zwit")
+            .accessibilityLabel(ZwitWidgetBrand.displayName)
     }
 }
