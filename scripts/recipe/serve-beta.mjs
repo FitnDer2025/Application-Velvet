@@ -44,4 +44,4 @@ const server = createServer(async (request, response) => {
   createReadStream(path).pipe(response);
 });
 
-server.listen(4173, '127.0.0.1', () => console.log('Recette Zwit disponible sur http://127.0.0.1:4173'));
+server.listen(4173, '127.0.0.1', () => console.log('Recette Velvet disponible sur http://127.0.0.1:4173'));

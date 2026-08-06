@@ -34,12 +34,12 @@ export function encryptBackup(plain, key, metadata = {}) {
 }
 
 export function decryptBackup(payload, key) {
-  if (!payload.subarray(0, MAGIC.length).equals(MAGIC)) throw new Error('Format de sauvegarde Zwit invalide.');
+  if (!payload.subarray(0, MAGIC.length).equals(MAGIC)) throw new Error('Format de sauvegarde Velvet invalide.');
   const headerEnd = payload.indexOf(10, MAGIC.length);
-  if (headerEnd < 0) throw new Error('En-tête de sauvegarde Zwit invalide.');
+  if (headerEnd < 0) throw new Error('En-tête de sauvegarde Velvet invalide.');
   const header = JSON.parse(payload.subarray(MAGIC.length, headerEnd).toString('utf8'));
   if (header.format !== 'velvet-backup-v1' || header.cipher !== 'aes-256-gcm') {
-    throw new Error('Version de sauvegarde Zwit non prise en charge.');
+    throw new Error('Version de sauvegarde Velvet non prise en charge.');
   }
   const decipher = createDecipheriv('aes-256-gcm', key, Buffer.from(header.nonce, 'base64'));
   decipher.setAuthTag(Buffer.from(header.tag, 'base64'));

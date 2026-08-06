@@ -28,7 +28,7 @@ function addressQuery(venue) {
 function catalogRows(source) {
   const start = source.indexOf(MARKER);
   const end = source.indexOf(MARKER, start + MARKER.length);
-  if (start < 0 || end < 0) throw new Error('Catalogue Zwit introuvable');
+  if (start < 0 || end < 0) throw new Error('Catalogue Velvet introuvable');
   return JSON.parse(source.slice(start + MARKER.length, end));
 }
 

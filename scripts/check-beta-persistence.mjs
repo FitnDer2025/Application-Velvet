@@ -61,23 +61,23 @@ const requirements = [
   [includes('functions/api/members/venue-relationships.js', 'set_my_venue_relationship', 'relationships: await relationships'), 'Favoris, visites et projets de sortie doivent être sauvegardés puis relus'],
   [includes('functions/api/members/directory.js', 'member_venue_catalog', 'venueRelationships', 'subscription_status'), 'L’annuaire doit charger le catalogue riche et son état Pro réel'],
   [!files['functions/api/members/directory.js'].includes("'city',"), 'L’annuaire membre ne doit pas exposer la commune privée'],
-  [includes('functions/api/pro/workspace.js', 'save_venue_draft', 'publish_venue', 'create_event', 'registration_status', 'pro_subscription_required'), 'Zwit Pro doit enregistrer ses actions métier et bloquer les comptes non abonnés'],
-  [includes('functions/api/control/workspace.js', 'create_establishment', 'decide_organizer', 'venue_visibility', 'control_beta_release_checks', 'claim_directory_venue', 'subscription_status'), 'Zwit Control doit piloter sa recette, l’attribution du catalogue et les abonnements Pro'],
-  [includes('functions/api/control/workspace.js', 'create_promotion', 'member_access', 'account_state', 'grant_campaign'), 'Zwit Control doit piloter les accès commerciaux et campagnes'],
+  [includes('functions/api/pro/workspace.js', 'save_venue_draft', 'publish_venue', 'create_event', 'registration_status', 'pro_subscription_required'), 'Velvet Pro doit enregistrer ses actions métier et bloquer les comptes non abonnés'],
+  [includes('functions/api/control/workspace.js', 'create_establishment', 'decide_organizer', 'venue_visibility', 'control_beta_release_checks', 'claim_directory_venue', 'subscription_status'), 'Velvet Control doit piloter sa recette, l’attribution du catalogue et les abonnements Pro'],
+  [includes('functions/api/control/workspace.js', 'create_promotion', 'member_access', 'account_state', 'grant_campaign'), 'Velvet Control doit piloter les accès commerciaux et campagnes'],
   [includes('functions/api/billing/_shared.js', 'signature_monthly_eur', 'pro_annual_eur', 'configured: false'), 'Le catalogue de paiement doit rester utilisable sans prétendre qu’un prestataire est actif'],
   [includes('functions/api/billing/checkout.js', 'billing_provider_not_configured', 'priceCode'), 'Le raccordement paiement doit refuser honnêtement un prestataire absent'],
   [includes('functions/api/billing/promotion.js', 'redeem_my_promotion', 'SHA-256'), 'Les codes promotionnels doivent être hachés avant interrogation de Supabase'],
   [includes('functions/api/admin/invites.js', 'invite_persistence_failed', 'registrationUrl'), 'Une invitation doit être confirmée et fournir son lien'],
   [includes('apps/beta/static/assets/members-live.js', '/api/members/photo-reactions', 'photo_reaction_persistence_failed'), 'L’interface membre doit refuser une réaction non confirmée'],
   [includes('apps/beta/static/assets/members-live.js', '/api/members/notifications', '/api/members/map', '/api/members/discovery', '/api/members/venue-relationships', 'data-open-venue'), 'L’interface doit exploiter notifications, Maps, découverte, catalogue et préférences établissements'],
-  [includes('apps/beta/static/assets/members-live.js', 'Zwit Découverte', 'Zwit Signature', '/api/billing/promotion', '/api/billing/checkout'), 'L’espace membre doit afficher les offres et exploiter le raccordement commercial'],
-  [includes('apps/beta/static/assets/pro-live.js', '/api/pro/workspace', 'S.threads = []', "localStorage.removeItem('velvetProCrmV1')", 'Cette vue ne contient plus aucune donnée de démonstration', "'trial', 'active'"), 'Zwit Pro doit neutraliser les données fictives et respecter l’abonnement serveur'],
-  [includes('apps/beta/static/assets/control-live.js', '/api/control/workspace', 'Pilotage', 'data-organizer-decision', 'data-subscription-status', 'controlClaimVenueForm', 'data-management-section', 'setView'), 'Zwit Control doit réunir le pilotage réel, le catalogue Pro et les invitations'],
-  [includes('apps/beta/static/assets/control-live.js', '/api/admin/invites', 'Générer le code sécurisé'), 'Zwit Control doit utiliser l’API réelle des invitations']
+  [includes('apps/beta/static/assets/members-live.js', 'Velvet Découverte', 'Velvet Signature', '/api/billing/promotion', '/api/billing/checkout'), 'L’espace membre doit afficher les offres et exploiter le raccordement commercial'],
+  [includes('apps/beta/static/assets/pro-live.js', '/api/pro/workspace', 'S.threads = []', "localStorage.removeItem('velvetProCrmV1')", 'Cette vue ne contient plus aucune donnée de démonstration', "'trial', 'active'"), 'Velvet Pro doit neutraliser les données fictives et respecter l’abonnement serveur'],
+  [includes('apps/beta/static/assets/control-live.js', '/api/control/workspace', 'Pilotage', 'data-organizer-decision', 'data-subscription-status', 'controlClaimVenueForm', 'data-management-section', 'setView'), 'Velvet Control doit réunir le pilotage réel, le catalogue Pro et les invitations'],
+  [includes('apps/beta/static/assets/control-live.js', '/api/admin/invites', 'Générer le code sécurisé'), 'Velvet Control doit utiliser l’API réelle des invitations']
 ];
 
 for (const [valid, message] of requirements) {
   if (!valid) throw new Error(message);
 }
 
-console.log(`Zwit persistence checks passed: ${requirements.length} parcours contrôlés`);
+console.log(`Velvet persistence checks passed: ${requirements.length} parcours contrôlés`);

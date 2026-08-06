@@ -15,4 +15,4 @@ assert.match(
   'La CSP doit autoriser les aperçus privés signés provenant de Supabase Storage.'
 );
 
-console.log('Zwit Worker import check passed.');
+console.log('Velvet Worker import check passed.');
