@@ -141,7 +141,7 @@ final class ScreenshotProtectionService: ObservableObject {
 
     private func didTakeScreenshot() {
         guard ownerProfileID != nil else { return }
-        warningMessage = "La capture a été détectée. Le propriétaire de la photo a été prévenu par Velvet. Toute diffusion sans consentement peut entraîner la suspension du compte."
+        warningMessage = "La capture a été détectée. Le propriétaire de la photo a été prévenu par Zwit. Toute diffusion sans consentement peut entraîner la suspension du compte."
         Task { await report(eventType: "screenshot") }
     }
 
@@ -188,7 +188,7 @@ final class ScreenshotProtectionService: ObservableObject {
 
 struct VelvetPhotoWatermark: View {
     var body: some View {
-        Text("V")
+        Text("Z")
             .font(VelvetTypography.brand(size: 24))
             .foregroundStyle(Color.white.opacity(0.20))
             .shadow(color: .black.opacity(0.55), radius: 4, y: 2)
@@ -222,31 +222,57 @@ private struct MediaCaptureShield: View {
 private struct LaunchView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared = false
+    @State private var orbit = false
+
+    private let whispers = [
+        "Chut", "Shh", "Ssst", "Silencio", "Silenzio", "Leise",
+        "Tyst", "Cicho", "Тише", "静かに", "쉿", "هدوء"
+    ]
 
     var body: some View {
-        VStack(spacing: VelvetSpacing.lg) {
-            VelvetMark(size: 92)
-                .scaleEffect(appeared ? 1 : 0.9)
-                .opacity(appeared ? 1 : 0)
+        ZStack {
+            ForEach(Array(whispers.enumerated()), id: \.offset) { index, whisper in
+                Text(whisper)
+                    .font(VelvetTypography.caption(size: index.isMultiple(of: 3) ? 12 : 10, weight: .medium))
+                    .tracking(1.2)
+                    .foregroundStyle(index.isMultiple(of: 4) ? VelvetColor.champagneGold.opacity(0.72) : VelvetColor.ivory.opacity(0.34))
+                    .offset(x: 142)
+                    .rotationEffect(.degrees(Double(index) * (360 / Double(whispers.count))))
+                    .rotationEffect(.degrees(orbit ? 360 : 0))
+            }
 
-            VStack(spacing: VelvetSpacing.xs) {
+            Circle()
+                .stroke(VelvetColor.champagneGold.opacity(0.16), lineWidth: 0.7)
+                .frame(width: 250, height: 250)
+                .scaleEffect(appeared ? 1 : 0.72)
+
+            VStack(spacing: VelvetSpacing.md) {
+                VelvetMark(size: 104)
+                    .scaleEffect(appeared ? 1 : 0.82)
+                    .opacity(appeared ? 1 : 0)
+
                 Text("ZWIT")
-                    .font(VelvetTypography.brand(size: 27))
-                    .tracking(8)
+                    .font(VelvetTypography.brand(size: 29))
+                    .tracking(9)
                     .foregroundStyle(VelvetColor.champagneGold)
 
-                Text("Là où les plus belles rencontres commencent.")
-                    .font(VelvetTypography.body(size: 14))
+                Text("Un secret se partage. Jamais il ne s’impose.")
+                    .font(VelvetTypography.body(size: 13))
                     .foregroundStyle(VelvetColor.textSecondary)
             }
             .opacity(appeared ? 1 : 0)
         }
+        .frame(width: 330, height: 330)
         .onAppear {
-            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.6)) {
+            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.72)) {
                 appeared = true
             }
+            guard !reduceMotion else { return }
+            withAnimation(.linear(duration: 14).repeatForever(autoreverses: false)) {
+                orbit = true
+            }
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Velvet. Là où les plus belles rencontres commencent.")
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Zwit. Chut. Une expérience discrète et confidentielle.")
     }
 }
