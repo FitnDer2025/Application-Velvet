@@ -1,0 +1,127 @@
+name: Finalize Zwit iOS hotfix
+
+on:
+  push:
+    branches:
+      - fix/zwit-ios-launch-brand-final
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/zwit-ios-launch-brand-final
+          fetch-depth: 0
+
+      - name: Patch Xcode product, launch gate and message dates
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          project_path = Path('ios/Velvet.xcodeproj/project.pbxproj')
+          project = project_path.read_text()
+          project = project.replace(
+              '100000000000000000000001 /* Velvet.app */',
+              '100000000000000000000001 /* Zwit.app */'
+          )
+          project = project.replace('path = Velvet.app;', 'path = Zwit.app;')
+          project = project.replace('productName = Velvet;', 'productName = Zwit;', 1)
+
+          for config_id in ('100000000000000000000072', '100000000000000000000073'):
+              pattern = re.compile(
+                  rf'({config_id} /\* (?:Debug|Release) \*/ = \{{.*?buildSettings = \{{)(.*?)(\n\t\t\t\}};\n\t\t\tname = (?:Debug|Release);)',
+                  re.S,
+              )
+
+              def update_config(match):
+                  body = match.group(2)
+                  body = body.replace('CURRENT_PROJECT_VERSION = 1;', 'CURRENT_PROJECT_VERSION = 2;')
+                  body = body.replace('MARKETING_VERSION = 0.3.0;', 'MARKETING_VERSION = 0.3.1;')
+                  body = body.replace('PRODUCT_NAME = "$(TARGET_NAME)";', 'PRODUCT_NAME = Zwit;')
+                  return match.group(1) + body + match.group(3)
+
+              project, count = pattern.subn(update_config, project, count=1)
+              if count != 1:
+                  raise SystemExit(f'Configuration Xcode introuvable: {config_id}')
+
+          if project.count('PRODUCT_NAME = Zwit;') != 2:
+              raise SystemExit('Le produit Zwit doit être défini en Debug et Release.')
+          if 'productName = Zwit;' not in project or 'path = Zwit.app;' not in project:
+              raise SystemExit('Le produit Xcode Zwit.app n’est pas correctement défini.')
+          project_path.write_text(project)
+
+          root_path = Path('ios/Velvet/App/RootView.swift')
+          root = root_path.read_text()
+          root = root.replace('    @State private var showBrandOpening = true\n', '')
+          root, opening_count = re.subn(
+              r'\n            if showBrandOpening \{\n                ZwitOpeningView\(\)\n                    \.transition\(\.opacity\)\n                    \.zIndex\(100\)\n            \}\n',
+              '\n',
+              root,
+              count=1,
+          )
+          root, task_count = re.subn(
+              r'\n        \.task \{\n            guard showBrandOpening else \{ return \}\n            try\? await Task\.sleep\(nanoseconds: 11_800_000_000\)\n            withAnimation\(\.easeInOut\(duration: 0\.9\)\) \{\n                showBrandOpening = false\n            \}\n        \}\n',
+              '\n',
+              root,
+              count=1,
+          )
+          if opening_count != 1 or task_count != 1 or 'showBrandOpening' in root:
+              raise SystemExit('Impossible de retirer l’ancienne ouverture imbriquée.')
+          root_path.write_text(root)
+
+          messaging_path = Path('ios/Velvet/Features/Messaging/RealtimeAppleMessagingViews.swift')
+          messaging = messaging_path.read_text()
+          start = messaging.index('private struct RealtimeMessageBubble: View {')
+          end = messaging.index('private struct RealtimeTypingBubble: View {', start)
+          section = messaging[start:end]
+          section = section.replace('    @State private var dragOffset: CGFloat = 0\n', '')
+          body_pattern = re.compile(
+              r'    var body: some View \{\n        ZStack\(alignment: isMine \? \.trailing : \.leading\) \{.*?\n    private var messageColumn',
+              re.S,
+          )
+          replacement = '''    var body: some View {
+              HStack(alignment: .bottom, spacing: 7) {
+                  if isMine { Spacer(minLength: 48) }
+                  messageColumn
+                  if !isMine { Spacer(minLength: 48) }
+              }
+              .frame(maxWidth: .infinity)
+          }
+
+          private var messageColumn'''
+          section, count = body_pattern.subn(replacement, section, count=1)
+          if count != 1:
+              raise SystemExit('La bulle de message n’a pas pu être simplifiée.')
+          if 'dragOffset' in section or 'Glissez le message' in section or 'messageDateLabel' in section:
+              raise SystemExit('La date au glissement est encore présente.')
+          messaging = messaging[:start] + section + messaging[end:]
+          messaging_path.write_text(messaging)
+
+          member = Path('ios/Velvet/Features/Discovery/MemberDetailView.swift').read_text()
+          if 'MemberAlbumQuickActions(profile: profile)' not in member:
+              raise SystemExit('Les actions d’albums rapides ne sont pas raccordées.')
+
+          app = Path('ios/Velvet/VelvetApp.swift').read_text()
+          if 'struct ZwitApp: App' not in app or 'ZwitNativeLaunchExperience' not in app:
+              raise SystemExit('Le point d’entrée Zwit n’est pas correctement raccordé.')
+
+          info = Path('ios/Velvet/Resources/Info.plist').read_text()
+          if info.count('<string>Zwit</string>') < 2:
+              raise SystemExit('Le nom visible Zwit n’est pas défini dans le bundle.')
+
+          Path('.github/workflows/zwit-ios-finalize.yml').unlink()
+          PY
+
+      - name: Commit finalized sources
+        run: |
+          git config user.name "Velvet-Application"
+          git config user.email "sh96hv64dj@privaterelay.appleid.com"
+          git add -A
+          git commit -m "fix(ios): livrer Zwit.app avec l’animation native et les dates corrigées"
+          git push origin HEAD:fix/zwit-ios-launch-brand-final
