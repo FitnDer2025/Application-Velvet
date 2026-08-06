@@ -172,10 +172,25 @@
   document.addEventListener('submit', (event) => clean(event.target), true);
   window.addEventListener('pageshow', () => clean(document));
   [0,250,1000].forEach((delay) => setTimeout(() => clean(document), delay));
-  if (!document.querySelector('script[data-zwit-experience]')) {
+
+  const loadRefinement = () => {
+    if (document.querySelector('script[data-zwit-experience-refinement]')) return;
+    const refinement = document.createElement('script');
+    refinement.src = '/assets/zwit-experience-refinement.js?v=20260806-3';
+    refinement.dataset.zwitExperienceRefinement = 'true';
+    document.head.appendChild(refinement);
+  };
+
+  const existingExperience = document.querySelector('script[data-zwit-experience]');
+  if (!existingExperience) {
     const experience = document.createElement('script');
     experience.src = '/assets/zwit-experience.js?v=20260806-2';
     experience.dataset.zwitExperience = 'true';
+    experience.addEventListener('load', loadRefinement, { once:true });
     document.head.appendChild(experience);
+  } else if (window.__ZWIT_EXPERIENCE_V2__) {
+    loadRefinement();
+  } else {
+    existingExperience.addEventListener('load', loadRefinement, { once:true });
   }
 })();
