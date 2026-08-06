@@ -125,11 +125,26 @@ test('les scripts de marque et de conversation sont syntaxiquement valides', () 
   }
 });
 
-test('la date de conversation disparaît automatiquement après deux secondes', () => {
+test('la date de conversation reste permanente sur Web, Web mobile et iOS', () => {
   const web = readFileSync(join(webRoot, 'assets/zwit-interaction-date-fix.js'), 'utf8');
   const ios = readFileSync(join(iosRoot, 'Velvet/DesignSystem/AppleShellComponents.swift'), 'utf8');
-  assert.match(web, /setTimeout\(\(\) => badge\.classList\.remove\('visible'\), 2000\)/);
-  assert.match(ios, /deadline:\s*\.now\(\) \+ 2/);
+  assert.match(web, /badge\.classList\.add\('visible'\)/);
+  assert.doesNotMatch(web, /badge\.classList\.remove\('visible'\)/);
+  assert.doesNotMatch(web, /dateTimer/);
+  assert.doesNotMatch(ios, /hideWorkItem/);
+  assert.doesNotMatch(ios, /deadline:\s*\.now\(\) \+ 2/);
+  assert.match(ios, /guard visible else/);
+});
+
+test('le logo de connexion est compact et le kit marketing est réduit', () => {
+  const brand = readFileSync(join(webRoot, 'assets/zwit-brand-system.js'), 'utf8');
+  const marketing = readFileSync(join(webRoot, 'assets/zwit-marketing-compact.css'), 'utf8');
+  const marketingPage = readFileSync(join(webRoot, 'marketing/acces-prive/index.html'), 'utf8');
+  assert.match(brand, /\.vg-mark\{position:relative!important;width:68px!important;height:68px!important/);
+  assert.match(brand, /\.vg-mark img\[data-zwit-canonical-logo="compact"\]/);
+  assert.match(marketing, /\.vwa-topbar\{min-height:58px!important/);
+  assert.match(marketing, /\.vwa-marketing-shell\{padding:28px 0 72px!important/);
+  assert.match(marketingPage, /zwit-marketing-compact\.css\?v=20260806-10/);
 });
 
 test('les données persistantes finales réécrivent les contenus visibles en Zwit', () => {
