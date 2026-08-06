@@ -13,7 +13,7 @@ const marketingScript = await readFile('apps/beta/static/assets/velvet-waitlist-
 const publicApi = await readFile('functions/api/waitlist.js', 'utf8');
 const controlApi = await readFile('functions/api/control/waitlist.js', 'utf8');
 const worker = await readFile('apps/beta/worker/index.js', 'utf8');
-const migration = await readFile('supabase/migrations/20260806111500_velvet_waiting_room.sql', 'utf8');
+const migration = await readFile('infra/supabase/migrations/0040_velvet_waiting_room.sql', 'utf8');
 const accountMenu = await readFile('apps/beta/static/assets/account-access-menu.js', 'utf8');
 
 test('waiting room JavaScript modules are syntactically valid', () => {
