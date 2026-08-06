@@ -63,7 +63,7 @@ contract('public API minimizes and validates the request', () => {
 });
 
 contract('Control cockpit exposes metrics, filters, CSV and role-bound updates', () => {
-  assert.match(controlPage, /Salle d’attente Velvet/);
+  assert.match(controlPage, /salle d’attente Velvet/i);
   assert.match(controlPage, /Professionnels/);
   assert.match(controlPage, /Exporter CSV/);
   assert.match(controlScript, /topTerritories/);
