@@ -61,7 +61,13 @@
     [/\benvironnement marketing\b/gi, 'espace Zwit'],
     [/\bversion de test\b/gi, 'version actuelle'],
     [/\bprofil test\b/gi, 'profil qualité'],
-    [/\bprofils test\b/gi, 'profils qualité']
+    [/\bprofils test\b/gi, 'profils qualité'],
+    [/\bVELVETPRO\b/g, 'ZWITPRO'],
+    [/\bVelvetPro\b/g, 'ZwitPro'],
+    [/\bvelvetpro\b/g, 'zwitpro'],
+    [/\bVELVET\b/g, 'ZWIT'],
+    [/\bVelvet\b/g, 'Zwit'],
+    [/\bvelvet\b/g, 'zwit']
   ];
 
   const removableSelectors = [
@@ -85,14 +91,28 @@
     return phraseRules.reduce((copy, [pattern, replacement]) => copy.replace(pattern, replacement), source);
   }
 
+  function cleanControlValue(element) {
+    if (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)) return;
+    const current = element.value;
+    const next = replaceCopy(current);
+    if (next === current) return;
+    const start = element.selectionStart;
+    const end = element.selectionEnd;
+    element.value = next;
+    if (Number.isInteger(start) && Number.isInteger(end)) {
+      try { element.setSelectionRange(start, end); } catch {}
+    }
+  }
+
   function cleanElement(element) {
     if (!(element instanceof Element)) return;
-    for (const attribute of ['title', 'aria-label', 'placeholder', 'alt']) {
+    for (const attribute of ['title', 'aria-label', 'placeholder', 'alt', 'value']) {
       if (!element.hasAttribute(attribute)) continue;
       const current = element.getAttribute(attribute);
       const next = replaceCopy(current);
       if (next !== current) element.setAttribute(attribute, next);
     }
+    cleanControlValue(element);
   }
 
   function cleanTextNode(node) {
@@ -121,6 +141,32 @@
     }
   }
 
+  function installCanvasBrandGuard() {
+    const prototype = window.CanvasRenderingContext2D?.prototype;
+    if (!prototype || prototype.__zwitBrandGuard) return;
+    const fillText = prototype.fillText;
+    const strokeText = prototype.strokeText;
+    prototype.fillText = function guardedFillText(text, ...args) {
+      return fillText.call(this, replaceCopy(text), ...args);
+    };
+    prototype.strokeText = function guardedStrokeText(text, ...args) {
+      return strokeText.call(this, replaceCopy(text), ...args);
+    };
+    Object.defineProperty(prototype, '__zwitBrandGuard', { value: true });
+  }
+
+  function installSpeechBrandGuard() {
+    const NativeUtterance = window.SpeechSynthesisUtterance;
+    if (!NativeUtterance || window.__ZWIT_SPEECH_BRAND_GUARD__) return;
+    const ZwitUtterance = function ZwitUtterance(text = '') {
+      return new NativeUtterance(replaceCopy(text));
+    };
+    ZwitUtterance.prototype = NativeUtterance.prototype;
+    Object.setPrototypeOf(ZwitUtterance, NativeUtterance);
+    window.SpeechSynthesisUtterance = ZwitUtterance;
+    window.__ZWIT_SPEECH_BRAND_GUARD__ = true;
+  }
+
   const style = document.createElement('style');
   style.id = 'velvetProductionSurfaceStyles';
   style.textContent = `
@@ -132,6 +178,9 @@
     .demo-badge{display:none!important}
   `;
   document.head.appendChild(style);
+
+  installCanvasBrandGuard();
+  installSpeechBrandGuard();
 
   let queued = false;
   const observer = new MutationObserver((mutations) => {
@@ -149,5 +198,8 @@
 
   clean(document);
   observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true });
+  document.addEventListener('focusin', (event) => cleanElement(event.target), true);
+  document.addEventListener('submit', (event) => clean(event.target), true);
   window.addEventListener('pageshow', () => clean(document));
+  [0, 250, 1000].forEach((delay) => setTimeout(() => clean(document), delay));
 })();
