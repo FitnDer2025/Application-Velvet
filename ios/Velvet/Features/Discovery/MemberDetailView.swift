@@ -17,6 +17,14 @@ struct MemberDetailView: View {
     var body: some View {
         VStack(spacing: 0) {
             memberIdentityHeader
+
+            if selectedTab == "profile" {
+                MemberAlbumQuickActions(profile: profile)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                    .padding(.bottom, 4)
+            }
+
             profileTabs
 
             if selectedTab == "outings" {
