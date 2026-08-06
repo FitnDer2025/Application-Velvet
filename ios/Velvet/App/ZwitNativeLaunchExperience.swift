@@ -21,7 +21,7 @@ struct ZwitNativeLaunchExperience: View {
             ZStack {
                 Color.black.ignoresSafeArea()
 
-                Image("ZwitOfficialLogo")
+                Image(ZwitBrand.splashAsset)
                     .resizable()
                     .scaledToFill()
                     .frame(width: proxy.size.width, height: proxy.size.height)
@@ -70,7 +70,7 @@ struct ZwitNativeLaunchExperience: View {
                 .scaleEffect(fogScale)
                 .allowsHitTesting(false)
 
-                Image("ZwitOfficialLogo")
+                Image(ZwitBrand.splashAsset)
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: min(proxy.size.width * 0.92, 720))
@@ -93,7 +93,7 @@ struct ZwitNativeLaunchExperience: View {
         )
         .task { await runSequence() }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Zwit. Chut. Une expérience discrète et confidentielle. Touchez l’écran pour passer l’animation.")
+        .accessibilityLabel("\(ZwitBrand.displayName). Chut. Une expérience discrète et confidentielle. Touchez l’écran pour passer l’animation.")
         .accessibilityAction(named: "Passer l’animation", finishImmediately)
     }
 
