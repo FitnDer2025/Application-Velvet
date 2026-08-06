@@ -9,7 +9,7 @@ test('la surface de production couvre les trois socles Zwit', async () => {
   const source = await read('apps/beta/static/assets/velvet-production-surface.js');
 
   assert.match(source, /Zwit Membres/);
-  assert.match(source, /Velvet Pro/);
+  assert.match(source, /Zwit Pro/);
   assert.match(source, /Zwit Contrôle/);
   assert.match(source, /Synchronisation active/);
   assert.match(source, /Agents qualité/);
