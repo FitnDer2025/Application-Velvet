@@ -4,7 +4,7 @@
   if (window.__VELVET_PRODUCTION_SURFACE__) return;
   window.__VELVET_PRODUCTION_SURFACE__ = true;
 
-  const OFFICIAL_LOGO = '/assets/zwit-logo-transparent.png?v=20260806-7';
+  const OFFICIAL_LOGO = '/assets/zwit-logo-transparent.png?v=20260806-8';
   const path = window.location.pathname;
   const title = path.startsWith('/control')
     ? 'Zwit Contrôle'
@@ -165,7 +165,7 @@
     #velvetMarketingBadge,#velvetMarketingProBadge,[data-beta-badge],[data-demo-badge],.beta-badge,.demo-badge{display:none!important}
     .zwit-opening-v2{visibility:visible!important}
     .zwit-opening-v2 img,.zwit-brand img,.zwit-brand-lockup img,[data-zwit-logo]{background:transparent!important;object-fit:contain!important;filter:drop-shadow(0 18px 34px rgba(0,0,0,.48))!important}
-    .zwit-opening-v2 .zwit-word span{display:inline!important}
+    .zwit-opening-v2 .zwit-word span{display:none!important}
   `;
   document.head.appendChild(style);
   installCanvasBrandGuard();
@@ -195,7 +195,7 @@
   const loadExperience = () => {
     if (document.querySelector('script[data-zwit-experience]')) return;
     const experience = document.createElement('script');
-    experience.src = '/assets/zwit-experience.js?v=20260806-7';
+    experience.src = '/assets/zwit-experience.js?v=20260806-8';
     experience.dataset.zwitExperience = 'true';
     document.head.appendChild(experience);
   };
@@ -206,11 +206,20 @@
       return;
     }
     const refinement = document.createElement('script');
-    refinement.src = '/assets/zwit-experience-refinement.js?v=20260806-7';
+    refinement.src = '/assets/zwit-experience-refinement.js?v=20260806-8';
     refinement.dataset.zwitExperienceRefinement = 'true';
     refinement.addEventListener('load', loadExperience, { once:true });
     document.head.appendChild(refinement);
   };
 
+  const loadInteractionDateFix = () => {
+    if (document.querySelector('script[data-zwit-interaction-date-fix]')) return;
+    const script = document.createElement('script');
+    script.src = '/assets/zwit-interaction-date-fix.js?v=20260806-8';
+    script.dataset.zwitInteractionDateFix = 'true';
+    document.head.appendChild(script);
+  };
+
   loadRefinement();
+  loadInteractionDateFix();
 })();
