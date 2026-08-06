@@ -1,16 +1,22 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { extname, join, relative } from 'node:path';
 import test from 'node:test';
 
 const root = new URL('../../..', import.meta.url).pathname;
 const webRoot = join(root, 'apps/beta/static');
 const iosRoot = join(root, 'ios');
-const readableExtensions = new Set(['.html', '.js', '.mjs', '.json', '.svg', '.md', '.swift', '.plist', '.strings', '.xcstrings']);
+const functionsRoot = join(root, 'functions');
+const finalMigrations = [
+  join(root, 'infra/supabase/migrations/0045_zwit_visible_brand_consistency.sql'),
+  join(root, 'supabase/migrations/20260806230500_zwit_visible_brand_consistency.sql')
+];
+const readableExtensions = new Set(['.html', '.js', '.mjs', '.json', '.svg', '.md', '.swift', '.plist', '.strings', '.xcstrings', '.sql']);
 const excludedDirectories = new Set(['.git', 'node_modules', 'DerivedData', '.build']);
 
 function walk(directory) {
+  if (!existsSync(directory)) return [];
   const files = [];
   for (const entry of readdirSync(directory)) {
     if (excludedDirectories.has(entry)) continue;
@@ -42,14 +48,23 @@ function isTechnical(value) {
     /^velvet[A-Z][A-Za-z0-9_]*$/,
     /^velvet[._/-][A-Za-z0-9_./-]+$/i,
     /^\/[^\s]*velvet[^\s]*$/i,
-    /\.(?:js|mjs|css|png|jpe?g|svg|swift|plist|entitlements|json)$/i,
-    /^(?:bucket|table|storage|schema|key|kind|target|scheme):?\s*velvet/i
+    /\.(?:js|mjs|css|png|jpe?g|svg|swift|plist|entitlements|json|sql)$/i,
+    /^(?:bucket|table|storage|schema|key|kind|target|scheme|migration):?\s*velvet/i,
+    /^velvet_private(?:\.|$)/i,
+    /^public\.velvet_/i
   ].some((pattern) => pattern.test(text));
 }
 
 function visibleVelvetFindings() {
   const findings = [];
-  for (const file of [...walk(webRoot), ...walk(iosRoot)]) {
+  const files = [
+    ...walk(webRoot),
+    ...walk(iosRoot),
+    ...walk(functionsRoot),
+    ...finalMigrations.filter(existsSync)
+  ];
+
+  for (const file of files) {
     const source = readFileSync(file, 'utf8');
     source.split(/\r?\n/).forEach((line, index) => {
       if (!/\bvelvet\b/i.test(line)) return;
@@ -78,6 +93,16 @@ test('la marque Web possède une source de vérité unique', () => {
   assert.match(brand, /email:\s*fullLogo/);
 });
 
+test('iOS possède une source visible de marque unique', () => {
+  const brand = readFileSync(join(iosRoot, 'Velvet/DesignSystem/ZwitBrand.swift'), 'utf8');
+  assert.match(brand, /static let name = "ZWIT"/);
+  assert.match(brand, /static let controlLabel = "ZWIT CONTRÔLE"/);
+  assert.match(brand, /static let memberLabel = "ZWIT"/);
+  assert.match(brand, /static let proLabel = "ZWIT PRO"/);
+  assert.match(brand, /static let splashAsset = "ZwitOfficialLogo"/);
+  assert.match(brand, /static let widgetAsset = "ZwitOfficialLogo"/);
+});
+
 test('les scripts de marque et de conversation sont syntaxiquement valides', () => {
   for (const script of [
     'assets/zwit-brand-system.js',
@@ -97,6 +122,16 @@ test('la date de conversation disparaît automatiquement après deux secondes', 
   assert.match(ios, /deadline:\s*\.now\(\) \+ 2/);
 });
 
+test('les données persistantes finales réécrivent les contenus visibles en Zwit', () => {
+  for (const migration of finalMigrations) {
+    assert.ok(existsSync(migration), `migration absente: ${relative(root, migration)}`);
+    const sql = readFileSync(migration, 'utf8');
+    assert.match(sql, /Annonce du lancement Zwit/);
+    assert.match(sql, /Zwit ouvre bientôt ses portes/);
+    assert.match(sql, /Découvrir Zwit/);
+  }
+});
+
 test('aucune chaîne utilisateur des trois socles ne contient encore Velvet', () => {
   const findings = visibleVelvetFindings();
   if (findings.length) {
@@ -108,4 +143,4 @@ test('aucune chaîne utilisateur des trois socles ne contient encore Velvet', ()
   assert.deepEqual(findings, []);
 });
 
-// Ce contrat est exécuté sur chaque PR pour empêcher toute régression de marque visible.
+// Ce contrat bloque toute régression de marque visible sur Web, Web mobile, iOS et fonctions de communication.
