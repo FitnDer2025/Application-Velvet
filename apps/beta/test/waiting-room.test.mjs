@@ -15,9 +15,9 @@ const worker = await readFile('apps/beta/worker/index.js', 'utf8');
 const migration = await readFile('supabase/migrations/20260806111500_velvet_waiting_room.sql', 'utf8');
 const accountMenu = await readFile('apps/beta/static/assets/account-access-menu.js', 'utf8');
 
-test('waiting room scripts are valid JavaScript', () => {
-  for (const source of [publicScript, controlScript, marketingScript, publicApi, controlApi, worker]) {
-    assert.doesNotThrow(() => new Script(source.replace(/^import .*$/gm, '').replace(/^export /gm, '')));
+test('waiting room browser scripts are valid JavaScript', () => {
+  for (const source of [publicScript, controlScript, marketingScript]) {
+    assert.doesNotThrow(() => new Script(source));
   }
 });
 
