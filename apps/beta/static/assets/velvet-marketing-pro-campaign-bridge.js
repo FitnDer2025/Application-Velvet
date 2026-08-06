@@ -170,7 +170,7 @@
       [context.date, context.time, context.location].filter(Boolean).join(' · '),
       context.dress ? `Dress code : ${context.dress}` : '',
       context.price ? `Entrée : ${context.price}` : '',
-      cta || 'Découvrez la soirée et réservez votre place sur Velvet.'
+      cta || 'Découvrez la soirée et réservez votre place sur Zwit.'
     ].filter(Boolean).join('\n\n');
     const tags = ['#Zwit', '#SoiréePrivée', '#Nightlife', '#Lille'];
     return {

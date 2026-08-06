@@ -13,7 +13,7 @@
     map: { label: 'Carte Zwit', selector: '[data-route="maps"]' }
   };
 
-  const DEFAULT_BRIEF = 'Présente Zwit comme une expérience premium qui réunit des profils complets, des échanges de confiance, des sorties et des établissements. Montre l’accueil, la découverte des membres, une fiche complète, la messagerie, les événements et la carte. Termine par une invitation élégante à rejoindre Velvet.';
+  const DEFAULT_BRIEF = 'Présente Zwit comme une expérience premium qui réunit des profils complets, des échanges de confiance, des sorties et des établissements. Montre l’accueil, la découverte des membres, une fiche complète, la messagerie, les événements et la carte. Termine par une invitation élégante à rejoindre Zwit.';
 
   const state = {
     running: false,

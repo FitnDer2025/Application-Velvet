@@ -36,8 +36,8 @@ test('le build publie les deux accès Marketing directement dans le module', () 
   assert.match(build, /velvet-marketing-mode\.js/);
   assert.match(build, /velvet-marketing-pro-mode\.js/);
   assert.doesNotMatch(build, /velvet-marketing-shortcut\.js/);
-  assert.match(moduleSource, /Velvet Marketing Membre/);
-  assert.match(moduleSource, /Velvet Marketing Pro/);
+  assert.match(moduleSource, /Zwit Marketing Membre/);
+  assert.match(moduleSource, /Zwit Marketing Pro/);
   assert.match(worker, /'\/marketing'/);
   assert.match(worker, /'\/marketing-pro'/);
 });

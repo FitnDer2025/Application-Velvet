@@ -8,7 +8,7 @@
   const JOB_PREFIX = 'velvet_studio_social_job_v1:';
   const LATEST_JOB_KEY = 'velvet_studio_social_latest_v1';
   const DRAFT_KEY = 'velvet_studio_social_draft_v1';
-  const DEFAULT_MEMBER = 'Raconte comment une envie discrète devient progressivement une belle rencontre grâce à Velvet. Montre le véritable accueil Membre, la découverte des profils, une fiche complète, les premiers messages, une sortie et les lieux proches. Le récit doit être sensuel, élégant, chaleureux et émouvant, jamais explicite. Termine par une invitation à rejoindre Velvet.';
+  const DEFAULT_MEMBER = 'Raconte comment une envie discrète devient progressivement une belle rencontre grâce à Zwit. Montre le véritable accueil Membre, la découverte des profils, une fiche complète, les premiers messages, une sortie et les lieux proches. Le récit doit être sensuel, élégant, chaleureux et émouvant, jamais explicite. Termine par une invitation à rejoindre Zwit.';
   const DEFAULT_PRO = 'Raconte comment un établissement gagne en visibilité, en maîtrise et en sérénité grâce à Zwit Pro. Montre le véritable tableau de bord, la fiche de l’établissement, l’agenda des soirées et le suivi des inscriptions. Le récit doit être premium, humain et convaincant. Termine par une invitation à rejoindre Zwit Pro.';
 
   const state = {
@@ -65,14 +65,14 @@
   function productCopy(product) {
     return product === 'pro'
       ? { title: 'Zwit Pro', icon: 'PRO', brief: DEFAULT_PRO, route: '/marketing-pro/' }
-      : { title: 'Zwit Membre', icon: 'V', brief: DEFAULT_MEMBER, route: '/marketing/' };
+      : { title: 'Zwit Membre', icon: 'Z', brief: DEFAULT_MEMBER, route: '/marketing/' };
   }
 
   function moduleMarkup() {
     const product = state.draft.product === 'pro' ? 'pro' : 'member';
     return `<section class="vss-shell" data-vss-shell>
       <header class="vss-head"><div class="vss-brand"><div class="vss-mark">▶</div><div><strong>Vidéos sociales Zwit</strong><span>Le véritable Zwit en action, une histoire française et une vidéo prête à diffuser.</span></div></div><div class="vss-links"><a class="vss-link gold" href="/marketing/" target="_blank" rel="noopener">↗ Zwit Marketing Membre</a><a class="vss-link gold" href="/marketing-pro/" target="_blank" rel="noopener">↗ Zwit Marketing Pro</a></div></header>
-      <div class="vss-body"><div class="vss-mode-grid"><button class="vss-mode ${product === 'member' ? 'active' : ''}" data-vss-product="member"><i>V</i><div><b>Promouvoir Zwit Membre</b><small>Profils, échanges, sorties, lieux et désir de rejoindre la communauté.</small></div><span></span></button><button class="vss-mode ${product === 'pro' ? 'active' : ''}" data-vss-product="pro"><i>PRO</i><div><b>Promouvoir Zwit Pro</b><small>Pilotage, établissement, événements, inscriptions et valeur business.</small></div><span></span></button></div>
+      <div class="vss-body"><div class="vss-mode-grid"><button class="vss-mode ${product === 'member' ? 'active' : ''}" data-vss-product="member"><i>Z</i><div><b>Promouvoir Zwit Membre</b><small>Profils, échanges, sorties, lieux et désir de rejoindre la communauté.</small></div><span></span></button><button class="vss-mode ${product === 'pro' ? 'active' : ''}" data-vss-product="pro"><i>PRO</i><div><b>Promouvoir Zwit Pro</b><small>Pilotage, établissement, événements, inscriptions et valeur business.</small></div><span></span></button></div>
       <div class="vss-grid"><section class="vss-card"><label class="vss-label" for="vssBrief">L’histoire à raconter</label><textarea id="vssBrief" data-vss-brief>${esc(state.draft.brief || productCopy(product).brief)}</textarea><div class="vss-options"><label class="vss-field">Format social<select data-vss-format><option value="9:16" ${state.draft.format === '9:16' ? 'selected' : ''}>Vertical 9:16 · Reels / TikTok</option><option value="1:1" ${state.draft.format === '1:1' ? 'selected' : ''}>Carré 1:1 · Publication</option><option value="16:9" ${state.draft.format === '16:9' ? 'selected' : ''}>Paysage 16:9 · Site / YouTube</option></select></label><label class="vss-field">Durée<select data-vss-duration><option value="15" ${Number(state.draft.duration) === 15 ? 'selected' : ''}>15 secondes</option><option value="30" ${Number(state.draft.duration) === 30 ? 'selected' : ''}>30 secondes</option><option value="45" ${Number(state.draft.duration) === 45 ? 'selected' : ''}>45 secondes</option></select></label></div>
       <label class="vss-label">Voix off française</label><div class="vss-voice-row"><label class="vss-field"><select data-vss-voice><option value="">Recherche des voix françaises…</option></select></label><button class="vss-btn secondary" data-vss-test-voice>Écouter la voix</button></div><button class="vss-btn" data-vss-generate>Écrire le scénario</button><div class="vss-message" data-vss-message></div></section><section class="vss-card" data-vss-result>${resultMarkup()}</section></div></div></section>`;
   }

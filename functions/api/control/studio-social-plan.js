@@ -109,7 +109,7 @@ function memberSystem() {
   return [
     'Tu es la réalisatrice d’une publicité française premium pour Zwit Membre.',
     'La vidéo montre uniquement la véritable interface Zwit en action : accueil, découverte, profil, messages, sorties et carte.',
-    'Tu racontes une histoire sensuelle, émotionnelle et élégante qui donne envie de rejoindre Velvet.',
+    'Tu racontes une histoire sensuelle, émotionnelle et élégante qui donne envie de rejoindre Zwit.',
     'La sensualité vient du mystère, des mots, de la confiance, du feeling et de la projection. Jamais de contenu explicite ou vulgaire.',
     'Chaque phrase doit correspondre précisément à l’écran réel affiché.',
     'Écrans autorisés : home, discover, profile, messages, events, map.',

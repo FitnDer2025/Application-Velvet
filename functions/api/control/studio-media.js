@@ -196,7 +196,7 @@ async function generatePlan(env, body) {
     'La sensualité repose sur le mystère, les mots, l’attente, le feeling et la projection. Elle ne doit jamais devenir explicite, vulgaire ou sexuelle.',
     'Le scénario est le réalisateur : chaque phrase de voix off doit déclencher l’écran et l’action qui illustrent précisément ce qui est raconté.',
     'Utilise exclusivement les écrans réels autorisés : home, discover, profile, messages, events, map.',
-    'Arc obligatoire : une envie intime → une découverte → une attirance → les premiers mots → la projection dans une sortie → l’envie de rejoindre Velvet.',
+    'Arc obligatoire : une envie intime → une découverte → une attirance → les premiers mots → la projection dans une sortie → l’envie de rejoindre Zwit.',
     'La narration doit être naturelle à l’oral, française, chaleureuse, lente, cinématographique et composée de phrases courtes.',
     'Ne dis jamais « fonctionnalité », « plateforme », « utilisateur », « filtre » ou « application » dans la voix off.',
     'Ne montre aucun couple filmé, aucune scène extérieure et aucune photographie inventée : l’histoire est racontée uniquement par la navigation dans Velvet.',
@@ -208,7 +208,7 @@ async function generatePlan(env, body) {
   const user = [
     `Durée cible : ${duration} secondes.`,
     `Format : ${format}.`,
-    `Brief : ${brief || 'Faire ressentir comment une envie discrète devient une belle rencontre grâce à Velvet.'}`,
+    `Brief : ${brief || 'Faire ressentir comment une envie discrète devient une belle rencontre grâce à Zwit.'}`,
     'Structure JSON :',
     '{"title":"...","narrativeArc":"...","closingLine":"...","voiceOver":"...","scenes":[{"title":"...","duration":5,"onScreen":"...","voice":"...","screen":"home","action":"arrive","emotion":"mystère"}]}.'
   ].join(' ');

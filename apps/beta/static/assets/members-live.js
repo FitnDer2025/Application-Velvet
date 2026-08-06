@@ -163,7 +163,7 @@
     profile_identity_required: 'Ajoute un nom de profil et une description d’au moins 20 caractères.',
     profile_payload_too_large: 'Le contenu du profil est trop volumineux.',
     gender_identity_required: 'Indique ton identité de genre pour compléter ta fiche personnelle.',
-    profile_required: 'Crée d’abord ton profil Velvet.',
+    profile_required: 'Crée d’abord ton profil Zwit.',
     organizer_request_already_pending: 'Une demande Organisateur est déjà en cours.',
     album_name_required: 'Donne un nom à cet album.',
     photo_and_album_required: 'Choisis une photo et un album.',
@@ -177,14 +177,14 @@
     personal_photo_owner_required: 'Chaque personne doit publier elle-même son portrait.',
     photo_access_denied: 'Cette photo n’est plus accessible.',
     cannot_react_to_own_photo: 'Tu peux consulter les réactions reçues, mais pas réagir à ta propre photo.',
-    photo_reaction_persistence_failed: 'La réaction n’a pas pu être confirmée dans la mémoire Velvet.',
+    photo_reaction_persistence_failed: 'La réaction n’a pas pu être confirmée dans la mémoire Zwit.',
     profile_contact_not_allowed: 'Ce profil n’accepte pas les messages de ta catégorie de profil.',
     profile_contact_blocked: 'Cette conversation ne peut pas être ouverte.',
     report_category_required: 'Choisis la raison du signalement.',
     event_registration_closed: 'Les inscriptions à cette sortie sont closes.',
     event_unavailable: 'Cette sortie n’est plus disponible.',
     saved_search_name_required: 'Donne un nom à cette recherche.',
-    saved_search_write_failed: 'La recherche n’a pas pu être enregistrée dans Velvet.'
+    saved_search_write_failed: 'La recherche n’a pas pu être enregistrée dans Zwit.'
     ,
     lifecycle_email_not_configured: 'L’envoi d’e-mails de confirmation n’est pas configuré.',
     lifecycle_action_already_pending: 'Une action sensible attend déjà des confirmations.',
@@ -202,9 +202,9 @@
     promotion_already_used: 'Ce code a déjà été utilisé par ce profil.',
     promotion_audience_mismatch: 'Ce code n’est pas destiné à ce type de profil.',
     billing_provider_not_configured: 'Le paiement sera ouvert après validation définitive de notre partenaire bancaire.',
-    identity_age_verification_required: 'La vérification de l’identité et de la majorité est obligatoire avant d’accéder à Velvet.',
+    identity_age_verification_required: 'La vérification de l’identité et de la majorité est obligatoire avant d’accéder à Zwit.',
     verification_provider_not_configured: 'Le prestataire de vérification n’est pas encore raccordé sur cet environnement.',
-    data_export_failed: 'Ton export n’a pas pu être préparé. Réessaie ou contacte l’équipe Velvet.'
+    data_export_failed: 'Ton export n’a pas pu être préparé. Réessaie ou contacte l’équipe Zwit.'
   };
 
   const REFERENCES = {

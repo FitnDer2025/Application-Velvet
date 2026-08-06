@@ -275,7 +275,7 @@ function fallbackCopy(event, venue, networks, tone, cta) {
     [context.date, context.time, context.location].filter(Boolean).join(' · '),
     context.dressCode ? `Dress code : ${context.dressCode}` : '',
     context.price ? `Entrée : ${context.price}` : '',
-    cta || 'Découvrez la soirée et réservez votre place sur Velvet.'
+    cta || 'Découvrez la soirée et réservez votre place sur Zwit.'
   ].filter(Boolean).join('\n\n');
   const hashtags = ['#Zwit', '#SoiréePrivée', '#Événement', '#Nightlife', context.city ? `#${context.city.replace(/\s+/g, '')}` : ''].filter(Boolean);
   return {

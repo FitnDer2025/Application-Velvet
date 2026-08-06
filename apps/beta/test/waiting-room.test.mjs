@@ -78,7 +78,7 @@ contract('Control cockpit exposes metrics, filters, CSV and role-bound updates',
 contract('Marketing kit contains traceable member and professional campaigns', () => {
   assert.match(marketingPage, /PUBLICATION PRINCIPALE/);
   assert.match(marketingPage, /APPEL À TESTEURS/);
-  assert.match(marketingPage, /VELVET PRO/);
+  assert.match(marketingPage, /ZWIT PRO/);
   assert.match(marketingPage, /RELANCE/);
   assert.match(marketingPage, /STORY · 3 ÉCRANS/);
   assert.match(marketingScript, /utm_source/);

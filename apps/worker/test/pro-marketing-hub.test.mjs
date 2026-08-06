@@ -15,7 +15,7 @@ const setup = await readFile('docs/VELVET_PRO_MARKETING_SETUP.md', 'utf8');
 test('le cockpit Zwit Marketing compile et reste dans le portail Pro', () => {
   assert.doesNotThrow(() => new Function(client));
   assert.doesNotThrow(() => new Function(runtime));
-  assert.match(client, /VELVET PRO · CONCENTRATEUR MARKETING/);
+  assert.match(client, /ZWIT PRO · CONCENTRATEUR MARKETING/);
   assert.match(client, /data-pro-marketing-nav/);
   assert.match(client, /Créer une campagne/);
   assert.match(client, /Calendrier éditorial/);

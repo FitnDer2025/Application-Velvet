@@ -9,7 +9,7 @@ const voice = await readFile('functions/api/control/studio-media-safe.js', 'utf8
 
 test('Zwit Studio ajoute le module social dans la page existante', () => {
   assert.doesNotThrow(() => new Function(inline));
-  assert.match(inline, /Vidéos sociales Velvet/);
+  assert.match(inline, /Vidéos sociales Zwit/);
   assert.match(inline, /Promouvoir Zwit Membre/);
   assert.match(inline, /Promouvoir Zwit Pro/);
   assert.match(inline, /\.vs1-project-main/);

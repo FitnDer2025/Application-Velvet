@@ -10,7 +10,7 @@ const planUrl = new URL('../../../functions/api/control/studio-social-plan.js', 
 test('le module social compile et présente les deux produits Zwit', async () => {
   const source = await readFile(clientUrl, 'utf8');
   assert.doesNotThrow(() => new Function(source));
-  assert.match(source, /Vidéos sociales Velvet/);
+  assert.match(source, /Vidéos sociales Zwit/);
   assert.match(source, /Promouvoir Zwit Membre/);
   assert.match(source, /Promouvoir Zwit Pro/);
   assert.match(source, /Écrire le scénario/);

@@ -20,7 +20,7 @@
     networks: ['facebook', 'instagram'],
     tone: 'premium',
     objective: 'event_registration',
-    cta: 'Découvrez la soirée et réservez votre place sur Velvet.',
+    cta: 'Découvrez la soirée et réservez votre place sur Zwit.',
     baseCopy: '',
     copies: { facebook: '', instagram: '', tiktok: '' },
     compliance: null,

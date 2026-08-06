@@ -18,7 +18,7 @@ test('les choix guidés acceptent une réponse personnelle sans l’inventer', (
   assert.match(onboarding, /Autre — préciser librement/);
   assert.match(onboarding, /data-other-for/);
   assert.match(onboarding, /data-select-other-for/);
-  assert.match(onboarding, /Velvet n’ajoute aucune envie ni expérience que tu n’as pas déclarée/);
+  assert.match(onboarding, /Zwit n’ajoute aucune envie ni expérience que tu n’as pas déclarée/);
 });
 
 test('les premiers repères restent alignés et le style de rencontre est sans double sens', () => {
@@ -29,7 +29,7 @@ test('les premiers repères restent alignés et le style de rencontre est sans d
 
 test('Mon histoire devient une chronologie de faits réels', () => {
   assert.match(members, /function profileStoryTimeline/);
-  assert.match(members, /Le début de son histoire Velvet/);
+  assert.match(members, /Le début de son histoire Zwit/);
   assert.match(members, /item\.target_type === 'profile'/);
   assert.match(members, /profile-story-timeline/);
   assert.doesNotMatch(members, /<h2>\$\{voice\.storyTitle\}<\/h2><p>\$\{e\(profile\.story/);

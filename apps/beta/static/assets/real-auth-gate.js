@@ -38,7 +38,7 @@
     invalid_recovery_link: 'Ce lien de récupération est incomplet.',
     invalid_or_expired_recovery_link: 'Ce lien de récupération est invalide ou expiré.',
     required_consents_missing: 'Les quatre validations sont obligatoires pour activer ton accès.',
-    activation_failed: 'L’activation n’a pas abouti. Contacte l’équipe Velvet.'
+    activation_failed: 'L’activation n’a pas abouti. Contacte l’équipe Zwit.'
   };
 
   function shell(content) {
@@ -187,7 +187,7 @@
   function passwordResetView(tokens) {
     window.history.replaceState({}, '', '/');
     gate.innerHTML = shell(`
-      <p class="vg-intro">Choisis maintenant un nouveau mot de passe pour sécuriser ton accès Velvet.</p>
+      <p class="vg-intro">Choisis maintenant un nouveau mot de passe pour sécuriser ton accès Zwit.</p>
       <form id="vg-password-reset">
         <label>Nouveau mot de passe<input name="password" type="password" minlength="12" autocomplete="new-password" required></label>
         <label>Confirmer le mot de passe<input name="confirmation" type="password" minlength="12" autocomplete="new-password" required></label>
@@ -226,7 +226,7 @@
       <p class="vg-intro">Avant l’accès, Zwit doit enregistrer tes choix séparément.</p>
       <form id="vg-consent" class="vg-consents">
         <label><input name="adult" type="checkbox" required> Je déclare avoir 18 ans ou plus.</label>
-        <label><input name="terms" type="checkbox" required> J’accepte les conditions d’utilisation de Velvet.</label>
+        <label><input name="terms" type="checkbox" required> J’accepte les conditions d’utilisation de Zwit.</label>
         <label><input name="privacy" type="checkbox" required> J’ai lu l’information de confidentialité.</label>
         <label><input name="sensitiveProfile" type="checkbox" required> Je consens explicitement au traitement des données sensibles que je choisirai de publier sur mon profil. Je pourrai retirer ce consentement.</label>
         <button type="submit">Activer mon accès</button>

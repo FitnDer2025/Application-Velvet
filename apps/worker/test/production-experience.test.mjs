@@ -8,9 +8,9 @@ const PREVIEW_TERMS = /\bBETA\b|bêta|version de test|environnement de démonstr
 test('la surface de production couvre les trois socles Zwit', async () => {
   const source = await read('apps/beta/static/assets/velvet-production-surface.js');
 
-  assert.match(source, /Velvet Membres/);
+  assert.match(source, /Zwit Membres/);
   assert.match(source, /Velvet Pro/);
-  assert.match(source, /Velvet Contrôle/);
+  assert.match(source, /Zwit Contrôle/);
   assert.match(source, /Synchronisation active/);
   assert.match(source, /Agents qualité/);
   assert.match(source, /MutationObserver/);
@@ -27,7 +27,7 @@ test('la connexion et le sélecteur de compte chargent la surface de production'
   assert.match(auth, /velvet-production-surface\.js/);
   assert.match(menu, /velvet-production-surface\.js/);
   assert.match(auth, /ACCÈS PRIVÉ · 18\+/);
-  assert.match(auth, /Velvet Contrôle/);
+  assert.match(auth, /Zwit Contrôle/);
   assert.doesNotMatch(auth, /invitées à tester|conditions de la BETA|BETA PRIVÉE/i);
 });
 

@@ -86,7 +86,7 @@ test('own profile reloads albums and does not duplicate album media in the hero'
 test('profile editing and Zwit AI are directly available in native iOS', async () => {
   const editor = await source('editor');
   assert.match(editor, /Modifier mon profil/);
-  assert.match(editor, /Velvet IA/);
+  assert.match(editor, /Zwit IA/);
   assert.match(editor, /generateProfileCopy/);
   assert.match(editor, /saveProfile/);
   assert.match(editor, /ProfileUpsertRequest/);

@@ -35,8 +35,8 @@ test('le module reste présent dans la bibliothèque et dans l’éditeur', () =
   assert.match(moduleSource, /data-vss-shell/);
   assert.match(moduleSource, /data-vss-editor/);
   assert.match(moduleSource, /new MutationObserver\(scheduleInstall\)/);
-  assert.match(moduleSource, /Velvet Marketing Membre/);
-  assert.match(moduleSource, /Velvet Marketing Pro/);
+  assert.match(moduleSource, /Zwit Marketing Membre/);
+  assert.match(moduleSource, /Zwit Marketing Pro/);
 });
 
 test('le tournage enregistre le flux réel et le recadre au format social', () => {

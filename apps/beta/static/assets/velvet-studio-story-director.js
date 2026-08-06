@@ -10,7 +10,7 @@
     ['Carte Zwit', 'map']
   ]);
 
-  const DEFAULT_STORY = 'Raconte comment une envie discrète devient une belle rencontre grâce à Velvet. Commence par le mystère d’une envie que l’on n’ose pas encore nommer. Fais naître l’attirance en découvrant un profil, puis l’émotion en entrant dans son univers. Montre les premiers mots échangés, la confiance qui s’installe et une sortie qui se prépare. Termine par l’envie de rejoindre Velvet. Le ton doit être sensuel, subtil, émouvant et jamais explicite.';
+  const DEFAULT_STORY = 'Raconte comment une envie discrète devient une belle rencontre grâce à Zwit. Commence par le mystère d’une envie que l’on n’ose pas encore nommer. Fais naître l’attirance en découvrant un profil, puis l’émotion en entrant dans son univers. Montre les premiers mots échangés, la confiance qui s’installe et une sortie qui se prépare. Termine par l’envie de rejoindre Zwit. Le ton doit être sensuel, subtil, émouvant et jamais explicite.';
 
   const state = {
     plan: null,
