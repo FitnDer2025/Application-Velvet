@@ -1,0 +1,39 @@
+name: Zwit identity rebrand
+
+on:
+  push:
+    branches:
+      - feat/zwit-rebrand
+    paths:
+      - scripts/zwit-rebrand.mjs
+      - .github/workflows/zwit-rebrand.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-rebrand:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout rebrand branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/zwit-rebrand
+          fetch-depth: 0
+
+      - name: Apply safe visible-brand replacement
+        run: node scripts/zwit-rebrand.mjs
+
+      - name: Commit generated rebrand
+        run: |
+          if git diff --quiet && [ -z "$(git status --porcelain)" ]; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: appliquer l'identité Zwit [skip ci]"
+          git push origin HEAD:feat/zwit-rebrand
