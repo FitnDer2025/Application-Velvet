@@ -12,6 +12,7 @@ struct ZwitNativeLaunchExperience: View {
     @State private var logoOpacity = 0.0
     @State private var logoBlur: CGFloat = 24
     @State private var logoScale: CGFloat = 0.90
+    @State private var hasFinished = false
 
     private let words = ["Chut", "Silencio", "Silenzio", "嘘"]
 
@@ -81,11 +82,19 @@ struct ZwitNativeLaunchExperience: View {
                     .accessibilityHidden(true)
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
+            .contentShape(Rectangle())
             .ignoresSafeArea()
         }
+        .contentShape(Rectangle())
+        .onTapGesture(perform: finishImmediately)
+        .highPriorityGesture(
+            DragGesture(minimumDistance: 0)
+                .onEnded { _ in finishImmediately() }
+        )
         .task { await runSequence() }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Zwit. Chut. Une expérience discrète et confidentielle.")
+        .accessibilityLabel("Zwit. Chut. Une expérience discrète et confidentielle. Touchez l’écran pour passer l’animation.")
+        .accessibilityAction(named: "Passer l’animation", finishImmediately)
     }
 
     private func fog(size: CGFloat) -> some View {
@@ -112,44 +121,53 @@ struct ZwitNativeLaunchExperience: View {
             currentWordIndex = 0
             wordOpacity = 1
             try? await Task.sleep(for: .milliseconds(850))
+            guard !Task.isCancelled, !hasFinished else { return }
             withAnimation(.easeInOut(duration: 0.65)) {
                 wordOpacity = 0
                 fogOpacity = 0.76
                 fogScale = 1.10
             }
             try? await Task.sleep(for: .milliseconds(600))
+            guard !Task.isCancelled, !hasFinished else { return }
             revealLogo()
             try? await Task.sleep(for: .milliseconds(11_500))
-            onFinished()
+            guard !Task.isCancelled, !hasFinished else { return }
+            finish()
             return
         }
 
         for index in words.indices {
+            guard !Task.isCancelled, !hasFinished else { return }
             currentWordIndex = index
             withAnimation(.easeInOut(duration: 0.78)) {
                 wordOpacity = 1
             }
             try? await Task.sleep(for: .milliseconds(1_250))
+            guard !Task.isCancelled, !hasFinished else { return }
             withAnimation(.easeInOut(duration: 0.82)) {
                 wordOpacity = 0
             }
             try? await Task.sleep(for: .milliseconds(620))
         }
 
+        guard !Task.isCancelled, !hasFinished else { return }
         currentWordIndex = nil
         withAnimation(.easeInOut(duration: 1.35)) {
             fogOpacity = 0.84
             fogScale = 1.18
         }
         try? await Task.sleep(for: .milliseconds(1_050))
+        guard !Task.isCancelled, !hasFinished else { return }
 
         revealLogo()
         try? await Task.sleep(for: .milliseconds(4_300))
-        onFinished()
+        guard !Task.isCancelled, !hasFinished else { return }
+        finish()
     }
 
     @MainActor
     private func revealLogo() {
+        guard !hasFinished else { return }
         withAnimation(.easeInOut(duration: 1.55)) {
             logoOpacity = 1
             logoBlur = 0
@@ -157,5 +175,23 @@ struct ZwitNativeLaunchExperience: View {
             fogOpacity = 0.46
             fogScale = 1.30
         }
+    }
+
+    @MainActor
+    private func finishImmediately() {
+        guard !hasFinished else { return }
+        withAnimation(.easeOut(duration: 0.18)) {
+            wordOpacity = 0
+            fogOpacity = 0
+            logoOpacity = 0
+        }
+        finish()
+    }
+
+    @MainActor
+    private func finish() {
+        guard !hasFinished else { return }
+        hasFinished = true
+        onFinished()
     }
 }
