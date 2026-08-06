@@ -65,7 +65,7 @@ const journeys = [
       && has('apps/beta/static/assets/members-onboarding-v2.js', '/api/members/couple-profile', 'startCoupleCommon')
   },
   {
-    name: 'Plume Velvet IA',
+    name: 'Plume Zwit IA',
     valid: has('functions/api/members/profile-copy.js', 'memberSession', 'hasSufficientSource', 'messages', 'Tu n’inventes jamais', 'uniquement du contenu à reformuler')
       && has('apps/beta/static/assets/members-onboarding-v2.js', '/api/members/profile-copy', 'data-ai-writer', 'sufficientAiSource')
       && has('apps/beta/static/assets/members-live.js', '/api/members/profile-copy', 'data-ai-writer', 'sufficientAiSource')
@@ -139,7 +139,7 @@ const journeys = [
       && !files['apps/beta/static/assets/location-verification.js'].includes('refreshNearbyVenues')
   },
   {
-    name: 'Thème clair Velvet',
+    name: 'Thème clair Zwit',
     valid: has('apps/beta/static/assets/members-live.js', 'velvet-member-theme-v1', 'Mode clair', 'applyTheme')
       && has('apps/beta/static/assets/members-live.css', 'html[data-theme="light"]', '#f4f4f2', '#641b36', '#c6a96a')
   },
@@ -172,7 +172,7 @@ const journeys = [
     valid: has('functions/api/control/workspace.js', 'claim_directory_venue', 'subscription_status')
       && has('functions/api/pro/workspace.js', 'pro_subscription_required', 'publish_venue', 'create_event')
       && has('apps/beta/static/assets/control-live.js', 'controlClaimVenueForm', 'data-subscription-status')
-      && has('apps/beta/static/assets/pro-live.js', "'trial', 'active'", 'Abonnement Velvet Pro requis')
+      && has('apps/beta/static/assets/pro-live.js', "'trial', 'active'", 'Abonnement Zwit Pro requis')
   },
   {
     name: 'Messagerie avec pièces jointes',
@@ -204,4 +204,4 @@ if (failures.length) {
   throw new Error(`Recette contractuelle incomplète : ${failures.map((journey) => journey.name).join(', ')}`);
 }
 
-console.log(`Velvet user journey checks passed: ${journeys.length} parcours bout en bout couverts`);
+console.log(`Zwit user journey checks passed: ${journeys.length} parcours bout en bout couverts`);
