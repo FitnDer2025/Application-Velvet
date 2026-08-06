@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import { Script } from 'node:vm';
 
@@ -15,9 +16,17 @@ const worker = await readFile('apps/beta/worker/index.js', 'utf8');
 const migration = await readFile('supabase/migrations/20260806111500_velvet_waiting_room.sql', 'utf8');
 const accountMenu = await readFile('apps/beta/static/assets/account-access-menu.js', 'utf8');
 
-test('waiting room browser scripts are valid JavaScript', () => {
+test('waiting room JavaScript modules are syntactically valid', () => {
   for (const source of [publicScript, controlScript, marketingScript]) {
     assert.doesNotThrow(() => new Script(source));
+  }
+  for (const file of [
+    'functions/api/waitlist.js',
+    'functions/api/control/waitlist.js',
+    'apps/beta/worker/index.js'
+  ]) {
+    const checked = spawnSync(process.execPath, ['--check', file], { encoding: 'utf8' });
+    assert.equal(checked.status, 0, checked.stderr || `${file} is invalid`);
   }
 });
 
