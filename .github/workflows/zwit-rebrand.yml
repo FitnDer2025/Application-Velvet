@@ -26,6 +26,28 @@ jobs:
       - name: Apply safe visible-brand replacement
         run: node scripts/zwit-rebrand.mjs
 
+      - name: Install SVG renderer
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends librsvg2-bin imagemagick
+
+      - name: Render Zwit web and Apple marks
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE="apps/beta/static/assets/zwit-icon.svg"
+          rsvg-convert -w 180 -h 180 "$SOURCE" -o apps/beta/static/assets/velvet-icon-180.png
+          rsvg-convert -w 192 -h 192 "$SOURCE" -o apps/beta/static/assets/velvet-icon-192.png
+          rsvg-convert -w 512 -h 512 "$SOURCE" -o apps/beta/static/assets/velvet-icon-512.png
+
+          IOS_MARK="ios/Velvet/Resources/Assets.xcassets/VelvetMark.imageset/VelvetMark.png"
+          if [ -f "$IOS_MARK" ]; then
+            SIZE="$(identify -format '%wx%h' "$IOS_MARK")"
+            WIDTH="${SIZE%x*}"
+            HEIGHT="${SIZE#*x}"
+            rsvg-convert -w "$WIDTH" -h "$HEIGHT" "$SOURCE" -o "$IOS_MARK"
+          fi
+
       - name: Commit generated rebrand
         run: |
           if git diff --quiet && [ -z "$(git status --porcelain)" ]; then
