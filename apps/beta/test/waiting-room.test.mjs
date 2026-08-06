@@ -16,7 +16,19 @@ const worker = await readFile('apps/beta/worker/index.js', 'utf8');
 const migration = await readFile('infra/supabase/migrations/0040_velvet_waiting_room.sql', 'utf8');
 const accountMenu = await readFile('apps/beta/static/assets/account-access-menu.js', 'utf8');
 
-test('waiting room JavaScript modules are syntactically valid', () => {
+function contract(name, run) {
+  test(name, () => {
+    try {
+      run();
+    } catch (error) {
+      const message = String(error?.stack || error?.message || error).replaceAll('\r', '').replaceAll('\n', '%0A');
+      console.error(`::error title=Velvet waiting room · ${name}::${message}`);
+      throw error;
+    }
+  });
+}
+
+contract('waiting room JavaScript modules are syntactically valid', () => {
   for (const source of [publicScript, controlScript, marketingScript]) {
     assert.doesNotThrow(() => new Script(source));
   }
@@ -30,7 +42,7 @@ test('waiting room JavaScript modules are syntactically valid', () => {
   }
 });
 
-test('public pre-registration separates members and professionals with explicit consent', () => {
+contract('public pre-registration separates members and professionals with explicit consent', () => {
   assert.match(publicPage, /data-audience="member"/);
   assert.match(publicPage, /data-audience="pro"/);
   assert.match(publicPage, /name="adultAttestation"[^>]*required/);
@@ -42,7 +54,7 @@ test('public pre-registration separates members and professionals with explicit 
   assert.match(publicScript, /turnstile/);
 });
 
-test('public API minimizes and validates the request', () => {
+contract('public API minimizes and validates the request', () => {
   assert.match(publicApi, /adult_attestation_required/);
   assert.match(publicApi, /launch_consent_required/);
   assert.match(publicApi, /verifyTurnstile/);
@@ -50,7 +62,7 @@ test('public API minimizes and validates the request', () => {
   assert.doesNotMatch(publicApi, /console\.(?:log|info|error).*email/i);
 });
 
-test('Control cockpit exposes metrics, filters, CSV and role-bound updates', () => {
+contract('Control cockpit exposes metrics, filters, CSV and role-bound updates', () => {
   assert.match(controlPage, /Salle d’attente Velvet/);
   assert.match(controlPage, /Professionnels/);
   assert.match(controlPage, /Exporter CSV/);
@@ -60,9 +72,10 @@ test('Control cockpit exposes metrics, filters, CSV and role-bound updates', () 
   assert.match(controlApi, /READ_ROLES/);
   assert.match(controlApi, /WRITE_ROLES/);
   assert.match(accountMenu, /Salle d’attente · Préinscriptions/);
+  assert.match(accountMenu, /data-control-waitlist-entry/);
 });
 
-test('Marketing kit contains traceable member and professional campaigns', () => {
+contract('Marketing kit contains traceable member and professional campaigns', () => {
   assert.match(marketingPage, /PUBLICATION PRINCIPALE/);
   assert.match(marketingPage, /APPEL À TESTEURS/);
   assert.match(marketingPage, /VELVET PRO/);
@@ -72,7 +85,7 @@ test('Marketing kit contains traceable member and professional campaigns', () =>
   assert.match(marketingScript, /replaceAll\('\{\{LIEN\}\}'/);
 });
 
-test('worker routes are public for registration and protected for internal dashboards', () => {
+contract('worker routes are public for registration and protected for internal dashboards', () => {
   assert.match(worker, /POST \/api\/waitlist/);
   assert.match(worker, /GET \/api\/control\/waitlist/);
   assert.match(worker, /PATCH \/api\/control\/waitlist/);
@@ -80,7 +93,7 @@ test('worker routes are public for registration and protected for internal dashb
   assert.doesNotMatch(worker, /PROTECTED_PREFIXES = \[[^\]]*'\/acces-prive'/s);
 });
 
-test('database keeps direct access closed and uses explicit RPC permissions', () => {
+contract('database keeps direct access closed and uses explicit RPC permissions', () => {
   assert.match(migration, /enable row level security/);
   assert.match(migration, /revoke all on public\.velvet_waitlist_entries from anon, authenticated/);
   assert.match(migration, /grant execute on function public\.register_velvet_waitlist[\s\S]*to anon, authenticated/);
