@@ -26,6 +26,18 @@ jobs:
       - name: Apply safe visible-brand replacement
         run: node scripts/zwit-rebrand.mjs
 
+      - name: Preserve technical migration assertions
+        run: |
+          git checkout origin/v1-lived-demo -- \
+            scripts/check-beta-persistence.mjs \
+            scripts/check-beta-release.mjs \
+            scripts/check-beta-user-journey.mjs \
+            scripts/check-beta-worker.mjs \
+            scripts/check-supabase-migrations.mjs \
+            scripts/generate-venue-address-coordinates.mjs \
+            scripts/ops/backup-format.mjs \
+            scripts/recipe/serve-beta.mjs
+
       - name: Install SVG renderer
         run: |
           sudo apt-get update -qq
