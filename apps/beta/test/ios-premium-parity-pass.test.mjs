@@ -106,7 +106,8 @@ test('member detail exposes full profile, outings, interactive albums and affini
     'InteractiveAlbumDetailView',
     'ProfileAffinityBar',
     'Écrire un message',
-    'Partager un album privé',
+    'Ouvrir mes albums privés',
+    'Demander l’ouverture d’un album',
     'Sécurité, blocage et signalement'
   ]) {
     assert.match(detail, new RegExp(contract));
