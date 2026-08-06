@@ -88,11 +88,14 @@
     const root = document.createElement('section');
     root.className = `velvet-account-access${host.closest('header') ? ' is-header' : ''}`;
     root.setAttribute('aria-label', 'Compte et espaces Velvet');
+    const waitlistLink = isAdmin && currentPath.startsWith('/control/')
+      ? `<a class="velvet-waitlist-link" href="/control/acces-prive/"${currentPath.startsWith('/control/acces-prive/') ? ' aria-current="page"' : ''}>Salle d’attente · Préinscriptions</a>`
+      : '';
     root.innerHTML = `${isAdmin ? `
       <p class="velvet-account-kicker">ACCÈS ADMINISTRATEUR</p>
       <nav aria-label="Changer d’interface">
         ${spaces.map((space) => `<a href="${space.href}"${space.accessibleLabel ? ` aria-label="${escape(space.accessibleLabel)}"` : ''}${currentPath.startsWith(space.path) ? ' aria-current="page"' : ''}>${escape(space.label)}</a>`).join('')}
-      </nav>` : ''}
+      </nav>${waitlistLink}` : ''}
       <button class="velvet-change-account" type="button">Changer de compte</button>`;
 
     root.querySelector('.velvet-change-account').addEventListener('click', (event) => changeAccount(event.currentTarget));
@@ -105,8 +108,9 @@
     .velvet-account-access{display:grid;gap:8px;margin-bottom:10px;padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:15px;background:rgba(255,255,255,.035);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     .velvet-account-kicker{margin:0!important;color:#c6a96a!important;font-size:9px!important;letter-spacing:.15em!important}
     .velvet-account-access nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
-    .velvet-account-access nav a{padding:7px 5px;border:1px solid rgba(255,255,255,.09);border-radius:9px;color:#bdb4b7;text-align:center;text-decoration:none;font-size:9px;line-height:1.25}
-    .velvet-account-access nav a:hover,.velvet-account-access nav a:focus-visible,.velvet-account-access nav a[aria-current=page]{border-color:rgba(198,169,106,.5);background:rgba(198,169,106,.09);color:#f4f4f2;outline:none}
+    .velvet-account-access nav a,.velvet-waitlist-link{padding:7px 5px;border:1px solid rgba(255,255,255,.09);border-radius:9px;color:#bdb4b7;text-align:center;text-decoration:none;font-size:9px;line-height:1.25}
+    .velvet-account-access nav a:hover,.velvet-account-access nav a:focus-visible,.velvet-account-access nav a[aria-current=page],.velvet-waitlist-link:hover,.velvet-waitlist-link:focus-visible,.velvet-waitlist-link[aria-current=page]{border-color:rgba(198,169,106,.5);background:rgba(198,169,106,.09);color:#f4f4f2;outline:none}
+    .velvet-waitlist-link{display:block;border-color:rgba(181,58,97,.3);background:rgba(100,27,54,.1);color:#d9a9b9;font-weight:700}
     .velvet-change-account{width:100%;padding:9px 10px;border:1px solid rgba(181,58,97,.38);border-radius:10px;background:rgba(100,27,54,.12);color:#d9a9b9;font:600 11px/1.2 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer}
     .velvet-change-account:hover,.velvet-change-account:focus-visible{border-color:#b53a61;background:rgba(100,27,54,.24);color:#f4f4f2;outline:2px solid rgba(181,58,97,.25);outline-offset:2px}
     .velvet-change-account:disabled{cursor:wait;opacity:.65}
@@ -114,8 +118,9 @@
     header .velvet-account-access.is-header .velvet-account-kicker{display:none}
     header .velvet-account-access.is-header nav{display:flex}
     header .velvet-account-access.is-header nav a{min-width:70px}
+    header .velvet-account-access.is-header .velvet-waitlist-link{white-space:nowrap}
     header .velvet-account-access.is-header .velvet-change-account{width:auto;white-space:nowrap}
-    @media(max-width:900px){header .velvet-account-access.is-header{margin-left:auto}header .velvet-account-access.is-header nav{display:none}}
+    @media(max-width:900px){header .velvet-account-access.is-header{margin-left:auto}header .velvet-account-access.is-header nav,header .velvet-account-access.is-header .velvet-waitlist-link{display:none}}
   `;
   document.head.appendChild(style);
   account().then(mount).catch(() => {});
