@@ -1,0 +1,380 @@
+name: Deploy Zwit animation skip and message dates
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.zwit-trigger/interaction-date.txt'
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  patch-test-deploy:
+    runs-on: macos-15
+    steps:
+      - name: Checkout deployed branch
+        uses: actions/checkout@v4
+        with:
+          ref: v1-lived-demo
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apply Web, Web mobile and iOS corrections
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          def replace_once(path: str, old: str, new: str):
+              file = Path(path)
+              text = file.read_text()
+              if old not in text:
+                  raise SystemExit(f"Missing expected block in {path}: {old[:90]!r}")
+              file.write_text(text.replace(old, new, 1))
+
+          # iOS: keep one single native opening experience (the @main overlay).
+          root_path = Path('ios/Velvet/App/RootView.swift')
+          root = root_path.read_text()
+          root = root.replace('    @State private var showBrandOpening = true\n', '')
+          root, removed_overlay = re.subn(
+              r'\n\s*if showBrandOpening \{\s*ZwitOpeningView\(\)\s*\.transition\(\.opacity\)\s*\.zIndex\(100\)\s*\}\s*',
+              '\n',
+              root,
+              count=1,
+              flags=re.S,
+          )
+          root, removed_task = re.subn(
+              r'\n\s*\.task \{\s*guard showBrandOpening else \{ return \}\s*try\? await Task\.sleep\(nanoseconds: 11_800_000_000\)\s*withAnimation\(\.easeInOut\(duration: 0\.9\)\) \{\s*showBrandOpening = false\s*\}\s*\}\s*',
+              '\n',
+              root,
+              count=1,
+              flags=re.S,
+          )
+          if removed_overlay != 1 or removed_task != 1:
+              raise SystemExit('The duplicate RootView opening experience was not found exactly once.')
+          root_path.write_text(root)
+
+          # iOS: any tap closes the native opening experience immediately.
+          launch_path = Path('ios/Velvet/App/ZwitNativeLaunchExperience.swift')
+          launch = launch_path.read_text()
+          launch = launch.replace(
+              '    @State private var logoScale: CGFloat = 0.90\n',
+              '    @State private var logoScale: CGFloat = 0.90\n    @State private var hasFinished = false\n',
+              1,
+          )
+          launch = launch.replace(
+              '        .task { await runSequence() }\n',
+              '        .contentShape(Rectangle())\n        .onTapGesture { finishImmediately() }\n        .task { await runSequence() }\n',
+              1,
+          )
+          launch = launch.replace('            onFinished()\n', '            finish()\n')
+          launch = launch.replace('        onFinished()\n', '        finish()\n')
+          final_marker = '''    @MainActor
+    private func revealLogo() {
+        withAnimation(.easeInOut(duration: 1.55)) {
+            logoOpacity = 1
+            logoBlur = 0
+            logoScale = 1
+            fogOpacity = 0.46
+            fogScale = 1.30
+        }
+    }
+}'''
+          final_replacement = '''    @MainActor
+    private func revealLogo() {
+        guard !hasFinished else { return }
+        withAnimation(.easeInOut(duration: 1.55)) {
+            logoOpacity = 1
+            logoBlur = 0
+            logoScale = 1
+            fogOpacity = 0.46
+            fogScale = 1.30
+        }
+    }
+
+    @MainActor
+    private func finishImmediately() {
+        guard !hasFinished else { return }
+        withAnimation(.easeOut(duration: 0.18)) {
+            wordOpacity = 0
+            fogOpacity = 0
+            logoOpacity = 0
+        }
+        finish()
+    }
+
+    @MainActor
+    private func finish() {
+        guard !hasFinished else { return }
+        hasFinished = true
+        onFinished()
+    }
+}'''
+          if final_marker not in launch:
+              raise SystemExit('Launch final marker not found.')
+          launch_path.write_text(launch.replace(final_marker, final_replacement, 1))
+
+          # iOS: keep the conversation day permanently visible near the header.
+          messages_path = Path('ios/Velvet/Features/Messaging/RealtimeAppleMessagingViews.swift')
+          messages = messages_path.read_text()
+          replace_screen = '''            VStack(spacing: 0) {
+                header
+                messagesTimeline
+            }'''
+          replacement_screen = '''            VStack(spacing: 0) {
+                header
+                conversationDateBanner
+                messagesTimeline
+            }'''
+          if replace_screen not in messages:
+              raise SystemExit('Conversation screen block not found.')
+          messages = messages.replace(replace_screen, replacement_screen, 1)
+
+          timeline_marker = '''    private var messagesTimeline: some View {
+'''
+          date_banner = '''    private var conversationDateBanner: some View {
+        HStack(spacing: 10) {
+            Rectangle()
+                .fill(VelvetColor.champagneGold.opacity(0.20))
+                .frame(height: 0.6)
+            Text(latestConversationDayLabel)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(VelvetColor.champagneGold)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(VelvetColor.panelRaised.opacity(0.94))
+                .clipShape(Capsule())
+                .overlay {
+                    Capsule().stroke(VelvetColor.champagneGold.opacity(0.22), lineWidth: 0.7)
+                }
+            Rectangle()
+                .fill(VelvetColor.champagneGold.opacity(0.20))
+                .frame(height: 0.6)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 7)
+        .background(VelvetColor.velvetBlack.opacity(0.86))
+        .accessibilityLabel("Messages du \(latestConversationDayLabel)")
+    }
+
+    private var latestConversationDayLabel: String {
+        guard let raw = messages.last?.createdAt else { return "Aujourd’hui" }
+        let date = RealtimeMessageDate.date(raw)
+        guard date != .distantPast else { return "Aujourd’hui" }
+        if Calendar.current.isDateInToday(date) { return "Aujourd’hui" }
+        if Calendar.current.isDateInYesterday(date) { return "Hier" }
+        return date.formatted(.dateTime.weekday(.wide).day().month(.wide).year()).capitalized
+    }
+
+    private var messagesTimeline: some View {
+'''
+          if timeline_marker not in messages:
+              raise SystemExit('Messages timeline marker not found.')
+          messages = messages.replace(timeline_marker, date_banner, 1)
+
+          messages = messages.replace(
+              '.font(.system(size: 10, weight: .semibold))\n                .foregroundStyle(VelvetColor.textSecondary)\n                .padding(.horizontal, 10)\n                .padding(.vertical, 5)\n                .background(.ultraThinMaterial)\n                .clipShape(Capsule())',
+              '.font(.system(size: 11, weight: .bold))\n                .foregroundStyle(VelvetColor.champagneGold)\n                .padding(.horizontal, 12)\n                .padding(.vertical, 6)\n                .background(VelvetColor.panelRaised.opacity(0.94))\n                .clipShape(Capsule())\n                .overlay {\n                    Capsule().stroke(VelvetColor.champagneGold.opacity(0.22), lineWidth: 0.7)\n                }',
+              1,
+          )
+          messages_path.write_text(messages)
+
+          # Web/Web mobile: transparent logo in the opening experience.
+          refinement_path = Path('apps/beta/static/assets/zwit-experience-refinement.js')
+          refinement = refinement_path.read_text()
+          refinement = re.sub(
+              r"const logoSource = '[^']+';",
+              "const logoSource = '/assets/zwit-logo-transparent.png?v=20260806-8';",
+              refinement,
+              count=1,
+          )
+          refinement_path.write_text(refinement)
+
+          # Load the shared interaction/date fix and invalidate cached assets.
+          surface_path = Path('apps/beta/static/assets/velvet-production-surface.js')
+          surface = surface_path.read_text()
+          surface = surface.replace('20260806-7', '20260806-8')
+          surface = surface.replace(
+              '.zwit-opening-v2 .zwit-word span{display:inline!important}',
+              '.zwit-opening-v2 .zwit-word span{display:none!important}',
+          )
+          loader_marker = '''  loadRefinement();
+})();'''
+          loader = '''  const loadInteractionDateFix = () => {
+    if (document.querySelector('script[data-zwit-interaction-date-fix]')) return;
+    const script = document.createElement('script');
+    script.src = '/assets/zwit-interaction-date-fix.js?v=20260806-8';
+    script.dataset.zwitInteractionDateFix = 'true';
+    document.head.appendChild(script);
+  };
+
+  loadRefinement();
+  loadInteractionDateFix();
+})();'''
+          if loader_marker not in surface:
+              raise SystemExit('Production surface loader marker not found.')
+          surface_path.write_text(surface.replace(loader_marker, loader, 1))
+          PY
+
+          cat > apps/beta/static/assets/zwit-interaction-date-fix.js <<'JS'
+          (() => {
+            'use strict';
+            if (window.__ZWIT_INTERACTION_DATE_FIX__) return;
+            window.__ZWIT_INTERACTION_DATE_FIX__ = true;
+
+            const openingSelector = '.zwit-opening-v2,.zwit-opening-v3';
+            const messageSelector = '[data-message-id],[data-created-at],[data-message-created-at],.message-row,.chat-message,.message-bubble';
+            let closing = false;
+
+            function closeOpening() {
+              const layer = document.querySelector(openingSelector);
+              if (!layer || closing) return;
+              closing = true;
+              layer.classList.add('leaving');
+              layer.style.pointerEvents = 'none';
+              layer.setAttribute('aria-hidden', 'true');
+              setTimeout(() => {
+                layer.remove();
+                closing = false;
+              }, 220);
+            }
+
+            document.addEventListener('pointerdown', () => {
+              if (document.querySelector(openingSelector)) closeOpening();
+            }, true);
+            document.addEventListener('touchstart', () => {
+              if (document.querySelector(openingSelector)) closeOpening();
+            }, { capture: true, passive: true });
+            document.addEventListener('keydown', (event) => {
+              if (!document.querySelector(openingSelector)) return;
+              if (['Escape', 'Enter', ' '].includes(event.key)) closeOpening();
+            }, true);
+
+            function rawDate(node) {
+              const time = node.matches?.('time') ? node : node.querySelector?.('time[datetime],time');
+              return node.dataset?.createdAt
+                || node.dataset?.messageCreatedAt
+                || time?.dateTime
+                || time?.getAttribute?.('datetime')
+                || '';
+            }
+
+            function parseDate(node) {
+              const value = rawDate(node);
+              if (!value) return null;
+              const date = new Date(value);
+              return Number.isNaN(date.getTime()) ? null : date;
+            }
+
+            function dayLabel(date) {
+              const today = new Date();
+              const yesterday = new Date(today);
+              yesterday.setDate(today.getDate() - 1);
+              if (date.toDateString() === today.toDateString()) return 'Aujourd’hui';
+              if (date.toDateString() === yesterday.toDateString()) return 'Hier';
+              return new Intl.DateTimeFormat('fr-FR', {
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+              }).format(date);
+            }
+
+            function messageRows() {
+              const rows = [...document.querySelectorAll(messageSelector)];
+              document.querySelectorAll('time[datetime]').forEach((time) => {
+                const row = time.closest(messageSelector);
+                if (row) rows.push(row);
+              });
+              return [...new Set(rows)]
+                .filter((row) => parseDate(row))
+                .sort((a, b) => parseDate(a) - parseDate(b));
+            }
+
+            function installVisibleDate(rows) {
+              const latest = rows.at(-1);
+              if (!latest) return;
+              let badge = document.querySelector('[data-zwit-current-message-date]');
+              if (!badge) {
+                badge = document.createElement('div');
+                badge.className = 'zwit-current-message-date';
+                badge.dataset.zwitCurrentMessageDate = 'true';
+                document.body.appendChild(badge);
+              }
+              badge.textContent = dayLabel(parseDate(latest));
+            }
+
+            function patchDates() {
+              const rows = messageRows();
+              if (!rows.length) {
+                document.querySelector('[data-zwit-current-message-date]')?.remove();
+                return;
+              }
+
+              document.querySelectorAll('.zwit-day-separator[data-zwit-runtime-date]').forEach((node) => node.remove());
+              let previousDay = '';
+              rows.forEach((row) => {
+                const date = parseDate(row);
+                const day = date.toDateString();
+                if (day !== previousDay && !row.previousElementSibling?.classList.contains('zwit-day-separator')) {
+                  const separator = document.createElement('div');
+                  separator.className = 'zwit-day-separator';
+                  separator.dataset.zwitRuntimeDate = 'true';
+                  separator.textContent = dayLabel(date);
+                  row.before(separator);
+                }
+                previousDay = day;
+              });
+              installVisibleDate(rows);
+            }
+
+            const style = document.createElement('style');
+            style.textContent = `
+              .zwit-opening-v2,.zwit-opening-v3{cursor:pointer;touch-action:manipulation}
+              .zwit-day-separator{display:flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;width:100%!important;margin:18px auto 12px!important;color:#d8bd77!important;font:700 11px Inter,Arial!important;text-transform:capitalize!important;position:relative!important;z-index:3!important}
+              .zwit-day-separator:before,.zwit-day-separator:after{content:""!important;flex:1 1 52px!important;max-width:90px!important;height:1px!important;background:#d8bd7733!important}
+              .zwit-current-message-date{position:fixed;z-index:9500;top:max(72px,calc(env(safe-area-inset-top) + 62px));left:50%;transform:translateX(-50%);padding:7px 14px;border:1px solid #d8bd7738;border-radius:999px;background:#111114e8;color:#d8bd77;backdrop-filter:blur(16px);box-shadow:0 10px 28px #0006;font:700 11px Inter,Arial;text-transform:capitalize;pointer-events:none}
+              @media(max-width:720px){.zwit-current-message-date{top:max(66px,calc(env(safe-area-inset-top) + 56px));font-size:10px;padding:6px 12px}}
+            `;
+            document.head.appendChild(style);
+
+            new MutationObserver(() => requestAnimationFrame(patchDates))
+              .observe(document.documentElement, { childList: true, subtree: true });
+            [0, 250, 900, 1800].forEach((delay) => setTimeout(patchDates, delay));
+          })();
+          JS
+
+      - name: Validate JavaScript
+        run: |
+          node --check apps/beta/static/assets/zwit-experience-refinement.js
+          node --check apps/beta/static/assets/zwit-interaction-date-fix.js
+          node --check apps/beta/static/assets/velvet-production-surface.js
+
+      - name: Build iOS application and extensions
+        run: |
+          xcodebuild \
+            -project ios/Velvet.xcodeproj \
+            -scheme Velvet \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Push validated deployment
+        run: |
+          git config user.name 'Zwit Deployment Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add \
+            apps/beta/static/assets/zwit-experience-refinement.js \
+            apps/beta/static/assets/zwit-interaction-date-fix.js \
+            apps/beta/static/assets/velvet-production-surface.js \
+            ios/Velvet/App/RootView.swift \
+            ios/Velvet/App/ZwitNativeLaunchExperience.swift \
+            ios/Velvet/Features/Messaging/RealtimeAppleMessagingViews.swift
+          if git diff --cached --quiet; then
+            echo 'No changes to deploy.'
+            exit 0
+          fi
+          git commit -m 'fix: permettre de passer l animation et afficher la date des messages'
+          git push origin HEAD:v1-lived-demo
