@@ -1,0 +1,3 @@
+Déclenche le déploiement contrôlé du 6 août 2026 pour :
+- fermer l’animation au premier toucher/clic ;
+- afficher clairement la date dans les conversations Web, Web mobile et iOS.
