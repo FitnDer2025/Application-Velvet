@@ -20,7 +20,7 @@ enum ErrorMessage {
         "human_verification_failed": "La vérification de sécurité a expiré. Recommence.",
         "required_consents_missing": "Les quatre validations sont obligatoires.",
         "member_access_required": "Ce compte ne possède pas encore l’accès Membre.",
-        "profile_required": "Ton profil Velvet est introuvable. Reconnecte-toi puis réessaie.",
+        "profile_required": "Ton profil Zwit est introuvable. Reconnecte-toi puis réessaie.",
         "profile_read_failed": "Ton profil n’a pas pu être actualisé. Tire l’écran vers le bas pour réessayer.",
         "profile_write_failed": "Les modifications du profil n’ont pas pu être enregistrées. Réessaie.",
         "profile_identity_required": "Ajoute un nom de profil et une présentation d’au moins 20 caractères.",
@@ -43,9 +43,9 @@ enum ErrorMessage {
         "album_read_failed": "Tes albums n’ont pas pu être actualisés. Tire l’écran vers le bas pour réessayer.",
         "album_creation_failed": "L’album n’a pas pu être créé. Réessaie.",
         "album_media_delete_failed": "La photo de l’album n’a pas pu être supprimée. Réessaie.",
-        "home_intelligence_failed": "Velvet Intelligence n’a pas pu actualiser ta sélection. Ferme ce message puis tire l’écran vers le bas pour réessayer.",
+        "home_intelligence_failed": "Zwit Intelligence n’a pas pu actualiser ta sélection. Ferme ce message puis tire l’écran vers le bas pour réessayer.",
         "location_consent_and_coordinates_required": "Autorise la localisation approximative pour activer le classement par proximité.",
-        "location_write_failed": "La localisation approximative n’a pas pu être enregistrée. Velvet reste utilisable sans classement par proximité.",
+        "location_write_failed": "La localisation approximative n’a pas pu être enregistrée. Zwit reste utilisable sans classement par proximité.",
         "verification_provider_not_configured": "Le prestataire de vérification n’est pas encore configuré.",
         "admission_required": "Cette fonction est réservée aux membres admis.",
         "account_deletion_not_configured": "La suppression doit encore être activée côté serveur.",
@@ -56,9 +56,9 @@ enum ErrorMessage {
         if let apiError = error as? APIError {
             switch apiError {
             case .invalidConfiguration:
-                return "L’adresse du service Velvet n’est pas configurée."
+                return "L’adresse du service Zwit n’est pas configurée."
             case .invalidResponse:
-                return "Velvet a reçu une réponse inattendue. Ferme cet écran puis réessaie."
+                return "Zwit a reçu une réponse inattendue. Ferme cet écran puis réessaie."
             case .unauthorized:
                 return "Ta session a expiré. Reconnecte-toi."
             case let .server(code, _):

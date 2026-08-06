@@ -210,7 +210,7 @@ final class APIClient: @unchecked Sendable {
         } catch let error as APIError {
             throw error
         } catch let error as DecodingError {
-            throw APIError.transport("La réponse de Velvet n’a pas pu être lue : \(error.localizedDescription)")
+            throw APIError.transport("La réponse de Zwit n’a pas pu être lue : \(error.localizedDescription)")
         } catch {
             throw APIError.transport("Connexion impossible. Vérifie ton réseau puis réessaie.")
         }

@@ -99,20 +99,20 @@
 
   function homeMarkup() {
     return `<section class="vs-simple-home" data-vs-simple-home>
-      <span class="vs-simple-eyebrow">VELVET STUDIO · CRÉATION ASSISTÉE PAR IA</span>
-      <h1>Décrivez votre idée.<br>Velvet crée la vidéo.</h1>
+      <span class="vs-simple-eyebrow">ZWIT STUDIO · CRÉATION ASSISTÉE PAR IA</span>
+      <h1>Décrivez votre idée.<br>Zwit crée la vidéo.</h1>
       <p>Écrivez simplement ce que vous souhaitez promouvoir. L’IA prépare le scénario, génère les visuels, crée la voix off et réalise automatiquement le montage.</p>
       <div class="vs-simple-compose">
-        <textarea data-vs-simple-home-prompt placeholder="Exemple : Crée une vidéo verticale de 15 secondes qui présente Velvet comme une rencontre premium, rassurante et moderne, avec un couple complice et une démonstration du profil membre."></textarea>
+        <textarea data-vs-simple-home-prompt placeholder="Exemple : Crée une vidéo verticale de 15 secondes qui présente Zwit comme une rencontre premium, rassurante et moderne, avec un couple complice et une démonstration du profil membre."></textarea>
         <button class="vs-simple-generate" data-vs-simple-open>Créer ma vidéo<small>Scénario + visuels + voix + montage</small></button>
       </div>
       <div class="vs-simple-trust"><span>Workers AI connecté</span><span>Personnes fictives majeures</span><span>Aucune compétence de montage requise</span></div>
       ${historyMarkup()}
     </section>
-    <section class="vs-simple-flow" aria-label="Fonctionnement de Velvet Studio">
+    <section class="vs-simple-flow" aria-label="Fonctionnement de Zwit Studio">
       <article><b>1</b><strong>Décrivez</strong><span>Une phrase suffit pour expliquer le résultat attendu.</span></article>
       <article><b>2</b><strong>L’IA réalise</strong><span>Scénario, visuels et voix off sont produits automatiquement.</span></article>
-      <article><b>3</b><strong>Velvet monte</strong><span>Les scènes, textes et démonstrations sont assemblés.</span></article>
+      <article><b>3</b><strong>Zwit monte</strong><span>Les scènes, textes et démonstrations sont assemblés.</span></article>
       <article><b>4</b><strong>Téléchargez</strong><span>La vidéo est prête au format du réseau choisi.</span></article>
     </section>`;
   }
@@ -145,8 +145,8 @@
 
   function overlayMarkup(initialPrompt = '') {
     return `<div class="vs-simple-overlay" data-vs-simple-overlay>
-      <section class="vs-simple-dialog" role="dialog" aria-modal="true" aria-label="Créer une vidéo avec Velvet Studio">
-        <header class="vs-simple-dialog-head"><div><strong>Créer une vidéo avec l’IA</strong><span>Décrivez le résultat, Velvet s’occupe du reste.</span></div><button class="vs-simple-close" data-vs-simple-close aria-label="Fermer">×</button></header>
+      <section class="vs-simple-dialog" role="dialog" aria-modal="true" aria-label="Créer une vidéo avec Zwit Studio">
+        <header class="vs-simple-dialog-head"><div><strong>Créer une vidéo avec l’IA</strong><span>Décrivez le résultat, Zwit s’occupe du reste.</span></div><button class="vs-simple-close" data-vs-simple-close aria-label="Fermer">×</button></header>
         <div class="vs-simple-dialog-body">
           <section class="vs-simple-brief-card">
             <span class="vs-simple-eyebrow">VOTRE DEMANDE</span><h2>Que doit raconter la vidéo ?</h2><p class="vs-simple-muted">Parlez naturellement : le sujet, le public et l’émotion recherchée suffisent.</p>
@@ -156,11 +156,11 @@
               <label>Durée<select data-vs-simple-duration><option value="15">15 secondes</option><option value="20">20 secondes</option><option value="30">30 secondes</option></select></label>
             </div>
             <button class="vs-simple-run" data-vs-simple-run>Produire ma vidéo</button>
-            <p class="vs-simple-note">Velvet utilise uniquement des personnages fictifs adultes et une représentation non explicite adaptée aux réseaux sociaux.</p>
+            <p class="vs-simple-note">Zwit utilise uniquement des personnages fictifs adultes et une représentation non explicite adaptée aux réseaux sociaux.</p>
             <div class="vs-simple-progress" data-vs-simple-progress>${stepMarkup('plan', 1, 'Scénario et voix off')}${stepMarkup('images', 2, 'Visuels photoréalistes')}${stepMarkup('voice', 3, 'Voix off française')}${stepMarkup('render', 4, 'Montage et export')}</div>
           </section>
           <section class="vs-simple-output">
-            <span class="vs-simple-eyebrow">APERÇU</span><h2 data-vs-simple-title>Votre vidéo apparaîtra ici</h2><p class="vs-simple-muted" data-vs-simple-copy>Velvet affiche chaque étape pendant la production.</p>
+            <span class="vs-simple-eyebrow">APERÇU</span><h2 data-vs-simple-title>Votre vidéo apparaîtra ici</h2><p class="vs-simple-muted" data-vs-simple-copy>Zwit affiche chaque étape pendant la production.</p>
             <div class="vs-simple-preview" data-vs-simple-preview><div class="vs-simple-placeholder"><b>✦</b><strong>Prêt à créer</strong><p>Décrivez la vidéo puis lancez la production.</p></div></div>
             <div class="vs-simple-result-actions" data-vs-simple-result hidden></div>
           </section>
@@ -229,7 +229,7 @@
       const payload = await apiJson({ action: 'generate_image', prompt: scene.prompt, scenario: scene.scenario, format, preset: 'rencontre-premium', mockProfile: PROFILE.id, steps: 8, seed: Math.floor(Math.random() * 2_000_000_000) + 1 });
       images.push(payload.media.dataUri);
       const preview = document.querySelector('[data-vs-simple-preview]');
-      if (preview) preview.innerHTML = `<img src="${payload.media.dataUri}" alt="Visuel généré par Velvet Studio"><div class="vs-simple-preview-status">Visuel ${index + 1} sur ${scenes.length} généré</div>`;
+      if (preview) preview.innerHTML = `<img src="${payload.media.dataUri}" alt="Visuel généré par Zwit Studio"><div class="vs-simple-preview-status">Visuel ${index + 1} sur ${scenes.length} généré</div>`;
     }
     return images;
   }
@@ -300,7 +300,7 @@
     ctx.shadowBlur = 0; ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = 2; ctx.stroke();
     const pad = phoneWidth * .075;
     ctx.fillStyle = '#651c37'; rounded(ctx, x + pad, y + pad, phoneWidth - pad * 2, phoneHeight * .14, 15); ctx.fill();
-    ctx.fillStyle = '#d2b46d'; ctx.font = `700 ${Math.max(13, phoneWidth * .055)}px Georgia`; ctx.fillText('VELVET', x + pad * 1.4, y + phoneHeight * .105);
+    ctx.fillStyle = '#d2b46d'; ctx.font = `700 ${Math.max(13, phoneWidth * .055)}px Georgia`; ctx.fillText('ZWIT', x + pad * 1.4, y + phoneHeight * .105);
     ctx.fillStyle = '#282429'; rounded(ctx, x + pad, y + phoneHeight * .23, phoneWidth - pad * 2, phoneHeight * .4, 18); ctx.fill();
     ctx.fillStyle = '#f5f1ed'; ctx.font = `650 ${Math.max(12, phoneWidth * .052)}px Inter,Arial`; ctx.fillText(PROFILE.label, x + pad * 1.35, y + phoneHeight * .48);
     ctx.fillStyle = '#c8aa66'; ctx.font = `500 ${Math.max(9, phoneWidth * .033)}px Inter,Arial`; ctx.fillText(`${PROFILE.age} · ${PROFILE.city}`, x + pad * 1.35, y + phoneHeight * .55);
@@ -336,7 +336,7 @@
     gradient.addColorStop(0, 'rgba(7,7,9,.14)'); gradient.addColorStop(.5, 'rgba(7,7,9,.22)'); gradient.addColorStop(1, 'rgba(7,7,9,.92)');
     ctx.fillStyle = gradient; ctx.fillRect(0, 0, width, height);
     const pad = width * .07;
-    ctx.fillStyle = '#d2b46d'; ctx.font = `700 ${Math.max(17, width * .028)}px Georgia`; ctx.fillText('VELVET', pad, height * .078);
+    ctx.fillStyle = '#d2b46d'; ctx.font = `700 ${Math.max(17, width * .028)}px Georgia`; ctx.fillText('ZWIT', pad, height * .078);
     ctx.fillStyle = 'rgba(255,255,255,.72)'; ctx.font = `600 ${Math.max(9, width * .014)}px Inter,Arial`; ctx.fillText('RENCONTRES · CONFIANCE · EXPÉRIENCES', pad, height * .108);
     if (scene.index > 0 && scene.index < plan.scenes.length - 1) drawPhone(ctx, width, height, scene.scenario, Math.min(1, progress * 2.2));
     ctx.fillStyle = '#fff'; ctx.font = `500 ${Math.max(38, width * .062)}px Georgia`; wrapText(ctx, scene.onScreen || scene.title, pad, height * .72, width * .78, height * .057, 3);
@@ -422,7 +422,7 @@
     button.disabled = true; button.textContent = 'Production en cours…'; resultActions.hidden = true;
     resetSteps();
     try {
-      setStep('plan', 'active', 'L’IA écrit'); title.textContent = 'Écriture du scénario'; copy.textContent = 'Velvet transforme ta demande en scènes, textes et voix off.';
+      setStep('plan', 'active', 'L’IA écrit'); title.textContent = 'Écriture du scénario'; copy.textContent = 'Zwit transforme ta demande en scènes, textes et voix off.';
       const plan = await generatePlan(brief, format, duration);
       setStep('plan', 'done', 'Scénario prêt'); title.textContent = plan.title; copy.textContent = plan.voiceOver;
       setStep('images', 'active', '0 / 3');

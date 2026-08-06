@@ -50,7 +50,7 @@ test('le shell garde le menu accessible et les couches fermées inoffensives', a
   assert.match(styles, /pointer-events: none !important/);
 });
 
-test('Xcode expose un schéma partagé lançant l’application Velvet', async () => {
+test('Xcode expose un schéma partagé lançant l’application Zwit', async () => {
   const scheme = await read('ios/Velvet.xcodeproj/xcshareddata/xcschemes/Velvet.xcscheme');
 
   assert.match(scheme, /BlueprintIdentifier = "100000000000000000000040"/);

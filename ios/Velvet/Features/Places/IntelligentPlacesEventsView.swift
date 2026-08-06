@@ -46,7 +46,7 @@ struct IntelligentPlacesEventsView: View {
                             selection == 2 ? "Destination signature" : "Agenda intelligent",
                             title: selection == 2 ? "Cap d’Agde" : "Sorties & clubs",
                             subtitle: selection == 2
-                                ? "Séjours, rencontres et rendez-vous Velvet dans le village naturiste."
+                                ? "Séjours, rencontres et rendez-vous Zwit dans le village naturiste."
                                 : "Agendas ouverts dans votre rayon ou publiés par les clubs que vous fréquentez."
                         )
                         Spacer(minLength: 8)
@@ -293,7 +293,7 @@ struct IntelligentEventDetailView: View {
                         CapDAgdeDetailHero(event: event)
                     } else {
                         VelvetPageHeader(
-                            "Événement Velvet",
+                            "Événement Zwit",
                             title: event.title,
                             subtitle: event.startsAt.velvetDateLabel
                         )
@@ -421,7 +421,7 @@ struct EventCreationView: View {
     @State private var startsAt = Date().addingTimeInterval(24 * 3600)
     @State private var endsAt = Date().addingTimeInterval(28 * 3600)
     @State private var capacity = 20
-    @State private var audience = "Membres Velvet admis"
+    @State private var audience = "Membres Zwit admis"
     @State private var dressCode = ""
     @State private var capZone = "Ensemble du village"
     @State private var capVenue = ""
@@ -440,7 +440,7 @@ struct EventCreationView: View {
                         VelvetPageHeader(
                             "Publication membre",
                             title: category == "cap_dagde" ? "Séjour au Cap d’Agde" : "Créer une sortie",
-                            subtitle: "Velvet contrôle automatiquement la cohérence et la sécurité avant publication."
+                            subtitle: "Zwit contrôle automatiquement la cohérence et la sécurité avant publication."
                         )
 
                         Picker("Type", selection: $category) {
@@ -459,7 +459,7 @@ struct EventCreationView: View {
                             .tint(VelvetColor.champagneGold)
                         Stepper("Capacité : \(capacity)", value: $capacity, in: 2...500)
 
-                        VelvetField(title: "Public", prompt: "Membres Velvet admis", text: $audience, contentType: nil)
+                        VelvetField(title: "Public", prompt: "Membres Zwit admis", text: $audience, contentType: nil)
                         VelvetField(title: "Dress code", prompt: "Facultatif", text: $dressCode, contentType: nil)
 
                         if category == "cap_dagde" {
@@ -472,7 +472,7 @@ struct EventCreationView: View {
                         }
 
                         Label(
-                            "Velvet Intelligence peut publier automatiquement une annonce sûre. Les situations incertaines restent soumises à une validation humaine.",
+                            "Zwit Intelligence peut publier automatiquement une annonce sûre. Les situations incertaines restent soumises à une validation humaine.",
                             systemImage: "checkmark.shield"
                         )
                         .font(VelvetTypography.caption(size: 11))
@@ -581,7 +581,7 @@ private struct CapDAgdeHero: View {
                 .offset(x: 185, y: -80)
 
             VStack(alignment: .leading, spacing: 16) {
-                Label("DESTINATION VELVET", systemImage: "sparkles")
+                Label("DESTINATION ZWIT", systemImage: "sparkles")
                     .font(VelvetTypography.caption(size: 9, weight: .bold))
                     .tracking(1.7)
                     .foregroundStyle(VelvetColor.champagneGold)
@@ -726,7 +726,7 @@ private struct CapDAgdeEventCard: View {
                     .font(VelvetTypography.title(size: 27))
                     .foregroundStyle(VelvetColor.ivory)
                     .lineLimit(2)
-                Text(event.description ?? "Séjour Velvet au Cap d’Agde")
+                Text(event.description ?? "Séjour Zwit au Cap d’Agde")
                     .font(VelvetTypography.body(size: 12))
                     .foregroundStyle(VelvetColor.textSecondary)
                     .lineLimit(2)

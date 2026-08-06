@@ -110,7 +110,7 @@
       } catch {}
       await wait(100);
     }
-    throw new Error('L’environnement Velvet Marketing ne s’est pas chargé correctement.');
+    throw new Error('L’environnement Zwit Marketing ne s’est pas chargé correctement.');
   }
 
   function moveCursor(x, y) {
@@ -148,7 +148,7 @@
 
   async function navigateScene(scene, index) {
     const doc = iframe.contentDocument;
-    if (!doc) throw new Error('L’interface Velvet n’est plus accessible.');
+    if (!doc) throw new Error('L’interface Zwit n’est plus accessible.');
     doc.defaultView.scrollTo({ top: 0, behavior: 'auto' });
     const view = job.product === 'pro' ? proView(scene.screen) : memberView(scene.screen);
     const selector = job.product === 'pro' ? `[data-vp-view="${view}"]` : `[data-vc-view="${view}"]`;
@@ -270,7 +270,7 @@
       if (state.cancelled) throw new Error('studio_cancelled');
       const scene = scenes[index];
       setStep(`SCÈNE ${index + 1} / ${scenes.length}`);
-      title.textContent = scene.title || 'Velvet';
+      title.textContent = scene.title || 'Zwit';
       subtitle.textContent = scene.onScreen || '';
       title.parentElement.classList.add('visible');
       await navigateScene(scene, index);
@@ -284,7 +284,7 @@
 
     title.parentElement.classList.remove('visible');
     outro.classList.remove('hidden');
-    const closing = job.plan.closingLine || (job.product === 'pro' ? 'Velvet Pro. Donnez à votre établissement la visibilité qu’il mérite.' : 'Velvet. Là où les plus belles rencontres commencent.');
+    const closing = job.plan.closingLine || (job.product === 'pro' ? 'Zwit Pro. Donnez à votre établissement la visibilité qu’il mérite.' : 'Velvet. Là où les plus belles rencontres commencent.');
     await speak(closing);
     await wait(900);
   }
@@ -295,11 +295,11 @@
     state.cancelled = false;
     startButton.disabled = true;
     startButton.textContent = 'Préparation…';
-    setStatus('Préparation de la voix et du véritable environnement Velvet…');
+    setStatus('Préparation de la voix et du véritable environnement Zwit…');
     try {
       state.voice = await loadVoices();
       await waitForCaptureBridge();
-      setStatus('Choisis cet onglet Velvet et active le partage audio.');
+      setStatus('Choisis cet onglet Zwit et active le partage audio.');
       state.displayStream = await requestDisplay();
       state.displayStream.getVideoTracks()[0]?.addEventListener('ended', () => {
         if (state.running) cancelCapture();
@@ -325,7 +325,7 @@
       state.displayStream = null;
       state.canvasStream = null;
       speechSynthesis?.cancel?.();
-      if (error.name === 'NotAllowedError') fail('Autorisation refusée. Sélectionne cet onglet Velvet et active le partage audio.');
+      if (error.name === 'NotAllowedError') fail('Autorisation refusée. Sélectionne cet onglet Zwit et active le partage audio.');
       else if (error.message !== 'studio_cancelled') fail(error.message || 'Le tournage a été interrompu.');
     }
   }
@@ -337,7 +337,7 @@
     const universe = job.product === 'pro' ? 'pro' : 'membre';
     const filename = `velvet-${universe}-${job.format.replace(':', 'x')}-${Date.now()}.${extension}`;
     result.hidden = false;
-    result.innerHTML = `<section class="vsc-result-card"><span>VIDÉO PRÊTE</span><h1>Le véritable Velvet, en mouvement.</h1><p>Voix française intégrée · ${job.format} · ${job.product === 'pro' ? 'Velvet Pro' : 'Velvet Membre'}</p><video src="${state.outputUrl}" controls playsinline></video><div><a href="${state.outputUrl}" download="${filename}">Télécharger la vidéo</a><button type="button" data-vsc-restart>Refaire un tournage</button><a href="/control/">Retour à Velvet Studio</a></div></section>`;
+    result.innerHTML = `<section class="vsc-result-card"><span>VIDÉO PRÊTE</span><h1>Le véritable Zwit, en mouvement.</h1><p>Voix française intégrée · ${job.format} · ${job.product === 'pro' ? 'Zwit Pro' : 'Zwit Membre'}</p><video src="${state.outputUrl}" controls playsinline></video><div><a href="${state.outputUrl}" download="${filename}">Télécharger la vidéo</a><button type="button" data-vsc-restart>Refaire un tournage</button><a href="/control/">Retour à Zwit Studio</a></div></section>`;
     frame.hidden = true;
     document.querySelector('[data-vsc-progress]')?.setAttribute('hidden', '');
   }
@@ -354,14 +354,14 @@
   }
 
   if (!job) {
-    fail('Projet vidéo introuvable. Retourne dans Velvet Studio et relance le tournage.');
+    fail('Projet vidéo introuvable. Retourne dans Zwit Studio et relance le tournage.');
     startButton.disabled = true;
   } else {
     frame.dataset.format = job.format || '9:16';
     iframe.src = sourceRoute();
-    document.querySelector('[data-vsc-universe]').textContent = job.product === 'pro' ? 'VELVET PRO' : 'VELVET MEMBRE';
+    document.querySelector('[data-vsc-universe]').textContent = job.product === 'pro' ? 'ZWIT PRO' : 'ZWIT MEMBRE';
     document.querySelector('[data-vsc-format]').textContent = `${job.format} · ${job.duration} secondes`;
-    setStatus('Le véritable environnement Velvet Marketing est en cours de chargement.');
+    setStatus('Le véritable environnement Zwit Marketing est en cours de chargement.');
   }
 
   startButton?.addEventListener('click', startCapture);

@@ -1,4 +1,4 @@
-# Velvet — géolocalisation et vérification identité + majorité
+# Zwit — géolocalisation et vérification identité + majorité
 
 ## Géolocalisation BETA
 
@@ -15,9 +15,9 @@
 ## Vérification finale
 
 - La majorité et l’identité seront contrôlées ensemble par un prestataire tiers.
-- Velvet ne conserve aucune pièce d’identité, identité civile ou date de naissance issue du contrôle.
-- Velvet conserve seulement le prestataire, un statut, les résultats booléens nécessaires, les dates techniques et une référence hachée.
-- Le badge `Profil vérifié Velvet` exige simultanément :
+- Zwit ne conserve aucune pièce d’identité, identité civile ou date de naissance issue du contrôle.
+- Zwit conserve seulement le prestataire, un statut, les résultats booléens nécessaires, les dates techniques et une référence hachée.
+- Le badge `Profil vérifié Zwit` exige simultanément :
   - identité vérifiée ;
   - majorité vérifiée ;
   - vérification encore valide.

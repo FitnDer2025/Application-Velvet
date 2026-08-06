@@ -146,7 +146,7 @@ struct ProfileMediaManagementView: View {
                 if mediaToDelete?.isProfileRequirement == true {
                     Text("Si moins de trois photos de profil validées restent disponibles, votre profil sera automatiquement masqué des autres membres jusqu’à son rétablissement.")
                 } else {
-                    Text("Le média sera supprimé de Velvet et ne sera plus accessible dans cet album.")
+                    Text("Le média sera supprimé de Zwit et ne sera plus accessible dans cet album.")
                 }
             }
         }
@@ -273,7 +273,7 @@ struct ProfileMediaManagementView: View {
 
         switch (profileResponse, photosResponse) {
         case (nil, nil):
-            loadIssue = "Velvet n’a pas pu joindre la photothèque. Tirez l’écran vers le bas ou touchez Actualiser."
+            loadIssue = "Zwit n’a pas pu joindre la photothèque. Tirez l’écran vers le bas ou touchez Actualiser."
         case (nil, _):
             loadIssue = "Les photos sont disponibles, mais les albums n’ont pas encore été actualisés."
         case (_, nil):
@@ -305,7 +305,7 @@ struct ProfileMediaManagementView: View {
         switch status {
         case "approved": "Validée et visible"
         case "rejected": "Refusée · à remplacer"
-        case "review": "Contrôle Velvet en cours"
+        case "review": "Contrôle Zwit en cours"
         default: "Validation en attente"
         }
     }

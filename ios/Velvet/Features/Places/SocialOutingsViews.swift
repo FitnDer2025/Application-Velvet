@@ -149,7 +149,7 @@ struct MemberOutingsHistoryView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(venue?.name ?? "Établissement Velvet")
+                        Text(venue?.name ?? "Établissement Zwit")
                             .font(VelvetTypography.body(size: 15, weight: .semibold))
                             .foregroundStyle(VelvetColor.ivory)
                             .lineLimit(1)

@@ -77,7 +77,7 @@
   function receiptText(receipts = []) {
     if (!receipts.length) return 'Envoyé';
     return receipts.map((receipt) => {
-      const name = receipt.displayIdentity || 'Membre Velvet';
+      const name = receipt.displayIdentity || 'Membre Zwit';
       if (receipt.status === 'read') return `Lu par ${name}${receipt.readAt ? ` à ${formatTime(receipt.readAt)}` : ''}`;
       if (receipt.status === 'delivered') return `Distribué à ${name}`;
       return `Envoyé à ${name}`;
@@ -90,7 +90,7 @@
       const key = reaction.reaction;
       const row = groups.get(key) || { count: 0, names: [] };
       row.count += 1;
-      row.names.push(reaction.display_identity || 'Membre Velvet');
+      row.names.push(reaction.display_identity || 'Membre Zwit');
       groups.set(key, row);
     });
     return groups;
@@ -377,7 +377,7 @@
       button.textContent = 'Alertes bloquées dans les réglages';
       button.disabled = true;
     } else if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) {
-      button.textContent = 'Installer Velvet pour activer les alertes';
+      button.textContent = 'Installer Zwit pour activer les alertes';
     }
   }
 
@@ -390,7 +390,7 @@
   async function enableWebPush() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
     if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) {
-      alert('Sur iPhone, ajoute d’abord Velvet à l’écran d’accueil, puis active les alertes depuis la Web App.');
+      alert('Sur iPhone, ajoute d’abord Zwit à l’écran d’accueil, puis active les alertes depuis la Web App.');
       return;
     }
     const permission = await Notification.requestPermission();
@@ -451,7 +451,7 @@
     section.innerHTML = `<summary>Profils consultés · ${views.length}</summary><div>${views.length ? views.map((view) => {
       const profile = profileFor(view.viewed_profile_id);
       const photo = profile?.media_assets?.find((media) => media.is_primary)?.previewUrl || profile?.media_assets?.[0]?.previewUrl || '';
-      return `<button type="button" data-history-profile="${e(view.viewed_profile_id)}">${photo ? `<img src="${e(photo)}" alt="">` : '<span>V</span>'}<b>${e(profile?.display_name || 'Profil Velvet')}</b><small>${Number(view.view_count || 1)} consultation(s) · ${e(relativeDate(view.last_viewed_at))}</small></button>`;
+      return `<button type="button" data-history-profile="${e(view.viewed_profile_id)}">${photo ? `<img src="${e(photo)}" alt="">` : '<span>V</span>'}<b>${e(profile?.display_name || 'Profil Zwit')}</b><small>${Number(view.view_count || 1)} consultation(s) · ${e(relativeDate(view.last_viewed_at))}</small></button>`;
     }).join('') : '<p class="muted">Aucun profil consulté pour le moment.</p>'}</div>`;
     section.addEventListener('click', (event) => {
       const button = event.target.closest('[data-history-profile]');

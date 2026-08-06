@@ -1,4 +1,4 @@
-# Velvet Database Bible — DB-01
+# Zwit Database Bible — DB-01
 
 ## Accounts, identities, profiles and shared profile governance
 
@@ -14,7 +14,7 @@
 
 This document defines the canonical data model for:
 
-- authenticated Velvet accounts;
+- authenticated Zwit accounts;
 - personal identities;
 - age and identity verification state;
 - independent and shared profiles;
@@ -30,7 +30,7 @@ This document is normative. Application code, APIs, database migrations and test
 
 ## 2. Locked product principles
 
-1. One human being owns one personal Velvet account.
+1. One human being owns one personal Zwit account.
 2. Login credentials are never shared between partners.
 3. An account may participate in several profiles.
 4. A couple profile is a shared profile, not a shared account.
@@ -61,7 +61,7 @@ Auth User
                  └── Professional Profile
 ```
 
-The authentication provider identifies a login subject. The `accounts` table represents the Velvet account. Profiles represent public or operational personas used on the platform.
+The authentication provider identifies a login subject. The `accounts` table represents the Zwit account. Profiles represent public or operational personas used on the platform.
 
 ---
 
@@ -152,7 +152,7 @@ Subtypes such as gender, orientation or establishment category must not be encod
 
 ## 5.1 `accounts`
 
-Canonical Velvet account attached to one authentication subject.
+Canonical Zwit account attached to one authentication subject.
 
 | Column | Type | Null | Rules |
 |---|---|---:|---|

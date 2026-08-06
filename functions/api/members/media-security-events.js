@@ -60,7 +60,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
       )
     ]);
 
-    const viewerName = clean(viewerProfiles?.[0]?.display_name, 120) || 'Un membre Velvet';
+    const viewerName = clean(viewerProfiles?.[0]?.display_name, 120) || 'Un membre Zwit';
     const ownerUserIds = [...new Set((ownerMembers || [])
       .map((row) => row.user_id)
       .filter((userId) => userId && userId !== access.account.userId))];

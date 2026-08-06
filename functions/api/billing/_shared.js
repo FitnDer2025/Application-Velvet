@@ -15,7 +15,7 @@ export const FALLBACK_CATALOG = {
   plans: [
     {
       code: 'member_discovery',
-      label: 'Velvet Découverte',
+      label: 'Zwit Découverte',
       audience: 'member',
       features: {
         advanced_search: false,
@@ -27,7 +27,7 @@ export const FALLBACK_CATALOG = {
     },
     {
       code: 'member_signature',
-      label: 'Velvet Signature',
+      label: 'Zwit Signature',
       audience: 'member',
       features: {
         advanced_search: true,
@@ -39,7 +39,7 @@ export const FALLBACK_CATALOG = {
     },
     {
       code: 'pro_workspace',
-      label: 'Velvet Pro',
+      label: 'Zwit Pro',
       audience: 'pro',
       features: {
         managed_establishments: 1,

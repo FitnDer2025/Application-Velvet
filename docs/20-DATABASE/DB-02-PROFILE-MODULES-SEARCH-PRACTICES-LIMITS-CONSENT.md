@@ -1,4 +1,4 @@
-# Velvet Database Bible — DB-02
+# Zwit Database Bible — DB-02
 
 ## Profile modules, searches, practices, limits and consent
 
@@ -12,7 +12,7 @@
 
 ## 1. Purpose
 
-This document defines the canonical data model for the modular content of a Velvet profile:
+This document defines the canonical data model for the modular content of a Zwit profile:
 
 - public presentation;
 - public and private demographic attributes;
@@ -31,7 +31,7 @@ This document is normative. Application code, API contracts, migrations, recomme
 
 ## 2. Locked product principles
 
-1. A Velvet profile is composed of independent domain modules attached to `profiles.id`.
+1. A Zwit profile is composed of independent domain modules attached to `profiles.id`.
 2. Sensitive personal data must not be stored as an unstructured profile blob.
 3. Search preferences are distinct from identity and presentation data.
 4. A declared practice is never equivalent to consent for a specific interaction.

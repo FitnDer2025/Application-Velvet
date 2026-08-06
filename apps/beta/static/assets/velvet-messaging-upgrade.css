@@ -1,4 +1,4 @@
-/* Velvet Messaging — parité Web / iOS */
+/* Zwit Messaging — parité Web / iOS */
 [data-route="conversations"]{position:relative}
 .velvet-message-badge{position:absolute;z-index:4;right:9px;top:50%;display:grid;min-width:21px;height:21px;padding:0 6px;place-items:center;transform:translateY(-50%);border:2px solid var(--panel);border-radius:999px;background:#b54570;color:#fff;font:700 10px/1 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;box-shadow:0 5px 16px rgba(181,69,112,.42)}
 .bottom-nav .velvet-message-badge{right:calc(50% - 27px);top:7px;transform:none;border-color:rgba(21,16,19,.96)}

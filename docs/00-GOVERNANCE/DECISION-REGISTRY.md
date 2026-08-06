@@ -1,4 +1,4 @@
-# Registre des décisions Velvet
+# Registre des décisions Zwit
 
 **Objectif :** empêcher la réouverture involontaire de sujets déjà arbitrés et orienter rapidement l'équipe vers les sources normatives.
 
@@ -32,19 +32,19 @@
 ### Modération, activité et confidentialité
 
 - Modération hybride avec première vérification par IA et revue humaine des cas sensibles.
-- Velvet Contrôle expose l’historique réel des décisions IA, les motifs, le niveau de confiance et les reprises humaines, sans journaliser le contenu ou l’URL d’un média intime (`ADR-UX-061`).
+- Zwit Contrôle expose l’historique réel des décisions IA, les motifs, le niveau de confiance et les reprises humaines, sans journaliser le contenu ou l’URL d’un média intime (`ADR-UX-061`).
 - Les seuils d’automatisation sont distincts pour les médias publics et privés ; le mode Observation désactive toute décision automatique sans désactiver l’analyse (`ADR-UX-061`).
 - Aucun affichage public de dernière connexion exacte.
-- Velvet Activity Index synthétique, Mode Absence et tendance de réactivité.
+- Zwit Activity Index synthétique, Mode Absence et tendance de réactivité.
 - Notifications push configurables et modes Standard, Discret et Invisible.
 - Les agents IA de recette sont strictement limités aux environnements internes, invisibles aux utilisateurs externes et obligatoirement supprimés avant toute ouverture publique.
 
 ### Conversations, consentement et confiance
 
 - Cycle produit : Découverte → Conversation → Confiance → Expériences → Souvenirs → Relation durable.
-- Invitation Velvet obligatoire avant création du Salon.
-- Pacte Velvet personnel et contextuel par Salon.
-- Velvet Trust Index multifacteur sans score public de popularité.
+- Invitation Zwit obligatoire avant création du Salon.
+- Pacte Zwit personnel et contextuel par Salon.
+- Zwit Trust Index multifacteur sans score public de popularité.
 
 ### Recherche et découverte — ADR-024 à ADR-036
 
@@ -54,7 +54,7 @@
 - Compatibilité réciproque plutôt qu'attractivité unilatérale.
 - Qualité avant quantité dans le flux initial.
 - Carte premium avec clustering, filtres, localisation approximative et mode invisible.
-- Velvet Alchemy Index qualitatif, sans pourcentage.
+- Zwit Alchemy Index qualitatif, sans pourcentage.
 - État d'esprit temporaire du membre intégré au contexte.
 - Cercle de confiance privé.
 - Réputation de sécurité strictement invisible.
@@ -67,7 +67,7 @@
 - Assistant IA dédié aux organisateurs avant, pendant et après les événements.
 - CRM métier modulaire avec socle commun et extensions par profession.
 - IA métier personnalisée à partir des contenus validés du professionnel.
-- Velvet Trips comme espace communautaire avant, pendant et après un voyage.
+- Zwit Trips comme espace communautaire avant, pendant et après un voyage.
 - Les professionnels n'accèdent jamais à la recherche privée des profils ni aux données non autorisées.
 
 ### Monétisation
@@ -88,7 +88,7 @@
 
 ### Distribution technique V1 — ADR-TECH-045
 
-- Velvet V1 est une application web responsive mobile-first installable en PWA.
+- Zwit V1 est une application web responsive mobile-first installable en PWA.
 - Les applications natives iOS et Android sont exclues du périmètre V1.
 - L'installation reste facultative et l'usage complet doit rester possible depuis un navigateur.
 - Les limitations propres aux navigateurs et systèmes doivent être affichées honnêtement.
@@ -104,18 +104,18 @@
 - `PRODUCT-METRICS.md` porte les estimations d'avancement.
 - `CHANGELOG-PRODUCT.md` conserve l'historique daté.
 - `ADR-STATUS.md` permet de vérifier rapidement les sujets déjà couverts.
-- Codex livre de manière autonome les changements Velvet jusqu'à leur fusion et leur déploiement.
+- Codex livre de manière autonome les changements Zwit jusqu'à leur fusion et leur déploiement.
 - Cyril conserve exclusivement l'exécution distante des scripts et migrations SQL Supabase.
-- Velvet Contrôle est organisé en cinq destinations : Pilotage, À traiter, IA & modération, Communications et Gestion ; son accueil montre en priorité ce que fait l’IA et ce que l’humain doit décider (`ADR-UX-061`).
+- Zwit Contrôle est organisé en cinq destinations : Pilotage, À traiter, IA & modération, Communications et Gestion ; son accueil montre en priorité ce que fait l’IA et ce que l’humain doit décider (`ADR-UX-061`).
 - Gestion permet de rechercher un profil membre par pseudonyme, e-mail ou identifiant, puis d’ouvrir une fiche de contrôle regroupant les comptes personnels liés et les seuls éléments opérationnels nécessaires, sans afficher les contenus privés (`ADR-UX-061`).
-- Les modèles e-mail restent dans une enveloppe visuelle Velvet fixe et auditée ; aucun envoi marketing n’est autorisé sans consentement et désinscription opérationnels (`ADR-UX-061`).
+- Les modèles e-mail restent dans une enveloppe visuelle Zwit fixe et auditée ; aucun envoi marketing n’est autorisé sans consentement et désinscription opérationnels (`ADR-UX-061`).
 
 ## ADR récentes
 
 - `ADR-DA-020` : modération hybride IA puis humain.
 - `ADR-DA-021` : pseudonymes et identifiants publics.
 - `ADR-DA-022` : vérification obligatoire de l'identité et de la majorité.
-- `ADR-DA-023` : Velvet Activity Index.
+- `ADR-DA-023` : Zwit Activity Index.
 - `ADR-DA-024-036` : découverte intelligente, alchimie, confiance, souvenirs et événements.
 - `ADR-PRO-038-041` : IA organisateur, CRM métier, IA professionnelle et voyages.
 - `ADR-GAM-043-044` : gamification positive et distinctions évolutives.
@@ -124,7 +124,7 @@
 - `ADR-TECH-058` : fondation iOS native SwiftUI après stabilisation du socle Web.
 - `ADR-AI-059` : profils IA de recette strictement internes, isolés par liste blanche, kill switch, nettoyage et blocage de publication.
 - `ADR-UX-060` : changement de compte commun et sélecteur Web des trois interfaces réservé à `admin`.
-- `ADR-UX-061` : cockpit Velvet Contrôle, historique IA, actions humaines, seuils photo et modèles e-mail Velvet.
+- `ADR-UX-061` : cockpit Zwit Contrôle, historique IA, actions humaines, seuils photo et modèles e-mail Velvet.
 - `ADR-GOV-001` : documentation et commit immédiats après acceptation.
 - `ADR-GOV-002` : pilotage continu par roadmap, métriques et changelog.
 - `ADR-GOV-003` : autonomie complète de livraison Codex, avec exécution SQL Supabase réservée à Cyril.

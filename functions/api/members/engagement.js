@@ -94,7 +94,7 @@ async function notifyProfileView(env, access, actorProfileId, targetProfileId) {
   ).catch(() => []);
   if (existing?.length) return { notified: 0, deduplicated: true };
 
-  const actorName = clean(actorRows?.[0]?.display_name, 120) || 'Un membre Velvet';
+  const actorName = clean(actorRows?.[0]?.display_name, 120) || 'Un membre Zwit';
   const title = `${actorName} a consulté votre profil`;
   const body = `${actorName} vient de découvrir votre univers Velvet.`;
   await serviceRest(env, '/rest/v1/member_notifications', {

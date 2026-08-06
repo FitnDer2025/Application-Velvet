@@ -178,7 +178,7 @@ export async function deliverBrowserActivity(env, {
     try {
       await sendWebPush(env, subscription, {
         notification: {
-          title: clean(title, 140) || 'Velvet',
+          title: clean(title, 140) || 'Zwit',
           body: clean(body, 220) || 'Une nouvelle activité vous attend.',
           icon: '/assets/velvet-icon-192.png',
           badge: '/assets/velvet-icon-192.png',

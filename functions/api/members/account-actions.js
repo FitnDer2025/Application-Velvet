@@ -24,9 +24,9 @@ function htmlPage(title, copy, form = '') {
   const escape = (value) => String(value || '').replace(/[&<>"']/g, (character) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[character]);
-  return new Response(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(title)} · Velvet</title><style>
+  return new Response(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(title)} · Zwit</title><style>
   :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:22px;background:radial-gradient(circle at 80% 10%,#522038,#0b080a 55%);color:#f8eee8;font:16px/1.6 Arial,sans-serif}.card{width:min(620px,100%);padding:38px;border:1px solid #50313d;border-radius:28px;background:#171014;box-shadow:0 30px 80px #0008}.eyebrow{color:#d9b879;font-size:11px;letter-spacing:.18em;text-transform:uppercase}h1{margin:.25em 0;font:44px/1.05 Georgia,serif}p{color:#cfc2c6}button,a{display:inline-block;margin-top:16px;padding:13px 20px;border:0;border-radius:999px;background:#9f2852;color:white;font-weight:700;text-decoration:none;cursor:pointer}.secondary{background:transparent;border:1px solid #d9b879;color:#d9b879}
-  </style></head><body><main class="card"><p class="eyebrow">Velvet · action sensible</p><h1>${escape(title)}</h1><p>${escape(copy)}</p>${form}</main></body></html>`, {
+  </style></head><body><main class="card"><p class="eyebrow">Zwit · action sensible</p><h1>${escape(title)}</h1><p>${escape(copy)}</p>${form}</main></body></html>`, {
     status: 200,
     headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' }
   });
@@ -62,9 +62,9 @@ function lifecycleEmail(action, confirmationUrl, profileName) {
     ? 'Le profil deviendra invisible dès que chaque membre actif de la fiche aura confirmé.'
     : 'Le profil deviendra invisible après les confirmations, puis les données seront supprimées définitivement 30 jours plus tard.';
   return {
-    subject: `Confirmer la ${label} de votre profil Velvet`,
+    subject: `Confirmer la ${label} de votre profil Zwit`,
     text: [
-      'VELVET — CONFIRMATION DE SÉCURITÉ',
+      'ZWIT — CONFIRMATION DE SÉCURITÉ',
       '',
       `Une demande de ${label} a été créée pour le profil « ${profileName} ».`,
       delay,
@@ -73,7 +73,7 @@ function lifecycleEmail(action, confirmationUrl, profileName) {
       '',
       'Ce lien personnel expire dans 48 heures. Si vous n’êtes pas à l’origine de cette demande, ne le validez pas et contactez Velvet.'
     ].join('\n'),
-    html: `<div style="background:#0b080a;padding:32px;color:#f8eee8;font-family:Arial,sans-serif"><div style="max-width:620px;margin:auto;padding:34px;border:1px solid #50313d;border-radius:26px;background:#171014"><p style="color:#d9b879;letter-spacing:2px;text-transform:uppercase;font-size:11px">Velvet · confirmation de sécurité</p><h1 style="font-family:Georgia,serif;font-weight:400">Confirmer la ${label}</h1><p style="color:#d5c8cc;line-height:1.7">Une demande concerne le profil <strong>${escape(profileName)}</strong>. ${delay}</p><a href="${escape(confirmationUrl)}" style="display:inline-block;margin-top:18px;padding:14px 22px;border-radius:999px;background:#9f2852;color:white;text-decoration:none;font-weight:700">Vérifier et confirmer</a><p style="margin-top:22px;color:#94878c;font-size:12px">Lien personnel valable 48 heures. Ne le partagez pas.</p></div></div>`
+    html: `<div style="background:#0b080a;padding:32px;color:#f8eee8;font-family:Arial,sans-serif"><div style="max-width:620px;margin:auto;padding:34px;border:1px solid #50313d;border-radius:26px;background:#171014"><p style="color:#d9b879;letter-spacing:2px;text-transform:uppercase;font-size:11px">Zwit · confirmation de sécurité</p><h1 style="font-family:Georgia,serif;font-weight:400">Confirmer la ${label}</h1><p style="color:#d5c8cc;line-height:1.7">Une demande concerne le profil <strong>${escape(profileName)}</strong>. ${delay}</p><a href="${escape(confirmationUrl)}" style="display:inline-block;margin-top:18px;padding:14px 22px;border-radius:999px;background:#9f2852;color:white;text-decoration:none;font-weight:700">Vérifier et confirmer</a><p style="margin-top:22px;color:#94878c;font-size:12px">Lien personnel valable 48 heures. Ne le partagez pas.</p></div></div>`
   };
 }
 
@@ -102,7 +102,7 @@ export async function onRequestGet({ request, env }) {
     return htmlPage(
       'Confirmation requise',
       `Confirmez-vous vouloir ${label} ? Pour une fiche couple, l’action ne sera appliquée qu’après la validation des deux adresses.`,
-      `<form method="post" action="/api/members/account-actions"><input type="hidden" name="token" value="${token}"><button type="submit">Confirmer cette action</button></form><a class="secondary" href="/membres/">Annuler et revenir à Velvet</a>`
+      `<form method="post" action="/api/members/account-actions"><input type="hidden" name="token" value="${token}"><button type="submit">Confirmer cette action</button></form><a class="secondary" href="/membres/">Annuler et revenir à Zwit</a>`
     );
   }
   try {
@@ -134,10 +134,10 @@ export async function onRequestPost({ request, env }) {
           : confirmation.action_type === 'delete'
             ? 'Le profil est désormais invisible. La suppression définitive interviendra dans 30 jours ; vous pouvez encore annuler depuis les paramètres.'
             : 'Le profil est maintenant en pause et invisible. Vous pourrez le réactiver depuis les paramètres.',
-        '<a href="/membres/">Revenir à Velvet</a>'
+        '<a href="/membres/">Revenir à Zwit</a>'
       );
     } catch {
-      return htmlPage('Lien invalide ou expiré', 'Cette confirmation ne peut plus être utilisée. Recommencez la demande depuis les paramètres.', '<a href="/membres/">Revenir à Velvet</a>');
+      return htmlPage('Lien invalide ou expiré', 'Cette confirmation ne peut plus être utilisée. Recommencez la demande depuis les paramètres.', '<a href="/membres/">Revenir à Zwit</a>');
     }
   }
 

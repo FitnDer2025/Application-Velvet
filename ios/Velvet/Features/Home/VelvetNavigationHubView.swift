@@ -14,7 +14,7 @@ struct VelvetNavigationHubView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     VelvetPageHeader(
-                        "Tout Velvet au même endroit",
+                        "Tout Zwit au même endroit",
                         title: "Navigation",
                         subtitle: "Trouver la bonne personne, choisir un lieu, annoncer une sortie et savoir qui sera présent."
                     )
@@ -57,7 +57,7 @@ struct VelvetNavigationHubView: View {
                                 destination: AnyView(CommunityAttendanceDirectoryView(currentProfile: profile))
                             ),
                             NavigationHubItem(
-                                title: "Carte Velvet",
+                                title: "Carte Zwit",
                                 detail: "Profils, clubs et événements proches",
                                 symbol: "map.fill",
                                 destination: AnyView(MemberMapView())
@@ -322,7 +322,7 @@ struct VelvetClubDirectoryView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 17) {
                     VelvetPageHeader(
-                        "Annuaire Velvet",
+                        "Annuaire Zwit",
                         title: "Clubs autour de moi",
                         subtitle: "Recherche dans l’intégralité des établissements, sans limiter les résultats au rayon de l’accueil."
                     )

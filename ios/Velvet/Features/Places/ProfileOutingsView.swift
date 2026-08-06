@@ -277,7 +277,7 @@ struct OwnProfileOutingsPanel: View {
                                 Image(systemName: "sparkles")
                                     .foregroundStyle(VelvetColor.champagneGold)
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(visit.venueDirectory?.name ?? "Établissement Velvet")
+                                    Text(visit.venueDirectory?.name ?? "Établissement Zwit")
                                         .font(VelvetTypography.body(size: 11, weight: .semibold))
                                         .foregroundStyle(VelvetColor.ivory)
                                         .lineLimit(1)
@@ -337,7 +337,7 @@ struct MemberNextOutingBanner: View {
                     .font(VelvetTypography.caption(size: 8, weight: .semibold))
                     .tracking(1.1)
                     .foregroundStyle(VelvetColor.champagneGold)
-                Text(visit.venueDirectory?.name ?? "Établissement Velvet")
+                Text(visit.venueDirectory?.name ?? "Établissement Zwit")
                     .font(VelvetTypography.body(size: 14, weight: .semibold))
                     .foregroundStyle(VelvetColor.ivory)
                     .lineLimit(1)

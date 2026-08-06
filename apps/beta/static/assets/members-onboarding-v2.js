@@ -68,9 +68,9 @@
     partner_email_must_be_different: 'L’invitation doit être envoyée à une autre adresse.',
     couple_partner_already_linked: 'Ta moitié est déjà rattachée à ce profil.',
     invalid_photo_file: 'Choisis une photo JPG, PNG ou WebP de moins de 4 Mo.',
-    ai_source_too_short: 'Ajoute au moins trois mots-clés précis avant de solliciter Velvet IA.',
-    profile_ai_unavailable: 'Velvet IA est momentanément indisponible.',
-    profile_ai_generation_failed: 'Velvet IA n’a pas pu composer ce texte. Enrichis légèrement ton brouillon puis réessaie.'
+    ai_source_too_short: 'Ajoute au moins trois mots-clés précis avant de solliciter Zwit IA.',
+    profile_ai_unavailable: 'Zwit IA est momentanément indisponible.',
+    profile_ai_generation_failed: 'Zwit IA n’a pas pu composer ce texte. Enrichis légèrement ton brouillon puis réessaie.'
   };
 
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
@@ -101,7 +101,7 @@
         <textarea name="${escapeHtml(name)}" data-ai-writer-source="${escapeHtml(name)}" maxlength="${maxLength}"${minLength ? ` minlength="${minLength}"` : ''}${required ? ' required' : ''}>${escapeHtml(value)}</textarea>
       </label>
       <div class="ai-writer-tools">
-        <button type="button" class="ai-writer-button" data-ai-writer="${escapeHtml(name)}" disabled>✦ Velvet IA</button>
+        <button type="button" class="ai-writer-button" data-ai-writer="${escapeHtml(name)}" disabled>✦ Zwit IA</button>
         <small data-ai-writer-status>Ajoute au moins 3 mots-clés précis.</small>
       </div>
     </div>`;
@@ -124,7 +124,7 @@
         button.disabled = !ready || button.dataset.loading === 'true';
         if (button.dataset.loading !== 'true') {
           status.textContent = ready
-            ? 'Velvet peut maintenant sublimer ce texte.'
+            ? 'Zwit peut maintenant sublimer ce texte.'
             : 'Ajoute au moins 3 mots-clés précis.';
         }
       };
@@ -135,7 +135,7 @@
         button.dataset.loading = 'true';
         button.disabled = true;
         button.textContent = '✦ Composition…';
-        status.textContent = 'Velvet compose une proposition fidèle à tes mots…';
+        status.textContent = 'Zwit compose une proposition fidèle à tes mots…';
         try {
           const result = await api('/api/members/profile-copy', {
             method: 'POST',
@@ -153,13 +153,13 @@
           textarea.value = result.text;
           textarea.dispatchEvent(new Event('input', { bubbles: true }));
           status.textContent = 'Proposition générée — tu gardes la main avant l’enregistrement.';
-          toast('Velvet IA a préparé une proposition. Relis-la et adapte-la librement.');
+          toast('Zwit IA a préparé une proposition. Relis-la et adapte-la librement.');
         } catch (error) {
           status.textContent = errors[error.message] || error.message;
           toast(error.message, true);
         } finally {
           button.dataset.loading = 'false';
-          button.textContent = '✦ Velvet IA';
+          button.textContent = '✦ Zwit IA';
           refresh();
         }
       });
@@ -234,7 +234,7 @@
         <input data-venue-input autocomplete="off" placeholder="Nom d’un club ou d’un spa">
         <span class="ov-results" data-venue-results hidden></span>
       </span>
-      <small>Les propositions proviennent du référentiel Velvet France–Belgique.</small>
+      <small>Les propositions proviennent du référentiel Zwit France–Belgique.</small>
     </div>`;
   }
 
@@ -245,7 +245,7 @@
       <article><small>${couple ? 'Notre univers' : 'Mon univers'}</small><div>${chips(draft.practices || draft.p0_desired_practices)}</div></article>
       <article><small>Ce qui compte</small><div>${chips(draft.values_list)}</div></article>
       <article><small>Rencontres et affinités</small><div>${chips([...(draft.meeting_styles || []), ...(draft.p0_attracted_to || [])])}</div></article>
-      <p>Tout restera modifiable depuis le profil. Velvet n’ajoute aucune envie ni expérience que tu n’as pas déclarée.</p>
+      <p>Tout restera modifiable depuis le profil. Zwit n’ajoute aucune envie ni expérience que tu n’as pas déclarée.</p>
     </div>`;
   }
 
@@ -376,7 +376,7 @@
             <div><i style="width:${((index + 1) / steps.length) * 100}%"></i></div>
             <small>${escapeHtml(step.audience)}</small>
           </header>
-          <div class="ov-guide"><span>V</span><p><strong>Velvet</strong>${escapeHtml(step.guide)}</p></div>
+          <div class="ov-guide"><span>V</span><p><strong>Zwit</strong>${escapeHtml(step.guide)}</p></div>
           <p class="ov-kicker">${escapeHtml(step.kicker)}</p>
           <h1>${escapeHtml(step.title)}</h1>
           <form id="ovStepForm" class="ov-form">
@@ -481,7 +481,7 @@
       {
         audience: 'À propos du couple', kicker: 'Vos mots',
         title: 'Décrivez-vous, simplement.',
-        guide: 'C’est le seul texte libre demandé. Dites ce qui vous rend singuliers ; Velvet utilisera aussi vos choix pour structurer le reste de la fiche.',
+        guide: 'C’est le seul texte libre demandé. Dites ce qui vous rend singuliers ; Zwit utilisera aussi vos choix pour structurer le reste de la fiche.',
         body: (d) => aiWriterField('description', 'Décrivez-vous', d.description, { minLength: 20, maxLength: 4000, required: true })
       },
       {
@@ -491,7 +491,7 @@
         body: (d) => venueInput(d.favorite_places || [])
       },
       {
-        audience: 'À propos du couple', kicker: 'Votre reflet Velvet',
+        audience: 'À propos du couple', kicker: 'Votre reflet Zwit',
         title: 'Est-ce bien vous ?',
         guide: 'Voici ce que vos réponses racontent. Revenez en arrière si quelque chose ne vous ressemble pas.',
         finish: 'Créer notre espace couple',
@@ -512,7 +512,7 @@
       {
         audience: audience(), kicker: 'Ton identité',
         title: 'Comment souhaites-tu être présenté(e) ?',
-        guide: 'Cette réponse permet à Velvet de respecter les filtres de visibilité et de s’adresser correctement à toi.',
+        guide: 'Cette réponse permet à Zwit de respecter les filtres de visibilité et de s’adresser correctement à toi.',
         body: (d) => selectWithOther('p0_gender_identity', 'Identité de genre', GENDERS, d.p0_gender_identity, true)
       },
       {
@@ -587,7 +587,7 @@
   function soloCommonSteps() {
     return [
       {
-        audience: 'Ton profil individuel', kicker: 'Ton identité Velvet',
+        audience: 'Ton profil individuel', kicker: 'Ton identité Zwit',
         title: 'Quel nom apparaîtra sur ton profil ?',
         guide: 'Il peut s’agir de ton prénom, d’un pseudonyme ou d’un nom que tu utilises déjà.',
         body: (d) => `<label class="ov-field">Nom affiché<input name="display_name" maxlength="120" value="${escapeHtml(d.display_name)}" required></label>`
@@ -608,7 +608,7 @@
       {
         audience: 'Ton profil individuel', kicker: 'Première impression',
         title: 'Décris-toi, simplement.',
-        guide: 'C’est le seul texte libre demandé. Parle de ton caractère et de ce qui te rend singulier ; Velvet structurera le reste à partir de tes réponses.',
+        guide: 'C’est le seul texte libre demandé. Parle de ton caractère et de ce qui te rend singulier ; Zwit structurera le reste à partir de tes réponses.',
         body: (d) => aiWriterField('description', 'Décris-toi', d.description, { minLength: 20, maxLength: 4000, required: true })
       },
       {
@@ -636,7 +636,7 @@
         body: (d) => venueInput(d.favorite_places || [])
       },
       {
-        audience: 'Ton profil individuel', kicker: 'Ton reflet Velvet',
+        audience: 'Ton profil individuel', kicker: 'Ton reflet Zwit',
         title: 'Est-ce bien toi ?',
         guide: 'Voici ce que tes réponses racontent. Reviens en arrière si quelque chose ne te ressemble pas.',
         finish: 'Créer mon profil',
@@ -648,7 +648,7 @@
   function startProfileChoice() {
     runWizard({
       steps: [{
-        audience: 'Première étape', kicker: 'Bienvenue dans Velvet',
+        audience: 'Première étape', kicker: 'Bienvenue dans Zwit',
         title: 'Pour qui allons-nous créer ce profil ?',
         guide: 'Dis-moi simplement si cette page doit raconter ton univers personnel ou celui de votre couple.',
         finish: 'Commencer',
@@ -769,7 +769,7 @@
     const profile = state.profileResult.profile;
     const existing = state.invitation;
     content.innerHTML = `<div class="ov-page"><section class="ov-shell ov-center">
-      <div class="ov-guide"><span>V</span><p><strong>Velvet</strong>La partie commune est prête. Je vais maintenant inviter ta moitié pendant que nous poursuivons ensemble.</p></div>
+      <div class="ov-guide"><span>V</span><p><strong>Zwit</strong>La partie commune est prête. Je vais maintenant inviter ta moitié pendant que nous poursuivons ensemble.</p></div>
       <p class="ov-kicker">Profil couple · invitation</p>
       <h1>${existing?.status === 'pending' ? 'L’invitation est déjà en route.' : 'À quelle adresse dois-je écrire à ta moitié ?'}</h1>
       ${existing?.status === 'pending' ? `<div class="ov-status-card"><strong>${escapeHtml(existing.invited_email)}</strong><span>${existing.delivery_status === 'sent' ? 'E-mail envoyé automatiquement' : 'Invitation créée'}</span></div>` : `
@@ -816,7 +816,7 @@
   function showInvitationResult(result) {
     const sent = result.emailDelivery?.status === 'sent';
     content.innerHTML = `<div class="ov-page"><section class="ov-shell ov-center">
-      <div class="ov-guide"><span>V</span><p><strong>Velvet</strong>${sent ? 'C’est fait. Ta moitié peut maintenant commencer à se confier de son côté.' : 'L’invitation est créée, mais l’envoi automatique n’est pas encore disponible. Utilise le lien de secours pour ce test.'}</p></div>
+      <div class="ov-guide"><span>V</span><p><strong>Zwit</strong>${sent ? 'C’est fait. Ta moitié peut maintenant commencer à se confier de son côté.' : 'L’invitation est créée, mais l’envoi automatique n’est pas encore disponible. Utilise le lien de secours pour ce test.'}</p></div>
       <p class="ov-kicker">Invitation partenaire</p>
       <h1>${sent ? 'Son invitation est en route.' : 'Le lien est prêt.'}</h1>
       <div class="ov-status-card"><strong>${escapeHtml(result.invitedEmail)}</strong><span>${sent ? 'E-mail envoyé automatiquement' : 'Lien personnel valable sept jours'}</span></div>
@@ -866,7 +866,7 @@
     const pending = current.filter((photo) => photo.moderation_status === 'pending');
     const rejected = current.filter((photo) => photo.moderation_status === 'rejected');
     content.innerHTML = `<div class="ov-page"><section class="ov-shell">
-      <div class="ov-guide"><span>V</span><p><strong>Velvet</strong>${escapeHtml(guide)}</p></div>
+      <div class="ov-guide"><span>V</span><p><strong>Zwit</strong>${escapeHtml(guide)}</p></div>
       <p class="ov-kicker">Photos obligatoires</p>
       <h1>${escapeHtml(title)}</h1>
       <div class="ov-photo-progress"><strong>${approved.length}</strong><span>sur ${minimum} validée${minimum > 1 ? 's' : ''}</span></div>
@@ -946,13 +946,13 @@
       const button = event.currentTarget;
       const status = form.querySelector('[data-status]');
       button.disabled = true;
-      button.textContent = 'Velvet Intelligence analyse…';
+      button.textContent = 'Zwit Intelligence analyse…';
       try {
         const result = await api('/api/members/photos', { method: 'PATCH', body: '{}' });
         if (!result.attempted) {
           status.textContent = 'Ces photos ont déjà été analysées et attendent une décision humaine.';
         } else if (result.failed) {
-          status.textContent = `L’analyse automatique n’a pas pu traiter ${result.failed} photo${result.failed > 1 ? 's' : ''}. Elles restent disponibles dans Velvet Control.`;
+          status.textContent = `L’analyse automatique n’a pas pu traiter ${result.failed} photo${result.failed > 1 ? 's' : ''}. Elles restent disponibles dans Zwit Control.`;
         } else {
           status.textContent = `${result.approved} validée${result.approved > 1 ? 's' : ''}, ${result.review} transmise${result.review > 1 ? 's' : ''} au contrôle et ${result.rejected} refusée${result.rejected > 1 ? 's' : ''}.`;
         }
@@ -1021,8 +1021,8 @@
     const guide = isCouple
       ? partnerPending
         ? 'Ta partie est entre de bonnes mains. Pendant ce temps, ta moitié avance à son rythme.'
-        : 'Vous vous êtes tous les deux confiés. Velvet Intelligence termine maintenant les vérifications.'
-      : 'Ton profil est bien enregistré. Velvet Intelligence termine maintenant la vérification de tes photos.';
+        : 'Vous vous êtes tous les deux confiés. Zwit Intelligence termine maintenant les vérifications.'
+      : 'Ton profil est bien enregistré. Zwit Intelligence termine maintenant la vérification de tes photos.';
     const title = isCouple
       ? partnerPending
         ? 'Un peu de patience, votre moitié n’a pas fini de se confier.'
@@ -1030,8 +1030,8 @@
       : 'Ton profil est presque prêt à être dévoilé.';
 
     content.innerHTML = `<div class="ov-page"><section class="ov-shell ov-waiting">
-      <div class="ov-guide"><span>V</span><p><strong>Velvet</strong>${escapeHtml(guide)}</p></div>
-      <p class="ov-kicker">Admission Velvet</p>
+      <div class="ov-guide"><span>V</span><p><strong>Zwit</strong>${escapeHtml(guide)}</p></div>
+      <p class="ov-kicker">Admission Zwit</p>
       <h1>${escapeHtml(title)}</h1>
       <div class="ov-progress-cards">
         <article><strong>✓</strong><span>${isCouple ? 'Fiche du couple' : 'Fiche individuelle'}</span></article>
@@ -1154,7 +1154,7 @@
         window.location.href = '/?reason=session';
         return;
       }
-      content.innerHTML = `<div class="ov-page"><section class="ov-shell ov-center"><p class="ov-kicker">Velvet</p><h1>Le parcours ne peut pas démarrer.</h1><p>${escapeHtml(errors[error.message] || error.message)}</p></section></div>`;
+      content.innerHTML = `<div class="ov-page"><section class="ov-shell ov-center"><p class="ov-kicker">Zwit</p><h1>Le parcours ne peut pas démarrer.</h1><p>${escapeHtml(errors[error.message] || error.message)}</p></section></div>`;
     }
   }
 

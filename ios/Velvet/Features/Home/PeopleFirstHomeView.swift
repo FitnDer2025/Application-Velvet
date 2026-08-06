@@ -77,7 +77,7 @@ struct PeopleFirstHomeView: View {
                     member: member,
                     title: member.profileType == .couple
                         ? "vient de rejoindre la communauté"
-                        : "vient de rejoindre Velvet",
+                        : "vient de rejoindre Zwit",
                     detail: [member.velvetDemographicAndAgeLabel, member.locationZone ?? member.city]
                         .compactMap { $0 }
                         .joined(separator: " · "),
@@ -114,7 +114,7 @@ struct PeopleFirstHomeView: View {
                 kind: .outing,
                 member: member,
                 title: member.attendanceThirdPersonLabel.lowercased(),
-                detail: "\(visit.venueDirectory?.name ?? "Établissement Velvet") · \(visit.visitDate.profileOutingDateLabel)",
+                detail: "\(visit.venueDirectory?.name ?? "Établissement Zwit") · \(visit.visitDate.profileOutingDateLabel)",
                 imageURL: member.socialPrimaryPhoto,
                 createdAt: visits
                     .map { PeopleFirstDate.parse($0.updatedAt ?? $0.createdAt) }
@@ -461,7 +461,7 @@ private struct PeopleFirstActivityCard: View {
             .overlay(Circle().stroke(VelvetColor.champagneGold.opacity(0.28), lineWidth: 0.9))
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(item.member?.displayName ?? "La communauté Velvet")
+                Text(item.member?.displayName ?? "La communauté Zwit")
                     .font(VelvetTypography.body(size: 15, weight: .semibold))
                     .foregroundStyle(VelvetColor.ivory)
                     .lineLimit(1)
@@ -495,7 +495,7 @@ private struct PeopleFirstActivityCard: View {
                     .background(VelvetColor.champagneGold.opacity(0.08))
                     .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(visit.venueDirectory?.name ?? "Établissement Velvet")
+                    Text(visit.venueDirectory?.name ?? "Établissement Zwit")
                         .font(VelvetTypography.body(size: 14, weight: .semibold))
                         .foregroundStyle(VelvetColor.ivory)
                     Text(visit.visitDate.profileOutingDateLabel)

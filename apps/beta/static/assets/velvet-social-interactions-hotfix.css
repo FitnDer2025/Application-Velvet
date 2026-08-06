@@ -1,4 +1,4 @@
-/* Velvet — réactions photo, liens d’actualité et conversation plus compacte */
+/* Zwit — réactions photo, liens d’actualité et conversation plus compacte */
 .home-feed-card > header strong[data-social-profile-id],
 .home-feed-card > header .feed-avatar[data-social-profile-id] {
   cursor: pointer;

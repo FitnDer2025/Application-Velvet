@@ -1,4 +1,4 @@
-# ADR-DA-024 à ADR-DA-036 – Découverte intelligente Velvet
+# ADR-DA-024 à ADR-DA-036 – Découverte intelligente Zwit
 
 Status: Accepted
 
@@ -8,7 +8,7 @@ Ce document enregistre le lot de décisions validées pour la recherche, la reco
 
 ## ADR-024 — Découverte hybride
 
-Velvet combine un flux de recommandations personnalisées, une recherche manuelle et des filtres avancés. Le swipe reste facultatif et ne constitue jamais le cœur de l'expérience.
+Zwit combine un flux de recommandations personnalisées, une recherche manuelle et des filtres avancés. Le swipe reste facultatif et ne constitue jamais le cœur de l'expérience.
 
 Amendement fonctionnel du 29 juillet 2026 :
 
@@ -42,7 +42,7 @@ Le flux présente d'abord une sélection limitée des profils les plus pertinent
 
 ## ADR-030 — Carte premium
 
-Velvet propose une carte fluide de qualité comparable aux références grand public, avec clustering, zoom, filtres et affichage des membres, clubs, événements et professionnels. Les positions restent approximatives et configurables ; un mode invisible est disponible.
+Zwit propose une carte fluide de qualité comparable aux références grand public, avec clustering, zoom, filtres et affichage des membres, clubs, événements et professionnels. Les positions restent approximatives et configurables ; un mode invisible est disponible.
 
 Amendement fonctionnel du 29 juillet 2026 :
 
@@ -56,9 +56,9 @@ Amendement fonctionnel du 29 juillet 2026 :
 - une adresse absente, trop vague ou non résolue n'est jamais positionnée artificiellement ;
 - aucune coordonnée exacte de membre n'est exposée ni conservée par cette fonction.
 
-## ADR-031 — Velvet Alchemy Index
+## ADR-031 — Zwit Alchemy Index
 
-Velvet n'affiche aucun pourcentage de compatibilité. Il utilise des niveaux qualitatifs tels que « Alchimie exceptionnelle », « Très belle connexion », « Belle compatibilité », « À découvrir » ou « Potentiel inattendu », accompagnés de raisons explicables.
+Zwit n'affiche aucun pourcentage de compatibilité. Il utilise des niveaux qualitatifs tels que « Alchimie exceptionnelle », « Très belle connexion », « Belle compatibilité », « À découvrir » ou « Potentiel inattendu », accompagnés de raisons explicables.
 
 ## ADR-032 — État d'esprit du moment
 
@@ -70,7 +70,7 @@ Le Cercle de confiance est un réseau privé de membres choisis. Il peut servir 
 
 ## ADR-034 — Réputation invisible
 
-Velvet utilise des signaux internes de fiabilité, de qualité et de sécurité sans note publique, étoiles, classement ni indicateur de popularité.
+Zwit utilise des signaux internes de fiabilité, de qualité et de sécurité sans note publique, étoiles, classement ni indicateur de popularité.
 
 ## ADR-035 — Carnet de Souvenirs
 
@@ -82,7 +82,7 @@ Les événements disposent d'outils avant, pendant et après : préparation, sal
 
 La présence peut être confirmée par :
 
-- QR officiel Velvet ;
+- QR officiel Zwit ;
 - géolocalisation ponctuelle et consentie dans le périmètre de l'événement ;
 - validation par l'organisateur ;
 - validation communautaire par des participants déjà confirmés.
@@ -95,4 +95,4 @@ La géolocalisation de présence n'est jamais un suivi continu.
 - Les expériences, événements, souvenirs et cercles de confiance alimentent un cycle cohérent sans générer de classement social.
 - Les paramètres de personnalisation, visibilité et localisation doivent être accessibles aux utilisateurs.
 - Les recherches sauvegardées sont privées par défaut et protégées par RLS.
-- Le thème clair reprend la palette Velvet validée — ivoire, beige chaud, pastel rosé, or champagne et bordeaux — sans modifier les règles de confidentialité.
+- Le thème clair reprend la palette Zwit validée — ivoire, beige chaud, pastel rosé, or champagne et bordeaux — sans modifier les règles de confidentialité.

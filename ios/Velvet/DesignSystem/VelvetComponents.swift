@@ -217,7 +217,7 @@ struct VelvetTopBar: View {
     var body: some View {
         HStack(spacing: 10) {
             VelvetMark(size: 30)
-            Text("VELVET")
+            Text("ZWIT")
                 .font(VelvetTypography.brand(size: 17))
                 .tracking(3.4)
                 .foregroundStyle(VelvetColor.ivory)
@@ -244,7 +244,7 @@ struct VelvetTopBar: View {
                     .font(.system(size: 17, weight: .medium))
                     .frame(width: 38, height: 38)
             }
-            .accessibilityLabel("Menu Velvet")
+            .accessibilityLabel("Menu Zwit")
         }
         .foregroundStyle(VelvetColor.ivory)
         .padding(.horizontal, 18)

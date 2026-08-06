@@ -33,7 +33,7 @@
   function messageMarkup(message, currentUserId) {
     const mine = String(message.sender_user_id || '') === String(currentUserId || '');
     return `<article class="message ${mine ? 'mine' : ''}" data-message-id="${e(message.id)}">
-      <small>${e(message.sender_identity || (mine ? 'Vous' : 'Membre Velvet'))}</small>
+      <small>${e(message.sender_identity || (mine ? 'Vous' : 'Membre Zwit'))}</small>
       ${message.body ? `<p>${e(message.body)}</p>` : ''}
       ${list(message.attachments).length ? `<div class="message-attachments">${list(message.attachments).map(attachmentMarkup).join('')}</div>` : ''}
     </article>`;

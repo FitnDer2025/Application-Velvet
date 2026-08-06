@@ -1,4 +1,4 @@
-# Recette utilisateur complète — Velvet BETA
+# Recette utilisateur complète — Zwit BETA
 
 > Complément V1.1 : `npm run recipe:browser` exécute désormais le build exact dans Chromium desktop, Chromium Android et WebKit iPhone. Cette preuve couvre le rendu, les débordements et le menu tactile. Elle ne remplace pas les scénarios connectés ci-dessous ni l’essai sur un iPhone physique installé en PWA.
 
@@ -11,7 +11,7 @@ visuelle sans persistance serveur est considérée comme un échec.
 - appliquer toutes les migrations jusqu’à `0020_velvet_venue_catalog.sql` ;
 - utiliser quatre adresses de test distinctes : membre individuel, partenaire A,
   partenaire B et professionnel ;
-- générer les invitations depuis Velvet Control ;
+- générer les invitations depuis Zwit Control ;
 - ne jamais utiliser de données d’identité ou de photos de personnes non
   consentantes ;
 - conserver un établissement du catalogue en mode non attribué pour contrôler le

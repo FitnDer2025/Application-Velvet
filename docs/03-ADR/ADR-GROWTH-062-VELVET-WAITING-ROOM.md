@@ -1,17 +1,17 @@
-# ADR-GROWTH-062 — Salle d’attente et préinscriptions Velvet
+# ADR-GROWTH-062 — Salle d’attente et préinscriptions Zwit
 
 - **Statut :** accepté
 - **Date :** 2026-08-06
 - **Décideur produit :** Cyril
-- **Périmètre :** Web, Velvet Contrôle, Velvet Marketing, Supabase
+- **Périmètre :** Web, Zwit Contrôle, Zwit Marketing, Supabase
 
 ## Contexte
 
-La V1 Velvet est prête à entrer en phase de test, mais le lancement public nécessite encore des moyens pour l’acquisition, l’infrastructure, la vérification d’identité et la modération. Velvet doit pouvoir constituer une première communauté régionale et démontrer sa traction avant l’ouverture complète et avant une démarche formelle auprès de financeurs.
+La V1 Zwit est prête à entrer en phase de test, mais le lancement public nécessite encore des moyens pour l’acquisition, l’infrastructure, la vérification d’identité et la modération. Zwit doit pouvoir constituer une première communauté régionale et démontrer sa traction avant l’ouverture complète et avant une démarche formelle auprès de financeurs.
 
 ## Décision
 
-Velvet met en place une **salle d’attente publique premium** à l’adresse `/acces-prive/` avec deux parcours distincts :
+Zwit met en place une **salle d’attente publique premium** à l’adresse `/acces-prive/` avec deux parcours distincts :
 
 1. préinscription membre ;
 2. préinscription professionnelle.
@@ -35,7 +35,7 @@ L’attestation de majorité et le consentement explicite aux communications li�
 
 ## Expérience publique
 
-La page doit respecter l’ADN Velvet :
+La page doit respecter l’ADN Zwit :
 
 - univers graphite, bordeaux et champagne ;
 - esthétique premium, minimaliste et cinématographique ;
@@ -45,9 +45,9 @@ La page doit respecter l’ADN Velvet :
 
 Après inscription, le message confirme l’enregistrement et invite la personne à surveiller sa boîte mail. Un lien personnel de recommandation peut être proposé.
 
-## Pilotage dans Velvet Contrôle
+## Pilotage dans Zwit Contrôle
 
-La salle d’attente appartient à la destination existante **Communications** de Velvet Contrôle ; elle ne crée pas une sixième destination principale.
+La salle d’attente appartient à la destination existante **Communications** de Zwit Contrôle ; elle ne crée pas une sixième destination principale.
 
 Le cockpit `/control/acces-prive/` affiche :
 
@@ -64,13 +64,13 @@ Le cockpit `/control/acces-prive/` affiche :
 
 Lecture : rôles admin, direction, moderator, support et auditor. Modification des états : admin et direction uniquement.
 
-## Campagne dans Velvet Marketing
+## Campagne dans Zwit Marketing
 
 Le module `/marketing/acces-prive/` fournit :
 
 - publication principale régionale ;
 - appel à bêta-testeurs ;
-- communication Velvet Pro ;
+- communication Zwit Pro ;
 - relance ;
 - scénario de story en trois écrans ;
 - règles éditoriales ;

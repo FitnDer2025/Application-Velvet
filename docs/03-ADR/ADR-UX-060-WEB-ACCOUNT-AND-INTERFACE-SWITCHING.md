@@ -4,9 +4,9 @@
 
 ## Décision
 
-- Les interfaces Web Membres, Velvet Pro et Velvet Control proposent toutes l’action « Changer de compte ».
+- Les interfaces Web Membres, Zwit Pro et Zwit Control proposent toutes l’action « Changer de compte ».
 - Cette action ferme la session active puis affiche la page de connexion ; elle ne conserve aucun accès du compte précédent.
-- Le rôle `admin` dispose, sur le Web uniquement, de raccourcis directs vers Membres, Velvet Pro et Velvet Control sans nouvelle authentification.
+- Le rôle `admin` dispose, sur le Web uniquement, de raccourcis directs vers Membres, Zwit Pro et Zwit Control sans nouvelle authentification.
 - Les raccourcis sont construits après lecture de la session serveur. Ils ne sont jamais déduits d’un état local ni d’un simple élément visuel.
 - Chaque interface conserve son contrôle d’accès serveur : le sélecteur ne crée aucun droit et une URL saisie manuellement reste soumise au RBAC.
 - Les autres rôles ne voient aucun raccourci transversal. Ils conservent seulement « Changer de compte ».

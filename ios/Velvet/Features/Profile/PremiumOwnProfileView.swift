@@ -57,7 +57,7 @@ struct PremiumOwnProfileView: View {
                     selectedContent
 
                     Label(
-                        "Studio du profil, Velvet IA, modification et paramètres sont accessibles depuis le menu en haut à droite.",
+                        "Studio du profil, Zwit IA, modification et paramètres sont accessibles depuis le menu en haut à droite.",
                         systemImage: "line.3.horizontal"
                     )
                     .font(VelvetTypography.body(size: 11))
@@ -224,7 +224,7 @@ struct PremiumOwnProfileView: View {
                 eyebrow: "Localisation publique",
                 title: currentProfile.locationZone ?? currentProfile.city ?? "Zone privée"
             ) {
-                Text("Velvet affiche uniquement la zone choisie et jamais l’adresse exacte.")
+                Text("Zwit affiche uniquement la zone choisie et jamais l’adresse exacte.")
                     .font(VelvetTypography.body(size: 12))
                     .foregroundStyle(VelvetColor.textSecondary)
             }
@@ -394,7 +394,7 @@ struct PremiumOwnProfileView: View {
     private func recommendationAuthor(_ recommendation: Recommendation) -> String {
         store.directory?.profiles.first(where: {
             $0.id == recommendation.authorProfileId
-        })?.displayName ?? "Membre Velvet"
+        })?.displayName ?? "Membre Zwit"
     }
 
     @MainActor

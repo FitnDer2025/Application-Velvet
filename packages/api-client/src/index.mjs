@@ -1,6 +1,6 @@
 export class VelvetApiError extends Error {
   constructor(status, payload) {
-    super(payload?.message || payload?.error || `Velvet API error ${status}`);
+    super(payload?.message || payload?.error || `Zwit API error ${status}`);
     this.name = 'VelvetApiError';
     this.status = status;
     this.code = payload?.error;
@@ -18,7 +18,7 @@ export class VelvetApiClient {
 
   constructor({ baseUrl, audience, onToken } = {}) {
     if (!baseUrl) throw new Error('baseUrl is required');
-    if (!['members', 'pro', 'control'].includes(audience)) throw new Error('Invalid Velvet audience');
+    if (!['members', 'pro', 'control'].includes(audience)) throw new Error('Invalid Zwit audience');
     this.#baseUrl = baseUrl.replace(/\/+$/, '');
     this.#audience = audience;
     this.#onToken = onToken || (() => {});

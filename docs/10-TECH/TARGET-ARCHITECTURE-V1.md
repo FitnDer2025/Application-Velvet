@@ -14,12 +14,12 @@ Statut : **PROPOSED — validation technique requise avant implémentation**
 ## Stack de référence
 
 - Frontend : Next.js, TypeScript, React ;
-- UI : composants accessibles, design tokens Velvet, Storybook lorsque le socle UI est stable ;
+- UI : composants accessibles, design tokens Zwit, Storybook lorsque le socle UI est stable ;
 - Backend : routes serveur Next.js et fonctions isolées selon les besoins ;
 - Données : Supabase PostgreSQL avec migrations versionnées ;
 - Authentification : Supabase Auth ou prestataire équivalent validé ;
 - Stockage : buckets séparés public, privé et quarantaine ;
-- Paiement : adaptateur indépendant et page hébergée chez un prestataire acceptant explicitement l'activité et les contenus de Velvet ; aucun fournisseur n'est activé sans accord écrit ;
+- Paiement : adaptateur indépendant et page hébergée chez un prestataire acceptant explicitement l'activité et les contenus de Zwit ; aucun fournisseur n'est activé sans accord écrit ;
 - Emails : Brevo ou Resend ;
 - Recherche : PostgreSQL en V1, moteur dédié seulement si les métriques le justifient ;
 - Analytics : PostHog avec collecte minimisée ;
@@ -100,7 +100,7 @@ Statut : **PROPOSED — validation technique requise avant implémentation**
 
 ## Paiement
 
-Velvet ne doit pas conserver de données de carte. Les responsabilités de marketplace, encaissement pour compte de tiers, remboursement, fiscalité et KYC professionnel doivent être validées juridiquement avant activation.
+Zwit ne doit pas conserver de données de carte. Les responsabilités de marketplace, encaissement pour compte de tiers, remboursement, fiscalité et KYC professionnel doivent être validées juridiquement avant activation.
 
 ## Performance V1
 

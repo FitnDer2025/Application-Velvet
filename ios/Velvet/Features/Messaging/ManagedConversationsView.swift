@@ -27,7 +27,7 @@ struct ManagedConversationsView: View {
                         VelvetEmptyState(
                             symbol: "bubble.left.and.bubble.right",
                             title: "Aucune conversation",
-                            message: "Écrivez depuis un profil ou rejoignez un Salon Velvet lié à une sortie."
+                            message: "Écrivez depuis un profil ou rejoignez un Salon Zwit lié à une sortie."
                         )
                     } else {
                         LazyVStack(spacing: 10) {

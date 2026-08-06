@@ -237,7 +237,7 @@ export async function deliverMessageNotifications(env, {
   ]);
   const settingsByUser = new Map((settingsRows || []).map((row) => [row.user_id, row]));
   const eligible = userIds.filter((userId) => messagesEnabled(settingsByUser.get(userId)));
-  const author = clean(senderIdentity, 120) || clean(senderProfile?.display_name, 120) || 'Un membre Velvet';
+  const author = clean(senderIdentity, 120) || clean(senderProfile?.display_name, 120) || 'Un membre Zwit';
   const title = `${author} vous a écrit`;
   const body = preview(messageBody);
   const metadata = {

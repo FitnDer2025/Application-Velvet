@@ -163,7 +163,7 @@
     profile_identity_required: 'Ajoute un nom de profil et une description d’au moins 20 caractères.',
     profile_payload_too_large: 'Le contenu du profil est trop volumineux.',
     gender_identity_required: 'Indique ton identité de genre pour compléter ta fiche personnelle.',
-    profile_required: 'Crée d’abord ton profil Velvet.',
+    profile_required: 'Crée d’abord ton profil Zwit.',
     organizer_request_already_pending: 'Une demande Organisateur est déjà en cours.',
     album_name_required: 'Donne un nom à cet album.',
     photo_and_album_required: 'Choisis une photo et un album.',
@@ -177,34 +177,34 @@
     personal_photo_owner_required: 'Chaque personne doit publier elle-même son portrait.',
     photo_access_denied: 'Cette photo n’est plus accessible.',
     cannot_react_to_own_photo: 'Tu peux consulter les réactions reçues, mais pas réagir à ta propre photo.',
-    photo_reaction_persistence_failed: 'La réaction n’a pas pu être confirmée dans la mémoire Velvet.',
+    photo_reaction_persistence_failed: 'La réaction n’a pas pu être confirmée dans la mémoire Zwit.',
     profile_contact_not_allowed: 'Ce profil n’accepte pas les messages de ta catégorie de profil.',
     profile_contact_blocked: 'Cette conversation ne peut pas être ouverte.',
     report_category_required: 'Choisis la raison du signalement.',
     event_registration_closed: 'Les inscriptions à cette sortie sont closes.',
     event_unavailable: 'Cette sortie n’est plus disponible.',
     saved_search_name_required: 'Donne un nom à cette recherche.',
-    saved_search_write_failed: 'La recherche n’a pas pu être enregistrée dans Velvet.'
+    saved_search_write_failed: 'La recherche n’a pas pu être enregistrée dans Zwit.'
     ,
     lifecycle_email_not_configured: 'L’envoi d’e-mails de confirmation n’est pas configuré.',
     lifecycle_action_already_pending: 'Une action sensible attend déjà des confirmations.',
     lifecycle_email_failed: 'L’e-mail de confirmation n’a pas pu être envoyé.',
-    ai_source_too_short: 'Ajoute au moins trois mots-clés précis avant de solliciter Velvet IA.',
-    profile_ai_unavailable: 'Velvet IA est momentanément indisponible.',
-    profile_ai_generation_failed: 'Velvet IA n’a pas pu composer ce texte. Enrichis légèrement ton brouillon puis réessaie.',
-    signature_required_saved_search: 'Les recherches sauvegardées font partie de Velvet Signature.',
+    ai_source_too_short: 'Ajoute au moins trois mots-clés précis avant de solliciter Zwit IA.',
+    profile_ai_unavailable: 'Zwit IA est momentanément indisponible.',
+    profile_ai_generation_failed: 'Zwit IA n’a pas pu composer ce texte. Enrichis légèrement ton brouillon puis réessaie.',
+    signature_required_saved_search: 'Les recherches sauvegardées font partie de Zwit Signature.',
     signature_conversation_limit: 'Tes 3 nouvelles conversations de la semaine sont utilisées. Les échanges déjà ouverts restent illimités.',
-    signature_follow_limit: 'Velvet Découverte permet de suivre 10 profils. Passe à Signature pour suivre sans limite.',
-    signature_profile_ai_limit: 'Ton quota Velvet IA est utilisé pour cette période.',
+    signature_follow_limit: 'Zwit Découverte permet de suivre 10 profils. Passe à Signature pour suivre sans limite.',
+    signature_profile_ai_limit: 'Ton quota Zwit IA est utilisé pour cette période.',
     promotion_invalid: 'Ce code promotionnel est inconnu ou incorrect.',
     promotion_expired: 'Ce code promotionnel a expiré.',
     promotion_limit_reached: 'Toutes les activations prévues pour ce code ont été utilisées.',
     promotion_already_used: 'Ce code a déjà été utilisé par ce profil.',
     promotion_audience_mismatch: 'Ce code n’est pas destiné à ce type de profil.',
     billing_provider_not_configured: 'Le paiement sera ouvert après validation définitive de notre partenaire bancaire.',
-    identity_age_verification_required: 'La vérification de l’identité et de la majorité est obligatoire avant d’accéder à Velvet.',
+    identity_age_verification_required: 'La vérification de l’identité et de la majorité est obligatoire avant d’accéder à Zwit.',
     verification_provider_not_configured: 'Le prestataire de vérification n’est pas encore raccordé sur cet environnement.',
-    data_export_failed: 'Ton export n’a pas pu être préparé. Réessaie ou contacte l’équipe Velvet.'
+    data_export_failed: 'Ton export n’a pas pu être préparé. Réessaie ou contacte l’équipe Zwit.'
   };
 
   const REFERENCES = {
@@ -372,7 +372,7 @@
         <textarea name="${e(name)}" data-ai-writer-source="${e(name)}"${long ? ' class="long"' : ''} maxlength="${maxLength}"${minLength ? ` minlength="${minLength}"` : ''}${required ? ' required' : ''}${placeholder ? ` placeholder="${e(placeholder)}"` : ''}>${e(value)}</textarea>
       </label>
       <div class="ai-writer-tools">
-        <button type="button" class="ai-writer-button" data-ai-writer="${e(name)}" disabled>✦ Velvet IA</button>
+        <button type="button" class="ai-writer-button" data-ai-writer="${e(name)}" disabled>✦ Zwit IA</button>
         <small data-ai-writer-status>Ajoute au moins 3 mots-clés précis.</small>
       </div>
     </div>`;
@@ -397,7 +397,7 @@
         button.disabled = !ready || button.dataset.loading === 'true';
         if (button.dataset.loading !== 'true') {
           status.textContent = ready
-            ? 'Velvet peut maintenant sublimer ce texte.'
+            ? 'Zwit peut maintenant sublimer ce texte.'
             : 'Ajoute au moins 3 mots-clés précis.';
         }
       };
@@ -408,7 +408,7 @@
         button.dataset.loading = 'true';
         button.disabled = true;
         button.textContent = '✦ Composition…';
-        status.textContent = 'Velvet compose une proposition fidèle à tes mots…';
+        status.textContent = 'Zwit compose une proposition fidèle à tes mots…';
         try {
           const result = await api('/api/members/profile-copy', {
             method: 'POST',
@@ -426,13 +426,13 @@
           textarea.value = result.text;
           textarea.dispatchEvent(new Event('input', { bubbles: true }));
           status.textContent = 'Proposition générée — tu gardes la main avant l’enregistrement.';
-          toast('Velvet IA a préparé une proposition. Relis-la et adapte-la librement.');
+          toast('Zwit IA a préparé une proposition. Relis-la et adapte-la librement.');
         } catch (error) {
           status.textContent = errorMessages[error.message] || error.message;
           toast(error.message, true);
         } finally {
           button.dataset.loading = 'false';
-          button.textContent = '✦ Velvet IA';
+          button.textContent = '✦ Zwit IA';
           refresh();
         }
       });
@@ -459,7 +459,7 @@
     });
     window.addEventListener('appinstalled', () => {
       state.installPrompt = null;
-      toast('Velvet est installé sur cet appareil.');
+      toast('Zwit est installé sur cet appareil.');
     });
   }
 
@@ -636,7 +636,7 @@
       .filter((button) => button.dataset.albumLightbox === albumKey);
     const photos = triggers.map((button) => {
       const image = button.querySelector('img');
-      return { src: image?.src || '', alt: image?.alt || 'Photo Velvet' };
+      return { src: image?.src || '', alt: image?.alt || 'Photo Zwit' };
     }).filter((photo) => photo.src);
     if (!photos.length) return;
 
@@ -847,7 +847,7 @@
       }
       content.innerHTML = `<div class="page">${emptyState(
         'Connexion impossible',
-        `La mémoire Velvet n’a pas pu être chargée : ${errorMessages[error.message] || error.message}`,
+        `La mémoire Zwit n’a pas pu être chargée : ${errorMessages[error.message] || error.message}`,
         '!'
       )}</div>`;
     }
@@ -949,16 +949,16 @@
     })[verification.status] || 'Vérification requise';
     content.innerHTML = `<div class="page admission-page verification-gate">
       <header class="admission-brand">
-        <span class="brand-mark">V</span><span><strong>Velvet</strong><small>ACCÈS PROTÉGÉ</small></span>
+        <span class="brand-mark">V</span><span><strong>Zwit</strong><small>ACCÈS PROTÉGÉ</small></span>
         <button class="text-button" id="admissionLogout" type="button">Se déconnecter</button>
       </header>
       ${pageHead(
         'Identité · majorité · confidentialité',
-        'Vérifions que Velvet reste un espace adulte.',
+        'Vérifions que Zwit reste un espace adulte.',
         'L’accès aux profils, messages, lieux et albums est fermé tant que l’identité et la majorité ne sont pas confirmées.'
       )}
       <section class="card admission-status">
-        <div><p class="eyebrow">État actuel</p><h2>${e(status)}</h2><p>Velvet ne conserve ni pièce d’identité, ni identité civile, ni date de naissance. Seuls le résultat, sa date et sa durée de validité sont enregistrés.</p></div>
+        <div><p class="eyebrow">État actuel</p><h2>${e(status)}</h2><p>Zwit ne conserve ni pièce d’identité, ni identité civile, ni date de naissance. Seuls le résultat, sa date et sa durée de validité sont enregistrés.</p></div>
         <span class="pill">18+</span>
       </section>
       <section class="grid two">
@@ -971,7 +971,7 @@
         </article>
         <article class="card section">
           <p class="eyebrow">Tes droits restent accessibles</p><h2>Récupérer tes données</h2>
-          <p>Tu peux télécharger tes informations Velvet même lorsque l’accès communautaire est verrouillé.</p>
+          <p>Tu peux télécharger tes informations Zwit même lorsque l’accès communautaire est verrouillé.</p>
           <button class="secondary" type="button" data-export-velvet>Préparer mon export JSON</button>
         </article>
       </section>
@@ -1038,7 +1038,7 @@
         <input autocomplete="off" data-venue-input placeholder="Commence à saisir le nom d’un club ou d’un spa">
         <span class="commune-results venue-results" data-venue-results role="listbox" hidden></span>
       </span>
-      <small class="field-help">Référentiel Velvet enrichi par les établissements vérifiés et OpenStreetMap. Les lieux restent soumis à vérification.</small>
+      <small class="field-help">Référentiel Zwit enrichi par les établissements vérifiés et OpenStreetMap. Les lieux restent soumis à vérification.</small>
     </fieldset>`;
   }
 
@@ -1091,7 +1091,7 @@
         <p>${joiningPartner ? `Tu as rejoint ${e(profile.display_name)}. Les informations communes pourront être enrichies par vous deux, mais cette fiche personnelle restera uniquement modifiable depuis ton compte.` : 'Cette fiche est enregistrée dans Supabase et visible uniquement par les membres admis à la BETA. Aucun contenu fictif ne sera ajouté.'}</p>
 
         <section class="form-step">
-          <h2>Votre identité Velvet</h2>
+          <h2>Votre identité Zwit</h2>
           <p>Commence par ce que les autres membres doivent comprendre au premier regard.</p>
           <div class="form-grid">
             <label>Type de profil
@@ -1139,7 +1139,7 @@
     return `<section class="discovery-step" data-discovery-step="${number}" ${attributes}${number ? ' hidden' : ''}>
       <div class="velvet-guide">
         <span class="guide-avatar">V</span>
-        <p><strong>Velvet</strong><span>${e(text)}</span></p>
+        <p><strong>Zwit</strong><span>${e(text)}</span></p>
       </div>
       <p class="eyebrow">${e(kicker)}</p>
       <h1>${e(title)}</h1>
@@ -1181,7 +1181,7 @@
           <input name="p0_first_name" maxlength="80" value="${e(ownPerson.first_name)}" autocomplete="given-name" required autofocus>
         </label>
       `),
-      discoveryStep(1, 'Ton identité', 'Comment souhaites-tu être présenté(e) ?', 'Choisis simplement l’identité qui te correspond. Elle permettra aussi à Velvet de respecter les préférences de visibilité de chacun.', `
+      discoveryStep(1, 'Ton identité', 'Comment souhaites-tu être présenté(e) ?', 'Choisis simplement l’identité qui te correspond. Elle permettra aussi à Zwit de respecter les préférences de visibilité de chacun.', `
         <label>Identité de genre
           <select name="p0_gender_identity" required>
             <option value="">Choisir…</option>
@@ -1190,13 +1190,13 @@
         </label>
       `)
     ] : [
-      discoveryStep(0, 'Bienvenue dans Velvet', 'Pour qui allons-nous créer ce profil ?', 'Commençons simplement. Dis-moi si cette page doit raconter ton univers personnel ou celui de votre couple.', `
+      discoveryStep(0, 'Bienvenue dans Zwit', 'Pour qui allons-nous créer ce profil ?', 'Commençons simplement. Dis-moi si cette page doit raconter ton univers personnel ou celui de votre couple.', `
         <div class="discovery-choices">
           ${discoveryChoice('profile_type', 'individual', 'Ce profil est pour moi', 'Une page personnelle centrée sur mon univers.', currentType === 'individual')}
           ${discoveryChoice('profile_type', 'couple', 'Ce profil est pour notre couple', 'Une page commune complétée par nos deux fiches.', currentType === 'couple')}
         </div>
       `),
-      discoveryStep(1, 'Votre identité Velvet', 'Quel nom apparaîtra sur votre profil ?', 'Choisis le prénom, le pseudonyme ou le nom de couple avec lequel les autres membres devront vous reconnaître.', `
+      discoveryStep(1, 'Votre identité Zwit', 'Quel nom apparaîtra sur votre profil ?', 'Choisis le prénom, le pseudonyme ou le nom de couple avec lequel les autres membres devront vous reconnaître.', `
         <label><span data-name-label>Nom affiché</span>
           <input name="display_name" maxlength="120" value="${e(profile?.display_name)}" autocomplete="nickname" required autofocus>
         </label>
@@ -1217,7 +1217,7 @@
           <input name="p0_first_name" maxlength="80" value="${e(ownPerson.first_name)}" required>
         </label>
       `),
-      discoveryStep(6, 'Ton identité', 'Comment souhaites-tu être présenté(e) ?', 'Cette réponse permet à Velvet de personnaliser ta fiche et de respecter les filtres de confidentialité.', `
+      discoveryStep(6, 'Ton identité', 'Comment souhaites-tu être présenté(e) ?', 'Cette réponse permet à Zwit de personnaliser ta fiche et de respecter les filtres de confidentialité.', `
         <label>Identité de genre
           <select name="p0_gender_identity" required>
             <option value="">Choisir…</option>
@@ -1301,7 +1301,7 @@
         discoveryStep(commonIndex + 2, 'Votre parcours', 'Comment avez-vous découvert cet univers ?', 'Racontez votre cheminement, vos premières découvertes et la manière dont vos envies ont évolué.', `
           ${aiWriterField('journey', 'Votre parcours', profile?.journey, { maxLength: 4000, long: true })}
         `),
-        discoveryStep(commonIndex + 3, 'Vos rencontres', 'Qu’aimeriez-vous trouver sur Velvet ?', 'Parlez-moi des personnes, du type de relation et du feeling que vous espérez rencontrer.', `
+        discoveryStep(commonIndex + 3, 'Vos rencontres', 'Qu’aimeriez-vous trouver sur Zwit ?', 'Parlez-moi des personnes, du type de relation et du feeling que vous espérez rencontrer.', `
           ${aiWriterField('search_text', 'Ce que vous recherchez', profile?.search_text, { maxLength: 4000, long: true })}
         `),
         discoveryStep(commonIndex + 4, 'Votre univers', 'Quelles pratiques font partie de vos envies ?', 'Sélectionnez ce que vous appréciez déjà ou souhaitez réellement explorer ensemble.', `
@@ -1310,7 +1310,7 @@
         discoveryStep(commonIndex + 5, 'Votre philosophie', 'Quelles valeurs doivent guider vos rencontres ?', 'Ces valeurs aideront les autres membres à comprendre immédiatement votre manière de vivre Velvet.', `
           ${multiField('values_list', 'Les valeurs qui comptent pour nous', REFERENCES.values, profile?.values_list)}
         `),
-        discoveryStep(commonIndex + 6, 'Votre rythme', 'Quand êtes-vous généralement disponibles ?', 'Ces repères permettront à Velvet de vous proposer des sorties et des profils compatibles avec votre quotidien.', `
+        discoveryStep(commonIndex + 6, 'Votre rythme', 'Quand êtes-vous généralement disponibles ?', 'Ces repères permettront à Zwit de vous proposer des sorties et des profils compatibles avec votre quotidien.', `
           ${multiField('availability', 'Nos disponibilités habituelles', REFERENCES.availability, selectedFromText(profile?.availability_text))}
         `),
         discoveryStep(commonIndex + 7, 'Vos habitudes', 'Quels lieux aimez-vous fréquenter ?', 'Commencez à saisir le nom d’un club ou d’un spa. Vous pourrez compléter cette liste plus tard depuis votre profil.', `
@@ -1331,7 +1331,7 @@
         <footer class="discovery-actions">
           <button class="secondary" type="button" data-discovery-back hidden>Retour</button>
           <button class="primary" type="button" data-discovery-next>Continuer</button>
-          <button class="primary" type="submit" data-discovery-submit hidden>${joiningPartner ? 'Rejoindre notre profil' : 'Découvrir Velvet'}</button>
+          <button class="primary" type="submit" data-discovery-submit hidden>${joiningPartner ? 'Rejoindre notre profil' : 'Découvrir Zwit'}</button>
         </footer>
         <p id="profileFormStatus" class="status-box" hidden></p>
       </section>
@@ -1381,7 +1381,7 @@
       if (descriptionLabel) descriptionLabel.textContent = couple
         ? 'Description du couple'
         : 'Ta description principale';
-      submit.textContent = couple ? 'Inviter ma moitié' : 'Découvrir Velvet';
+      submit.textContent = couple ? 'Inviter ma moitié' : 'Découvrir Zwit';
     };
 
     const display = () => {
@@ -1648,7 +1648,7 @@
   }
 
   function photoStatus(photo) {
-    if (photo.moderation_status === 'approved') return '<span class="photo-state approved">Validée par Velvet Intelligence</span>';
+    if (photo.moderation_status === 'approved') return '<span class="photo-state approved">Validée par Zwit Intelligence</span>';
     if (photo.moderation_status === 'rejected') return `<span class="photo-state rejected">À remplacer</span><small>${e(photo.rejection_reason || photo.ai_assessment?.summary || 'Les critères ne sont pas remplis.')}</small>`;
     return `<span class="photo-state pending">Analyse ou contrôle en cours</span><small>${e(photo.ai_assessment?.summary || 'La photo reste privée pendant le contrôle.')}</small>`;
   }
@@ -1681,7 +1681,7 @@
 
     content.innerHTML = `<div class="page admission-page">
       <header class="admission-brand">
-        <span class="brand-mark">V</span><span><strong>Velvet</strong><small>SAS D’ADMISSION</small></span>
+        <span class="brand-mark">V</span><span><strong>Zwit</strong><small>SAS D’ADMISSION</small></span>
         <button class="text-button" id="admissionLogout" type="button">Se déconnecter</button>
       </header>
       ${pageHead(
@@ -1732,13 +1732,13 @@
         </article>` : ''}
       </section>
       <section class="card ai-notice">
-        <p class="eyebrow">Velvet Intelligence</p>
+        <p class="eyebrow">Zwit Intelligence</p>
         <h2>Ce qui est analysé — et ce qui ne l’est pas</h2>
         <p>L’analyse vérifie le nombre de personnes, le cadrage au minimum à mi-corps, la visibilité et la netteté suffisante. Elle n’identifie personne, ne compare aucun visage et ne crée aucun gabarit biométrique. Une décision incertaine est transmise à un contrôle humain.</p>
         <p>Les photos restent privées et inaccessibles aux autres membres tant qu’elles ne sont pas approuvées.</p>
       </section>
       <section class="community-teaser" aria-label="Aperçu verrouillé">
-        <p class="eyebrow">Après validation</p><h2>La communauté Velvet se dévoilera ici.</h2>
+        <p class="eyebrow">Après validation</p><h2>La communauté Zwit se dévoilera ici.</h2>
         <div class="blurred-community">${[1,2,3].map(() => '<article><span></span><strong>Profil protégé</strong><small>Contact verrouillé</small></article>').join('')}</div>
       </section>
     </div>`;
@@ -1870,7 +1870,7 @@
           : profile.created_at,
         activity: updatedAt > new Date(createdAt.getTime() + 12 * 60 * 60 * 1000)
           ? `${profile.display_name} a enrichi son profil`
-          : `${profile.display_name} vient de rejoindre Velvet`,
+          : `${profile.display_name} vient de rejoindre Zwit`,
         profile
       };
     });
@@ -1904,7 +1904,7 @@
           type: 'plan',
           date: plan.created_at,
           profile: list(state.directory.profiles).find((profile) => profile.id === plan.profile_id),
-          title: event?.title || 'Événement Velvet',
+          title: event?.title || 'Événement Zwit',
           detail: event ? new Date(event.starts_at).toLocaleString('fr-FR') : plan.registration_status
         };
       })
@@ -1940,7 +1940,7 @@
       </article>`;
     }
     return `<article class="card home-feed-card profile-feed-card">
-      <header><span class="feed-avatar">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}</span><div><strong>${e(item.activity || `${profile.display_name} vient de rejoindre Velvet`)}</strong><small>${e(viewedAtLabel(item.date))}</small></div></header>
+      <header><span class="feed-avatar">${cover ? `<img src="${e(cover.previewUrl)}" alt="">` : e(initials(profile.display_name))}</span><div><strong>${e(item.activity || `${profile.display_name} vient de rejoindre Zwit`)}</strong><small>${e(viewedAtLabel(item.date))}</small></div></header>
       <div class="home-profile-preview">${profilePreviewCard(profile, { variant: 'feed' })}</div>
     </article>`;
   }
@@ -2062,7 +2062,7 @@
         woman: 'Femme seule',
         man: 'Homme seul',
         other: 'Profil individuel'
-      })[type] || 'Profil Velvet',
+      })[type] || 'Profil Zwit',
       icon: ({
         couple: '⚭',
         woman: '♀',
@@ -2156,7 +2156,7 @@
     return `<section class="profile-engagement-panel">
       <article class="memory-card">
         <span class="memory-icon">✓</span>
-        <div><small>Votre mémoire Velvet</small><strong>${memory ? `Consulté ${memory.view_count} fois` : 'Première découverte'}</strong>
+        <div><small>Votre mémoire Zwit</small><strong>${memory ? `Consulté ${memory.view_count} fois` : 'Première découverte'}</strong>
         <p>${memory ? `Dernière visite : ${e(viewedAtLabel(memory.last_viewed_at))}` : 'Cette visite sera ajoutée à votre historique privé.'}</p></div>
       </article>
       <article class="reaction-card">
@@ -2176,7 +2176,7 @@
           }).join('') || '<small>Donne ton premier ressenti.</small>'}</div>
           <p>${e(consensus)}</p>
         </div>` : ''}
-        <p class="privacy-note">Ce ressenti reste invisible pour le profil consulté. Il sert à votre comparaison et, plus tard, aux recommandations privées de Velvet Intelligence.</p>
+        <p class="privacy-note">Ce ressenti reste invisible pour le profil consulté. Il sert à votre comparaison et, plus tard, aux recommandations privées de Zwit Intelligence.</p>
       </article>
     </section>`;
   }
@@ -2288,7 +2288,7 @@
     const typeLabels = { couple: 'Tous les couples', woman: 'Toutes les femmes', man: 'Tous les hommes' };
     return `<div class="page discover-page">
       ${pageHead('Recherche sur mesure', 'Recherche', 'Combine librement les critères : chaque groupe accepte plusieurs sélections sans limite.')}
-      ${signature ? '' : '<section class="signature-notice"><div><p class="eyebrow">Velvet Découverte</p><strong>La recherche essentielle reste accessible.</strong><small>Âges, pratiques, physique, présence et recherches sauvegardées sont inclus dans Velvet Signature.</small></div><button class="secondary" type="button" data-route="settings">Voir Signature</button></section>'}
+      ${signature ? '' : '<section class="signature-notice"><div><p class="eyebrow">Zwit Découverte</p><strong>La recherche essentielle reste accessible.</strong><small>Âges, pratiques, physique, présence et recherches sauvegardées sont inclus dans Zwit Signature.</small></div><button class="secondary" type="button" data-route="settings">Voir Signature</button></section>'}
       <section class="card saved-search-bar">
         <label>Mes recherches
           <select id="savedSearchSelect">
@@ -2299,7 +2299,7 @@
         <label>Nom de cette recherche<input id="savedSearchName" maxlength="80" placeholder="Ex. Couples échangistes autour de Lille"></label>
         <button class="primary" type="button" data-save-search${signature ? '' : ' disabled'}>Enregistrer</button>
         <button class="secondary" type="button" data-delete-search${state.selectedSavedSearchId ? '' : ' disabled'}>Supprimer</button>
-        <small>${signature ? (state.savedSearchPersistenceAvailable ? 'Synchronisée avec ton compte Velvet.' : 'Enregistrée sur cet appareil jusqu’à l’installation de la migration Supabase.') : 'Disponible avec Velvet Signature.'}</small>
+        <small>${signature ? (state.savedSearchPersistenceAvailable ? 'Synchronisée avec ton compte Velvet.' : 'Enregistrée sur cet appareil jusqu’à l’installation de la migration Supabase.') : 'Disponible avec Zwit Signature.'}</small>
       </section>
       <div class="discover-layout">
         <form id="discoverFilters" class="card discover-filter-panel">
@@ -2547,7 +2547,7 @@
       <aside>
         <article class="card"><p class="eyebrow">Orientation et attirances</p><h3>${e(person.orientation || 'Non renseignées')}</h3></article>
         <article class="card" style="margin-top:14px"><p class="eyebrow">Photos individuelles</p>
-          ${personalPhotos.length ? `<div class="mini-gallery">${personalPhotos.map((photo) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo individuelle de ${e(person.first_name)}">${photoReactionBar(photo, own)}</figure>`).join('')}</div>` : '<h3>Aucune photo publiée</h3><p>Velvet n’affiche aucune image de substitution.</p>'}
+          ${personalPhotos.length ? `<div class="mini-gallery">${personalPhotos.map((photo) => `<figure><img src="${e(photo.previewUrl)}" alt="Photo individuelle de ${e(person.first_name)}">${photoReactionBar(photo, own)}</figure>`).join('')}</div>` : '<h3>Aucune photo publiée</h3><p>Zwit n’affiche aucune image de substitution.</p>'}
           ${canAddPersonalPhotos ? `<form class="profile-photo-form" data-photo-role="individual_portrait" data-individual-profile="${e(person.id)}">
             <label>Ajouter des photos individuelles<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required></label>
             <button class="secondary" type="submit">Ajouter</button><small class="photo-upload-status" role="status"></small>
@@ -2562,7 +2562,7 @@
     if (!rows.length) return `<p>Aucune recommandation reçue pour le moment.</p>`;
     return rows.map((item) => {
       const author = list(state.directory.profiles).find((profileRow) => profileRow.id === item.author_profile_id);
-      return `<div class="card" style="margin-top:10px"><strong>${e(author?.display_name || 'Membre Velvet')}</strong><p>${e(item.body)}</p>${item.rating ? `<span class="pill gold">${e(item.rating)}/5</span>` : ''}</div>`;
+      return `<div class="card" style="margin-top:10px"><strong>${e(author?.display_name || 'Membre Zwit')}</strong><p>${e(item.body)}</p>${item.rating ? `<span class="pill gold">${e(item.rating)}/5</span>` : ''}</div>`;
     }).join('');
   }
 
@@ -2572,7 +2572,7 @@
     if (createdAt && !Number.isNaN(createdAt.getTime())) {
       events.push({
         date: createdAt,
-        title: 'Le début de son histoire Velvet',
+        title: 'Le début de son histoire Zwit',
         text: `${profile.display_name} a rejoint la communauté et posé les premiers repères de son univers.`
       });
     }
@@ -3173,7 +3173,7 @@
 
   function renderMaps() {
     if (!state.mapData) {
-      return `<div class="page">${pageHead('Localisation choisie', 'Maps', 'Velvet prépare la carte sans jamais exposer l’adresse ni la position exacte d’un membre.')}
+      return `<div class="page">${pageHead('Localisation choisie', 'Maps', 'Zwit prépare la carte sans jamais exposer l’adresse ni la position exacte d’un membre.')}
         <section class="loading-state"><span class="loader"></span><p>Chargement des zones publiques…</p></section>
       </div>`;
     }
@@ -3219,7 +3219,7 @@
         bindDynamicForms();
       }
     } catch (error) {
-      content.innerHTML = `<div class="page">${emptyState('Carte indisponible', `Velvet n’a pas pu charger Maps : ${errorMessages[error.message] || error.message}`, '!')}</div>`;
+      content.innerHTML = `<div class="page">${emptyState('Carte indisponible', `Zwit n’a pas pu charger Maps : ${errorMessages[error.message] || error.message}`, '!')}</div>`;
     }
   }
 
@@ -3265,7 +3265,7 @@
     const date = new Date(event.starts_at);
     return `<button class="card event-tile" data-open-event="${e(event.id)}">
       <time datetime="${e(event.starts_at)}"><strong>${e(date.toLocaleDateString('fr-FR', { day: '2-digit' }))}</strong><span>${e(date.toLocaleDateString('fr-FR', { month: 'short' }))}</span></time>
-      <span><small>${e(date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }))} · ${e(event.location_public || 'Lieu confidentiel')}${Number.isFinite(Number(event.distance_km)) ? ` · ${e(event.distance_km)} km` : ''}</small><b>${e(event.title)}</b><em>${e(event.capacity)} places · ${e(event.audience || 'Membres Velvet')}</em></span>
+      <span><small>${e(date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }))} · ${e(event.location_public || 'Lieu confidentiel')}${Number.isFinite(Number(event.distance_km)) ? ` · ${e(event.distance_km)} km` : ''}</small><b>${e(event.title)}</b><em>${e(event.capacity)} places · ${e(event.audience || 'Membres Zwit')}</em></span>
       <i>→</i>
     </button>`;
   }
@@ -3274,7 +3274,7 @@
     const distance = Number(venue._catalogDistanceKm);
     const visitors = venueUpcomingProfiles(venue.id);
     return `<button class="card venue-tile" data-open-venue="${e(venue.id)}">
-      <span class="venue-tile-main"><span class="venue-symbol">⌑</span><span><small>${e(venue.kind || 'lieu Velvet')} · ${e(venue.city || 'Localisation à confirmer')}${Number.isFinite(distance) ? ` · ${e(Math.round(distance))} km` : Number.isFinite(Number(venue.distance_km)) ? ` · ${e(Math.round(Number(venue.distance_km)))} km` : ''}</small><b>${e(venue.name)}</b><em>${e(venue.claim_status === 'claimed' ? 'Fiche professionnelle reliée à Velvet Pro' : 'Référencé par Velvet · informations à confirmer')}</em></span><i>→</i></span>
+      <span class="venue-tile-main"><span class="venue-symbol">⌑</span><span><small>${e(venue.kind || 'lieu Zwit')} · ${e(venue.city || 'Localisation à confirmer')}${Number.isFinite(distance) ? ` · ${e(Math.round(distance))} km` : Number.isFinite(Number(venue.distance_km)) ? ` · ${e(Math.round(Number(venue.distance_km)))} km` : ''}</small><b>${e(venue.name)}</b><em>${e(venue.claim_status === 'claimed' ? 'Fiche professionnelle reliée à Zwit Pro' : 'Référencé par Zwit · informations à confirmer')}</em></span><i>→</i></span>
       <span class="venue-tile-community">
         <strong>${visitors.length} profil${visitors.length > 1 ? 's' : ''} annoncé${visitors.length > 1 ? 's' : ''}</strong>
         ${visitors.length ? `<span class="venue-presence-rail">${visitors.slice(0, 7).map((profile) => {
@@ -3442,7 +3442,7 @@
     }
     return `<button class="notification-tile ${notification.read_at ? '' : 'unread'}" data-open-notification="${e(notification.id)}">
       <span class="notification-avatar">${notificationIcon(notification.event_type)}</span>
-      <span><small>Velvet · ${e(viewedAtLabel(notification.created_at))}</small><b>${e(notification.title)}</b><em>${e(notification.body || '')}</em></span>
+      <span><small>Zwit · ${e(viewedAtLabel(notification.created_at))}</small><b>${e(notification.title)}</b><em>${e(notification.body || '')}</em></span>
       ${notification.read_at ? '<i>→</i>' : '<i class="unread-dot" aria-label="Non lue"></i>'}
     </button>`;
   }
@@ -3474,7 +3474,7 @@
     ['profile_views', 'Visites du profil', 'Membres ayant découvert votre univers'],
     ['events', 'Sorties', 'Inscriptions, rappels et changements'],
     ['recommendations', 'Recommandations', 'Nouvelles compatibilités et recommandations'],
-    ['security', 'Sécurité du compte', 'Connexion, validation et alertes Velvet']
+    ['security', 'Sécurité du compte', 'Connexion, validation et alertes Zwit']
   ];
 
   function settingsChecks(name, options, selected) {
@@ -3512,16 +3512,16 @@
       currency: price.currency || 'EUR'
     });
     return `<div class="page settings-page">
-      ${pageHead('Confidentialité · tranquillité · contrôle', 'Paramètres', 'Décide précisément qui peut te découvrir, qui peut t’écrire et ce que Velvet est autorisé à te signaler.')}
+      ${pageHead('Confidentialité · tranquillité · contrôle', 'Paramètres', 'Décide précisément qui peut te découvrir, qui peut t’écrire et ce que Zwit est autorisé à te signaler.')}
       <form id="settingsForm" class="settings-layout">
         <section class="card settings-card membership-card ${signature ? 'active' : ''}">
-          <div class="membership-head"><div><p class="eyebrow">Votre accès</p><h2>${signature ? 'Velvet Signature' : 'Velvet Découverte'}</h2><p>${access.source === 'verified_woman' ? 'Accès complet offert à votre profil vérifié.' : access.source === 'founder' ? 'Accès fondateur offert pendant la période de lancement.' : signature ? 'Votre accès complet est actif.' : 'Le cœur de Velvet reste accessible gratuitement.'}</p></div><span>${signature ? 'SIGNATURE' : 'DÉCOUVERTE'}</span></div>
+          <div class="membership-head"><div><p class="eyebrow">Votre accès</p><h2>${signature ? 'Zwit Signature' : 'Zwit Découverte'}</h2><p>${access.source === 'verified_woman' ? 'Accès complet offert à votre profil vérifié.' : access.source === 'founder' ? 'Accès fondateur offert pendant la période de lancement.' : signature ? 'Votre accès complet est actif.' : 'Le cœur de Zwit reste accessible gratuitement.'}</p></div><span>${signature ? 'SIGNATURE' : 'DÉCOUVERTE'}</span></div>
           ${access.validUntil ? `<small>Accès actif jusqu’au ${e(new Date(access.validUntil).toLocaleDateString('fr-FR'))}.</small>` : ''}
           <div class="membership-comparison">
-            <div><strong>Découverte</strong><small>Recherche essentielle</small><small>3 nouvelles conversations / semaine</small><small>10 profils suivis</small><small>1 essai Velvet IA</small></div>
+            <div><strong>Découverte</strong><small>Recherche essentielle</small><small>3 nouvelles conversations / semaine</small><small>10 profils suivis</small><small>1 essai Zwit IA</small></div>
             <div><strong>Signature</strong><small>Recherche avancée et sauvegardée</small><small>Conversations et suivis illimités</small><small>20 textes IA / mois</small><small>Alertes personnalisées</small></div>
           </div>
-          ${signature ? `<p class="membership-usage">Velvet IA : ${e(accessFeatures.profileAiUsed || 0)} / ${e(accessFeatures.profileAiLimit || '∞')} · profils suivis : ${e(accessFeatures.followingUsed || 0)}${accessFeatures.followLimit ? ` / ${e(accessFeatures.followLimit)}` : ''}</p>` : `<div class="membership-prices">${memberPrices.map((price) => `<button class="secondary" type="button" data-checkout-price="${e(price.price_code)}"><b>${e(priceLabel(price))}</b><small>${price.interval_count === 3 ? 'pour 3 mois' : price.interval_unit === 'year' ? 'par an' : 'par mois'}</small></button>`).join('')}</div>`}
+          ${signature ? `<p class="membership-usage">Zwit IA : ${e(accessFeatures.profileAiUsed || 0)} / ${e(accessFeatures.profileAiLimit || '∞')} · profils suivis : ${e(accessFeatures.followingUsed || 0)}${accessFeatures.followLimit ? ` / ${e(accessFeatures.followLimit)}` : ''}</p>` : `<div class="membership-prices">${memberPrices.map((price) => `<button class="secondary" type="button" data-checkout-price="${e(price.price_code)}"><b>${e(priceLabel(price))}</b><small>${price.interval_count === 3 ? 'pour 3 mois' : price.interval_unit === 'year' ? 'par an' : 'par mois'}</small></button>`).join('')}</div>`}
           ${state.billingCatalog?.provider?.configured ? '' : '<small>Le module est prêt. L’ouverture des paiements attend la validation écrite du partenaire bancaire spécialisé.</small>'}
           <div class="promotion-redeem" data-promotion-redeem>
             <label>Vous avez un code promotionnel ?<input name="code" autocomplete="off" maxlength="40" placeholder="VELVET-XXXX-XXXX-XXXX"></label>
@@ -3529,7 +3529,7 @@
           </div>
         </section>
         <section class="card settings-card appearance-card">
-          <p class="eyebrow">Apparence</p><h2>Ambiance Velvet</h2>
+          <p class="eyebrow">Apparence</p><h2>Ambiance Zwit</h2>
           <p>Bascule tout l’espace membre entre le velours sombre et une version claire ivoire, beige, or et bordeaux.</p>
           <div class="settings-options">
             <label class="settings-toggle">
@@ -3560,9 +3560,9 @@
           ${notificationEventChecks(notifications.event_types)}
         </section>
         <section class="card settings-card">
-          <p class="eyebrow">Canaux</p><h2>Où Velvet peut vous prévenir ?</h2>
+          <p class="eyebrow">Canaux</p><h2>Où Zwit peut vous prévenir ?</h2>
           <div class="settings-options">
-            <label class="settings-toggle"><span><strong>Dans Velvet</strong><small>Badges et centre de notifications</small></span><input type="checkbox" name="in_app_enabled"${notifications.in_app_enabled !== false ? ' checked' : ''}><i></i></label>
+            <label class="settings-toggle"><span><strong>Dans Zwit</strong><small>Badges et centre de notifications</small></span><input type="checkbox" name="in_app_enabled"${notifications.in_app_enabled !== false ? ' checked' : ''}><i></i></label>
             <label class="settings-toggle"><span><strong>Notifications du téléphone</strong><small>Web mobile et PWA · état : ${e(browserPermission)}</small></span><input type="checkbox" name="browser_enabled"${notifications.browser_enabled ? ' checked' : ''}${browserPermission === 'unsupported' ? ' disabled' : ''}><i></i></label>
             <label class="settings-toggle"><span><strong>Par e-mail</strong><small>Récapitulatif et alertes choisies</small></span><input type="checkbox" name="email_enabled"${notifications.email_enabled !== false ? ' checked' : ''}><i></i></label>
           </div>
@@ -3573,9 +3573,9 @@
           <button class="secondary" type="button" data-test-notification>Autoriser et tester une notification</button>
         </section>
         <section class="card settings-card mobile-app-card">
-          <p class="eyebrow">Web mobile</p><h2>Velvet sur votre écran d’accueil</h2>
-          <p>${installed ? 'Velvet est déjà ouvert comme une application sur cet appareil.' : 'Installe Velvet depuis le navigateur pour obtenir un affichage plein écran, un accès rapide et les notifications web.'}</p>
-          <button class="secondary" type="button" data-install-velvet${state.installPrompt || installed ? '' : ' hidden'}>${installed ? 'Velvet est installé' : 'Installer Velvet'}</button>
+          <p class="eyebrow">Web mobile</p><h2>Zwit sur votre écran d’accueil</h2>
+          <p>${installed ? 'Zwit est déjà ouvert comme une application sur cet appareil.' : 'Installe Zwit depuis le navigateur pour obtenir un affichage plein écran, un accès rapide et les notifications web.'}</p>
+          <button class="secondary" type="button" data-install-velvet${state.installPrompt || installed ? '' : ' hidden'}>${installed ? 'Zwit est installé' : 'Installer Zwit'}</button>
           <small>Sur iPhone : Partager → Sur l’écran d’accueil. Sur Android : menu du navigateur → Installer l’application.</small>
         </section>
         <section class="card settings-card account-lifecycle-card">
@@ -3585,7 +3585,7 @@
             : lifecycleProfile.lifecycle_state === 'paused' ? '<p>Le profil est conservé mais invisible pour les autres membres.</p><button class="primary" type="button" data-lifecycle-action="resume">Réactiver mon profil</button>'
               : lifecycleProfile.lifecycle_state === 'deletion_pending' ? '<p>Le profil est invisible et conservé pendant 30 jours avant effacement définitif.</p><button class="primary" type="button" data-lifecycle-action="cancel">Annuler la suppression</button>'
                 : `<p>La pause conserve la fiche. La suppression la rend invisible après validation, puis efface définitivement les données 30 jours plus tard.</p><div class="lifecycle-actions"><button class="secondary" type="button" data-lifecycle-action="pause">Mettre le profil en pause</button><button class="danger" type="button" data-lifecycle-action="delete">Supprimer le compte</button></div>`}
-          <small>Pour une fiche couple, Velvet adresse un lien personnel à chaque membre actif et n’applique l’action qu’après toutes les validations.</small>
+          <small>Pour une fiche couple, Zwit adresse un lien personnel à chaque membre actif et n’applique l’action qu’après toutes les validations.</small>
         </section>
         <footer class="settings-save">
           <p id="settingsStatus" class="status-box" hidden></p>
@@ -3636,7 +3636,7 @@
         const result = await window.VelvetPWA.enableNotifications();
         browserToggle.checked = true;
         toast(result?.subscribed
-          ? 'Notifications Velvet activées sur cet appareil.'
+          ? 'Notifications Zwit activées sur cet appareil.'
           : 'Autorisation accordée. L’envoi distant doit encore être configuré sur cet environnement.');
         return true;
       } catch (error) {
@@ -3662,7 +3662,7 @@
         state.access = result.access;
         content.innerHTML = renderSettingsView(state.settings);
         bindSettings();
-        toast('Votre accès Velvet Signature est activé.');
+        toast('Votre accès Zwit Signature est activé.');
       } catch (error) {
         toast(errorMessages[error.message] || error.message, true);
         button.disabled = false;
@@ -3775,7 +3775,7 @@
     if (!current && !longest) {
       return `<aside class="conversation-streak-card dormant">
         <span class="streak-flame">◇</span>
-        <div><small>Complicité Velvet</small><strong>Commencez votre série</strong><p>Une journée compte lorsque les deux profils échangent au moins un message.</p></div>
+        <div><small>Complicité Zwit</small><strong>Commencez votre série</strong><p>Une journée compte lorsque les deux profils échangent au moins un message.</p></div>
       </aside>`;
     }
     const nextMilestone = [3, 7, 14, 30, 60, 100].find((value) => value > current);
@@ -3880,7 +3880,7 @@
 
   function openingHoursView(value) {
     if (!value || typeof value !== 'object' || Array.isArray(value) || !Object.keys(value).length) {
-      return '<p class="muted">Les horaires seront publiés depuis Velvet Pro.</p>';
+      return '<p class="muted">Les horaires seront publiés depuis Zwit Pro.</p>';
     }
     return `<div class="hours-list">${Object.entries(value).map(([day, hours]) => `<div><span>${e(day)}</span><strong>${e(Array.isArray(hours) ? hours.join(' · ') : hours)}</strong></div>`).join('')}</div>`;
   }
@@ -3940,8 +3940,8 @@
         : '';
     content.innerHTML = `<div class="page venue-site">
       <section class="venue-hero">
-        <div><p class="eyebrow">${e(venue.kind || 'Établissement Velvet')}</p><h1>${e(venue.name)}</h1><p>${e(venue.description || 'Cet établissement complète actuellement sa présentation dans Velvet Pro.')}</p>
-          <div class="badges"><span class="pill gold">${professionalActive ? 'Professionnel Velvet Pro' : venue.claim_status === 'claimed' ? 'Fiche revendiquée · abonnement inactif' : 'Référencé Velvet · à confirmer'}</span>${venue.city ? `<span class="pill">${e(venue.city)}</span>` : ''}</div>
+        <div><p class="eyebrow">${e(venue.kind || 'Établissement Zwit')}</p><h1>${e(venue.name)}</h1><p>${e(venue.description || 'Cet établissement complète actuellement sa présentation dans Zwit Pro.')}</p>
+          <div class="badges"><span class="pill gold">${professionalActive ? 'Professionnel Zwit Pro' : venue.claim_status === 'claimed' ? 'Fiche revendiquée · abonnement inactif' : 'Référencé Zwit · à confirmer'}</span>${venue.city ? `<span class="pill">${e(venue.city)}</span>` : ''}</div>
           <div class="actions">${routeUrl ? `<a class="primary" href="${e(routeUrl)}" target="_blank" rel="noopener noreferrer">Itinéraire</a>` : ''}${website ? `<a class="secondary" href="${e(website)}" target="_blank" rel="noopener noreferrer">Site officiel</a>` : ''}<button class="secondary" data-venue-relation="favorite" data-venue-id="${e(venue.id)}">${venueRelationship(venue.id,'favorite') ? 'Retirer des favoris' : 'Ajouter aux favoris'}</button><button class="secondary" data-venue-relation="visited" data-venue-id="${e(venue.id)}">${venueRelationship(venue.id,'visited') ? 'Déjà fréquenté ✓' : 'J’y suis déjà allé(e)'}</button><button class="secondary" data-venue-relation="planning" data-venue-id="${e(venue.id)}">${venueRelationship(venue.id,'planning') ? 'Envie enregistrée ✓' : 'J’ai envie d’y aller'}</button><button class="secondary" data-route="venues">Retour</button></div>
         </div><span class="venue-hero-mark">V</span>
       </section>
@@ -3951,7 +3951,7 @@
         <span><small>Adresse</small><b>${e(venue.address_public || venue.address || 'À venir')}</b></span>
       </nav>
       <section class="grid two venue-content">
-        <article class="card section"><p class="eyebrow">L’essentiel</p><h2>Présentation</h2><p>${e(venue.description || venue.practical_info || 'Cette fiche provient du référentiel Velvet et doit encore être confirmée par le professionnel.')}</p><h3>Public et programmation</h3>${chips([venue.audience,venue.evening_types].filter(Boolean),'Informations à confirmer')}<h3>Équipements</h3>${chips(venue.amenities, 'Équipements à renseigner')}</article>
+        <article class="card section"><p class="eyebrow">L’essentiel</p><h2>Présentation</h2><p>${e(venue.description || venue.practical_info || 'Cette fiche provient du référentiel Zwit et doit encore être confirmée par le professionnel.')}</p><h3>Public et programmation</h3>${chips([venue.audience,venue.evening_types].filter(Boolean),'Informations à confirmer')}<h3>Équipements</h3>${chips(venue.amenities, 'Équipements à renseigner')}</article>
         <article class="card section"><p class="eyebrow">Préparer sa venue</p><h2>Horaires</h2>${venue.opening_hours_text ? `<p>${e(venue.opening_hours_text)}</p>` : openingHoursView(venue.opening_hours)}<h3>Tarifs indicatifs</h3><p>${e(venue.pricing_text || 'Tarifs à confirmer auprès de l’établissement.')}</p><h3>Contact public</h3>
           <div class="contact-list">${venue.phone_public || venue.phone ? `<a href="tel:${e(String(venue.phone_public || venue.phone).replace(/[^+0-9]/g, ''))}">${e(venue.phone_public || venue.phone)}</a>` : ''}${venue.email_public || venue.email ? `<a href="mailto:${e(venue.email_public || venue.email)}">${e(venue.email_public || venue.email)}</a>` : ''}${!venue.phone_public && !venue.phone && !venue.email_public && !venue.email ? '<span>Coordonnées à confirmer</span>' : ''}</div>
         </article>
@@ -3971,7 +3971,7 @@
         }).join('')}</div>` : '<p class="muted">Aucun membre n’a encore annoncé sa venue.</p>'}
       </section>
       ${supportsAgenda ? `<section class="home-section"><header class="section-heading"><div><p class="eyebrow">Agenda</p><h2>Prochaines soirées</h2></div></header>
-        ${professionalActive ? (events.length ? `<div class="grid two">${events.map(eventTile).join('')}</div>` : emptyState('Aucune soirée publiée', 'Ce professionnel peut publier son agenda depuis Velvet Pro.', '✦')) : emptyState('Agenda non disponible', 'L’établissement pourra ouvrir son agenda après revendication de la fiche, validation par Velvet et activation de son abonnement Pro.', '✦')}
+        ${professionalActive ? (events.length ? `<div class="grid two">${events.map(eventTile).join('')}</div>` : emptyState('Aucune soirée publiée', 'Ce professionnel peut publier son agenda depuis Zwit Pro.', '✦')) : emptyState('Agenda non disponible', 'L’établissement pourra ouvrir son agenda après revendication de la fiche, validation par Zwit et activation de son abonnement Pro.', '✦')}
       </section>` : ''}
       <section class="grid two home-section">
         <article><header class="section-heading"><div><p class="eyebrow">Galerie</p><h2>L’univers du lieu</h2></div></header>${emptyState(professionalActive ? 'Galerie à venir' : 'Galerie verrouillée', professionalActive ? 'Les photos seront ajoutées par l’établissement depuis son espace professionnel.' : 'Aucune photo n’est publiée sans autorisation. La galerie sera ouverte uniquement par un professionnel abonné.', '◇')}</article>
@@ -4077,7 +4077,7 @@
         .filter(Boolean)
         .map((profile) => [profile.id, profile])).values()];
       content.innerHTML = `<div class="page">
-        ${pageHead('Sortie Velvet', event.title, `${new Date(event.starts_at).toLocaleString('fr-FR')} · ${event.location_public || 'Lieu communiqué aux inscrits'}`, '<button class="secondary" data-route="events">Retour aux sorties</button>')}
+        ${pageHead('Sortie Zwit', event.title, `${new Date(event.starts_at).toLocaleString('fr-FR')} · ${event.location_public || 'Lieu communiqué aux inscrits'}`, '<button class="secondary" data-route="events">Retour aux sorties</button>')}
         <section class="grid two">
           <article class="card section"><p class="eyebrow">Présentation</p><h2>${e(event.title)}</h2><p>${e(event.description || 'La présentation sera prochainement complétée par l’organisateur.')}</p>${chips([event.audience, `${event.capacity} places`].filter(Boolean))}</article>
           <article class="card section"><p class="eyebrow">Votre participation</p><h2>${mine ? (mine.status === 'waitlisted' ? 'Liste d’attente' : 'Inscription enregistrée') : 'Envie de participer ?'}</h2>
@@ -4396,7 +4396,7 @@
         state.following = state.following.filter((id) => id !== reportForm.dataset.profileId);
         state.directory.profiles = state.directory.profiles.filter((profile) => profile.id !== reportForm.dataset.profileId);
         reportForm.reset();
-        toast('Signalement transmis à Velvet Control. Le membre est bloqué.');
+        toast('Signalement transmis à Zwit Control. Le membre est bloqué.');
         route('discover');
       } catch (error) {
         toast(errorMessages[error.message] || error.message, true);
@@ -4658,9 +4658,9 @@
       ${pageHead('Évolution du compte membre', 'Demander l’accès Organisateur', 'Un organisateur est un membre particulier — couple ou individuel — qui organise des soirées privées à domicile ou dans un lieu tiers. Ce n’est pas un établissement professionnel.', '<button class="secondary" data-route="me">Retour au profil</button>')}
       <form id="organizerRequestForm" class="card">
         <h2>Présente ton projet</h2>
-        <p>Indique le type de soirées envisagées, les lieux habituels, la capacité approximative et ton expérience. Velvet examinera la demande avant d’accorder le rôle.</p>
+        <p>Indique le type de soirées envisagées, les lieux habituels, la capacité approximative et ton expérience. Zwit examinera la demande avant d’accorder le rôle.</p>
         <label>Présentation de votre activité d’organisateur<textarea name="message" class="long" maxlength="2000" required></textarea></label>
-        <button class="primary" type="submit" style="margin-top:14px">Transmettre à Velvet</button>
+        <button class="primary" type="submit" style="margin-top:14px">Transmettre à Zwit</button>
       </form>
     </div>`;
     document.querySelector('#organizerRequestForm').addEventListener('submit', async (event) => {
@@ -4698,8 +4698,8 @@
       try {
         const result = await api('/api/members/couple-invite', { method: 'POST', body: JSON.stringify({ email }) });
         const invitation = result.invitation;
-        const subject = 'Ton invitation privée Velvet';
-        const body = `Je t’invite à compléter notre profil couple sur Velvet : ${result.registrationUrl}`;
+        const subject = 'Ton invitation privée Zwit';
+        const body = `Je t’invite à compléter notre profil couple sur Zwit : ${result.registrationUrl}`;
         const mailto = `mailto:${result.invitedEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         content.innerHTML = `<div class="page">
           ${pageHead('Invitation partenaire', 'Lien sécurisé créé', 'Le lien est prérempli pour l’adresse indiquée et ne peut être utilisé qu’une seule fois.')}

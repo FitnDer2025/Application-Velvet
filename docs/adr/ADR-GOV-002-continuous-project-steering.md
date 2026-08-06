@@ -6,11 +6,11 @@ Date: 2026-07-23
 
 ## Context
 
-Velvet now contains enough validated product decisions that the main risk is no longer a lack of ideas, but loss of continuity: reopening closed topics, forgetting pending domains, or allowing roadmap and documentation to drift apart.
+Zwit now contains enough validated product decisions that the main risk is no longer a lack of ideas, but loss of continuity: reopening closed topics, forgetting pending domains, or allowing roadmap and documentation to drift apart.
 
 ## Decision
 
-Velvet is governed through a continuous product steering system.
+Zwit is governed through a continuous product steering system.
 
 After every accepted ADR, the following actions are mandatory:
 

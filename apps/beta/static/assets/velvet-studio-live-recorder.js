@@ -10,10 +10,10 @@
     profile: { label: 'Profil complet', selector: '[data-route="discover"]' },
     messages: { label: 'Messagerie', selector: '[data-route="conversations"]' },
     events: { label: 'Sorties et événements', selector: '[data-route="events"]' },
-    map: { label: 'Carte Velvet', selector: '[data-route="maps"]' }
+    map: { label: 'Carte Zwit', selector: '[data-route="maps"]' }
   };
 
-  const DEFAULT_BRIEF = 'Présente Velvet comme une expérience premium qui réunit des profils complets, des échanges de confiance, des sorties et des établissements. Montre l’accueil, la découverte des membres, une fiche complète, la messagerie, les événements et la carte. Termine par une invitation élégante à rejoindre Velvet.';
+  const DEFAULT_BRIEF = 'Présente Zwit comme une expérience premium qui réunit des profils complets, des échanges de confiance, des sorties et des établissements. Montre l’accueil, la découverte des membres, une fiche complète, la messagerie, les événements et la carte. Termine par une invitation élégante à rejoindre Zwit.';
 
   const state = {
     running: false,
@@ -48,9 +48,9 @@
 
   function homeMarkup() {
     return `<section class="vsr-home">
-      <span class="vsr-kicker">VELVET STUDIO</span>
+      <span class="vsr-kicker">ZWIT STUDIO</span>
       <h1>Le vrai Velvet.<br>En mouvement.</h1>
-      <p>Décrivez la démonstration. Velvet prépare la narration française, ouvre l’espace Membres Marketing et enregistre sa navigation réelle jusqu’à la vidéo finale.</p>
+      <p>Décrivez la démonstration. Zwit prépare la narration française, ouvre l’espace Membres Marketing et enregistre sa navigation réelle jusqu’à la vidéo finale.</p>
       <div class="vsr-compose"><textarea data-vsr-home>${esc(DEFAULT_BRIEF)}</textarea><button class="vsr-create" data-vsr-open>Créer la vidéo<small>Navigation live + voix française + export</small></button></div>
       <div class="vsr-proof"><span>Véritable interface Membres</span><span>Navigation enregistrée en direct</span><span>Profils fictifs Marketing</span><span>Aucun secours vocal anglais</span></div>
     </section>`;
@@ -58,15 +58,15 @@
 
   function modalMarkup(prompt) {
     const step = (id, n, label) => `<div class="vsr-step" data-vsr-step="${id}"><i>${n}</i><span>${label}</span><small>En attente</small></div>`;
-    return `<div class="vsr-modal" data-vsr-modal><section class="vsr-panel" role="dialog" aria-modal="true" aria-label="Créer une vidéo Velvet">
-      <header class="vsr-head"><div><strong>Créer une vidéo de Velvet</strong><span>Le navigateur demandera l’autorisation d’enregistrer cet onglet.</span></div><button class="vsr-close" data-vsr-close aria-label="Fermer">×</button></header>
-      <div class="vsr-grid"><section class="vsr-card"><span class="vsr-kicker">DIRECTION DE LA VIDÉO</span><h2>Que doit raconter Velvet ?</h2><p class="vsr-muted">Décrivez l’objectif. L’IA prépare un parcours court, puis le véritable espace Membres est piloté et filmé.</p>
+    return `<div class="vsr-modal" data-vsr-modal><section class="vsr-panel" role="dialog" aria-modal="true" aria-label="Créer une vidéo Zwit">
+      <header class="vsr-head"><div><strong>Créer une vidéo de Zwit</strong><span>Le navigateur demandera l’autorisation d’enregistrer cet onglet.</span></div><button class="vsr-close" data-vsr-close aria-label="Fermer">×</button></header>
+      <div class="vsr-grid"><section class="vsr-card"><span class="vsr-kicker">DIRECTION DE LA VIDÉO</span><h2>Que doit raconter Zwit ?</h2><p class="vsr-muted">Décrivez l’objectif. L’IA prépare un parcours court, puis le véritable espace Membres est piloté et filmé.</p>
         <textarea data-vsr-prompt>${esc(prompt || DEFAULT_BRIEF)}</textarea>
         <div class="vsr-options"><label>Format<select data-vsr-format><option value="9:16">Vertical · Réseaux sociaux</option><option value="1:1">Carré · Publication</option><option value="16:9">Paysage · Site / YouTube</option></select></label><label>Durée<select data-vsr-duration><option value="15">15 secondes</option><option value="30" selected>30 secondes</option></select></label></div>
         <button class="vsr-run" data-vsr-run>Créer et enregistrer la vidéo</button>
-        <p class="vsr-help">Au moment de l’autorisation, choisissez l’onglet Velvet actuellement ouvert. L’enregistrement ne démarre qu’une fois le scénario et la voix prêts.</p>
+        <p class="vsr-help">Au moment de l’autorisation, choisissez l’onglet Zwit actuellement ouvert. L’enregistrement ne démarre qu’une fois le scénario et la voix prêts.</p>
         <div class="vsr-progress">${step('permission',1,'Autorisation de l’onglet')}${step('plan',2,'Scénario français')}${step('voice',3,'Voix off française')}${step('record',4,'Navigation réelle')}${step('export',5,'Export de la vidéo')}</div>
-      </section><section class="vsr-card"><span class="vsr-kicker">APERÇU</span><h2 data-vsr-title>Le véritable Velvet apparaîtra ici</h2><p class="vsr-muted" data-vsr-copy>Accueil, profils, messages, sorties et carte seront ouverts réellement.</p><div class="vsr-preview" data-vsr-preview><iframe src="/marketing/" title="BETA Marketing Velvet"></iframe><div class="vsr-status">Prévisualisation de la BETA Marketing · données fictives</div></div><div class="vsr-actions" data-vsr-actions hidden></div></section></div>
+      </section><section class="vsr-card"><span class="vsr-kicker">APERÇU</span><h2 data-vsr-title>Le véritable Zwit apparaîtra ici</h2><p class="vsr-muted" data-vsr-copy>Accueil, profils, messages, sorties et carte seront ouverts réellement.</p><div class="vsr-preview" data-vsr-preview><iframe src="/marketing/" title="BETA Marketing Zwit"></iframe><div class="vsr-status">Prévisualisation de la BETA Marketing · données fictives</div></div><div class="vsr-actions" data-vsr-actions hidden></div></section></div>
     </section></div>`;
   }
 
@@ -123,12 +123,12 @@
   async function generatePlan(brief, format, duration) {
     const payload = await apiJson({ action: 'plan_video', brief, format, duration });
     const raw = payload.plan;
-    if (!raw?.scenes?.length) throw new Error('Le scénario Velvet est incomplet.');
+    if (!raw?.scenes?.length) throw new Error('Le scénario Zwit est incomplet.');
     const preferred = duration >= 30 ? ['home', 'discover', 'profile', 'messages', 'events', 'map'] : ['home', 'discover', 'profile', 'events'];
     const sceneDuration = duration / preferred.length;
     const byScreen = new Map(raw.scenes.map((scene) => [scene.screen, scene]));
     const fallbackVoice = {
-      home: 'Bienvenue dans Velvet, un univers élégant pensé pour des rencontres plus sincères.',
+      home: 'Bienvenue dans Zwit, un univers élégant pensé pour des rencontres plus sincères.',
       discover: 'Découvrez des profils complets et trouvez les personnes qui vous correspondent vraiment.',
       profile: 'Chaque fiche raconte un univers, des envies et un niveau de confiance clairement visible.',
       messages: 'Échangez simplement dans une messagerie conçue autour de la discrétion et du respect.',
@@ -136,7 +136,7 @@
       map: 'Explorez les membres, les établissements et les expériences disponibles autour de vous.'
     };
     return {
-      title: raw.title || 'Découvrir Velvet',
+      title: raw.title || 'Découvrir Zwit',
       duration,
       format,
       scenes: preferred.map((screen, index) => {
@@ -181,7 +181,7 @@
   }
 
   function stageMarkup(format) {
-    return `<div class="vsr-stage" data-vsr-stage><div class="vsr-live-frame" data-vsr-live-frame data-format="${format}"><iframe data-vsr-live-iframe src="/marketing/?velvet_capture=${crypto.randomUUID().replaceAll('-', '').slice(0, 48)}&velvet_live=1" title="Velvet Membres en direct"></iframe><div class="vsr-cursor" data-vsr-cursor style="left:50%;top:50%"></div><div class="vsr-scene-tag" data-vsr-scene>Velvet</div><div class="vsr-intro" data-vsr-intro><div><div class="vsr-brand">VELVET</div><div class="vsr-brand-copy">Là où les plus belles rencontres commencent.</div></div></div><div class="vsr-outro hidden" data-vsr-outro><div><div class="vsr-brand">VELVET</div><div class="vsr-brand-copy">Rejoignez un univers pensé pour les rencontres, les expériences et la confiance.</div></div></div></div><div class="vsr-live-note">ENREGISTREMENT DU VÉRITABLE ESPACE MEMBRES</div></div>`;
+    return `<div class="vsr-stage" data-vsr-stage><div class="vsr-live-frame" data-vsr-live-frame data-format="${format}"><iframe data-vsr-live-iframe src="/marketing/?velvet_capture=${crypto.randomUUID().replaceAll('-', '').slice(0, 48)}&velvet_live=1" title="Zwit Membres en direct"></iframe><div class="vsr-cursor" data-vsr-cursor style="left:50%;top:50%"></div><div class="vsr-scene-tag" data-vsr-scene>Zwit</div><div class="vsr-intro" data-vsr-intro><div><div class="vsr-brand">ZWIT</div><div class="vsr-brand-copy">Là où les plus belles rencontres commencent.</div></div></div><div class="vsr-outro hidden" data-vsr-outro><div><div class="vsr-brand">ZWIT</div><div class="vsr-brand-copy">Rejoignez un univers pensé pour les rencontres, les expériences et la confiance.</div></div></div></div><div class="vsr-live-note">ENREGISTREMENT DU VÉRITABLE ESPACE MEMBRES</div></div>`;
   }
 
   async function waitForMarketing(iframe, timeout = 12000) {
@@ -242,7 +242,7 @@
   async function navigateScene(frame, iframe, scene) {
     const doc = iframe.contentDocument;
     const tag = frame.querySelector('[data-vsr-scene]');
-    tag.textContent = ROUTES[scene.screen]?.label || 'Velvet';
+    tag.textContent = ROUTES[scene.screen]?.label || 'Zwit';
     doc.defaultView.scrollTo({ top: 0, behavior: 'auto' });
 
     if (scene.screen === 'profile') {
@@ -370,7 +370,7 @@
 
       setStep('plan', 'active', 'Écriture en français');
       title.textContent = 'Préparation de la navigation';
-      copy.textContent = 'Velvet organise un parcours fidèle aux fonctionnalités visibles.';
+      copy.textContent = 'Zwit organise un parcours fidèle aux fonctionnalités visibles.';
       const plan = await generatePlan(brief, format, duration);
       setStep('plan', 'done', `${plan.scenes.length} étapes`);
 
@@ -417,7 +417,7 @@
       actions.hidden = false;
       actions.innerHTML = `<a class="vsr-download" href="${state.outputUrl}" download="${filename}">Télécharger la vidéo</a><button class="vsr-secondary" data-vsr-new>Créer une autre vidéo</button>`;
       title.textContent = plan.title;
-      copy.textContent = `Navigation Velvet enregistrée en direct · ${duration} secondes · voix française intégrée`;
+      copy.textContent = `Navigation Zwit enregistrée en direct · ${duration} secondes · voix française intégrée`;
     } catch (error) {
       document.querySelector('[data-vsr-stage]')?.remove();
       state.displayStream?.getTracks().forEach((track) => track.stop());
@@ -430,7 +430,7 @@
         updateStatus(copy.textContent);
       } else if (error.name === 'NotAllowedError') {
         title.textContent = 'Autorisation nécessaire';
-        copy.textContent = 'Choisissez l’onglet Velvet lorsque le navigateur demande quelle surface enregistrer.';
+        copy.textContent = 'Choisissez l’onglet Zwit lorsque le navigateur demande quelle surface enregistrer.';
       }
     } finally {
       state.running = false;
@@ -465,7 +465,7 @@
     }
     if (event.target.closest('[data-vsr-new]')) {
       const preview = document.querySelector('[data-vsr-preview]');
-      if (preview) preview.innerHTML = '<iframe src="/marketing/" title="BETA Marketing Velvet"></iframe><div class="vsr-status">Prévisualisation de la BETA Marketing · données fictives</div>';
+      if (preview) preview.innerHTML = '<iframe src="/marketing/" title="BETA Marketing Zwit"></iframe><div class="vsr-status">Prévisualisation de la BETA Marketing · données fictives</div>';
       document.querySelector('[data-vsr-actions]')?.setAttribute('hidden', '');
       ['permission', 'plan', 'voice', 'record', 'export'].forEach((id) => setStep(id, 'idle', 'En attente'));
     }

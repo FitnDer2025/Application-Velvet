@@ -20,7 +20,7 @@
     networks: ['facebook', 'instagram'],
     tone: 'premium',
     objective: 'event_registration',
-    cta: 'Découvrez la soirée et réservez votre place sur Velvet.',
+    cta: 'Découvrez la soirée et réservez votre place sur Zwit.',
     baseCopy: '',
     copies: { facebook: '', instagram: '', tiktok: '' },
     compliance: null,
@@ -225,7 +225,7 @@
     state.progress = 'Connexion au concentrateur marketing…';
     markNav();
     if ($('#pageTitle')) $('#pageTitle').textContent = 'Marketing';
-    if ($('#content')) $('#content').innerHTML = '<section class="card" style="max-width:760px;margin:8vh auto;text-align:center"><div class="ey">Velvet Marketing</div><h1>Préparation de vos campagnes…</h1><p class="lead">Synchronisation de votre agenda, de vos affiches et de vos réseaux sociaux.</p></section>';
+    if ($('#content')) $('#content').innerHTML = '<section class="card" style="max-width:760px;margin:8vh auto;text-align:center"><div class="ey">Zwit Marketing</div><h1>Préparation de vos campagnes…</h1><p class="lead">Synchronisation de votre agenda, de vos affiches et de vos réseaux sociaux.</p></section>';
     try {
       await loadSnapshot(true);
       state.progress = '';
@@ -249,7 +249,7 @@
   function heroMarkup() {
     const values = stats();
     const migration = state.snapshot?.migrationPending;
-    return `<section class="vpm-hero"><div><div class="ey">VELVET PRO · CONCENTRATEUR MARKETING</div><h1>Une soirée.<br>Une campagne complète.</h1><p>Retrouvez votre agenda, vos affiches Velvet Studio et vos réseaux dans un seul espace. Velvet prépare les textes, contrôle leur compatibilité, programme la diffusion et mesure les résultats.</p><div class="vpm-promise"><span>Agenda synchronisé</span><span>Affiches Studio IA</span><span>Facebook · Instagram · TikTok</span><span>Validation humaine obligatoire</span></div></div><div class="vpm-hero-side"><div class="vpm-kpi-row"><div class="vpm-mini-kpi"><small>Programmées</small><b>${values.scheduled}</b></div><div class="vpm-mini-kpi"><small>Diffusées</small><b>${values.published}</b></div><div class="vpm-mini-kpi"><small>Réseaux actifs</small><b>${values.networks}/2</b></div><div class="vpm-mini-kpi"><small>À corriger</small><b>${values.failed}</b></div></div><button class="vpm-btn gold" data-vpm-new>Créer une campagne</button><div class="vpm-status-note">${migration ? '<b>Synchronisation locale active.</b><br>La migration Supabase Marketing doit être appliquée pour programmer et diffuser entre plusieurs appareils.' : '<b>Velvet Marketing synchronisé.</b><br>Les campagnes, validations et publications sont mémorisées dans votre espace professionnel.'}</div></div></section>`;
+    return `<section class="vpm-hero"><div><div class="ey">ZWIT PRO · CONCENTRATEUR MARKETING</div><h1>Une soirée.<br>Une campagne complète.</h1><p>Retrouvez votre agenda, vos affiches Zwit Studio et vos réseaux dans un seul espace. Zwit prépare les textes, contrôle leur compatibilité, programme la diffusion et mesure les résultats.</p><div class="vpm-promise"><span>Agenda synchronisé</span><span>Affiches Studio IA</span><span>Facebook · Instagram · TikTok</span><span>Validation humaine obligatoire</span></div></div><div class="vpm-hero-side"><div class="vpm-kpi-row"><div class="vpm-mini-kpi"><small>Programmées</small><b>${values.scheduled}</b></div><div class="vpm-mini-kpi"><small>Diffusées</small><b>${values.published}</b></div><div class="vpm-mini-kpi"><small>Réseaux actifs</small><b>${values.networks}/2</b></div><div class="vpm-mini-kpi"><small>À corriger</small><b>${values.failed}</b></div></div><button class="vpm-btn gold" data-vpm-new>Créer une campagne</button><div class="vpm-status-note">${migration ? '<b>Synchronisation locale active.</b><br>La migration Supabase Marketing doit être appliquée pour programmer et diffuser entre plusieurs appareils.' : '<b>Zwit Marketing synchronisé.</b><br>Les campagnes, validations et publications sont mémorisées dans votre espace professionnel.'}</div></div></section>`;
   }
 
   function tabsMarkup() {
@@ -291,7 +291,7 @@
     const renders = compatibleRenders(state.snapshot?.renders || []);
     const project = linkedProject(render);
     const copiesReady = Boolean(state.baseCopy || Object.values(state.copies).some(Boolean));
-    return `<div class="vpm-grid"><section class="vpm-panel"><div class="ey">1 · SOURCE DE LA CAMPAGNE</div><h2>Soirée et création</h2><div class="vpm-section"><label class="vpm-label">Soirée issue de votre agenda</label><select class="vpm-select" data-vpm-event>${eventOptions() || '<option value="">Créez d’abord une soirée dans l’agenda</option>'}</select>${event ? eventCard(event) : '<div class="vpm-empty"><b>＋</b>Votre agenda ne contient aucune soirée exploitable.</div>'}</div><div class="vpm-section"><div style="display:flex;align-items:end;justify-content:space-between;gap:10px"><div><h3>Affiche Velvet Studio</h3><p class="lead" style="font-size:11px">Choisissez le format qui accompagnera la publication.</p></div><button class="vpm-btn ghost" data-open-studio>Ouvrir Studio IA</button></div>${renders.length ? `<div class="vpm-render-list">${renders.slice(0, 12).map(renderCard).join('')}</div>` : '<div class="vpm-empty"><b>✦</b>Aucune affiche validée. Créez d’abord un visuel dans Studio IA.</div>'}</div><div class="vpm-section"><h3>Réseaux à activer</h3><div class="vpm-network-row">${Object.entries(NETWORKS).map(([id, item]) => networkChoice(id, item)).join('')}</div></div><div class="vpm-section"><div class="vpm-form-grid"><label><span class="vpm-label">Objectif</span><select class="vpm-select" data-vpm-objective><option value="event_registration" ${state.objective === 'event_registration' ? 'selected' : ''}>Obtenir des inscriptions</option><option value="awareness" ${state.objective === 'awareness' ? 'selected' : ''}>Faire connaître la soirée</option><option value="last_places" ${state.objective === 'last_places' ? 'selected' : ''}>Remplir les dernières places</option><option value="brand" ${state.objective === 'brand' ? 'selected' : ''}>Valoriser l’établissement</option></select></label><label><span class="vpm-label">Ton éditorial</span><select class="vpm-select" data-vpm-tone><option value="premium" ${state.tone === 'premium' ? 'selected' : ''}>Premium et désirable</option><option value="warm" ${state.tone === 'warm' ? 'selected' : ''}>Chaleureux et rassurant</option><option value="festive" ${state.tone === 'festive' ? 'selected' : ''}>Festif et énergique</option><option value="exclusive" ${state.tone === 'exclusive' ? 'selected' : ''}>Exclusif et mystérieux</option></select></label></div><label style="display:block;margin-top:10px"><span class="vpm-label">Appel à l’action</span><input class="vpm-input" data-vpm-cta value="${esc(state.cta)}"></label><div class="vpm-actions"><button class="vpm-btn gold" data-vpm-generate ${state.loading || !event ? 'disabled' : ''}>${state.loading ? 'Rédaction en cours…' : 'Rédiger avec Velvet IA'}</button><button class="vpm-btn ghost" data-vpm-check ${!copiesReady ? 'disabled' : ''}>Contrôler la conformité</button></div>${messageMarkup()}</div></section><section class="vpm-panel"><div class="ey">2 · COMPOSITION ÉDITORIALE</div><h2>Votre publication</h2>${copyMarkup()}${complianceMarkup()}<div class="vpm-section"><div class="ey">PRÉVISUALISATION</div><h3>Rendu sur les réseaux</h3><div class="vpm-preview-grid">${state.networks.map((network) => socialPreview(network, render, project)).join('') || '<div class="vpm-empty"><b>◉</b>Sélectionnez au moins un réseau.</div>'}</div></div><div class="vpm-section"><div class="ey">3 · DIFFUSION</div><h3>Programmation</h3>${scheduleMarkup(event)}<label class="vpm-approval"><input type="checkbox" data-vpm-approved ${state.approved ? 'checked' : ''}><span><b>Je valide personnellement cette campagne.</b><br>J’ai vérifié le texte, le visuel, la date, le compte destinataire et la conformité de la publication.</span></label><div class="vpm-actions"><button class="vpm-btn ghost" data-vpm-save ${!copiesReady ? 'disabled' : ''}>Enregistrer le brouillon</button><button class="vpm-btn gold" data-vpm-schedule ${!copiesReady || !state.approved ? 'disabled' : ''}>Programmer la campagne</button><button class="vpm-btn" data-vpm-publish ${!copiesReady || !state.approved ? 'disabled' : ''}>Publier maintenant</button></div></div></section></div>`;
+    return `<div class="vpm-grid"><section class="vpm-panel"><div class="ey">1 · SOURCE DE LA CAMPAGNE</div><h2>Soirée et création</h2><div class="vpm-section"><label class="vpm-label">Soirée issue de votre agenda</label><select class="vpm-select" data-vpm-event>${eventOptions() || '<option value="">Créez d’abord une soirée dans l’agenda</option>'}</select>${event ? eventCard(event) : '<div class="vpm-empty"><b>＋</b>Votre agenda ne contient aucune soirée exploitable.</div>'}</div><div class="vpm-section"><div style="display:flex;align-items:end;justify-content:space-between;gap:10px"><div><h3>Affiche Zwit Studio</h3><p class="lead" style="font-size:11px">Choisissez le format qui accompagnera la publication.</p></div><button class="vpm-btn ghost" data-open-studio>Ouvrir Studio IA</button></div>${renders.length ? `<div class="vpm-render-list">${renders.slice(0, 12).map(renderCard).join('')}</div>` : '<div class="vpm-empty"><b>✦</b>Aucune affiche validée. Créez d’abord un visuel dans Studio IA.</div>'}</div><div class="vpm-section"><h3>Réseaux à activer</h3><div class="vpm-network-row">${Object.entries(NETWORKS).map(([id, item]) => networkChoice(id, item)).join('')}</div></div><div class="vpm-section"><div class="vpm-form-grid"><label><span class="vpm-label">Objectif</span><select class="vpm-select" data-vpm-objective><option value="event_registration" ${state.objective === 'event_registration' ? 'selected' : ''}>Obtenir des inscriptions</option><option value="awareness" ${state.objective === 'awareness' ? 'selected' : ''}>Faire connaître la soirée</option><option value="last_places" ${state.objective === 'last_places' ? 'selected' : ''}>Remplir les dernières places</option><option value="brand" ${state.objective === 'brand' ? 'selected' : ''}>Valoriser l’établissement</option></select></label><label><span class="vpm-label">Ton éditorial</span><select class="vpm-select" data-vpm-tone><option value="premium" ${state.tone === 'premium' ? 'selected' : ''}>Premium et désirable</option><option value="warm" ${state.tone === 'warm' ? 'selected' : ''}>Chaleureux et rassurant</option><option value="festive" ${state.tone === 'festive' ? 'selected' : ''}>Festif et énergique</option><option value="exclusive" ${state.tone === 'exclusive' ? 'selected' : ''}>Exclusif et mystérieux</option></select></label></div><label style="display:block;margin-top:10px"><span class="vpm-label">Appel à l’action</span><input class="vpm-input" data-vpm-cta value="${esc(state.cta)}"></label><div class="vpm-actions"><button class="vpm-btn gold" data-vpm-generate ${state.loading || !event ? 'disabled' : ''}>${state.loading ? 'Rédaction en cours…' : 'Rédiger avec Zwit IA'}</button><button class="vpm-btn ghost" data-vpm-check ${!copiesReady ? 'disabled' : ''}>Contrôler la conformité</button></div>${messageMarkup()}</div></section><section class="vpm-panel"><div class="ey">2 · COMPOSITION ÉDITORIALE</div><h2>Votre publication</h2>${copyMarkup()}${complianceMarkup()}<div class="vpm-section"><div class="ey">PRÉVISUALISATION</div><h3>Rendu sur les réseaux</h3><div class="vpm-preview-grid">${state.networks.map((network) => socialPreview(network, render, project)).join('') || '<div class="vpm-empty"><b>◉</b>Sélectionnez au moins un réseau.</div>'}</div></div><div class="vpm-section"><div class="ey">3 · DIFFUSION</div><h3>Programmation</h3>${scheduleMarkup(event)}<label class="vpm-approval"><input type="checkbox" data-vpm-approved ${state.approved ? 'checked' : ''}><span><b>Je valide personnellement cette campagne.</b><br>J’ai vérifié le texte, le visuel, la date, le compte destinataire et la conformité de la publication.</span></label><div class="vpm-actions"><button class="vpm-btn ghost" data-vpm-save ${!copiesReady ? 'disabled' : ''}>Enregistrer le brouillon</button><button class="vpm-btn gold" data-vpm-schedule ${!copiesReady || !state.approved ? 'disabled' : ''}>Programmer la campagne</button><button class="vpm-btn" data-vpm-publish ${!copiesReady || !state.approved ? 'disabled' : ''}>Publier maintenant</button></div></div></section></div>`;
   }
 
   function eventCard(event) {
@@ -316,12 +316,12 @@
 
   function copyMarkup() {
     const active = state.networks[0] || 'facebook';
-    return `<div class="vpm-section"><div class="vpm-copy-tabs">${state.networks.map((network) => `<button type="button" data-vpm-copy-tab="${network}" class="${network === active ? 'active' : ''}">${NETWORKS[network].label}</button>`).join('')}</div>${state.networks.map((network, index) => `<div class="vpm-copy-editor" data-vpm-copy-panel="${network}" ${index ? 'hidden' : ''}><textarea class="vpm-textarea" data-vpm-copy="${network}" placeholder="Velvet préparera ici une version adaptée à ${NETWORKS[network].label}…">${esc(state.copies[network] || state.baseCopy)}</textarea><span class="vpm-counter">${String(state.copies[network] || state.baseCopy).length} caractères</span></div>`).join('') || '<div class="vpm-empty"><b>✎</b>Choisissez un réseau pour rédiger la campagne.</div>'}</div>`;
+    return `<div class="vpm-section"><div class="vpm-copy-tabs">${state.networks.map((network) => `<button type="button" data-vpm-copy-tab="${network}" class="${network === active ? 'active' : ''}">${NETWORKS[network].label}</button>`).join('')}</div>${state.networks.map((network, index) => `<div class="vpm-copy-editor" data-vpm-copy-panel="${network}" ${index ? 'hidden' : ''}><textarea class="vpm-textarea" data-vpm-copy="${network}" placeholder="Zwit préparera ici une version adaptée à ${NETWORKS[network].label}…">${esc(state.copies[network] || state.baseCopy)}</textarea><span class="vpm-counter">${String(state.copies[network] || state.baseCopy).length} caractères</span></div>`).join('') || '<div class="vpm-empty"><b>✎</b>Choisissez un réseau pour rédiger la campagne.</div>'}</div>`;
   }
 
   function complianceMarkup() {
     const report = state.compliance;
-    if (!report) return '<div class="vpm-section"><div class="vpm-compliance"><div class="vpm-score"><span><b>—</b><small> Contrôle social</small></span><span class="vpm-badge">À analyser</span></div><p style="margin:0;color:#8f8885;font-size:10px">Velvet vérifiera les formulations sensibles avant toute programmation.</p></div></div>';
+    if (!report) return '<div class="vpm-section"><div class="vpm-compliance"><div class="vpm-score"><span><b>—</b><small> Contrôle social</small></span><span class="vpm-badge">À analyser</span></div><p style="margin:0;color:#8f8885;font-size:10px">Zwit vérifiera les formulations sensibles avant toute programmation.</p></div></div>';
     const tone = report.score >= 85 ? 'ready' : report.score >= 55 ? 'review' : 'blocked';
     return `<div class="vpm-section"><div class="vpm-compliance"><div class="vpm-score"><span><b class="vpm-${tone}">${Number(report.score || 0)}/100</b><small> Compatibilité sociale</small></span><span class="vpm-badge ${tone === 'ready' ? 'active' : tone}">${tone === 'ready' ? 'Prêt' : tone === 'review' ? 'À vérifier' : 'Bloqué'}</span></div>${(report.issues || []).map((issue) => `<div class="vpm-issue ${issue.severity === 'blocking' ? 'blocking' : ''}">${esc(issue.label)}</div>`).join('') || '<p style="margin:0;color:#88cfa3;font-size:10px">Aucune formulation bloquante détectée. Une vérification humaine reste obligatoire.</p>'}</div></div>`;
   }
@@ -365,12 +365,12 @@
 
   function publicationCard(publication) {
     const campaign = state.snapshot?.campaigns?.find((item) => item.id === publication.campaign_id);
-    return `<article class="vpm-card"><span class="vpm-badge ${esc(publication.status)}">${esc(publication.status)}</span><h3>${esc(campaign?.title || 'Campagne Velvet')}</h3><p>${NETWORKS[publication.provider]?.label || publication.provider} · ${esc(publication.sequence_code)}</p><p style="margin-top:8px">${esc(formatDate(publication.scheduled_at, true))}</p>${publication.status === 'scheduled' ? `<div class="vpm-actions"><button class="vpm-btn danger" data-vpm-cancel="${publication.id}">Annuler</button></div>` : ''}</article>`;
+    return `<article class="vpm-card"><span class="vpm-badge ${esc(publication.status)}">${esc(publication.status)}</span><h3>${esc(campaign?.title || 'Campagne Zwit')}</h3><p>${NETWORKS[publication.provider]?.label || publication.provider} · ${esc(publication.sequence_code)}</p><p style="margin-top:8px">${esc(formatDate(publication.scheduled_at, true))}</p>${publication.status === 'scheduled' ? `<div class="vpm-actions"><button class="vpm-btn danger" data-vpm-cancel="${publication.id}">Annuler</button></div>` : ''}</article>`;
   }
 
   function publicationsMarkup() {
     const publications = [...(state.snapshot?.publications || [])].sort((left, right) => new Date(right.scheduled_at) - new Date(left.scheduled_at));
-    return `<section class="vpm-panel"><div class="ey">HISTORIQUE</div><h2>Publications</h2><p class="lead">Velvet n’affiche jamais une publication comme réussie sans confirmation de la plateforme.</p>${publications.length ? `<div style="overflow:auto"><table class="vpm-table"><thead><tr><th>Réseau</th><th>Campagne</th><th>Échéance</th><th>Statut</th><th>Diagnostic</th></tr></thead><tbody>${publications.map((publication) => { const campaign = state.snapshot?.campaigns?.find((item) => item.id === publication.campaign_id); return `<tr><td>${esc(NETWORKS[publication.provider]?.label || publication.provider)}</td><td>${esc(campaign?.title || 'Campagne')}</td><td>${esc(formatDate(publication.scheduled_at, true))}</td><td><span class="vpm-badge ${esc(publication.status)}">${esc(publication.status)}</span></td><td>${esc(publication.error_message || publication.external_post_id || '—')}</td></tr>`; }).join('')}</tbody></table></div>` : empty('◎', 'Aucune publication', 'Les publications confirmées par Facebook, Instagram ou TikTok apparaîtront ici.')}</section>`;
+    return `<section class="vpm-panel"><div class="ey">HISTORIQUE</div><h2>Publications</h2><p class="lead">Zwit n’affiche jamais une publication comme réussie sans confirmation de la plateforme.</p>${publications.length ? `<div style="overflow:auto"><table class="vpm-table"><thead><tr><th>Réseau</th><th>Campagne</th><th>Échéance</th><th>Statut</th><th>Diagnostic</th></tr></thead><tbody>${publications.map((publication) => { const campaign = state.snapshot?.campaigns?.find((item) => item.id === publication.campaign_id); return `<tr><td>${esc(NETWORKS[publication.provider]?.label || publication.provider)}</td><td>${esc(campaign?.title || 'Campagne')}</td><td>${esc(formatDate(publication.scheduled_at, true))}</td><td><span class="vpm-badge ${esc(publication.status)}">${esc(publication.status)}</span></td><td>${esc(publication.error_message || publication.external_post_id || '—')}</td></tr>`; }).join('')}</tbody></table></div>` : empty('◎', 'Aucune publication', 'Les publications confirmées par Facebook, Instagram ou TikTok apparaîtront ici.')}</section>`;
   }
 
   function resultsMarkup() {
@@ -390,7 +390,7 @@
     const capabilities = state.snapshot?.capabilities || {};
     const meta = connectionFor('facebook');
     const tiktok = connectionFor('tiktok');
-    return `<section class="vpm-panel"><div class="ey">PARAMÈTRES SOCIAUX</div><h2>Connexions officielles</h2><p class="lead">Velvet ne demande jamais vos mots de passe. Chaque réseau est relié par son autorisation officielle et peut être déconnecté à tout moment.</p><div class="vpm-card-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:18px">${connectionCard('meta', meta, capabilities.meta)}${connectionCard('tiktok', tiktok, capabilities.tiktok)}</div><div class="vpm-status-note" style="margin-top:14px"><b>Sécurité des accès.</b><br>Les jetons sociaux sont chiffrés côté serveur, séparés par établissement et ne sont jamais envoyés au navigateur.</div></section>`;
+    return `<section class="vpm-panel"><div class="ey">PARAMÈTRES SOCIAUX</div><h2>Connexions officielles</h2><p class="lead">Zwit ne demande jamais vos mots de passe. Chaque réseau est relié par son autorisation officielle et peut être déconnecté à tout moment.</p><div class="vpm-card-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:18px">${connectionCard('meta', meta, capabilities.meta)}${connectionCard('tiktok', tiktok, capabilities.tiktok)}</div><div class="vpm-status-note" style="margin-top:14px"><b>Sécurité des accès.</b><br>Les jetons sociaux sont chiffrés côté serveur, séparés par établissement et ne sont jamais envoyés au navigateur.</div></section>`;
   }
 
   function connectionCard(provider, connection, capability) {
@@ -444,7 +444,7 @@
     syncInputs();
     state.loading = true;
     state.error = '';
-    state.progress = 'Velvet IA adapte le récit à chaque réseau…';
+    state.progress = 'Zwit IA adapte le récit à chaque réseau…';
     render();
     try {
       const payload = await jsonApi({ action: 'generate_copy', venueId: venueId(), event, networks: state.networks, tone: state.tone, objective: state.objective, cta: state.cta });
@@ -469,7 +469,7 @@
     try {
       const payload = await jsonApi({ action: 'compliance_check', venueId: venueId(), copy: state.networks.map((network) => state.copies[network] || '').join('\n'), networks: state.networks });
       state.compliance = payload.compliance;
-      state.progress = state.compliance?.score >= 85 ? 'La campagne est prête pour une vérification humaine finale.' : 'Velvet a identifié des formulations à relire avant diffusion.';
+      state.progress = state.compliance?.score >= 85 ? 'La campagne est prête pour une vérification humaine finale.' : 'Zwit a identifié des formulations à relire avant diffusion.';
     } catch (error) {
       state.error = friendlyError(error.message);
       state.progress = '';
@@ -487,7 +487,7 @@
       event_id: event?.id || null,
       studio_project_id: project?.id || render?.project_id || null,
       studio_render_id: render?.id || null,
-      title: event?.title || 'Campagne Velvet',
+      title: event?.title || 'Campagne Zwit',
       objective: state.objective,
       status,
       base_copy: state.baseCopy || state.copies[state.networks[0]] || '',
@@ -547,7 +547,7 @@
         state.campaignId = payload.campaignId;
         state.snapshot = payload;
       }
-      state.progress = 'Brouillon enregistré dans Velvet Marketing.';
+      state.progress = 'Brouillon enregistré dans Zwit Marketing.';
     } catch (error) {
       state.error = friendlyError(error.message);
       state.progress = '';
@@ -587,7 +587,7 @@
         });
         state.snapshot = payload;
         state.campaignId = payload.campaignId;
-        state.progress = publishNow ? 'La demande de publication a été transmise. Le statut sera confirmé par chaque plateforme.' : 'Campagne programmée dans Velvet Marketing.';
+        state.progress = publishNow ? 'La demande de publication a été transmise. Le statut sera confirmé par chaque plateforme.' : 'Campagne programmée dans Zwit Marketing.';
       }
     } catch (error) {
       state.error = friendlyError(error.message);
@@ -598,7 +598,7 @@
   }
 
   async function disconnect(provider) {
-    if (!confirm(`Déconnecter ${provider === 'meta' ? 'Facebook et Instagram' : 'TikTok'} de Velvet ?`)) return;
+    if (!confirm(`Déconnecter ${provider === 'meta' ? 'Facebook et Instagram' : 'TikTok'} de Zwit ?`)) return;
     try {
       const payload = await jsonApi({ action: 'disconnect', venueId: venueId(), provider });
       state.snapshot = payload;
@@ -646,10 +646,10 @@
     if (source === 'marketing_compliance_blocking') return 'La campagne contient une formulation bloquante. Corrigez le texte avant diffusion.';
     if (source === 'marketing_campaign_incomplete') return 'La soirée, l’affiche et au moins un réseau sont obligatoires.';
     if (source.startsWith('social_connection_required')) return `Connectez d’abord les réseaux concernés : ${source.split(':')[1] || ''}.`;
-    if (source === 'meta_not_configured') return 'L’application Meta Velvet doit être configurée dans Cloudflare.';
-    if (source === 'tiktok_not_configured') return 'L’application TikTok Velvet doit être configurée dans Cloudflare.';
+    if (source === 'meta_not_configured') return 'L’application Meta Zwit doit être configurée dans Cloudflare.';
+    if (source === 'tiktok_not_configured') return 'L’application TikTok Zwit doit être configurée dans Cloudflare.';
     if (source === 'social_scheduler_not_configured') return 'Le planificateur Cloudflare doit être configuré avant diffusion.';
-    return source || 'Velvet Marketing est momentanément indisponible.';
+    return source || 'Zwit Marketing est momentanément indisponible.';
   }
 
   document.addEventListener('click', (event) => {

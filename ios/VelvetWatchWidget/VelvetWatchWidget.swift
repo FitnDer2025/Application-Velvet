@@ -94,7 +94,7 @@ private struct VelvetWatchWidget: Widget {
                     Color.clear
                 }
         }
-        .configurationDisplayName("Velvet")
+        .configurationDisplayName("Zwit")
         .description("Compte les activités non lues sans afficher de contenu privé.")
         .supportedFamilies([
             .accessoryCircular,
@@ -121,13 +121,13 @@ private struct VelvetWatchWidgetView: View {
                 }
             }
             .widgetLabel {
-                Text("Activité Velvet")
+                Text("Activité Zwit")
             }
 
         case .accessoryRectangular:
             HStack(spacing: 7) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("VELVET")
+                    Text("ZWIT")
                         .font(.system(size: 10, weight: .bold))
                     Text("\(entry.snapshot.total) non lu\(entry.snapshot.total > 1 ? "s" : "")")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -144,7 +144,7 @@ private struct VelvetWatchWidgetView: View {
             }
 
         default:
-            Text("Velvet \(entry.snapshot.total) · ✉︎\(entry.snapshot.messages) ◉\(entry.snapshot.visits) ♥\(entry.snapshot.likes)")
+            Text("Zwit \(entry.snapshot.total) · ✉︎\(entry.snapshot.messages) ◉\(entry.snapshot.visits) ♥\(entry.snapshot.likes)")
         }
     }
 }

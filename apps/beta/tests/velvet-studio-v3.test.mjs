@@ -20,4 +20,4 @@ assert.ok(sql.includes('enable row level security') && sql.includes('studio_camp
 assert.ok(build.indexOf('velvet-studio-v2.js') < build.indexOf('velvet-studio-v3.js'), 'La V3 doit être chargée après la V2');
 assert.ok(build.indexOf('velvet-studio-v3.js') < build.indexOf('velvet-control-scroll-recovery.js'), 'Le garde-fou de scroll doit rester chargé en dernier');
 
-console.log('Velvet Studio V3: 12 contrôles validés.');
+console.log('Zwit Studio V3: 12 contrôles validés.');

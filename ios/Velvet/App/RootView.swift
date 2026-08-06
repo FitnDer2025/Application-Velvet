@@ -50,7 +50,7 @@ struct RootView: View {
         .animation(.easeInOut(duration: VelvetMotion.normal), value: appState.phase.id)
         .animation(.easeOut(duration: 0.18), value: screenshotProtection.shouldObscureMedia)
         .alert(
-            "Velvet",
+            "Zwit",
             isPresented: Binding(
                 get: { appState.alertMessage != nil },
                 set: { if !$0 { appState.alertMessage = nil } }
@@ -230,7 +230,7 @@ private struct LaunchView: View {
                 .opacity(appeared ? 1 : 0)
 
             VStack(spacing: VelvetSpacing.xs) {
-                Text("VELVET")
+                Text("ZWIT")
                     .font(VelvetTypography.brand(size: 27))
                     .tracking(8)
                     .foregroundStyle(VelvetColor.champagneGold)

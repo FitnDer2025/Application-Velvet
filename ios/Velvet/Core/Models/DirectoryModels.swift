@@ -112,7 +112,7 @@ struct Conversation: Codable, Identifiable, Sendable {
             return participantDisplayName
         }
         if let subject, !subject.isEmpty { return subject }
-        return kind == "event" ? "Salon Velvet" : "Membre Velvet"
+        return kind == "event" ? "Salon Zwit" : "Membre Zwit"
     }
 }
 

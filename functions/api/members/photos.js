@@ -182,7 +182,7 @@ export async function analyzePublicAlbumPhoto(env, bytes, policy = DEFAULT_MEDIA
 }
 
 export async function analyzePrivateAlbumPhoto(env, bytes, policy = DEFAULT_MEDIA_MODERATION_POLICY) {
-  const result = await runVisionAssessment(env, bytes, `Analyse cette image d'album privé Velvet sans reconnaître ni identifier les personnes. La nudité adulte consensuelle n'est pas un motif de refus. Signale comme "prohibited" toute image montrant une personne pouvant être mineure, une violence manifeste, une contrainte apparente ou un contenu manifestement illégal. Si l'âge adulte ou la situation sont incertains, indique "uncertain": true. Réponds uniquement en JSON :
+  const result = await runVisionAssessment(env, bytes, `Analyse cette image d'album privé Zwit sans reconnaître ni identifier les personnes. La nudité adulte consensuelle n'est pas un motif de refus. Signale comme "prohibited" toute image montrant une personne pouvant être mineure, une violence manifeste, une contrainte apparente ou un contenu manifestement illégal. Si l'âge adulte ou la situation sont incertains, indique "uncertain": true. Réponds uniquement en JSON :
 {"prohibited":false,"uncertain":false,"confidence":0.0,"summary":"raison concise en français"}`, 220);
   const raw = parseAiJson(result);
   const confidence = Math.max(0, Math.min(1, Number(raw.confidence) || 0));

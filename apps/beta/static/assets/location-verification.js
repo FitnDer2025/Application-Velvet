@@ -79,7 +79,7 @@
     return `<section class="card settings-card velvet-location-card" data-velvet-location-card>
       <p class="eyebrow">Autour de toi</p>
       <h2>Utiliser ma position approximative</h2>
-      <p>Velvet demande ta position uniquement lorsque tu appuies sur le bouton. Le serveur la ramène immédiatement à une zone d’environ ${escapeHtml(location.precision_km || 10)} km. Les coordonnées GPS exactes ne sont pas enregistrées et ta position n’est jamais affichée sur ton profil.</p>
+      <p>Zwit demande ta position uniquement lorsque tu appuies sur le bouton. Le serveur la ramène immédiatement à une zone d’environ ${escapeHtml(location.precision_km || 10)} km. Les coordonnées GPS exactes ne sont pas enregistrées et ta position n’est jamais affichée sur ton profil.</p>
       <div class="velvet-feature-status ${location.enabled ? 'active' : ''}">
         <span aria-hidden="true">${location.enabled ? '✓' : '○'}</span>
         <div><strong>${location.enabled ? 'Position approximative active' : 'Localisation désactivée'}</strong><small>${location.enabled ? `Dernière utilisation : ${escapeHtml(formatDate(location.last_used_at))} · ${nearbyCount} lieu${nearbyCount > 1 ? 'x' : ''} proche${nearbyCount > 1 ? 's' : ''} trouvé${nearbyCount > 1 ? 's' : ''}` : 'Aucune donnée de position conservée.'}</small></div>
@@ -108,9 +108,9 @@
       && verification.identity_verified === true
       && verification.majority_verified === true;
     return `<section class="card settings-card velvet-verification-card" data-velvet-verification-card>
-      <p class="eyebrow">Confiance Velvet</p>
+      <p class="eyebrow">Confiance Zwit</p>
       <h2>Identité et majorité</h2>
-      <p>Le contrôle est réalisé par un prestataire tiers. Velvet reçoit seulement le résultat nécessaire pour attribuer le badge ; aucune pièce d’identité, identité civile ou date de naissance n’est conservée par Velvet.</p>
+      <p>Le contrôle est réalisé par un prestataire tiers. Zwit reçoit seulement le résultat nécessaire pour attribuer le badge ; aucune pièce d’identité, identité civile ou date de naissance n’est conservée par Velvet.</p>
       <div class="velvet-feature-status ${verified ? 'verified' : ''}">
         <span aria-hidden="true">${verified ? '✓' : '◇'}</span>
         <div><strong>${escapeHtml(verificationStatusLabel(verification.status))}</strong><small>${verified ? `Vérifiée le ${escapeHtml(formatDate(verification.verified_at))}` : payload?.accessBlockedByVerification ? 'L’accès communautaire reste fermé jusqu’à la confirmation.' : payload?.bypassedForInternalRecipe ? 'Compte autorisé uniquement pour la recette interne.' : 'Le verrou sera activé avant toute ouverture externe.'}</small></div>
@@ -118,7 +118,7 @@
       ${payload?.providerConfigured
         ? '<button class="secondary" type="button" data-start-velvet-verification>Commencer la vérification</button>'
         : '<button class="secondary" type="button" disabled>Prestataire volontairement non raccordé</button>'}
-      <small class="velvet-foundation-note">Le badge « Profil vérifié Velvet » apparaîtra uniquement après confirmation simultanée de l’identité et de la majorité. Pour un couple, les deux partenaires devront être vérifiés.</small>
+      <small class="velvet-foundation-note">Le badge « Profil vérifié Zwit » apparaîtra uniquement après confirmation simultanée de l’identité et de la majorité. Pour un couple, les deux partenaires devront être vérifiés.</small>
     </section>`;
   }
 
@@ -126,7 +126,7 @@
     return `<section class="card settings-card velvet-export-card" data-velvet-export-card>
       <p class="eyebrow">Portabilité</p>
       <h2>Télécharger mes données</h2>
-      <p>Velvet prépare un fichier JSON lisible et réutilisable contenant les données liées à ton compte. Les pièces d’identité et les informations privées d’autres membres n’y figurent jamais.</p>
+      <p>Zwit prépare un fichier JSON lisible et réutilisable contenant les données liées à ton compte. Les pièces d’identité et les informations privées d’autres membres n’y figurent jamais.</p>
       <button class="secondary" type="button" data-export-velvet>Préparer mon export JSON</button>
       <small class="velvet-foundation-note">Le téléchargement est généré à la demande, n’est pas mis en cache et ses médias restent protégés par ta session.</small>
     </section>`;
@@ -150,7 +150,7 @@
 
     const holder = document.createElement('div');
     holder.className = 'velvet-foundation-holder';
-    holder.innerHTML = '<section class="card settings-card"><p>Préparation de la localisation et de la confiance Velvet…</p></section>';
+    holder.innerHTML = '<section class="card settings-card"><p>Préparation de la localisation et de la confiance Zwit…</p></section>';
     footer.before(holder);
 
     try {
@@ -187,7 +187,7 @@
     button.disabled = true;
     try {
       cache.location = await api('/api/members/location', { method: 'DELETE' });
-      toast('La localisation Velvet est désactivée et la zone enregistrée a été effacée.');
+      toast('La localisation Zwit est désactivée et la zone enregistrée a été effacée.');
       refreshLocationCard();
     } catch (error) {
       toast(error.message, true);
@@ -246,7 +246,7 @@
       link.click();
       link.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-      toast('Ton export Velvet a été téléchargé sur cet appareil.');
+      toast('Ton export Zwit a été téléchargé sur cet appareil.');
     } catch (error) {
       toast(error.message === 'data_export_failed'
         ? 'Ton export n’a pas pu être préparé. Réessaie dans quelques instants.'
@@ -274,7 +274,7 @@
   function verifiedPill() {
     const pill = document.createElement('span');
     pill.className = 'pill velvet-verified-pill';
-    pill.textContent = '✓ Profil vérifié Velvet';
+    pill.textContent = '✓ Profil vérifié Zwit';
     return pill;
   }
 

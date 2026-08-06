@@ -46,8 +46,8 @@
 
   const spaces = [
     { href: '/membres/', label: 'Membres', path: '/membres/' },
-    { href: '/pro/', label: 'Velvet Pro', path: '/pro/' },
-    { href: '/control/', label: 'Velvet Contrôle', accessibleLabel: 'Velvet Control', path: '/control/' }
+    { href: '/pro/', label: 'Zwit Pro', path: '/pro/' },
+    { href: '/control/', label: 'Zwit Contrôle', accessibleLabel: 'Zwit Control', path: '/control/' }
   ];
 
   const escape = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
@@ -87,7 +87,7 @@
     document.querySelector('#logoutButton')?.remove();
     const root = document.createElement('section');
     root.className = `velvet-account-access${host.closest('header') ? ' is-header' : ''}`;
-    root.setAttribute('aria-label', 'Compte et espaces Velvet');
+    root.setAttribute('aria-label', 'Compte et espaces Zwit');
     const waitlistLink = isAdmin && currentPath.startsWith('/control/')
       ? `<a class="velvet-waitlist-link" href="/control/acces-prive/"${currentPath.startsWith('/control/acces-prive/') ? ' aria-current="page"' : ''}>Salle d’attente · Préinscriptions</a>`
       : '';
@@ -118,7 +118,7 @@
       entry.innerHTML = `
         <div>
           <p class="control-eyebrow">ACCÈS PRIVÉ · PRÉ-OUVERTURE</p>
-          <h2>Salle d’attente Velvet</h2>
+          <h2>Salle d’attente Zwit</h2>
           <p>Suivre les préinscriptions membres et professionnelles, les territoires, les sources de campagne et l’état des invitations.</p>
         </div>
         <div class="velvet-control-waitlist-actions">

@@ -7,11 +7,11 @@ const capture = await readFile('apps/beta/static/assets/velvet-studio-capture.js
 const build = await readFile('apps/beta/scripts/build.mjs', 'utf8');
 const voice = await readFile('functions/api/control/studio-media-safe.js', 'utf8');
 
-test('Velvet Studio ajoute le module social dans la page existante', () => {
+test('Zwit Studio ajoute le module social dans la page existante', () => {
   assert.doesNotThrow(() => new Function(inline));
-  assert.match(inline, /Vidéos sociales Velvet/);
-  assert.match(inline, /Promouvoir Velvet Membre/);
-  assert.match(inline, /Promouvoir Velvet Pro/);
+  assert.match(inline, /Vidéos sociales Zwit/);
+  assert.match(inline, /Promouvoir Zwit Membre/);
+  assert.match(inline, /Promouvoir Zwit Pro/);
   assert.match(inline, /\.vs1-project-main/);
   assert.match(inline, /hero\.insertAdjacentElement\('afterend'/);
   assert.match(inline, /data-vss-generate/);

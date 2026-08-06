@@ -40,7 +40,7 @@
     }
     if (isIos && !isStandalone()) {
       showIosInstallGuide();
-      throw new Error('Sur iPhone, ajoute d’abord Velvet à l’écran d’accueil, puis ouvre le raccourci pour activer les notifications.');
+      throw new Error('Sur iPhone, ajoute d’abord Zwit à l’écran d’accueil, puis ouvre le raccourci pour activer les notifications.');
     }
 
     const permission = await Notification.requestPermission();
@@ -49,7 +49,7 @@
     }
 
     const registration = await serviceWorkerRegistration();
-    if (!registration) throw new Error('Le service de notification Velvet est indisponible.');
+    if (!registration) throw new Error('Le service de notification Zwit est indisponible.');
 
     const configResponse = await nativeFetch('/api/members/push-subscriptions', {
       credentials: 'same-origin',
@@ -59,7 +59,7 @@
     if (!configResponse.ok) throw new Error(config.error || 'Configuration Web Push indisponible.');
 
     if (!config.publicKey) {
-      await showLocalNotification('Velvet est prêt', 'Les notifications locales sont actives sur cet appareil.');
+      await showLocalNotification('Zwit est prêt', 'Les notifications locales sont actives sur cet appareil.');
       localStorage.setItem('velvet_notifications_permission', 'granted');
       return { mode: 'local', subscribed: false };
     }
@@ -87,7 +87,7 @@
 
     localStorage.setItem('velvet_push_origin', window.location.origin);
     localStorage.setItem('velvet_notifications_permission', 'granted');
-    await showLocalNotification('Velvet est prêt', 'Tes notifications sont maintenant reliées à cet iPhone.');
+    await showLocalNotification('Zwit est prêt', 'Tes notifications sont maintenant reliées à cet iPhone.');
     return { mode: 'push', subscribed: true };
   }
 
@@ -116,9 +116,9 @@
     sheet.innerHTML = `<div class="velvet-ios-card">
       <button type="button" aria-label="Fermer">×</button>
       <span class="velvet-ios-icon"><img src="/assets/velvet-icon-192.png" alt="" width="58" height="58"></span>
-      <p>Velvet sur iPhone</p>
-      <h2>Ajoute Velvet à ton écran d’accueil.</h2>
-      <ol><li>Dans Safari, touche <strong>Partager</strong>.</li><li>Choisis <strong>Sur l’écran d’accueil</strong>.</li><li>Ouvre ensuite l’icône Velvet et active les notifications dans Paramètres.</li></ol>
+      <p>Zwit sur iPhone</p>
+      <h2>Ajoute Zwit à ton écran d’accueil.</h2>
+      <ol><li>Dans Safari, touche <strong>Partager</strong>.</li><li>Choisis <strong>Sur l’écran d’accueil</strong>.</li><li>Ouvre ensuite l’icône Zwit et active les notifications dans Paramètres.</li></ol>
       <small>Lors du passage au domaine privé, l’autorisation Web Push devra être activée une nouvelle fois.</small>
     </div>`;
     sheet.querySelector('button').addEventListener('click', () => sheet.remove());
@@ -132,7 +132,7 @@
     const note = document.createElement('p');
     note.dataset.domainMigrationNote = 'true';
     note.className = 'status-box';
-    note.textContent = 'Lors de la migration vers le domaine privé Velvet, cet appareil devra réautoriser une fois les notifications. Cette étape est déjà prévue dans le plan de bascule.';
+    note.textContent = 'Lors de la migration vers le domaine privé Zwit, cet appareil devra réautoriser une fois les notifications. Cette étape est déjà prévue dans le plan de bascule.';
     card.appendChild(note);
   }
 

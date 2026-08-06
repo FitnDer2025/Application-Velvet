@@ -7,10 +7,10 @@
     ['Profil complet', 'profile'],
     ['Messagerie', 'messages'],
     ['Sorties et événements', 'events'],
-    ['Carte Velvet', 'map']
+    ['Carte Zwit', 'map']
   ]);
 
-  const DEFAULT_STORY = 'Raconte comment une envie discrète devient une belle rencontre grâce à Velvet. Commence par le mystère d’une envie que l’on n’ose pas encore nommer. Fais naître l’attirance en découvrant un profil, puis l’émotion en entrant dans son univers. Montre les premiers mots échangés, la confiance qui s’installe et une sortie qui se prépare. Termine par l’envie de rejoindre Velvet. Le ton doit être sensuel, subtil, émouvant et jamais explicite.';
+  const DEFAULT_STORY = 'Raconte comment une envie discrète devient une belle rencontre grâce à Zwit. Commence par le mystère d’une envie que l’on n’ose pas encore nommer. Fais naître l’attirance en découvrant un profil, puis l’émotion en entrant dans son univers. Montre les premiers mots échangés, la confiance qui s’installe et une sortie qui se prépare. Termine par l’envie de rejoindre Zwit. Le ton doit être sensuel, subtil, émouvant et jamais explicite.';
 
   const state = {
     plan: null,
@@ -92,7 +92,7 @@
     const scene = storyForScreen(screen);
     if (!scene) return;
     const caption = ensureCaption(frame);
-    caption.innerHTML = `<small>${escapeHtml(scene.emotion || 'Velvet')}</small><strong>${escapeHtml(scene.onScreen || scene.title)}</strong>`;
+    caption.innerHTML = `<small>${escapeHtml(scene.emotion || 'Zwit')}</small><strong>${escapeHtml(scene.onScreen || scene.title)}</strong>`;
     caption.classList.remove('show');
     requestAnimationFrame(() => caption.classList.add('show'));
     const tag = frame.querySelector('[data-vsr-scene]');
@@ -126,7 +126,7 @@
     const modalPrompt = document.querySelector('[data-vsr-prompt]');
     if (modalPrompt && !modalPrompt.dataset.vsdReady) {
       modalPrompt.dataset.vsdReady = '1';
-      if (!modalPrompt.value || modalPrompt.value.includes('Présente Velvet comme une expérience premium')) modalPrompt.value = DEFAULT_STORY;
+      if (!modalPrompt.value || modalPrompt.value.includes('Présente Zwit comme une expérience premium')) modalPrompt.value = DEFAULT_STORY;
     }
     const heading = document.querySelector('.vsr-home h1');
     if (heading) heading.innerHTML = 'Une envie.<br>Une histoire. Velvet.';

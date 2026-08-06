@@ -96,7 +96,7 @@ struct IntelligentHomeActivityView: View {
                     mediaURL: primaryPhoto(member),
                     title: member.profileType == .couple
                         ? "vient de rejoindre la communauté"
-                        : "vient de rejoindre Velvet",
+                        : "vient de rejoindre Zwit",
                     detail: [member.velvetDemographicAndAgeLabel, member.locationZone ?? member.city]
                         .compactMap { $0 }
                         .joined(separator: " · "),
@@ -124,7 +124,7 @@ struct IntelligentHomeActivityView: View {
                 actorImageURL: primaryPhoto(member),
                 mediaURL: nil,
                 title: member.attendanceThirdPersonLabel.lowercased(),
-                detail: "\(visit.venueDirectory?.name ?? "Établissement Velvet") · \(visit.visitDate.profileOutingDateLabel)",
+                detail: "\(visit.venueDirectory?.name ?? "Établissement Zwit") · \(visit.visitDate.profileOutingDateLabel)",
                 createdAt: CommunityDate.parse(visit.updatedAt ?? visit.createdAt),
                 visit: visit,
                 reaction: nil
@@ -140,7 +140,7 @@ struct IntelligentHomeActivityView: View {
                 id: "reaction-\(notification.id.uuidString)",
                 kind: .photoReaction,
                 member: actor,
-                actorName: notification.metadata?.actorName ?? actor?.displayName ?? "Un membre Velvet",
+                actorName: notification.metadata?.actorName ?? actor?.displayName ?? "Un membre Zwit",
                 actorImageURL: notification.actorPreviewUrl ?? actor.flatMap(primaryPhoto),
                 mediaURL: notification.entityPreviewUrl,
                 title: reactionTitle(notification.metadata?.reaction),
@@ -160,7 +160,7 @@ struct IntelligentHomeActivityView: View {
                 id: "followed-\(activity.id)",
                 kind: activity.type == "recommendation" ? .recommendation : .community,
                 member: member,
-                actorName: activity.profileName ?? member?.displayName ?? "La communauté Velvet",
+                actorName: activity.profileName ?? member?.displayName ?? "La communauté Zwit",
                 actorImageURL: activity.previewUrl ?? member.flatMap(primaryPhoto),
                 mediaURL: activity.type == "photo" ? activity.previewUrl : nil,
                 title: activityTitle(activity),
@@ -258,7 +258,7 @@ struct IntelligentHomeActivityView: View {
         VStack(alignment: .leading, spacing: 14) {
             sectionHeader(
                 "À découvrir",
-                detail: "Sélection Velvet Intelligence"
+                detail: "Sélection Zwit Intelligence"
             )
 
             if recommendedProfiles.isEmpty {
@@ -551,7 +551,7 @@ private struct CommunityActivityCard: View {
                         .clipShape(Circle())
 
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(visit.venueDirectory?.name ?? "Établissement Velvet")
+                        Text(visit.venueDirectory?.name ?? "Établissement Zwit")
                             .font(VelvetTypography.body(size: 13, weight: .semibold))
                             .foregroundStyle(VelvetColor.ivory)
                             .lineLimit(1)

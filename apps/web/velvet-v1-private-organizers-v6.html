@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Velvet — V5 Profils & Établissements</title>
+  <title>Zwit — V5 Profils & Établissements</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#09090b}
     iframe{border:0;width:100%;height:100%;display:block}
   </style>
 </head>
 <body>
-<iframe id="app" src="./velvet-v1-locked-dense-demo-v3.html" title="Velvet V1"></iframe>
+<iframe id="app" src="./velvet-v1-locked-dense-demo-v3.html" title="Zwit V1"></iframe>
 <script>
 const frame=document.getElementById('app');
 frame.addEventListener('load',()=>{
@@ -180,7 +180,7 @@ frame.addEventListener('load',()=>{
   w.S.profileV4Requests=w.S.profileV4Requests||{};
   w.S.v5VenueRegistrations=w.S.v5VenueRegistrations||{};
   w.S.v5OrganizerEvents=w.S.v5OrganizerEvents||[];
-  w.S.organizerAccess=w.S.organizerAccess||{status:'approved',profileId:'self',accountType:'Couple',grantedBy:'Modération Velvet',grantedAt:'27 juillet 2026'};
+  w.S.organizerAccess=w.S.organizerAccess||{status:'approved',profileId:'self',accountType:'Couple',grantedBy:'Modération Zwit',grantedAt:'27 juillet 2026'};
   w.menu=w.menu||[];
   if(w.S.organizerAccess.status==='approved'&&!w.menu.some(item=>item[0]==='organizer')){
     w.menu.splice(w.menu.length-1,0,['organizer','Organiser']);
@@ -207,7 +207,7 @@ frame.addEventListener('load',()=>{
       prices:[['Couple','45 € avec 2 consommations'],['Femme seule','Invitation selon soirée'],['Homme seul','70 € · soirées sélectionnées']],
       equipment:['Bar premium','Dancefloor','Vestiaires sécurisés','Espace lounge','Terrasse privée','Parking discret'],
       gallery:[w.I.club,w.I.party,'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=1000&q=82','https://images.unsplash.com/photo-1496024840928-4c417adf211d?auto=format&fit=crop&w=1000&q=82'],
-      organizer:{profileId:'af',name:'Emma & Nicolas',verified:true,img:w.I.c1,bio:'Couple membre · Organisateurs privés validés par Velvet'},
+      organizer:{profileId:'af',name:'Emma & Nicolas',verified:true,img:w.I.c1,bio:'Couple membre · Organisateurs privés validés par Zwit'},
       events:[
         {id:'op1',day:'31',month:'JUIL',name:'Nuit Velours',date:'Vendredi 31 juillet · 22h',audience:'Couples et femmes',booked:43,total:60,participants:['af','cl','nt']},
         {id:'op2',day:'08',month:'AOÛT',name:'Rouge Intense',date:'Samedi 8 août · 21h30',audience:'Couples · Dress code rouge',booked:51,total:70,participants:['em','jm','sa']},
@@ -223,7 +223,7 @@ frame.addEventListener('load',()=>{
       prices:[['Couple','55 €'],['Femme seule','Entrée offerte sur sélection'],['Privatisation','Sur devis']],
       equipment:['Bassin chauffé','Sauna','Hammam','Espace massage','Douches privées','Parking'],
       gallery:[w.I.spa,'https://images.unsplash.com/photo-1531853121101-cb94c8ed218d?auto=format&fit=crop&w=1000&q=82','https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1000&q=82',w.I.room],
-      organizer:{profileId:'cl',name:'Chloé',verified:true,img:w.I.w1,bio:'Membre individuelle · Organisatrice privée validée par Velvet'},
+      organizer:{profileId:'cl',name:'Chloé',verified:true,img:w.I.w1,bio:'Membre individuelle · Organisatrice privée validée par Zwit'},
       events:[
         {id:'or1',day:'08',month:'AOÛT',name:'Évasion Spa',date:'Samedi 8 août · 20h',audience:'Couples et femmes',booked:22,total:28,participants:['em','jm','sa']},
         {id:'or2',day:'22',month:'AOÛT',name:'Bulles & confidences',date:'Samedi 22 août · 19h',audience:'Couples',booked:16,total:24,participants:['af','nt']}
@@ -233,12 +233,12 @@ frame.addEventListener('load',()=>{
       id:'suite-velours',name:'Suite Velours',type:'Love room',city:'Arras',distance:'31 km',rating:'4,9',reviews:76,
       hero:w.I.room,tagline:'Une parenthèse confidentielle pensée pour deux… ou davantage.',
       description:'Une adresse élégante et totalement privatisable avec spa, ambiance lumineuse sur mesure et arrivée autonome. Les événements accueillis restent limités à de petits groupes invités.',
-      address:'Arras centre · Adresse après confirmation',phone:'Réservation exclusivement via Velvet',
+      address:'Arras centre · Adresse après confirmation',phone:'Réservation exclusivement via Zwit',
       hours:[['Arrivée journée','14h00'],['Arrivée nuit','18h00'],['Départ','11h00']],
       prices:[['Journée','149 €'],['Nuit','249 €'],['Événement privé','À partir de 390 €']],
       equipment:['Spa privatif','Lit king size','Bar discret','Parking privé','Arrivée autonome','Sonorisation'],
       gallery:[w.I.room,'https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1000&q=82','https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=1000&q=82',w.I.spa],
-      organizer:{profileId:'em',name:'Léa & Hugo',verified:true,img:w.I.c2,bio:'Couple membre · Organisateurs privés validés par Velvet'},
+      organizer:{profileId:'em',name:'Léa & Hugo',verified:true,img:w.I.c2,bio:'Couple membre · Organisateurs privés validés par Zwit'},
       events:[
         {id:'sv1',day:'15',month:'AOÛT',name:'Dîner confidentiel',date:'Samedi 15 août · 19h30',audience:'Sur invitation',booked:8,total:10,participants:['af','em','cl','jm']}
       ]
@@ -247,7 +247,7 @@ frame.addEventListener('load',()=>{
 
   const SELF_ORGANIZER={
     profileId:'self',name:SELF.name,verified:true,img:SELF.img,
-    bio:'Couple membre Velvet autorisé par la modération à proposer des soirées privées. Il ne s’agit ni d’un établissement ni d’un compte professionnel.'
+    bio:'Couple membre Zwit autorisé par la modération à proposer des soirées privées. Il ne s’agit ni d’un établissement ni d’un compte professionnel.'
   };
   const SELF_PRIVATE_EVENTS=[
     {id:'priv1',day:'05',month:'SEPT',name:'Dîner, musique & confidences',date:'Samedi 5 septembre · 19h30',place:'À notre domicile · Métropole lilloise',audience:'5 couples · Sur sélection',booked:8,total:10,participants:['af','em','nt']},
@@ -401,7 +401,7 @@ frame.addEventListener('load',()=>{
           <div><span>Zone</span><strong>${esc(p.radius)}</strong></div><div><span>Disponibilités</span><strong>${esc(p.availability)}</strong></div>
         </div></section>
         <section id="location" class="v4-side-card"><h3>Localisation</h3><div class="v4-map"><span class="v4-map-label">⌖ ${esc(p.location)} · Position approximative</span></div><p class="muted">${esc(p.radius)}. L’adresse exacte n’est jamais affichée.</p></section>
-        <section class="v4-side-card"><h3>Confiance Velvet</h3><div class="v4-list"><div><span>Identités</span><strong class="verified">Vérifiées</strong></div><div><span>Couple</span><strong class="verified">Vérifié</strong></div><div><span>Photos</span><strong class="verified">Vérifiées</strong></div><div><span>Rencontres</span><strong>27 certifiées</strong></div></div></section>
+        <section class="v4-side-card"><h3>Confiance Zwit</h3><div class="v4-list"><div><span>Identités</span><strong class="verified">Vérifiées</strong></div><div><span>Couple</span><strong class="verified">Vérifié</strong></div><div><span>Photos</span><strong class="verified">Vérifiées</strong></div><div><span>Rencontres</span><strong>27 certifiées</strong></div></div></section>
         <section class="v4-side-card"><h3>Découvrir chacun</h3><p class="muted">Le profil commun raconte leur histoire. Leurs fiches personnelles précisent leurs envies et leurs limites individuelles.</p>
           <div class="v4-actions">${p.names.map((name,index)=>`<button class="v4-secondary" onclick="parent.v4Tab('person${index}')">${esc(name)} →</button>`).join('')}</div>
         </section>
@@ -493,7 +493,7 @@ frame.addEventListener('load',()=>{
 
   function venueDetail(venue){
     return `<div class="v5"><button class="v4-secondary v4-back" onclick="parent.v5Venues()">← Tous les établissements</button>
-      <section class="v5-hero"><img src="${venue.hero}" alt="${esc(venue.name)}"><div class="v5-hero-copy"><div class="v4-kicker">${esc(venue.type)} · ${esc(venue.city)} · Vérifié Velvet</div><h1>${esc(venue.name)}</h1><p class="v4-lead">${esc(venue.tagline)}</p>
+      <section class="v5-hero"><img src="${venue.hero}" alt="${esc(venue.name)}"><div class="v5-hero-copy"><div class="v4-kicker">${esc(venue.type)} · ${esc(venue.city)} · Vérifié Zwit</div><h1>${esc(venue.name)}</h1><p class="v4-lead">${esc(venue.tagline)}</p>
         <div class="v5-badges"><span class="v5-badge">★ ${venue.rating} · ${venue.reviews} avis</span><span class="v5-badge">⌖ ${venue.distance}</span><span class="v5-badge">${venue.events.length} événements à venir</span></div>
         <div class="v5-actions"><button class="v4-primary" onclick="parent.v5Scroll('v5agenda')">Voir l’agenda</button><button class="v4-secondary" onclick="parent.v5Toast('Établissement ajouté aux favoris')">♡ Favori</button><button class="v4-secondary" onclick="parent.v5Toast('Itinéraire sécurisé ouvert')">Itinéraire</button></div>
       </div></section>
@@ -528,7 +528,7 @@ frame.addEventListener('load',()=>{
     const isSelf=context==='self',venue=isSelf?null:context,organizer=isSelf?SELF_ORGANIZER:venue.organizer;
     const agenda={id:isSelf?'private-self':venue.id,events:isSelf?SELF_PRIVATE_EVENTS.concat(w.S.v5OrganizerEvents):venue.events};
     return `<div class="v5"><button class="v4-secondary v4-back" onclick="${isSelf?'parent.v5Organizer()':`parent.v5OpenVenue('${venue.id}')`}">← ${isSelf?'Retour à mon espace':`Retour à ${esc(venue.name)}`}</button>
-      <section class="v5-section"><div class="v5-public-organizer"><img src="${organizer.img}" alt=""><div><div class="v4-kicker">Profil membre · Organisateur privé validé · Données fictives</div><h1 class="hero">${esc(organizer.name)}</h1><p class="v4-copy">${esc(organizer.bio)} Leur rôle d’organisateur est une extension de leur profil Velvet : il ne crée aucun statut professionnel et ne les transforme pas en établissement.</p>
+      <section class="v5-section"><div class="v5-public-organizer"><img src="${organizer.img}" alt=""><div><div class="v4-kicker">Profil membre · Organisateur privé validé · Données fictives</div><h1 class="hero">${esc(organizer.name)}</h1><p class="v4-copy">${esc(organizer.bio)} Leur rôle d’organisateur est une extension de leur profil Zwit : il ne crée aucun statut professionnel et ne les transforme pas en établissement.</p>
         <div class="v5-badges"><span class="v5-badge">Profil vérifié</span><span class="v5-badge">Accès accordé par la modération</span><span class="v5-badge">Charte des soirées privées signée</span><span class="v5-badge">4,9 / 5 · 12 soirées</span></div>
         <div class="v5-actions"><button class="v4-primary" onclick="parent.v5OpenMember('${organizer.profileId}')">Voir le profil complet</button><button class="v4-secondary" onclick="parent.v5Toast('Conversation privée ouverte')">Contacter</button><button class="v4-secondary" onclick="parent.v5Toast('Organisateur suivi')">Suivre</button></div>
       </div></div></section>

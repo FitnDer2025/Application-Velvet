@@ -3,7 +3,7 @@
 ## Statut
 Validé
 
-## Invitations Velvet
+## Invitations Zwit
 États visibles :
 - `sent` — Envoyée
 - `viewed` — Consultée
@@ -13,7 +13,7 @@ Validé
 
 Aucune heure précise de consultation n'est affichée.
 
-## Messages d'un Salon Velvet
+## Messages d'un Salon Zwit
 États visibles :
 - `sent` — Envoyé
 - `delivered` — Distribué

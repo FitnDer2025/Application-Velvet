@@ -290,7 +290,7 @@ struct ProfileSummaryView: View {
             }
 
             ProfileSectionCard(eyebrow: "Localisation publique", title: profile.locationZone ?? profile.city ?? "Zone privée") {
-                Text("Velvet affiche uniquement la zone choisie et jamais l’adresse exacte.")
+                Text("Zwit affiche uniquement la zone choisie et jamais l’adresse exacte.")
                     .font(VelvetTypography.body(size: 12))
                     .foregroundStyle(VelvetColor.textSecondary)
             }
@@ -515,7 +515,7 @@ struct ProfileSummaryView: View {
     private func recommendationRow(_ recommendation: Recommendation) -> some View {
         let author = store.directory?.profiles.first(where: {
             $0.id == recommendation.authorProfileId
-        })?.displayName ?? "Membre Velvet"
+        })?.displayName ?? "Membre Zwit"
 
         return VStack(alignment: .leading, spacing: 6) {
             HStack {

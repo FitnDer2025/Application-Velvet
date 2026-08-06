@@ -4,7 +4,7 @@ Status: Accepted
 
 ## Decision
 
-Velvet uses a hybrid moderation workflow in which artificial intelligence performs the first review and a human moderator intervenes only when required.
+Zwit uses a hybrid moderation workflow in which artificial intelligence performs the first review and a human moderator intervenes only when required.
 
 ## Scope
 
@@ -21,7 +21,7 @@ The workflow applies to sensitive profile changes and user-generated media, incl
 ## Workflow
 
 1. New or modified content is analysed automatically.
-2. Content with sufficient confidence is accepted or rejected automatically according to Velvet rules.
+2. Content with sufficient confidence is accepted or rejected automatically according to Zwit rules.
 3. Ambiguous, high-risk or reported content is routed to a human moderator.
 4. While a replacement is being reviewed, the previously approved content remains visible.
 5. The owner can preview the pending content and receives a notification when a decision is made.

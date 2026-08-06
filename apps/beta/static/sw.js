@@ -56,7 +56,7 @@ self.addEventListener('activate', (event) => {
 });
 
 function offlineDocument() {
-  return new Response(`<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Velvet hors connexion</title><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#0b080a;color:#f6eee6;font-family:-apple-system,BlinkMacSystemFont,sans-serif"><main style="max-width:420px;padding:28px;text-align:center"><h1 style="font-family:Georgia,serif;font-weight:500">Velvet est hors connexion.</h1><p style="color:#b9adb1;line-height:1.6">Rétablis ta connexion puis rouvre l’application. Aucune page de connexion ancienne n’est conservée sur cet appareil.</p></main></body></html>`, {
+  return new Response(`<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zwit hors connexion</title><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#0b080a;color:#f6eee6;font-family:-apple-system,BlinkMacSystemFont,sans-serif"><main style="max-width:420px;padding:28px;text-align:center"><h1 style="font-family:Georgia,serif;font-weight:500">Zwit est hors connexion.</h1><p style="color:#b9adb1;line-height:1.6">Rétablis ta connexion puis rouvre l’application. Aucune page de connexion ancienne n’est conservée sur cet appareil.</p></main></body></html>`, {
     status: 503,
     headers: {
       'content-type': 'text/html; charset=utf-8',
@@ -101,7 +101,7 @@ self.addEventListener('message', (event) => {
     return;
   }
   if (event.data?.type !== 'VELVET_NOTIFICATION') return;
-  event.waitUntil(self.registration.showNotification(event.data.title || 'Velvet', {
+  event.waitUntil(self.registration.showNotification(event.data.title || 'Zwit', {
     body: event.data.body || 'Une nouvelle activité vous attend.',
     icon: '/assets/velvet-icon-192.png',
     badge: '/assets/velvet-icon-192.png',
@@ -124,7 +124,7 @@ self.addEventListener('push', (event) => {
   if (conversationId) destination = `/membres/?route=conversations&conversation=${encodeURIComponent(conversationId)}`;
   else if (profileId) destination = `/membres/?route=members&profile=${encodeURIComponent(profileId)}`;
   else if (eventId) destination = `/membres/?route=events&event=${encodeURIComponent(eventId)}`;
-  event.waitUntil(self.registration.showNotification(declarative.title || 'Velvet', {
+  event.waitUntil(self.registration.showNotification(declarative.title || 'Zwit', {
     body: declarative.body || 'Une nouvelle activité vous attend.',
     icon: declarative.icon || '/assets/velvet-icon-192.png',
     badge: declarative.badge || '/assets/velvet-icon-192.png',

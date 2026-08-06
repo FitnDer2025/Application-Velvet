@@ -1,7 +1,7 @@
 # Maquette V1 — Périmètre et critères d'acceptation
 
 ## But de la V1
-Démontrer le cœur de valeur Velvet avec une expérience cohérente, premium et testable de bout en bout, sans prétendre livrer immédiatement l'intégralité de l'écosystème.
+Démontrer le cœur de valeur Zwit avec une expérience cohérente, premium et testable de bout en bout, sans prétendre livrer immédiatement l'intégralité de l'écosystème.
 
 ## Parcours critique V1
 1. Créer un compte.
@@ -9,12 +9,12 @@ Démontrer le cœur de valeur Velvet avec une expérience cohérente, premium et
 3. Créer ou rejoindre un couple lorsque pertinent.
 4. Configurer recherches, limites et visibilité.
 5. Découvrir des profils compatibles.
-6. Envoyer une Invitation Velvet personnalisée.
+6. Envoyer une Invitation Zwit personnalisée.
 7. Accepter ou refuser une invitation.
-8. Ouvrir un Salon Velvet après acceptation.
+8. Ouvrir un Salon Zwit après acceptation.
 9. Échanger des messages avec statuts.
 10. Partager un média selon les permissions prévues.
-11. Utiliser un Carnet Velvet strictement privé.
+11. Utiliser un Carnet Zwit strictement privé.
 12. Bloquer ou signaler un membre.
 
 ## Must-have maquette V1
@@ -37,13 +37,13 @@ Démontrer le cœur de valeur Velvet avec une expérience cohérente, premium et
 - Accès au profil détaillé.
 - États vides et chargement.
 
-### Invitations Velvet
+### Invitations Zwit
 - Message personnalisé unique.
 - Aucune relance.
 - Statuts Envoyée, Consultée, Acceptée, Refusée, Expirée.
 - Salon créé uniquement après acceptation.
 
-### Salons Velvet
+### Salons Zwit
 - Ouverture sur la dernière activité ou le premier non-lu.
 - Messages texte.
 - Statuts Envoyé, Distribué, Lu.

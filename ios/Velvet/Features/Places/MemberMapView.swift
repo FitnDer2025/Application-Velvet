@@ -67,7 +67,7 @@ struct MemberMapView: View {
                         VelvetEmptyState(
                             symbol: "map",
                             title: "Carte indisponible",
-                            message: errorMessage ?? "Velvet ne peut pas charger Maps pour le moment."
+                            message: errorMessage ?? "Zwit ne peut pas charger Maps pour le moment."
                         )
                     }
                 }

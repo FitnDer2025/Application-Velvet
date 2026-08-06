@@ -6,7 +6,7 @@ L’accès communautaire est refusé lorsque `IDENTITY_AGE_VERIFICATION_REQUIRED
 
 Profil, paramètres, déconnexion, démarrage de la vérification et export des données restent accessibles afin qu’une personne puisse régulariser sa situation ou exercer ses droits.
 
-Velvet ne crée jamais de statut vérifié en interne et ne conserve ni pièce d’identité, ni identité civile, ni date de naissance, ni référence brute du prestataire.
+Zwit ne crée jamais de statut vérifié en interne et ne conserve ni pièce d’identité, ni identité civile, ni date de naissance, ni référence brute du prestataire.
 
 ## Variables serveur
 

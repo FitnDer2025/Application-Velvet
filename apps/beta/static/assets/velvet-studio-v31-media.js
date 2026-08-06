@@ -137,7 +137,7 @@
 
   async function openMediaTab(modal) {
     const project = currentProject();
-    if (!project) return notify('Ouvre d’abord un projet Velvet Studio.', 'error');
+    if (!project) return notify('Ouvre d’abord un projet Zwit Studio.', 'error');
     state.activeProjectId = project.id;
     modal.querySelectorAll('.vs3-tabs button').forEach((button) => button.classList.remove('active'));
     modal.querySelector('[data-v31-media-tab]')?.classList.add('active');
@@ -150,20 +150,20 @@
 
   function mediaWorkspaceMarkup(project) {
     const pack = currentPack();
-    const prompt = clean(pack?.brief || project.prompt || project.objective || 'Créer une campagne Velvet premium qui montre une connexion sincère et la qualité de l’expérience.', 1200);
+    const prompt = clean(pack?.brief || project.prompt || project.objective || 'Créer une campagne Zwit premium qui montre une connexion sincère et la qualité de l’expérience.', 1200);
     return `<div class="vs31-workspace">
       <section class="vs31-generator">
         <div class="vs31-heading"><div><span class="vs3-kicker">V3.1 · Génération réelle</span><h3>Studio photo & vidéo</h3><p>Crée une photographie publicitaire avec Workers AI, puis transforme-la en clip social avec une démonstration fictive de Velvet.</p></div><div class="vs31-ai-state" data-v31-capability><i></i><span>Vérification de Workers AI…</span></div></div>
         <div class="vs31-form">
           <label class="wide">Prompt créatif<textarea data-v31-prompt>${esc(prompt)}</textarea></label>
-          <label>Style<select data-v31-preset><option value="rencontre-premium">Rencontre premium</option><option value="soiree-chic">Soirée chic</option><option value="lifestyle-urbain">Lifestyle urbain</option><option value="velvet-pro">Velvet Pro</option></select></label>
+          <label>Style<select data-v31-preset><option value="rencontre-premium">Rencontre premium</option><option value="soiree-chic">Soirée chic</option><option value="lifestyle-urbain">Lifestyle urbain</option><option value="velvet-pro">Zwit Pro</option></select></label>
           <label>Profil fictif<select data-v31-profile>${Object.entries(MOCK_PROFILES).map(([id, profile]) => `<option value="${id}">${esc(profile.label)} · ${esc(profile.city)}</option>`).join('')}</select></label>
           <label>Fonction simulée<select data-v31-scenario>${Object.entries(SCENARIOS).map(([id, scenario]) => `<option value="${id}">${esc(scenario.label)}</option>`).join('')}</select></label>
           <label>Format<select data-v31-format><option value="9:16">Story / Reel · 9:16</option><option value="4:5">Instagram · 4:5</option><option value="1:1">Carré · 1:1</option><option value="16:9">Paysage · 16:9</option></select></label>
           <label>Variantes<select data-v31-count><option value="1">1 image</option><option value="2">2 images</option><option value="3">3 images</option></select></label>
           <button class="vs31-generate" data-v31-generate><span>✦</span><strong>Générer les visuels</strong><small>Personnes fictives majeures · non explicite</small></button>
         </div>
-        <div class="vs31-promise"><article><strong>Photo réelle</strong><span>FLUX.1 Schnell</span></article><article><strong>Simulation Velvet</strong><span>Profil, recherche, message ou sortie</span></article><article><strong>Clip social</strong><span>WebM animé, prêt à tester</span></article></div>
+        <div class="vs31-promise"><article><strong>Photo réelle</strong><span>FLUX.1 Schnell</span></article><article><strong>Simulation Zwit</strong><span>Profil, recherche, message ou sortie</span></article><article><strong>Clip social</strong><span>WebM animé, prêt à tester</span></article></div>
       </section>
       <section class="vs31-gallery-section"><div class="vs31-gallery-head"><div><span class="vs3-kicker">Productions</span><h3>Galerie média</h3></div><span data-v31-count-label>Chargement…</span></div><div class="vs31-gallery" data-v31-gallery><div class="vs31-empty">Aucun média généré pour ce projet.</div></div></section>
     </div>`;
@@ -268,7 +268,7 @@
   function mediaCard(item) {
     const profile = MOCK_PROFILES[item.mockProfile] || MOCK_PROFILES.couple_lille;
     const scenario = SCENARIOS[item.scenario] || SCENARIOS.profil;
-    return `<article class="vs31-media-card" data-media-id="${item.id}"><div class="vs31-image ${esc(item.format).replace(':', '-')}" style="--media-image:url('${item.dataUri}')"><img src="${item.dataUri}" alt="Visuel publicitaire Velvet généré"><div class="vs31-image-brand"><b>V</b><span>VELVET</span></div><div class="vs31-member-preview"><small>${esc(profile.type)} · ${esc(profile.city)}</small><strong>${esc(profile.label)}</strong><span>${esc(profile.age)} · ${esc(profile.trust)}</span></div></div><div class="vs31-media-copy"><div><span>${esc(item.format)} · ${esc(scenario.label)}</span><h4>${esc(item.title)}</h4><small>${new Date(item.createdAt).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })} · ${esc(item.model)}</small></div><div class="vs31-media-actions"><button data-v31-video="${item.id}" class="primary">Créer le clip</button><button data-v31-download="${item.id}">Photo</button><button data-v31-copy="${item.id}">Prompt</button><button data-v31-delete="${item.id}" class="danger">×</button></div></div></article>`;
+    return `<article class="vs31-media-card" data-media-id="${item.id}"><div class="vs31-image ${esc(item.format).replace(':', '-')}" style="--media-image:url('${item.dataUri}')"><img src="${item.dataUri}" alt="Visuel publicitaire Zwit généré"><div class="vs31-image-brand"><b>V</b><span>ZWIT</span></div><div class="vs31-member-preview"><small>${esc(profile.type)} · ${esc(profile.city)}</small><strong>${esc(profile.label)}</strong><span>${esc(profile.age)} · ${esc(profile.trust)}</span></div></div><div class="vs31-media-copy"><div><span>${esc(item.format)} · ${esc(scenario.label)}</span><h4>${esc(item.title)}</h4><small>${new Date(item.createdAt).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })} · ${esc(item.model)}</small></div><div class="vs31-media-actions"><button data-v31-video="${item.id}" class="primary">Créer le clip</button><button data-v31-download="${item.id}">Photo</button><button data-v31-copy="${item.id}">Prompt</button><button data-v31-delete="${item.id}" class="danger">×</button></div></div></article>`;
   }
 
   function downloadImage(id) {
@@ -358,7 +358,7 @@
     ctx.fill();
     ctx.fillStyle = '#C6A96A';
     ctx.font = `700 ${Math.max(14, phoneW * 0.06)}px Georgia`;
-    ctx.fillText('VELVET', x + pad * 1.5, y + pad + phoneH * 0.085);
+    ctx.fillText('ZWIT', x + pad * 1.5, y + pad + phoneH * 0.085);
 
     ctx.fillStyle = '#242126';
     roundRect(ctx, x + pad, y + phoneH * 0.23, phoneW - pad * 2, phoneH * 0.38, 22);
@@ -401,7 +401,7 @@
     const pad = width * 0.07;
     ctx.fillStyle = '#C6A96A';
     ctx.font = `700 ${Math.max(16, width * 0.027)}px Georgia`;
-    ctx.fillText('VELVET', pad, height * 0.085);
+    ctx.fillText('ZWIT', pad, height * 0.085);
     ctx.fillStyle = 'rgba(244,244,242,.78)';
     ctx.font = `600 ${Math.max(10, width * 0.015)}px Inter, sans-serif`;
     ctx.fillText('RENCONTRES · ÉVÉNEMENTS · CONFIANCE', pad, height * 0.115);
@@ -429,7 +429,7 @@
       ctx.fill();
       ctx.fillStyle = '#151515';
       ctx.font = `700 ${Math.max(13, width * 0.021)}px Inter, sans-serif`;
-      ctx.fillText('DÉCOUVRIR VELVET', pad + width * 0.045, height * 0.935);
+      ctx.fillText('DÉCOUVRIR ZWIT', pad + width * 0.045, height * 0.935);
       ctx.restore();
     }
 

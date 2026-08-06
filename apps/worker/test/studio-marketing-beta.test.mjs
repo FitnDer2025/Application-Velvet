@@ -10,7 +10,7 @@ const portraits = await readFile('functions/api/control/marketing-portrait.js', 
 const build = await readFile('apps/beta/scripts/build.mjs', 'utf8');
 const worker = await readFile('apps/beta/worker/index.js', 'utf8');
 
-test('Velvet Marketing Membre utilise le vrai shell avec des données fictives', () => {
+test('Zwit Marketing Membre utilise le vrai shell avec des données fictives', () => {
   assert.doesNotThrow(() => new Function(member));
   assert.match(member, /\.app-shell/);
   assert.match(member, /members\/directory/);
@@ -20,12 +20,12 @@ test('Velvet Marketing Membre utilise le vrai shell avec des données fictives',
   assert.doesNotMatch(member, /Données réelles Supabase/);
 });
 
-test('Velvet Marketing Pro utilise le vrai shell avec son activité fictive', () => {
+test('Zwit Marketing Pro utilise le vrai shell avec son activité fictive', () => {
   assert.doesNotThrow(() => new Function(pro));
   assert.match(pro, /\/api\/pro\/workspace/);
   assert.match(pro, /BETA MARKETING PRO · DONNÉES FICTIVES/);
   assert.match(pro, /data-vp-view/);
-  assert.match(pro, /Maison Velvet Lille/);
+  assert.match(pro, /Maison Zwit Lille/);
   assert.match(pro, /registrations/);
   assert.match(pro, /subscription_status: 'active'/);
 });
@@ -36,8 +36,8 @@ test('le build publie les deux accès Marketing directement dans le module', () 
   assert.match(build, /velvet-marketing-mode\.js/);
   assert.match(build, /velvet-marketing-pro-mode\.js/);
   assert.doesNotMatch(build, /velvet-marketing-shortcut\.js/);
-  assert.match(moduleSource, /Velvet Marketing Membre/);
-  assert.match(moduleSource, /Velvet Marketing Pro/);
+  assert.match(moduleSource, /Zwit Marketing Membre/);
+  assert.match(moduleSource, /Zwit Marketing Pro/);
   assert.match(worker, /'\/marketing'/);
   assert.match(worker, /'\/marketing-pro'/);
 });

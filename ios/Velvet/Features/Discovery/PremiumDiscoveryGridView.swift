@@ -102,7 +102,7 @@ struct PremiumDiscoveryGridView: View {
                             .font(VelvetTypography.body(size: 13, weight: .semibold))
                             .foregroundStyle(VelvetColor.ivory)
                         Spacer()
-                        Text("SÉLECTION VELVET")
+                        Text("SÉLECTION ZWIT")
                             .font(VelvetTypography.caption(size: 8, weight: .semibold))
                             .tracking(1.1)
                             .foregroundStyle(VelvetColor.champagneGold)

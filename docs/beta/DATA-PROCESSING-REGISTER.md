@@ -1,4 +1,4 @@
-# Velvet BETA — registre initial des traitements
+# Zwit BETA — registre initial des traitements
 
 Ce registre est un document de travail à compléter avec l’identité juridique de l’éditeur, les sous-traitants retenus, les durées définitives et les contacts RGPD.
 
@@ -13,10 +13,10 @@ Ce registre est un document de travail à compléter avec l’identité juridiqu
 | Photos de profil | minimum 3 photos individuelles ou 3 photos du couple et 1 portrait par partenaire ; ajouts ultérieurs libres | Admission puis carrousel public du profil | Privées pendant le contrôle, puis membres BETA approuvés | Jusqu’au retrait |
 | Albums publics | nom de bibliothèque, photos approuvées | Organiser une galerie consultable | Membres BETA approuvés | Jusqu’au retrait |
 | Albums privés | nom, photos, bénéficiaires, date d’accord et expiration | Partage ponctuel choisi par le propriétaire | Propriétaires et comptes autorisés pour 1, 2, 4, 8, 12, 24 h ou sans échéance | Jusqu’au retrait ; accès révocable |
-| Contrôle technique des photos | profil public : nombre de personnes, visage visible, cadrage et netteté ; album privé : détection de risque sans refus de la nudité adulte ; résultat et confiance | Vérifier l’admission et empêcher la diffusion de contenus manifestement interdits | Velvet Intelligence et, en cas de doute, modération habilitée | Résultat lié au média ; fichier supprimé au retrait |
+| Contrôle technique des photos | profil public : nombre de personnes, visage visible, cadrage et netteté ; album privé : détection de risque sans refus de la nudité adulte ; résultat et confiance | Vérifier l’admission et empêcher la diffusion de contenus manifestement interdits | Zwit Intelligence et, en cas de doute, modération habilitée | Résultat lié au média ; fichier supprimé au retrait |
 | Conversations | messages, membres, pièces jointes | Communication | Participants uniquement | Durée à valider avec option d’effacement |
 | Événements | agenda, inscriptions, présence | Organisation des sorties | Membres, organisateurs, Pro | Événement + durée d’historique à valider |
-| Établissements | fiche, équipe, statistiques | Velvet Pro | Pro autorisé et membres pour le public | Relation contractuelle |
+| Établissements | fiche, équipe, statistiques | Zwit Pro | Pro autorisé et membres pour le public | Relation contractuelle |
 | Recommandations et avis | auteur, cible, texte, note | Confiance communautaire | Selon visibilité | Jusqu’au retrait ou modération |
 | Modération | signalement, éléments nécessaires, décision | Sécurité et contentieux | Modération restreinte | Durée proportionnée à valider |
 | Audit et sécurité | acteur, action, date, IP tronquée si nécessaire | Traçabilité et défense | Sécurité, audit | Durée à valider par catégorie |

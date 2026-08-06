@@ -108,7 +108,7 @@ test('la signature du callback 18+ couvre tous les champs et change au moindre r
 
 test('le format de sauvegarde chiffre, authentifie et détecte toute altération', () => {
   const key = backupKey(randomBytes(32).toString('base64'));
-  const plain = Buffer.from('Velvet backup recipe payload');
+  const plain = Buffer.from('Zwit backup recipe payload');
   const payload = encryptBackup(plain, key, { source_fingerprint: 'source-test' });
   const restored = decryptBackup(payload, key);
   assert.deepEqual(restored.plain, plain);

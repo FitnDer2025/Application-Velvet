@@ -200,7 +200,7 @@ struct OnboardingFlowView: View {
 
             if !birthYear.isEmpty, parsedBirthYear == nil {
                 Label(
-                    "L’accès à Velvet est réservé aux personnes majeures.",
+                    "L’accès à Zwit est réservé aux personnes majeures.",
                     systemImage: "exclamationmark.circle"
                 )
                 .font(VelvetTypography.caption())

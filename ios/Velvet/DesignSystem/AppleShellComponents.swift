@@ -13,7 +13,7 @@ struct CompactVelvetTopBar: View {
     var body: some View {
         HStack(spacing: 9) {
             VelvetMark(size: 25)
-            Text("VELVET")
+            Text("ZWIT")
                 .font(VelvetTypography.brand(size: 14))
                 .tracking(2.8)
                 .foregroundStyle(VelvetColor.ivory)
@@ -33,7 +33,7 @@ struct CompactVelvetTopBar: View {
                 }
             }
 
-            topButton(symbol: "line.3.horizontal", label: "Menu Velvet", action: menu) {
+            topButton(symbol: "line.3.horizontal", label: "Menu Zwit", action: menu) {
                 EmptyView()
             }
         }

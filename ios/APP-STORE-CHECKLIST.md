@@ -1,4 +1,4 @@
-# Checklist App Store — Velvet iOS
+# Checklist App Store — Zwit iOS
 
 ## Avant le premier build TestFlight
 

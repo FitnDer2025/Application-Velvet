@@ -29,7 +29,7 @@ struct AppleConversationsView: View {
                         VelvetEmptyState(
                             symbol: "bubble.left.and.bubble.right",
                             title: "Aucune conversation",
-                            message: "Écris depuis un profil ou rejoins un Salon Velvet lié à une sortie."
+                            message: "Écris depuis un profil ou rejoins un Salon Zwit lié à une sortie."
                         )
                     } else {
                         LazyVStack(spacing: 10) {
@@ -122,7 +122,7 @@ private struct AppleConversationTile: View {
                 }
 
                 if conversation.kind == "event" {
-                    Text("SALON VELVET")
+                    Text("SALON ZWIT")
                         .font(VelvetTypography.caption(size: 8, weight: .semibold))
                         .tracking(1.1)
                         .foregroundStyle(VelvetColor.champagneGold)
@@ -358,7 +358,7 @@ struct AppleConversationView: View {
                     .foregroundStyle(VelvetColor.ivory)
                     .lineLimit(1)
                 if conversation.kind == "event" {
-                    Text("Salon Velvet")
+                    Text("Salon Zwit")
                         .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(VelvetColor.champagneGold)
                 }
@@ -394,7 +394,7 @@ struct AppleConversationView: View {
 
                 ZStack(alignment: .topLeading) {
                     if draft.isEmpty {
-                        Text(outgoingAttachments.isEmpty ? "iMessage Velvet" : "Ajouter un message…")
+                        Text(outgoingAttachments.isEmpty ? "iMessage Zwit" : "Ajouter un message…")
                             .font(.system(size: 15))
                             .foregroundStyle(VelvetColor.textSecondary.opacity(0.72))
                             .padding(.horizontal, 14)

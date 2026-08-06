@@ -1,6 +1,6 @@
-# Velvet Marketing — raccordement Meta et TikTok
+# Zwit Marketing — raccordement Meta et TikTok
 
-Velvet Marketing transforme une soirée Velvet Pro et un rendu Velvet Studio en campagne sociale validée, programmée et suivie.
+Zwit Marketing transforme une soirée Zwit Pro et un rendu Zwit Studio en campagne sociale validée, programmée et suivie.
 
 ## 1. Prérequis Supabase
 
@@ -21,7 +21,7 @@ La migration ajoute :
 
 ## 2. Secrets Cloudflare
 
-Ajouter exclusivement dans **Cloudflare → Worker Velvet → Settings → Variables and Secrets** :
+Ajouter exclusivement dans **Cloudflare → Worker Zwit → Settings → Variables and Secrets** :
 
 ```text
 META_APP_ID
@@ -49,7 +49,7 @@ Règles :
 
 ## 3. Application Meta
 
-Créer une application Meta Business pour Velvet et configurer l’URL de redirection exacte :
+Créer une application Meta Business pour Zwit et configurer l’URL de redirection exacte :
 
 ```text
 https://<domaine-public-velvet>/api/pro/marketing/oauth/meta/callback
@@ -66,13 +66,13 @@ instagram_content_publish
 instagram_manage_insights
 ```
 
-Le professionnel autorise Velvet, puis choisit la Page Facebook qu’il administre. Le compte Instagram professionnel associé à cette Page est détecté et mémorisé.
+Le professionnel autorise Zwit, puis choisit la Page Facebook qu’il administre. Le compte Instagram professionnel associé à cette Page est détecté et mémorisé.
 
-Velvet ne stocke jamais le mot de passe Meta. Les jetons sont chiffrés côté Worker et ne sont jamais renvoyés au navigateur.
+Zwit ne stocke jamais le mot de passe Meta. Les jetons sont chiffrés côté Worker et ne sont jamais renvoyés au navigateur.
 
 Avant une ouverture commerciale, finaliser :
 
-- vérification de l’entreprise Velvet dans Meta Business ;
+- vérification de l’entreprise Zwit dans Meta Business ;
 - politique de confidentialité publique ;
 - suppression des données et révocation des accès ;
 - démonstration vidéo du parcours d’autorisation ;
@@ -95,11 +95,11 @@ video.publish
 video.upload
 ```
 
-Le mode par défaut de Velvet est **l’envoi en brouillon TikTok**. La publication directe reste désactivée tant que l’application et le client de publication ne sont pas audités.
+Le mode par défaut de Zwit est **l’envoi en brouillon TikTok**. La publication directe reste désactivée tant que l’application et le client de publication ne sont pas audités.
 
 Avant l’ouverture commerciale, finaliser :
 
-- vérification de l’URL et du domaine Velvet ;
+- vérification de l’URL et du domaine Zwit ;
 - audit de la Content Posting API ;
 - présentation claire du compte destinataire ;
 - aperçu du contenu avant envoi ;
@@ -133,7 +133,7 @@ Le fichier source reste dans le bucket privé `velvet-pro-studio`. Le lien tempo
 
 ## 7. Parcours de recette
 
-1. Créer une soirée dans Velvet Pro.
+1. Créer une soirée dans Zwit Pro.
 2. Créer et valider une affiche dans Studio IA.
 3. Ouvrir **Marketing**.
 4. Connecter Meta et/ou TikTok.
@@ -154,7 +154,7 @@ Le module n’est prêt pour une diffusion publique que lorsque :
 - tous les secrets sont présents dans Cloudflare ;
 - le domaine public définitif est configuré ;
 - les audits Meta et TikTok sont acceptés ;
-- les publications de recette sont confirmées sur des comptes Velvet ;
+- les publications de recette sont confirmées sur des comptes Zwit ;
 - les erreurs et révocations ont été testées ;
 - les textes et visuels respectent les règles de chaque plateforme ;
 - le suivi des métriques ne présente aucune donnée inventée.

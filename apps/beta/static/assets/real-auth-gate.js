@@ -38,14 +38,14 @@
     invalid_recovery_link: 'Ce lien de récupération est incomplet.',
     invalid_or_expired_recovery_link: 'Ce lien de récupération est invalide ou expiré.',
     required_consents_missing: 'Les quatre validations sont obligatoires pour activer ton accès.',
-    activation_failed: 'L’activation n’a pas abouti. Contacte l’équipe Velvet.'
+    activation_failed: 'L’activation n’a pas abouti. Contacte l’équipe Zwit.'
   };
 
   function shell(content) {
     return `<div class="vg-card">
       <div class="vg-mark"><img src="/assets/velvet-icon-192.png" alt="" width="54" height="54"></div>
       <p class="vg-kicker">ACCÈS PRIVÉ · 18+</p>
-      <h1>Velvet</h1>
+      <h1>Zwit</h1>
       ${content}
       <p class="vg-legal"><a href="/legal/privacy/">Confidentialité</a> · <a href="/legal/terms/">Conditions</a> · <a href="/legal/safety/">Sécurité</a></p>
     </div>`;
@@ -99,7 +99,7 @@
 
   function loginView() {
     gate.innerHTML = shell(`
-      <p class="vg-intro">Connecte-toi pour accéder aux espaces Velvet autorisés pour ton compte.</p>
+      <p class="vg-intro">Connecte-toi pour accéder aux espaces Zwit autorisés pour ton compte.</p>
       <form id="vg-login">
         <label>E-mail<input name="email" type="email" autocomplete="email" required></label>
         <label>Mot de passe<input name="password" type="password" autocomplete="current-password" required></label>
@@ -158,7 +158,7 @@
 
   function recoveryRequestView() {
     gate.innerHTML = shell(`
-      <p class="vg-intro">Indique ton adresse. Si elle correspond à un compte Velvet, tu recevras un lien personnel pour choisir un nouveau mot de passe.</p>
+      <p class="vg-intro">Indique ton adresse. Si elle correspond à un compte Zwit, tu recevras un lien personnel pour choisir un nouveau mot de passe.</p>
       <form id="vg-recovery-request">
         <label>E-mail<input name="email" type="email" autocomplete="email" required></label>
         <div class="vg-turnstile" data-turnstile></div>
@@ -187,7 +187,7 @@
   function passwordResetView(tokens) {
     window.history.replaceState({}, '', '/');
     gate.innerHTML = shell(`
-      <p class="vg-intro">Choisis maintenant un nouveau mot de passe pour sécuriser ton accès Velvet.</p>
+      <p class="vg-intro">Choisis maintenant un nouveau mot de passe pour sécuriser ton accès Zwit.</p>
       <form id="vg-password-reset">
         <label>Nouveau mot de passe<input name="password" type="password" minlength="12" autocomplete="new-password" required></label>
         <label>Confirmer le mot de passe<input name="confirmation" type="password" minlength="12" autocomplete="new-password" required></label>
@@ -223,10 +223,10 @@
 
   function consentView() {
     gate.innerHTML = shell(`
-      <p class="vg-intro">Avant l’accès, Velvet doit enregistrer tes choix séparément.</p>
+      <p class="vg-intro">Avant l’accès, Zwit doit enregistrer tes choix séparément.</p>
       <form id="vg-consent" class="vg-consents">
         <label><input name="adult" type="checkbox" required> Je déclare avoir 18 ans ou plus.</label>
-        <label><input name="terms" type="checkbox" required> J’accepte les conditions d’utilisation de Velvet.</label>
+        <label><input name="terms" type="checkbox" required> J’accepte les conditions d’utilisation de Zwit.</label>
         <label><input name="privacy" type="checkbox" required> J’ai lu l’information de confidentialité.</label>
         <label><input name="sensitiveProfile" type="checkbox" required> Je consens explicitement au traitement des données sensibles que je choisirai de publier sur mon profil. Je pourrai retirer ce consentement.</label>
         <button type="submit">Activer mon accès</button>
@@ -265,9 +265,9 @@
       window.location.replace(destination);
       return;
     }
-    const links = [{ href: '/membres/', label: 'Velvet Membres', roles: [] }];
-    links.push({ href: '/pro/', label: 'Velvet Pro', roles: ['organizer', 'pro_owner', 'pro_staff', 'direction', 'admin'] });
-    links.push({ href: '/control/', label: 'Velvet Contrôle', roles: ['moderator', 'support', 'auditor', 'direction', 'admin'] });
+    const links = [{ href: '/membres/', label: 'Zwit Membres', roles: [] }];
+    links.push({ href: '/pro/', label: 'Zwit Pro', roles: ['organizer', 'pro_owner', 'pro_staff', 'direction', 'admin'] });
+    links.push({ href: '/control/', label: 'Zwit Contrôle', roles: ['moderator', 'support', 'auditor', 'direction', 'admin'] });
     const allowed = links.filter((link) => !link.roles.length || link.roles.some((role) => roles.includes(role)));
     gate.innerHTML = shell(`
       <p class="vg-intro">Bienvenue ${escape(account.email)}. Choisis ton espace autorisé.</p>

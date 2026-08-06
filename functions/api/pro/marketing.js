@@ -275,9 +275,9 @@ function fallbackCopy(event, venue, networks, tone, cta) {
     [context.date, context.time, context.location].filter(Boolean).join(' · '),
     context.dressCode ? `Dress code : ${context.dressCode}` : '',
     context.price ? `Entrée : ${context.price}` : '',
-    cta || 'Découvrez la soirée et réservez votre place sur Velvet.'
+    cta || 'Découvrez la soirée et réservez votre place sur Zwit.'
   ].filter(Boolean).join('\n\n');
-  const hashtags = ['#Velvet', '#SoiréePrivée', '#Événement', '#Nightlife', context.city ? `#${context.city.replace(/\s+/g, '')}` : ''].filter(Boolean);
+  const hashtags = ['#Zwit', '#SoiréePrivée', '#Événement', '#Nightlife', context.city ? `#${context.city.replace(/\s+/g, '')}` : ''].filter(Boolean);
   return {
     baseCopy: base,
     versions: {
@@ -302,7 +302,7 @@ async function generateCopy(env, { event, venue, networks, tone, objective, cta 
   const fallback = fallbackCopy(event, venue, networks, tone, cta);
   if (!env.AI || typeof env.AI.run !== 'function') return fallback;
   const context = eventContext(event, venue);
-  const prompt = `Tu es directrice éditoriale senior pour Velvet, plateforme française premium réservée aux adultes et aux professionnels de la nuit.
+  const prompt = `Tu es directrice éditoriale senior pour Zwit, plateforme française premium réservée aux adultes et aux professionnels de la nuit.
 Écris une campagne qui donne envie de découvrir et réserver la soirée, sans contenu explicite, sans promesse sexuelle et sans vocabulaire vulgaire.
 Établissement : ${context.venue}, ${context.city}.
 Soirée : ${context.title}.
@@ -314,7 +314,7 @@ Lieu : ${context.location}.
 Prix : ${context.price}.
 Objectif : ${objective || 'inscriptions'}.
 Ton : ${tone || 'premium, chaleureux et désirable'}.
-CTA : ${cta || 'Découvrir la soirée sur Velvet'}.
+CTA : ${cta || 'Découvrir la soirée sur Zwit'}.
 Réseaux : ${networks.join(', ')}.
 Contraintes : français naturel, élégant, destiné aux réseaux sociaux, aucune nudité, aucun acte sexuel, aucun service sexuel, aucune formulation qui promet une rencontre garantie. Le texte doit rester accessible à un public majeur tout en étant compatible avec la modération des plateformes.
 Réponds uniquement en JSON valide : {"baseCopy":"...","versions":{"facebook":"...","instagram":"...","tiktok":"..."},"hashtags":["#..."],"tone":"..."}`;

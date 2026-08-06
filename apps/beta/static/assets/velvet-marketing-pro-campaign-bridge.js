@@ -50,18 +50,18 @@
         id: '91000000-0000-4000-8000-000000000001',
         provider: 'meta',
         providerAccountId: 'maison-velvet-page',
-        providerAccountName: 'Maison Velvet Lille',
+        providerAccountName: 'Maison Zwit Lille',
         providerAccountHandle: 'maisonvelvet.lille',
         scopes: ['pages_manage_posts', 'instagram_content_publish'],
         status: 'active',
-        configuration: { previewOnly: true, facebookPageName: 'Maison Velvet Lille', instagramUsername: 'maisonvelvet.lille' },
+        configuration: { previewOnly: true, facebookPageName: 'Maison Zwit Lille', instagramUsername: 'maisonvelvet.lille' },
         lastVerifiedAt: new Date().toISOString()
       },
       {
         id: '91000000-0000-4000-8000-000000000002',
         provider: 'tiktok',
         providerAccountId: 'maison-velvet-tiktok',
-        providerAccountName: 'Maison Velvet Lille',
+        providerAccountName: 'Maison Zwit Lille',
         providerAccountHandle: 'maisonvelvet.lille',
         scopes: ['video.upload'],
         status: 'active',
@@ -92,7 +92,7 @@
       mime_type: render.mime_type || (render.render_type === 'video' ? 'video/webm' : 'image/png')
     }));
     return {
-      venue: workspace.venues?.find((venue) => venue.id === VENUE_ID) || workspace.venues?.[0] || { id: VENUE_ID, name: 'Maison Velvet Lille', city: 'Lille' },
+      venue: workspace.venues?.find((venue) => venue.id === VENUE_ID) || workspace.venues?.[0] || { id: VENUE_ID, name: 'Maison Zwit Lille', city: 'Lille' },
       events: workspace.events || [],
       projects: studio.projects || [],
       renders
@@ -152,7 +152,7 @@
   function eventContext(event = {}) {
     const date = event.starts_at ? new Date(event.starts_at) : null;
     return {
-      title: event.title || 'Une soirée Velvet',
+      title: event.title || 'Une soirée Zwit',
       description: event.description || 'Une expérience élégante, musicale et chaleureuse, pensée pour les rencontres choisies.',
       date: date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : '',
       time: date && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '',
@@ -170,9 +170,9 @@
       [context.date, context.time, context.location].filter(Boolean).join(' · '),
       context.dress ? `Dress code : ${context.dress}` : '',
       context.price ? `Entrée : ${context.price}` : '',
-      cta || 'Découvrez la soirée et réservez votre place sur Velvet.'
+      cta || 'Découvrez la soirée et réservez votre place sur Zwit.'
     ].filter(Boolean).join('\n\n');
-    const tags = ['#Velvet', '#SoiréePrivée', '#Nightlife', '#Lille'];
+    const tags = ['#Zwit', '#SoiréePrivée', '#Nightlife', '#Lille'];
     return {
       baseCopy: base,
       versions: {

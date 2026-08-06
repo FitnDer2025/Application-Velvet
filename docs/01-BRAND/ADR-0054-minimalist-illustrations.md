@@ -2,7 +2,7 @@
 
 Décision validée.
 
-Velvet adopte une approche hybride et minimaliste. L'expérience repose d'abord sur les photographies, la typographie, les icônes, les espaces et la palette de marque.
+Zwit adopte une approche hybride et minimaliste. L'expérience repose d'abord sur les photographies, la typographie, les icônes, les espaces et la palette de marque.
 
 Les illustrations sont réservées aux moments où elles apportent une aide réelle :
 - Onboarding
@@ -17,7 +17,7 @@ Les illustrations sont réservées aux moments où elles apportent une aide rée
 - Formes simples
 - Peu de détails
 - Beaucoup d'espace
-- Palette limitée au Rouge Velvet, Champagne, Or satiné, Anthracite et Ivoire
+- Palette limitée au Rouge Zwit, Champagne, Or satiné, Anthracite et Ivoire
 
 ## Exclusions
 

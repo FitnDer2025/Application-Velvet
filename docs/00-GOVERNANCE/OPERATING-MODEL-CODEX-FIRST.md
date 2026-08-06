@@ -1,10 +1,10 @@
-# Operating Model — Velvet Codex-first
+# Operating Model — Zwit Codex-first
 
 Statut : **ACCEPTED**
 
 ## Décision fondatrice
 
-Velvet est construit avec une équipe volontairement réduite :
+Zwit est construit avec une équipe volontairement réduite :
 
 - Cyril pilote la vision, les arbitrages, les partenariats et la validation finale ;
 - ChatGPT structure le produit, les règles métier, l’UX, l’architecture documentaire et les critères d’acceptation ;
@@ -23,7 +23,7 @@ L’objectif n’est pas de supprimer le contrôle humain, mais de réduire radi
 
 ## Autonomie de livraison
 
-Codex conduit de bout en bout l'exécution technique des demandes Velvet :
+Codex conduit de bout en bout l'exécution technique des demandes Zwit :
 
 - création de branche ;
 - implémentation et tests ;
@@ -37,7 +37,7 @@ La seule frontière opérationnelle permanente concerne Supabase : Codex prépar
 
 ## Organisation des domaines
 
-Velvet repose sur quatre domaines indépendants mais cohérents :
+Zwit repose sur quatre domaines indépendants mais cohérents :
 
 - **Community** : profils, découverte, albums, conversations, confiance et interactions.
 - **Professionals** : établissements, organisateurs, événements, réservations, billetterie et CRM.

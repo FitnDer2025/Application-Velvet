@@ -7,7 +7,7 @@ const scriptPath = 'apps/beta/static/assets/velvet-studio-sprint1.js';
 const stylePath = 'apps/beta/static/assets/velvet-studio-sprint1.css';
 const buildPath = 'apps/beta/scripts/build.mjs';
 
-test('Velvet Studio Sprint 1 exposes the professional production workspace', async () => {
+test('Zwit Studio Sprint 1 exposes the professional production workspace', async () => {
   const [script, style, build] = await Promise.all([
     readFile(scriptPath, 'utf8'),
     readFile(stylePath, 'utf8'),

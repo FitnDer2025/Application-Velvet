@@ -26,7 +26,7 @@ test('les médias et conversations peuvent être retirés sans supprimer les don
   assert.match(directory, /approvedProfilePhotos\.length >= 3/);
 });
 
-test('Velvet Intelligence partage proximité compatibilité suivi et mémoire', async () => {
+test('Zwit Intelligence partage proximité compatibilité suivi et mémoire', async () => {
   const [home, settings, map] = await Promise.all([
     read('functions/api/members/home-intelligence.js'),
     read('functions/api/members/experience-preferences.js'),

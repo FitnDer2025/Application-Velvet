@@ -34,7 +34,7 @@ test('iOS startup failures use an inline fallback instead of a modal alert', asy
   assert.match(store, /loadIssue = ErrorMessage\.text/);
   assert.doesNotMatch(store, /catch \{\s*errorMessage = ErrorMessage\.text\(for: error\)\s*\}\s*\n\s*func refreshMessaging/);
   assert.match(home, /Votre espace reste disponible/);
-  assert.match(home, /Continuer sur Velvet/);
+  assert.match(home, /Continuer sur Zwit/);
   assert.match(home, /intelligenceIssue = ErrorMessage\.text/);
   assert.doesNotMatch(home, /store\.errorMessage = ErrorMessage\.text\(for: error\)/);
 });

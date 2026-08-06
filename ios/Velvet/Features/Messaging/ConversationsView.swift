@@ -27,7 +27,7 @@ struct ConversationsView: View {
                         VelvetEmptyState(
                             symbol: "bubble.left.and.bubble.right",
                             title: "Aucune conversation",
-                            message: "Écris depuis un profil ou rejoins un Salon Velvet lié à une sortie."
+                            message: "Écris depuis un profil ou rejoins un Salon Zwit lié à une sortie."
                         )
                     } else {
                         LazyVStack(spacing: 12) {
@@ -93,7 +93,7 @@ private struct ConversationTile: View {
                     .multilineTextAlignment(.leading)
 
                 HStack(spacing: 7) {
-                    Text(conversation.kind == "event" ? "SALON VELVET" : "ÉCHANGE PRIVÉ")
+                    Text(conversation.kind == "event" ? "SALON ZWIT" : "ÉCHANGE PRIVÉ")
                         .font(VelvetTypography.caption(size: 8, weight: .semibold))
                         .tracking(1.1)
                         .foregroundStyle(VelvetColor.champagneGold)
@@ -222,7 +222,7 @@ struct ConversationView: View {
                     .font(VelvetTypography.body(size: 17, weight: .semibold))
                     .foregroundStyle(VelvetColor.ivory)
                     .lineLimit(1)
-                Text(conversation.kind == "event" ? "SALON VELVET" : "CONVERSATION PRIVÉE")
+                Text(conversation.kind == "event" ? "SALON ZWIT" : "CONVERSATION PRIVÉE")
                     .font(VelvetTypography.caption(size: 8, weight: .semibold))
                     .tracking(1.2)
                     .foregroundStyle(VelvetColor.champagneGold)

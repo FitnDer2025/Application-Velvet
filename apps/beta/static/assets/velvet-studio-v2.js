@@ -189,7 +189,7 @@
     ctx.fill();
     ctx.fillStyle = '#C6A96A';
     ctx.font = `700 ${Math.max(15, width * 0.025)}px Georgia`;
-    ctx.fillText('VELVET', deviceX + pad * 1.5, deviceY + pad + deviceH * 0.09);
+    ctx.fillText('ZWIT', deviceX + pad * 1.5, deviceY + pad + deviceH * 0.09);
 
     const cards = 4;
     for (let i = 0; i < cards; i += 1) {
@@ -269,11 +269,11 @@
     ctx.fillStyle = '#C6A96A';
     ctx.font = `700 ${Math.max(13, width * 0.022)}px Inter, sans-serif`;
     ctx.letterSpacing = `${Math.max(1, width * 0.002)}px`;
-    ctx.fillText(`SCÈNE ${String(active.index + 1).padStart(2, '0')} · VELVET`, safeX, lower);
+    ctx.fillText(`SCÈNE ${String(active.index + 1).padStart(2, '0')} · ZWIT`, safeX, lower);
 
     ctx.fillStyle = '#F4F4F2';
     ctx.font = `500 ${Math.max(34, width * 0.065)}px Georgia`;
-    wrapText(ctx, scene.title || 'Velvet', safeX, lower + height * 0.055, safeW, height * 0.055, 2);
+    wrapText(ctx, scene.title || 'Zwit', safeX, lower + height * 0.055, safeW, height * 0.055, 2);
 
     ctx.fillStyle = 'rgba(244,244,242,.82)';
     ctx.font = `500 ${Math.max(18, width * 0.031)}px Inter, sans-serif`;
@@ -361,7 +361,7 @@
       fps: FPS,
       scenes: project.scenes.map((scene, index) => ({
         index, id: scene.id, duration: Number(scene.duration || 0), visualPrompt: scene.prompt || scene.visual,
-        overlay: scene.text || '', transition: scene.transition || 'Velvet Fade'
+        overlay: scene.text || '', transition: scene.transition || 'Zwit Fade'
       })),
       voice: { ...project.voice, text: project.voiceOver || '' },
       music: { ...project.music },
@@ -477,7 +477,7 @@
     const target = document.querySelector('[data-v2-capabilities]');
     if (!target) return;
     const providers = runtime.capability?.providers || [
-      { name: 'Compositor Velvet', status: 'ready', mode: 'local' },
+      { name: 'Compositor Zwit', status: 'ready', mode: 'local' },
       { name: 'Voix navigateur', status: 'ready', mode: 'local' },
       { name: 'Musique procédurale', status: 'ready', mode: 'local' },
       { name: 'Vidéo générative', status: 'disabled', mode: 'optionnel' }
@@ -503,7 +503,7 @@
 
   function openDesk() {
     const project = currentProject();
-    if (!project) return notify('Ouvre d’abord un projet Velvet Studio.', 'error');
+    if (!project) return notify('Ouvre d’abord un projet Zwit Studio.', 'error');
     closeDesk();
     const size = formatSize(project.format);
     const modal = document.createElement('section');
@@ -511,7 +511,7 @@
     modal.dataset.velvetStudioV2 = 'true';
     modal.innerHTML = `
       <header class="vs2-head">
-        <div><span class="vs2-mark">V2</span><p><strong>Velvet Studio · Réalisation temps réel</strong><small>${esc(project.title)} · ${esc(project.format)} · ${totalDuration(project).toFixed(0)} s</small></p></div>
+        <div><span class="vs2-mark">V2</span><p><strong>Zwit Studio · Réalisation temps réel</strong><small>${esc(project.title)} · ${esc(project.format)} · ${totalDuration(project).toFixed(0)} s</small></p></div>
         <div class="vs2-head-actions"><button data-v2-voice>Voix OFF</button><button data-v2-play>▶ Prévisualiser</button><button class="primary" data-v2-render>Rendre la vidéo</button><button class="close" data-v2-close>×</button></div>
       </header>
       <main class="vs2-layout">

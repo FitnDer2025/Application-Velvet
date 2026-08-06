@@ -1,8 +1,8 @@
-# ADR-0046 - Indice de Confiance Velvet
+# ADR-0046 - Indice de Confiance Zwit
 
 Décision validée.
 
-L'Indice de Confiance Velvet est un score composite basé sur :
+L'Indice de Confiance Zwit est un score composite basé sur :
 - Vérification d'identité (email, téléphone, identité, selfie)
 - Complétude et authenticité du profil
 - Rencontres confirmées mutuellement

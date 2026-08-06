@@ -12,7 +12,7 @@ const buildUrl = new URL('../../beta/scripts/build.mjs', import.meta.url);
 test('le module social compile et conserve la page Studio', async () => {
   const source = await readFile(moduleUrl, 'utf8');
   assert.doesNotThrow(() => new Function(source));
-  assert.match(source, /Vidéos sociales Velvet/);
+  assert.match(source, /Vidéos sociales Zwit/);
   assert.match(source, /\.vs1-project-main/);
   assert.match(source, /\.vs1-editor-shell/);
   assert.doesNotMatch(source, /innerHTML\s*=\s*homeMarkup|querySelectorAll\('\.vsl-home/);

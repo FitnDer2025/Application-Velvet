@@ -26,8 +26,8 @@ function firstSentence(value, max = 135) {
 
 function frenchFallback(duration = 6) {
   return Number(duration) >= 7
-    ? 'Tout commence par une envie, puis par quelques mots. Avec Velvet, une rencontre peut devenir une histoire.'
-    : 'Avec Velvet, une envie peut devenir une belle histoire.';
+    ? 'Tout commence par une envie, puis par quelques mots. Avec Zwit, une rencontre peut devenir une histoire.'
+    : 'Avec Zwit, une envie peut devenir une belle histoire.';
 }
 
 async function requireControl(request, env) {

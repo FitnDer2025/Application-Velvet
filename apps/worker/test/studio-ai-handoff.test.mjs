@@ -22,10 +22,10 @@ test('le tournage retrouve le job et ouvre le bon environnement', () => {
 
 test('le module reste accessible dans l’éditeur', () => {
   assert.match(moduleSource, /data-vss-editor/);
-  assert.match(moduleSource, /Vidéos sociales Velvet/);
+  assert.match(moduleSource, /Vidéos sociales Zwit/);
   assert.match(moduleSource, /data-vss-back-studio/);
-  assert.match(moduleSource, /Velvet Membre/);
-  assert.match(moduleSource, /Velvet Pro/);
+  assert.match(moduleSource, /Zwit Membre/);
+  assert.match(moduleSource, /Zwit Pro/);
 });
 
 test('la capture n’est jamais déclenchée automatiquement depuis Control', () => {

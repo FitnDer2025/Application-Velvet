@@ -176,7 +176,7 @@ function posterDirectionPrompt({ venue, brand, event, creative, format }) {
 Identité permanente : ${brand?.brand_prompt || 'élégante, premium, nocturne'}.
 Couleurs : principale ${brand?.primary_color || '#7D294C'}, secondaire ${brand?.secondary_color || '#0D0D0D'}, accent ${brand?.accent_color || '#D5B477'}.
 Style demandé : ${creative?.style || brand?.visual_style || 'premium-club'}.
-Thème : ${event?.theme || event?.title || 'soirée Velvet'}.
+Thème : ${event?.theme || event?.title || 'soirée Zwit'}.
 Ambiance : ${event?.description || creative?.brief || ''}.
 Format : ${format || '4:5'}.
 Photos fournies : elles seront composées ensuite sans modification par Velvet. Ne demande jamais de recréer les personnes.

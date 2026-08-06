@@ -1,4 +1,4 @@
-# Velvet Product Metrics
+# Zwit Product Metrics
 
 **Dernière mise à jour :** 4 août 2026
 
@@ -24,9 +24,9 @@ ADR-GOV-003 clarifie l'autonomie de livraison sans modifier les pourcentages d'a
 | Événements | 90 % |
 | Clubs | 70 % |
 | Professionnels | 90 % |
-| Voyages Velvet | 90 % |
+| Voyages Zwit | 90 % |
 | Administration / back-office | 85 % |
-| IA Velvet | 80 % |
+| IA Zwit | 80 % |
 | Monétisation | 95 % |
 | Gamification | 70 % |
 | Mobile avancé | 50 % |
@@ -42,9 +42,9 @@ ADR-GOV-003 clarifie l'autonomie de livraison sans modifier les pourcentages d'a
 - Recherche & découverte : 70 % → 95 %
 - Événements : 60 % → 90 %
 - Professionnels : 50 % → 90 %
-- IA Velvet : 40 % → 75 %
+- IA Zwit : 40 % → 75 %
 - Gamification : 25 % → 70 %
-- Ajout du domaine Voyages Velvet : 90 %
+- Ajout du domaine Voyages Zwit : 90 %
 
 ## Progression apportée par ADR-MON-057
 
@@ -55,7 +55,7 @@ ADR-GOV-003 clarifie l'autonomie de livraison sans modifier les pourcentages d'a
 ## Progression apportée par ADR-UX-061
 
 - Administration / back-office : 65 % → 85 %
-- IA Velvet : 75 % → 80 %
+- IA Zwit : 75 % → 80 %
 - Contrôle dispose d’un cockpit réel, d’une file humaine, d’un historique IA explicable et de réglages média bornés.
 - Le solde dépend des futurs connecteurs d’identité, de marketing et de la validation en recette authentifiée.
 

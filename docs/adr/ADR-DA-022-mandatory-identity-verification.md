@@ -4,7 +4,7 @@ Status: Accepted
 
 ## Decision
 
-Identity and legal-age verification are mandatory for every Velvet member before full platform access is granted.
+Identity and legal-age verification are mandatory for every Zwit member before full platform access is granted.
 
 ## Verification goals
 
@@ -30,4 +30,4 @@ Identity and legal-age verification are mandatory for every Velvet member before
 
 ## Product consequence
 
-There is no ordinary “verified profile” badge because verification is a platform-wide prerequisite. Trust differentiation is instead expressed through the Velvet Trust Index, account history, recommendations, participation and other validated trust signals.
+There is no ordinary “verified profile” badge because verification is a platform-wide prerequisite. Trust differentiation is instead expressed through the Zwit Trust Index, account history, recommendations, participation and other validated trust signals.

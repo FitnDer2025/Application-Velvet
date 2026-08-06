@@ -27,7 +27,7 @@ struct MemberToolsView: View {
                     VelvetPageHeader(
                         "Studio membre",
                         title: "Outils du profil",
-                        subtitle: "Les fonctions avancées de Velvet, pensées comme des outils natifs simples et confidentiels."
+                        subtitle: "Les fonctions avancées de Zwit, pensées comme des outils natifs simples et confidentiels."
                     )
 
                     Picker("Outil", selection: $selectedTool) {
@@ -67,7 +67,7 @@ private struct ProfileWritingTool: View {
         VelvetCard {
             VStack(alignment: .leading, spacing: 16) {
                 toolHeader(
-                    "Plume Velvet",
+                    "Plume Zwit",
                     title: "Affiner mon profil",
                     detail: "L’IA reformule uniquement ta matière. Elle n’invente ni pratique, ni expérience, ni information privée."
                 )
@@ -170,7 +170,7 @@ private struct OrganizerAccessTool: View {
                 toolHeader(
                     "Événements",
                     title: "Devenir organisateur",
-                    detail: "Propose des sorties et anime des Salons Velvet après validation de l’équipe."
+                    detail: "Propose des sorties et anime des Salons Zwit après validation de l’équipe."
                 )
 
                 if let state {

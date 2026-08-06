@@ -31,7 +31,7 @@ struct VenueDetailView: View {
                     VelvetPageHeader(
                         venue.verificationStatus == "verified"
                             ? "Établissement vérifié"
-                            : "Lieu Velvet",
+                            : "Lieu Zwit",
                         title: venue.name,
                         subtitle: [venue.categoryPrimary ?? venue.kind, venue.city]
                             .compactMap { $0 }

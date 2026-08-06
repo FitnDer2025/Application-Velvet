@@ -22,7 +22,7 @@ function contract(name, run) {
       run();
     } catch (error) {
       const message = String(error?.stack || error?.message || error).replaceAll('\r', '').replaceAll('\n', '%0A');
-      console.error(`::error title=Velvet waiting room · ${name}::${message}`);
+      console.error(`::error title=Zwit waiting room · ${name}::${message}`);
       throw error;
     }
   });
@@ -78,7 +78,7 @@ contract('Control cockpit exposes metrics, filters, CSV and role-bound updates',
 contract('Marketing kit contains traceable member and professional campaigns', () => {
   assert.match(marketingPage, /PUBLICATION PRINCIPALE/);
   assert.match(marketingPage, /APPEL À TESTEURS/);
-  assert.match(marketingPage, /VELVET PRO/);
+  assert.match(marketingPage, /ZWIT PRO/);
   assert.match(marketingPage, /RELANCE/);
   assert.match(marketingPage, /STORY · 3 ÉCRANS/);
   assert.match(marketingScript, /utm_source/);

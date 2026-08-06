@@ -29,7 +29,7 @@
     context.fillStyle = '#fff8ed';
     context.shadowColor = 'rgba(0,0,0,.55)';
     context.shadowBlur = Math.max(2, Math.round(fontSize * 0.12));
-    context.fillText('VELVET', width - margin, height - margin);
+    context.fillText('ZWIT', width - margin, height - margin);
     context.restore();
   }
 
@@ -110,11 +110,11 @@
 
     image.addEventListener('contextmenu', (event) => {
       event.preventDefault();
-      toast('Cette photo est protégée par Velvet et ne peut pas être enregistrée depuis ce menu.', true);
+      toast('Cette photo est protégée par Zwit et ne peut pas être enregistrée depuis ce menu.', true);
     });
     image.addEventListener('dragstart', (event) => {
       event.preventDefault();
-      toast('Le glisser-déposer des photos Velvet est désactivé.', true);
+      toast('Le glisser-déposer des photos Zwit est désactivé.', true);
     });
   }
 
@@ -127,7 +127,7 @@
     if (!shield) {
       shield = document.createElement('div');
       shield.id = 'velvetPrivacyShield';
-      shield.innerHTML = '<span>V</span><strong>Espace privé Velvet</strong>';
+      shield.innerHTML = '<span>V</span><strong>Espace privé Zwit</strong>';
       document.body.appendChild(shield);
     }
     return shield;

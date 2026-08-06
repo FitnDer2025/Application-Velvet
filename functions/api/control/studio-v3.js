@@ -34,7 +34,7 @@ function normalizeProject(project = {}) {
   const scenes = Array.isArray(project.scenes) ? project.scenes.slice(0, MAX_PROJECT_SCENES) : [];
   return {
     id: text(project.id || uid(), 100),
-    title: text(project.title || 'Projet Velvet Studio', 180),
+    title: text(project.title || 'Projet Zwit Studio', 180),
     objective: text(project.objective, 1200),
     audience: text(project.audience, 500),
     channel: text(project.channel || 'Instagram', 120),
@@ -48,7 +48,7 @@ function normalizeProject(project = {}) {
       text: text(scene.text, 500),
       prompt: text(scene.prompt || scene.visual, 2400),
       duration: number(scene.duration, 0.5, 30, 5),
-      transition: text(scene.transition || 'Velvet Fade', 80),
+      transition: text(scene.transition || 'Zwit Fade', 80),
       palette: Array.isArray(scene.palette) ? scene.palette.slice(0, 2).map((item) => text(item, 20)) : ['#0D0D0D', '#641B36']
     }))
   };
@@ -56,12 +56,12 @@ function normalizeProject(project = {}) {
 
 function normalizeBrief(brief = {}, project = {}) {
   return {
-    brand: text(brief.brand || 'Velvet', 80) || 'Velvet',
+    brand: text(brief.brand || 'Zwit', 80) || 'Zwit',
     prompt: text(brief.prompt || project.prompt || project.objective, MAX_PROMPT),
-    objective: text(brief.objective || project.objective || 'Faire connaître Velvet et déclencher des inscriptions qualifiées.', 1200),
+    objective: text(brief.objective || project.objective || 'Faire connaître Zwit et déclencher des inscriptions qualifiées.', 1200),
     audience: text(brief.audience || project.audience || 'Couples, femmes seules et professionnels du secteur', 500),
     region: text(brief.region || 'Hauts-de-France et Belgique', 180),
-    offer: text(brief.offer || 'Découvrir Velvet et rejoindre la communauté', 320),
+    offer: text(brief.offer || 'Découvrir Zwit et rejoindre la communauté', 320),
     tone: text(brief.tone || 'Premium, humain, élégant', 180)
   };
 }
@@ -75,8 +75,8 @@ function campaignGateway(env) {
 
 function videoScenes(project, targetDuration, maxScenes) {
   const source = project.scenes.length ? project.scenes : [{
-    id: uid(), title: 'Velvet', visual: 'Ruban Velvet sur fond noir', text: 'Le libertinage évolue.', prompt: 'Univers Velvet premium', duration: 5,
-    transition: 'Velvet Fade', palette: ['#0D0D0D', '#641B36']
+    id: uid(), title: 'Zwit', visual: 'Ruban Zwit sur fond noir', text: 'Le libertinage évolue.', prompt: 'Univers Zwit premium', duration: 5,
+    transition: 'Zwit Fade', palette: ['#0D0D0D', '#641B36']
   }];
   const selected = source.slice(0, Math.min(maxScenes, source.length)).map((scene) => ({ ...scene, id: uid() }));
   const total = selected.reduce((sum, scene) => sum + scene.duration, 0) || 1;
@@ -95,77 +95,77 @@ function localPack(project, brief) {
     'Les plus belles rencontres commencent par la confiance.',
     'Profils, événements et établissements enfin réunis.',
     'Moins de bruit. Plus de qualité. Plus de liberté.',
-    'Velvet rapproche les personnes, les lieux et les expériences qui comptent.'
+    'Zwit rapproche les personnes, les lieux et les expériences qui comptent.'
   ];
   const videoDefinitions = [
     ['Teaser social', 15, '9:16', 'Instagram Reels / TikTok', hooks[0], 3],
     ['Film découverte', 30, '9:16', 'Instagram Reels / Facebook', hooks[2], 5],
-    ['Film manifeste', 45, '16:9', 'YouTube / site Velvet', hooks[1], 6],
+    ['Film manifeste', 45, '16:9', 'YouTube / site Zwit', hooks[1], 6],
     ['Focus confiance', 20, '1:1', 'Instagram / Facebook', hooks[3], 4],
-    ['Velvet Pro', 30, '16:9', 'LinkedIn / prospection', hooks[4], 5]
+    ['Zwit Pro', 30, '16:9', 'LinkedIn / prospection', hooks[4], 5]
   ];
   const videos = videoDefinitions.map(([title, duration, format, channel, hook, maxScenes], index) => ({
     id: uid(), kind: 'video', title, duration, format, channel, hook,
     status: 'draft',
-    objective: index === 4 ? 'Convaincre les établissements de rejoindre Velvet Pro.' : brief.objective,
-    cta: index === 4 ? 'Découvrir Velvet Pro' : 'Découvrir Velvet',
-    voiceOver: `${hook} ${index === 4 ? 'Velvet Pro centralise vos événements, vos réservations et votre visibilité auprès d’une communauté qualifiée.' : 'Velvet réunit profils, lieux, événements et outils de confiance dans une expérience premium et discrète.'} ${signature}`,
+    objective: index === 4 ? 'Convaincre les établissements de rejoindre Zwit Pro.' : brief.objective,
+    cta: index === 4 ? 'Découvrir Zwit Pro' : 'Découvrir Zwit',
+    voiceOver: `${hook} ${index === 4 ? 'Zwit Pro centralise vos événements, vos réservations et votre visibilité auprès d’une communauté qualifiée.' : 'Zwit réunit profils, lieux, événements et outils de confiance dans une expérience premium et discrète.'} ${signature}`,
     scenes: videoScenes(project, duration, maxScenes)
   }));
 
   const visualData = [
-    ['Manifeste', hooks[0], 'Ruban Velvet et lumière champagne'],
+    ['Manifeste', hooks[0], 'Ruban Zwit et lumière champagne'],
     ['Confiance', 'La confiance avant tout.', 'Consentement, albums privés et modération'],
     ['Découverte', 'Des rencontres qui ont du sens.', 'Recherche premium et profils de qualité'],
     ['Événements', 'Vivez plus que des conversations.', 'Agenda et sorties à proximité'],
-    ['Établissements', 'Les meilleurs lieux, au même endroit.', 'Carte Velvet et sélection de lieux'],
+    ['Établissements', 'Les meilleurs lieux, au même endroit.', 'Carte Zwit et sélection de lieux'],
     ['Discrétion', 'Votre liberté mérite de la discrétion.', 'Interface épurée et données protégées'],
     ['Communauté', 'Une communauté choisie.', 'Diversité adulte et bienveillance'],
-    ['Proximité', `Velvet arrive en ${brief.region}.`, 'Carte régionale élégante'],
-    ['Velvet Pro', 'Organiser. Remplir. Fidéliser.', 'Cockpit professionnel premium'],
+    ['Proximité', `Zwit arrive en ${brief.region}.`, 'Carte régionale élégante'],
+    ['Zwit Pro', 'Organiser. Remplir. Fidéliser.', 'Cockpit professionnel premium'],
     ['Invitation', 'Votre invitation pour découvrir Velvet.', 'Carte digitale avec ruban bordeaux'],
-    ['Fonctionnalités', 'Tout Velvet, en un seul univers.', 'Recherche, messages, carte et événements'],
-    ['Signature', signature, 'Logo Velvet et halo champagne']
+    ['Fonctionnalités', 'Tout Zwit, en un seul univers.', 'Recherche, messages, carte et événements'],
+    ['Signature', signature, 'Logo Zwit et halo champagne']
   ];
   const formats = ['1080×1350', '1080×1920', '1200×628', '1080×1080'];
   const visuals = visualData.map(([theme, headline, direction], index) => ({
     id: uid(), kind: 'visual', theme, headline, direction, format: formats[index % formats.length], status: 'draft',
-    prompt: `${direction}. Style ${brief.tone}, palette Velvet #0D0D0D #641B36 #C6A96A #F4F4F2. Personnes fictives majeures, aucune nudité, aucune donnée réelle.`,
-    cta: index === 8 ? 'Découvrir Velvet Pro' : 'Découvrir Velvet'
+    prompt: `${direction}. Style ${brief.tone}, palette Zwit #0D0D0D #641B36 #C6A96A #F4F4F2. Personnes fictives majeures, aucune nudité, aucune donnée réelle.`,
+    cta: index === 8 ? 'Découvrir Zwit Pro' : 'Découvrir Zwit'
   }));
 
-  const hashtags = ['#Velvet', '#RencontresLibres', '#Libertinage', '#Communauté', '#Consentement', '#Discrétion', '#Événements', '#VelvetPro', '#HautsDeFrance', '#Belgique'];
+  const hashtags = ['#Zwit', '#RencontresLibres', '#Libertinage', '#Communauté', '#Consentement', '#Discrétion', '#Événements', '#VelvetPro', '#HautsDeFrance', '#Belgique'];
   const postData = [
-    ['Instagram', hooks[0], 'Velvet réunit les rencontres, les événements et les établissements dans une seule expérience pensée autour de la confiance.'],
+    ['Instagram', hooks[0], 'Zwit réunit les rencontres, les événements et les établissements dans une seule expérience pensée autour de la confiance.'],
     ['Instagram', 'Des rencontres qui ont du sens.', 'Une interface premium et une communauté où la qualité compte davantage que la quantité.'],
-    ['TikTok', 'Et si les rencontres libres entraient enfin dans une nouvelle ère ?', 'Découvrez Velvet : plus fluide, plus élégant, plus humain.'],
-    ['Facebook', 'Velvet arrive près de chez vous.', `Le lancement commence en ${brief.region}, avec les membres, événements et établissements de la région.`],
-    ['Facebook', 'La confiance n’est pas une option.', 'Consentement, discrétion, albums privés et modération font partie de Velvet dès le départ.'],
-    ['LinkedIn', 'Velvet Pro : le cockpit des établissements.', 'Créez vos événements, développez votre visibilité et fidélisez votre communauté depuis un seul espace.'],
+    ['TikTok', 'Et si les rencontres libres entraient enfin dans une nouvelle ère ?', 'Découvrez Zwit : plus fluide, plus élégant, plus humain.'],
+    ['Facebook', 'Zwit arrive près de chez vous.', `Le lancement commence en ${brief.region}, avec les membres, événements et établissements de la région.`],
+    ['Facebook', 'La confiance n’est pas une option.', 'Consentement, discrétion, albums privés et modération font partie de Zwit dès le départ.'],
+    ['LinkedIn', 'Zwit Pro : le cockpit des établissements.', 'Créez vos événements, développez votre visibilité et fidélisez votre communauté depuis un seul espace.'],
     ['Instagram', 'Votre prochaine sortie commence ici.', 'Explorez les événements et établissements proches de vous dans un environnement premium.'],
-    ['TikTok', 'Moins de bruit. Plus de vraies connexions.', 'Velvet remet le feeling, le respect et la qualité au centre.'],
-    ['Instagram', 'Une communauté libre. Jamais sans respect.', 'Velvet accueille les envies et les identités dans un cadre adulte, bienveillant et consentant.'],
+    ['TikTok', 'Moins de bruit. Plus de vraies connexions.', 'Zwit remet le feeling, le respect et la qualité au centre.'],
+    ['Instagram', 'Une communauté libre. Jamais sans respect.', 'Zwit accueille les envies et les identités dans un cadre adulte, bienveillant et consentant.'],
     ['LinkedIn', 'Une plateforme pensée comme un écosystème.', 'Membres, lieux, événements et professionnels avancent enfin avec les mêmes outils.']
   ];
   const posts = postData.map(([platform, headline, body], index) => ({
     id: uid(), kind: 'post', platform, headline, body,
-    cta: platform === 'LinkedIn' ? 'Découvrir Velvet Pro' : 'Découvrir Velvet',
+    cta: platform === 'LinkedIn' ? 'Découvrir Zwit Pro' : 'Découvrir Zwit',
     status: 'draft', hashtags: hashtags.slice(0, platform === 'LinkedIn' ? 5 : 8), visualId: visuals[index % visuals.length].id,
     characterCount: `${headline} ${body}`.length
   }));
 
   const newsletter = {
     id: uid(), kind: 'newsletter', status: 'draft',
-    subject: 'Velvet ouvre un nouvel univers pour les rencontres libres',
+    subject: 'Zwit ouvre un nouvel univers pour les rencontres libres',
     preheader: 'Une plateforme premium, plus humaine, plus fluide et pensée autour de la confiance.',
     headline: hooks[0],
-    body: `Velvet réunit les profils, les événements, les établissements et les outils professionnels dans une même expérience. Notre ambition : proposer une communauté adulte où la qualité, le respect, la discrétion et le consentement sont visibles à chaque étape. Le lancement commence en ${brief.region}.`,
-    cta: 'Découvrir Velvet'
+    body: `Zwit réunit les profils, les événements, les établissements et les outils professionnels dans une même expérience. Notre ambition : proposer une communauté adulte où la qualité, le respect, la discrétion et le consentement sont visibles à chaque étape. Le lancement commence en ${brief.region}.`,
+    cta: 'Découvrir Zwit'
   };
   const banner = {
-    id: uid(), kind: 'banner', status: 'draft', eyebrow: 'VELVET · NOUVELLE EXPÉRIENCE',
+    id: uid(), kind: 'banner', status: 'draft', eyebrow: 'ZWIT · NOUVELLE EXPÉRIENCE',
     headline: hooks[0], subheadline: 'Rencontres, événements et établissements réunis dans un même univers premium.',
-    cta: 'Découvrir Velvet', format: 'Desktop + mobile'
+    cta: 'Découvrir Zwit', format: 'Desktop + mobile'
   };
 
   const calendarItems = [...videos.slice(0, 4), ...posts, ...visuals.slice(0, 4)];
@@ -188,7 +188,7 @@ function localPack(project, brief) {
     brandGuard: {
       score: 96, status: 'pass',
       checks: [
-        ['Identité Velvet', true], ['Consentement et respect', true], ['Personnes majeures uniquement', true],
+        ['Identité Zwit', true], ['Consentement et respect', true], ['Personnes majeures uniquement', true],
         ['Aucune donnée membre réelle', true], ['Promesses vérifiables', true], ['Aucun contenu explicite', true]
       ]
     },

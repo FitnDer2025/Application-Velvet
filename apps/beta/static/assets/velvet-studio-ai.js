@@ -53,7 +53,7 @@
     panel.style.marginTop = '16px';
     panel.innerHTML = `
       <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap">
-        <div><p class="vs-eyebrow">Copilote créatif ${generative ? 'IA générative' : 'moteur Velvet local'}</p><h2>${escapeHtml(prompt.title || 'Concept Velvet')}</h2><p>${escapeHtml(prompt.hook || '')}</p></div>
+        <div><p class="vs-eyebrow">Copilote créatif ${generative ? 'IA générative' : 'moteur Zwit local'}</p><h2>${escapeHtml(prompt.title || 'Concept Zwit')}</h2><p>${escapeHtml(prompt.hook || '')}</p></div>
         <div class="vs-actions"><button class="vs-btn secondary" type="button" data-vs-copy-prompt>Copier le prompt</button><button class="vs-btn secondary" type="button" data-vs-export-ai>Exporter JSON</button></div>
       </div>
       <div class="vs-grid two">
@@ -65,7 +65,7 @@
     page?.appendChild(panel);
     panel.querySelector('[data-vs-copy-prompt]')?.addEventListener('click', async () => {
       await navigator.clipboard.writeText(prompt.masterPrompt || '');
-      toast('Prompt Velvet copié.');
+      toast('Prompt Zwit copié.');
     });
     panel.querySelector('[data-vs-export-ai]')?.addEventListener('click', () => {
       const blob = new Blob([JSON.stringify(prompt, null, 2)], { type: 'application/json' });
@@ -89,7 +89,7 @@
     try {
       const result = await studioApi({ action: 'generate_prompt', brief: currentBrief() });
       promptPanel(result.prompt, result.generative);
-      toast(result.generative ? 'Concept généré par l’IA Velvet.' : 'Concept généré par le moteur Velvet local.');
+      toast(result.generative ? 'Concept généré par l’IA Velvet.' : 'Concept généré par le moteur Zwit local.');
     } catch (error) {
       toast(`Génération impossible : ${error.message}`, 'error');
     } finally {
@@ -121,7 +121,7 @@
     const generate = page.querySelector('[data-vs-generate]');
     if (generate && !generate.dataset.vsAiBound) {
       generate.dataset.vsAiBound = 'true';
-      generate.textContent = 'Générer avec l’IA Velvet';
+      generate.textContent = 'Générer avec l’IA Zwit';
       generate.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -134,7 +134,7 @@
       capture.type = 'button';
       capture.className = 'vs-btn secondary';
       capture.dataset.vsCapture = 'true';
-      capture.textContent = 'Ouvrir Velvet en mode Capture';
+      capture.textContent = 'Ouvrir Zwit en mode Capture';
       capture.addEventListener('click', () => startCapture(capture));
       actions.prepend(capture);
     }

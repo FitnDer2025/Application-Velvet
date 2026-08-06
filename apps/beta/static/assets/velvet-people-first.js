@@ -95,7 +95,7 @@
   }
 
   function displayName(profile) {
-    return str(pick(profile, 'displayName', 'display_name', 'name')) || 'Membre Velvet';
+    return str(pick(profile, 'displayName', 'display_name', 'name')) || 'Membre Zwit';
   }
 
   function profiles(bundle = state.bundle) {
@@ -171,7 +171,7 @@
   }
 
   function venueName(venue) {
-    return str(pick(venue, 'name', 'displayName', 'display_name')) || 'Établissement Velvet';
+    return str(pick(venue, 'name', 'displayName', 'display_name')) || 'Établissement Zwit';
   }
 
   function venueCity(venue) {
@@ -308,7 +308,7 @@
     return `<button type="button" class="people-first-recommendation" data-open-profile="${esc(candidate.id)}">
       <span class="people-first-recommendation-media">
         ${image(candidate.photoUrl || primaryPhoto(profile), candidate.displayName || displayName(profile))}
-        <span class="people-first-score">${Number(candidate.compatibilityScore) ? `${candidate.compatibilityScore}%` : 'Velvet IA'}</span>
+        <span class="people-first-score">${Number(candidate.compatibilityScore) ? `${candidate.compatibilityScore}%` : 'Zwit IA'}</span>
       </span>
       <span class="people-first-recommendation-copy"><strong>${esc(candidate.displayName || displayName(profile))}</strong><small>${esc(meta)}</small></span>
     </button>`;
@@ -333,7 +333,7 @@
       } else if (updatedAt > new Date(createdAt.getTime() + 12 * 3600000)) {
         items.push({ id: `profile-${profileId(member)}-${updatedAt.toISOString()}`, kind: 'profile', member, title: 'a enrichi son profil', detail: [arr(member.practices)[0], arr(pick(member, 'valuesList', 'values_list'))[0], profileLocation(member)].filter(Boolean).join(' · '), media: primaryPhoto(member), createdAt: updatedAt });
       } else {
-        items.push({ id: `joined-${profileId(member)}`, kind: 'joined', member, title: profileType(member) === 'couple' ? 'vient de rejoindre la communauté' : 'vient de rejoindre Velvet', detail: profileMeta(member), media: primaryPhoto(member), createdAt });
+        items.push({ id: `joined-${profileId(member)}`, kind: 'joined', member, title: profileType(member) === 'couple' ? 'vient de rejoindre la communauté' : 'vient de rejoindre Zwit', detail: profileMeta(member), media: primaryPhoto(member), createdAt });
       }
     }
 
@@ -413,7 +413,7 @@
   function feedCard(item) {
     const member = item.member;
     const id = profileId(member);
-    const actorName = member ? displayName(member) : 'La communauté Velvet';
+    const actorName = member ? displayName(member) : 'La communauté Zwit';
     const actorImage = item.actorImage || primaryPhoto(member);
     const meta = member ? profileMeta(member) : '';
     const profileAction = id ? `data-open-profile="${esc(id)}"` : '';
@@ -576,7 +576,7 @@
   function profileHero(profile, own = false) {
     return `<header class="people-first-profile-hero">
       <div class="people-first-profile-hero-media">${image(primaryPhoto(profile), displayName(profile))}</div>
-      <div class="people-first-profile-hero-copy"><span>${own ? 'MON PROFIL' : 'PROFIL VELVET'}</span><h1>${esc(displayName(profile))}</h1><p>${esc(profileMeta(profile))}</p><div>${pick(profile, 'verificationStatus', 'verification_status') === 'verified' ? '<em>Profil vérifié</em>' : ''}<em>${profilePhotos(profile).length} photos</em></div></div>
+      <div class="people-first-profile-hero-copy"><span>${own ? 'MON PROFIL' : 'PROFIL ZWIT'}</span><h1>${esc(displayName(profile))}</h1><p>${esc(profileMeta(profile))}</p><div>${pick(profile, 'verificationStatus', 'verification_status') === 'verified' ? '<em>Profil vérifié</em>' : ''}<em>${profilePhotos(profile).length} photos</em></div></div>
     </header>`;
   }
 
@@ -734,7 +734,7 @@
     root.querySelectorAll('[data-lightbox-src]').forEach((node) => node.addEventListener('click', () => {
       const dialog = document.createElement('dialog');
       dialog.className = 'people-first-lightbox';
-      dialog.innerHTML = `<button type="button" data-close-dialog aria-label="Fermer">×</button>${image(node.dataset.lightboxSrc, 'Photo Velvet')}`;
+      dialog.innerHTML = `<button type="button" data-close-dialog aria-label="Fermer">×</button>${image(node.dataset.lightboxSrc, 'Photo Zwit')}`;
       document.body.append(dialog); bindOwnedContent(dialog); dialog.addEventListener('close', () => dialog.remove()); dialog.showModal();
     }));
   }
@@ -746,7 +746,7 @@
       if (route === 'profile') return await renderOwnProfile(force);
       openLegacyRoute(route);
     } catch (error) {
-      content.innerHTML = `<section class="people-first-page"><div class="people-first-empty"><strong>Velvet n’a pas pu actualiser cette vue.</strong><p>${esc(error.message)}</p><button type="button" data-retry-route="${esc(route)}">Réessayer</button></div></section>`;
+      content.innerHTML = `<section class="people-first-page"><div class="people-first-empty"><strong>Zwit n’a pas pu actualiser cette vue.</strong><p>${esc(error.message)}</p><button type="button" data-retry-route="${esc(route)}">Réessayer</button></div></section>`;
       content.querySelector('[data-retry-route]')?.addEventListener('click', () => navigate(route, true));
     }
   }

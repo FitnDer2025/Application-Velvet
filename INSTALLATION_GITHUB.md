@@ -5,7 +5,7 @@
 2. Ouvrir le dépôt GitHub.
 3. **Add file** → **Upload files**.
 4. Glisser tout le contenu du dossier.
-5. Valider avec : `docs: initialize Velvet OS starter kit`.
+5. Valider avec : `docs: initialize Zwit OS starter kit`.
 
 ## PowerShell
 ```powershell

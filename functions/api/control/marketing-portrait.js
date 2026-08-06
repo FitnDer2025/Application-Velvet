@@ -15,7 +15,7 @@ async function requireControl(request, env) {
   const session = await memberSession(request, env, { allowUnverified: true });
   if (session.response) return session.response;
   if (!session.account.roles.some((role) => CONTROL_ROLES.has(role))) {
-    return new Response('Accès marketing réservé à Velvet Control.', { status: 403 });
+    return new Response('Accès marketing réservé à Zwit Control.', { status: 403 });
   }
   return null;
 }
