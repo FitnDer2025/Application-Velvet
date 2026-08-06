@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct VelvetApp: App {
+struct ZwitApp: App {
     @UIApplicationDelegateAdaptor(VelvetAppDelegate.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var appState = AppState()
@@ -9,28 +9,41 @@ struct VelvetApp: App {
     @StateObject private var screenshotProtection = ScreenshotProtectionService()
     @StateObject private var location = LocationService()
     @State private var locationConfiguredForSession = false
+    @State private var showsLaunchExperience = true
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environmentObject(appState)
-                .environmentObject(biometrics)
-                .environmentObject(screenshotProtection)
-                .environmentObject(location)
-                .preferredColorScheme(.dark)
-                .task {
-                    await appState.restoreSession()
-                    await biometrics.unlockIfNeeded()
-                    configureLocationIfNeeded()
-                }
-                .onChange(of: appState.phase.id) { _, phaseID in
-                    if phaseID == "home" {
-                        configureLocationIfNeeded()
-                    } else if phaseID == "signedOut" {
-                        locationConfiguredForSession = false
-                        location.onLocation = nil
+            ZStack {
+                RootView()
+                    .environmentObject(appState)
+                    .environmentObject(biometrics)
+                    .environmentObject(screenshotProtection)
+                    .environmentObject(location)
+
+                if showsLaunchExperience {
+                    ZwitNativeLaunchExperience {
+                        withAnimation(.easeInOut(duration: 0.85)) {
+                            showsLaunchExperience = false
+                        }
                     }
+                    .transition(.opacity)
+                    .zIndex(10_000)
                 }
+            }
+            .preferredColorScheme(.dark)
+            .task {
+                await appState.restoreSession()
+                await biometrics.unlockIfNeeded()
+                configureLocationIfNeeded()
+            }
+            .onChange(of: appState.phase.id) { _, phaseID in
+                if phaseID == "home" {
+                    configureLocationIfNeeded()
+                } else if phaseID == "signedOut" {
+                    locationConfiguredForSession = false
+                    location.onLocation = nil
+                }
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
