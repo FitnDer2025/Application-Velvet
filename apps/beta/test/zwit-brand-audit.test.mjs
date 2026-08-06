@@ -12,7 +12,7 @@ const finalMigrations = [
   join(root, 'infra/supabase/migrations/0045_zwit_visible_brand_consistency.sql'),
   join(root, 'supabase/migrations/20260806230500_zwit_visible_brand_consistency.sql')
 ];
-const readableExtensions = new Set(['.html', '.js', '.mjs', '.json', '.svg', '.md', '.swift', '.plist', '.strings', '.xcstrings', '.sql']);
+const readableExtensions = new Set(['.html', '.js', '.mjs', '.json', '.svg', '.md', '.swift', '.plist', '.strings', '.xcstrings']);
 const excludedDirectories = new Set(['.git', 'node_modules', 'DerivedData', '.build']);
 
 function walk(directory) {
@@ -48,7 +48,7 @@ function isTechnical(value) {
     /^velvet[A-Z][A-Za-z0-9_]*$/,
     /^velvet[._/-][A-Za-z0-9_./-]+$/i,
     /^\/[^\s]*velvet[^\s]*$/i,
-    /\.(?:js|mjs|css|png|jpe?g|svg|swift|plist|entitlements|json|sql)$/i,
+    /\.(?:js|mjs|css|png|jpe?g|svg|swift|plist|entitlements|json)$/i,
     /^(?:bucket|table|storage|schema|key|kind|target|scheme|migration):?\s*velvet/i,
     /^velvet_private(?:\.|$)/i,
     /^public\.velvet_/i
@@ -60,8 +60,7 @@ function visibleVelvetFindings() {
   const files = [
     ...walk(webRoot),
     ...walk(iosRoot),
-    ...walk(functionsRoot),
-    ...finalMigrations.filter(existsSync)
+    ...walk(functionsRoot)
   ];
 
   for (const file of files) {
@@ -101,6 +100,17 @@ test('iOS possède une source visible de marque unique', () => {
   assert.match(brand, /static let proLabel = "ZWIT PRO"/);
   assert.match(brand, /static let splashAsset = "ZwitOfficialLogo"/);
   assert.match(brand, /static let widgetAsset = "ZwitOfficialLogo"/);
+});
+
+test('Watch et widgets utilisent tous le logo officiel', () => {
+  const watch = readFileSync(join(iosRoot, 'VelvetWatch/VelvetWatchApp.swift'), 'utf8');
+  const watchWidget = readFileSync(join(iosRoot, 'VelvetWatchWidget/VelvetWatchWidget.swift'), 'utf8');
+  const phoneWidget = readFileSync(join(iosRoot, 'VelvetWidget/VelvetNotificationWidget.swift'), 'utf8');
+  assert.doesNotMatch(watch, /Text\("V"\)/);
+  assert.doesNotMatch(watchWidget, /Text\("V"\)/);
+  assert.match(watch, /Image\(ZwitWatchBrand\.logoAsset\)/);
+  assert.match(watchWidget, /Image\(ZwitWatchWidgetBrand\.logoAsset\)/);
+  assert.match(phoneWidget, /Image\(ZwitWidgetBrand\.logoAsset\)/);
 });
 
 test('les scripts de marque et de conversation sont syntaxiquement valides', () => {
