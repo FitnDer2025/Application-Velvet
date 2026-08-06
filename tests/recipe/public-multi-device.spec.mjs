@@ -54,7 +54,7 @@ test('la connexion publique reste premium, locale et sans débordement', async (
     if (!['127.0.0.1', 'localhost'].includes(url.hostname)) failures.push(`Ressource tierce: ${url.hostname}`);
   });
   await page.goto('/');
-  await expect(page).toHaveTitle(/Velvet/);
+  await expect(page).toHaveTitle(/Zwit/);
   await expect(page.locator('text=Les rencontres commencent par la confiance.')).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
