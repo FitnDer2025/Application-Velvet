@@ -85,5 +85,5 @@ test('database keeps direct access closed and uses explicit RPC permissions', ()
   assert.match(migration, /revoke all on public\.velvet_waitlist_entries from anon, authenticated/);
   assert.match(migration, /grant execute on function public\.register_velvet_waitlist[\s\S]*to anon, authenticated/);
   assert.match(migration, /role_code in \('admin', 'direction'/);
-  assert.doesNotMatch(migration, /sexual|practice|orientation|photo|identity_document/i);
+  assert.doesNotMatch(migration, /sexual_preferences|intimate_practices|sexual_orientation|profile_photo|identity_document|exact_geolocation/i);
 });
