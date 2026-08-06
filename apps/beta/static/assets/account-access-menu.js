@@ -103,6 +103,36 @@
     else host.prepend(root);
   }
 
+  function mountControlWaitlistEntry(currentAccount) {
+    if (!currentPath.startsWith('/control/') || currentPath.startsWith('/control/acces-prive/')) return;
+    const allowed = new Set(['admin', 'direction', 'moderator', 'support', 'auditor']);
+    const roles = Array.isArray(currentAccount.roles) ? currentAccount.roles : [];
+    if (!roles.some((role) => allowed.has(role))) return;
+
+    const install = () => {
+      const page = document.querySelector('[data-page="communications"]');
+      if (!page || page.querySelector('[data-control-waitlist-entry]')) return;
+      const entry = document.createElement('section');
+      entry.className = 'control-card velvet-control-waitlist-entry';
+      entry.dataset.controlWaitlistEntry = 'true';
+      entry.innerHTML = `
+        <div>
+          <p class="control-eyebrow">ACCÈS PRIVÉ · PRÉ-OUVERTURE</p>
+          <h2>Salle d’attente Velvet</h2>
+          <p>Suivre les préinscriptions membres et professionnelles, les territoires, les sources de campagne et l’état des invitations.</p>
+        </div>
+        <div class="velvet-control-waitlist-actions">
+          <a class="control-btn secondary" href="/marketing/acces-prive/">Préparer les publications</a>
+          <a class="control-btn" href="/control/acces-prive/">Ouvrir le dashboard</a>
+        </div>`;
+      page.querySelector('.control-head')?.insertAdjacentElement('afterend', entry);
+    };
+
+    install();
+    const observer = new MutationObserver(install);
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
   const style = document.createElement('style');
   style.textContent = `
     .velvet-account-access{display:grid;gap:8px;margin-bottom:10px;padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:15px;background:rgba(255,255,255,.035);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -120,8 +150,15 @@
     header .velvet-account-access.is-header nav a{min-width:70px}
     header .velvet-account-access.is-header .velvet-waitlist-link{white-space:nowrap}
     header .velvet-account-access.is-header .velvet-change-account{width:auto;white-space:nowrap}
-    @media(max-width:900px){header .velvet-account-access.is-header{margin-left:auto}header .velvet-account-access.is-header nav,header .velvet-account-access.is-header .velvet-waitlist-link{display:none}}
+    .velvet-control-waitlist-entry{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:0 0 18px;padding:22px 24px;border-color:rgba(217,182,107,.24)!important;background:radial-gradient(circle at 92% 8%,rgba(140,18,63,.22),transparent 38%),linear-gradient(135deg,rgba(217,182,107,.055),rgba(255,255,255,.018))!important}
+    .velvet-control-waitlist-entry h2{margin:5px 0 7px;font-size:24px}
+    .velvet-control-waitlist-entry p:not(.control-eyebrow){max-width:690px;margin:0;color:#948d89;line-height:1.55}
+    .velvet-control-waitlist-actions{display:flex;flex-shrink:0;gap:8px}
+    @media(max-width:900px){header .velvet-account-access.is-header{margin-left:auto}header .velvet-account-access.is-header nav,header .velvet-account-access.is-header .velvet-waitlist-link{display:none}.velvet-control-waitlist-entry{align-items:flex-start;flex-direction:column}.velvet-control-waitlist-actions{width:100%;flex-wrap:wrap}}
   `;
   document.head.appendChild(style);
-  account().then(mount).catch(() => {});
+  account().then((currentAccount) => {
+    mount(currentAccount);
+    mountControlWaitlistEntry(currentAccount);
+  }).catch(() => {});
 })();
