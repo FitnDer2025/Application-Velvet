@@ -40,7 +40,7 @@
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const layer = document.createElement('div');
     layer.className = `zwit-opening${reduced ? ' reduced' : ''}`;
-    layer.innerHTML = `<div class="zwit-opening-ring">${words.map((word, index) => `<span style="--i:${index};--n:${words.length}">${escapeHTML(word)}</span>`).join('')}</div><div class="zwit-opening-core"><img src="/assets/zwit-logo-1024.jpg" alt=""><strong>Zwit</strong><small>Un secret se partage. Jamais il ne s’impose.</small></div>`;
+    layer.innerHTML = `<div class="zwit-opening-ring">${words.map((word, index) => `<span style="--i:${index};--n:${words.length}">${escapeHTML(word)}</span>`).join('')}</div><div class="zwit-opening-core"><img src="/assets/zwit-logo.svg" alt=""><strong>Zwit</strong><small>Un secret se partage. Jamais il ne s’impose.</small></div>`;
     document.body.appendChild(layer);
     requestAnimationFrame(() => layer.classList.add('visible'));
     setTimeout(() => {
