@@ -119,7 +119,7 @@ struct ZwitNativeLaunchExperience: View {
             }
             try? await Task.sleep(for: .milliseconds(600))
             revealLogo()
-            try? await Task.sleep(for: .milliseconds(1400))
+            try? await Task.sleep(for: .milliseconds(11_500))
             onFinished()
             return
         }
@@ -129,7 +129,7 @@ struct ZwitNativeLaunchExperience: View {
             withAnimation(.easeInOut(duration: 0.78)) {
                 wordOpacity = 1
             }
-            try? await Task.sleep(for: .milliseconds(1250))
+            try? await Task.sleep(for: .milliseconds(1_250))
             withAnimation(.easeInOut(duration: 0.82)) {
                 wordOpacity = 0
             }
@@ -141,10 +141,10 @@ struct ZwitNativeLaunchExperience: View {
             fogOpacity = 0.84
             fogScale = 1.18
         }
-        try? await Task.sleep(for: .milliseconds(1050))
+        try? await Task.sleep(for: .milliseconds(1_050))
 
         revealLogo()
-        try? await Task.sleep(for: .milliseconds(1900))
+        try? await Task.sleep(for: .milliseconds(4_300))
         onFinished()
     }
 
