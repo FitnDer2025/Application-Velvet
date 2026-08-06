@@ -411,7 +411,7 @@ struct PremiumMemberDetailView: View {
             Button {
                 showsAlbumAccess = true
             } label: {
-                Label("Partager un album privé", systemImage: "lock.open")
+                Label("Ouvrir mes albums privés", systemImage: "lock.open")
                     .font(VelvetTypography.body(size: 13, weight: .semibold))
                     .foregroundStyle(VelvetColor.champagneGold)
                     .frame(maxWidth: .infinity, minHeight: 46)
@@ -423,6 +423,23 @@ struct PremiumMemberDetailView: View {
                     }
             }
             .buttonStyle(.plain)
+
+            Button {
+                Task { await requestAlbumAccess() }
+            } label: {
+                Label("Demander l’ouverture d’un album", systemImage: "lock.badge.clock")
+                    .font(VelvetTypography.body(size: 13, weight: .semibold))
+                    .foregroundStyle(VelvetColor.ivory)
+                    .frame(maxWidth: .infinity, minHeight: 46)
+                    .background(VelvetColor.ivory.opacity(0.055))
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(VelvetColor.borderSubtle, lineWidth: 1)
+                    }
+            }
+            .buttonStyle(.plain)
+            .disabled(isWorking)
 
             Button {
                 showsSafety = true
@@ -473,6 +490,27 @@ struct PremiumMemberDetailView: View {
         store.directory?.profiles.first(where: {
             $0.id == recommendation.authorProfileId
         })?.displayName ?? "Membre Zwit"
+    }
+
+    @MainActor
+    private func requestAlbumAccess() async {
+        isWorking = true
+        defer { isWorking = false }
+        do {
+            let id = try await store.service.startConversation(profileID: profile.id)
+            _ = try await store.service.sendMessage(
+                "🔐 Votre profil nous plaît. Accepteriez-vous de nous ouvrir l’un de vos albums privés ?",
+                conversationID: id
+            )
+            activeConversation = .direct(
+                id: id,
+                title: profile.displayName,
+                profileID: profile.id,
+                photoURL: primaryMedia?.previewUrl
+            )
+        } catch {
+            store.errorMessage = ErrorMessage.text(for: error)
+        }
     }
 
     @MainActor

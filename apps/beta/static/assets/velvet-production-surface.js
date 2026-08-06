@@ -202,4 +202,10 @@
   document.addEventListener('submit', (event) => clean(event.target), true);
   window.addEventListener('pageshow', () => clean(document));
   [0, 250, 1000].forEach((delay) => setTimeout(() => clean(document), delay));
+  if (!document.querySelector('script[data-zwit-experience]')) {
+    const experience = document.createElement('script');
+    experience.src = '/assets/zwit-experience.js?v=20260806-1';
+    experience.dataset.zwitExperience = 'true';
+    document.head.appendChild(experience);
+  }
 })();

@@ -282,7 +282,13 @@ struct RealtimeAppleConversationView: View {
             )
             .padding(.top, 30)
         } else {
-            ForEach(messages) { message in
+            ForEach(Array(messages.enumerated()), id: \.element.id) { index, message in
+                if index == 0 || !Calendar.current.isDate(
+                    RealtimeMessageDate.date(messages[index - 1].createdAt),
+                    inSameDayAs: RealtimeMessageDate.date(message.createdAt)
+                ) {
+                    RealtimeMessageDaySeparator(date: RealtimeMessageDate.date(message.createdAt))
+                }
                 messageBubble(for: message)
                     .id(message.id)
             }
@@ -653,6 +659,32 @@ struct RealtimeAppleConversationView: View {
     }
 }
 
+private struct RealtimeMessageDaySeparator: View {
+    let date: Date
+
+    private var label: String {
+        if Calendar.current.isDateInToday(date) { return "Aujourd’hui" }
+        if Calendar.current.isDateInYesterday(date) { return "Hier" }
+        return date.formatted(.dateTime.weekday(.wide).day().month(.wide).year())
+    }
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Rectangle().fill(VelvetColor.borderSubtle).frame(height: 0.5)
+            Text(label.capitalized)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(VelvetColor.textSecondary)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(.ultraThinMaterial)
+                .clipShape(Capsule())
+            Rectangle().fill(VelvetColor.borderSubtle).frame(height: 0.5)
+        }
+        .padding(.vertical, 8)
+        .accessibilityLabel("Messages du \(label)")
+    }
+}
+
 private struct RealtimeAttachmentDraftChip: View {
     let attachment: OutgoingMessageAttachment
     let remove: () -> Void
@@ -701,6 +733,7 @@ private struct RealtimeMessageBubble: View {
     let reactions: [MessageReaction]
     let currentUserID: UUID?
     let openImage: (URL) -> Void
+    @State private var dragOffset: CGFloat = 0
 
     private let reactionChoices: [(key: String, emoji: String)] = [
         ("like", "👍"),
@@ -712,12 +745,40 @@ private struct RealtimeMessageBubble: View {
     ]
 
     var body: some View {
-        HStack(alignment: .bottom, spacing: 7) {
-            if isMine { Spacer(minLength: 48) }
-            messageColumn
-            if !isMine { Spacer(minLength: 48) }
+        ZStack(alignment: isMine ? .trailing : .leading) {
+            Text(messageDateLabel)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(VelvetColor.champagneGold.opacity(0.82))
+                .padding(.horizontal, 8)
+                .opacity(abs(dragOffset) > 14 ? 1 : 0)
+
+            HStack(alignment: .bottom, spacing: 7) {
+                if isMine { Spacer(minLength: 48) }
+                messageColumn
+                if !isMine { Spacer(minLength: 48) }
+            }
+            .offset(x: dragOffset)
+            .gesture(
+                DragGesture(minimumDistance: 12)
+                    .onChanged { value in
+                        let allowed = isMine ? min(0, value.translation.width) : max(0, value.translation.width)
+                        dragOffset = max(-118, min(118, allowed))
+                    }
+                    .onEnded { _ in
+                        withAnimation(.spring(response: 0.30, dampingFraction: 0.82)) {
+                            dragOffset = 0
+                        }
+                    }
+            )
         }
         .frame(maxWidth: .infinity)
+        .accessibilityHint("Glissez le message sur le côté pour afficher sa date complète.")
+    }
+
+    private var messageDateLabel: String {
+        RealtimeMessageDate.date(message.createdAt).formatted(
+            .dateTime.day().month(.abbreviated).year().hour().minute()
+        )
     }
 
     private var messageColumn: some View {
