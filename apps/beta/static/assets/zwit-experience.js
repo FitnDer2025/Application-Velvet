@@ -3,7 +3,14 @@
   if (window.__ZWIT_EXPERIENCE__) return;
   window.__ZWIT_EXPERIENCE__ = true;
 
-  const words = ['Chut', 'Shh', 'Ssst', 'Silencio', 'Silenzio', 'Leise', 'Tyst', 'Cicho', 'Тише', '静かに', '쉿', 'هدوء'];
+  const openingWords = [
+    { word: 'Chut', language: 'Français' },
+    { word: 'Silencio', language: 'Español' },
+    { word: 'Silenzio', language: 'Italiano' },
+    { word: '嘘…', language: '中文' }
+  ];
+  const OFFICIAL_LOGO = '/assets/zwit-logo-official.jpg';
+  const OFFICIAL_MARK = OFFICIAL_LOGO;
   const state = { profileId: '', patchedMessages: new WeakSet() };
   const escapeHTML = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[char]);
 
@@ -34,20 +41,54 @@
   }
 
   function showOpening() {
-    if (!/^\/(?:$|membres|pro|acces-prive)/.test(location.pathname)) return;
-    if (sessionStorage.getItem('zwit-opening-seen') === '1') return;
-    sessionStorage.setItem('zwit-opening-seen', '1');
-    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const layer = document.createElement('div');
-    layer.className = `zwit-opening${reduced ? ' reduced' : ''}`;
-    layer.innerHTML = `<div class="zwit-opening-ring">${words.map((word, index) => `<span style="--i:${index};--n:${words.length}">${escapeHTML(word)}</span>`).join('')}</div><div class="zwit-opening-core"><img src="/assets/zwit-logo.svg" alt=""><strong>Zwit</strong><small>Un secret se partage. Jamais il ne s’impose.</small></div>`;
-    document.body.appendChild(layer);
-    requestAnimationFrame(() => layer.classList.add('visible'));
-    setTimeout(() => {
-      layer.classList.add('leaving');
-      setTimeout(() => layer.remove(), 650);
-    }, reduced ? 1200 : 2700);
+  if (!/^\/(?:$|membres|pro|acces-prive)/.test(location.pathname)) return;
+  const key = 'zwit-opening-seen-v3';
+  if (sessionStorage.getItem(key) === '1') return;
+  sessionStorage.setItem(key, '1');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const layer = document.createElement('div');
+  layer.className = `zwit-opening${reduced ? ' reduced' : ''}`;
+  layer.innerHTML = `<div class="zwit-opening-glow" aria-hidden="true"></div><div class="zwit-opening-word-stage" aria-live="polite"><small></small><strong></strong></div><div class="zwit-opening-mist" aria-hidden="true">${Array.from({ length: 8 }, (_, index) => `<i style="--i:${index}"></i>`).join('')}</div><div class="zwit-opening-logo"><img src="${OFFICIAL_LOGO}" alt="Logo Zwit"><span>CHUT.</span></div>`;
+  document.body.appendChild(layer);
+  requestAnimationFrame(() => layer.classList.add('visible'));
+
+  const finish = () => {
+    layer.classList.add('leaving');
+    setTimeout(() => layer.remove(), 760);
+  };
+
+  if (reduced) {
+    layer.classList.add('is-logo');
+    setTimeout(finish, 1450);
+    return;
   }
+
+  const stage = layer.querySelector('.zwit-opening-word-stage');
+  const word = stage.querySelector('strong');
+  const language = stage.querySelector('small');
+  let index = 0;
+
+  const revealLogo = () => {
+    layer.classList.add('is-misting');
+    setTimeout(() => layer.classList.add('is-logo'), 780);
+    setTimeout(finish, 2450);
+  };
+
+  const revealWord = () => {
+    const item = openingWords[index];
+    language.textContent = item.language;
+    word.textContent = item.word;
+    requestAnimationFrame(() => stage.classList.add('is-visible'));
+    setTimeout(() => {
+      stage.classList.remove('is-visible');
+      index += 1;
+      if (index < openingWords.length) setTimeout(revealWord, 190);
+      else setTimeout(revealLogo, 240);
+    }, 660);
+  };
+
+  setTimeout(revealWord, 260);
+}
 
   function parsedMessageDate(message) {
     const time = message.querySelector('time[datetime], time');
@@ -57,9 +98,6 @@
     return Number.isNaN(date.getTime()) ? null : date;
   }
 
-  function fullDate(date) {
-    return new Intl.DateTimeFormat('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' }).format(date);
-  }
 
   function dayDate(date) {
     const today = new Date();
@@ -87,9 +125,8 @@
       previousDay = day;
       if (state.patchedMessages.has(message)) return;
       state.patchedMessages.add(message);
-      message.classList.add('zwit-dated-message');
-      message.dataset.zwitFullDate = fullDate(date);
-      message.setAttribute('aria-label', `${message.textContent.trim()}. Envoyé ${fullDate(date)}`);
+      message.classList.remove('zwit-dated-message');
+      message.removeAttribute('data-zwit-full-date');
     });
   }
 
@@ -152,7 +189,23 @@
     });
   }
 
+function installBrandLogo() {
+  document.querySelectorAll('img[src*="zwit-logo.svg"]').forEach((image) => {
+    image.src = OFFICIAL_MARK;
+    image.alt = 'Zwit';
+  });
+  if (document.querySelector('[data-zwit-official-brand]')) return;
+  const brand = document.createElement('a');
+  brand.href = '/membres/';
+  brand.className = 'zwit-official-brand';
+  brand.dataset.zwitOfficialBrand = '1';
+  brand.setAttribute('aria-label', 'Accueil Zwit');
+  brand.innerHTML = `<img src="${OFFICIAL_MARK}" alt="Zwit">`;
+  document.body.appendChild(brand);
+}
+
   function patch() {
+    installBrandLogo();
     patchMessages();
     patchProfileActions();
   }
@@ -163,12 +216,15 @@
   }, true);
 
   const style = document.createElement('style');
-  style.textContent = `
-    .zwit-opening{position:fixed;z-index:2147483647;inset:0;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 50% 42%,#4b1b31 0,#111014 34%,#050506 72%);color:#f5efe9;opacity:0;transition:opacity .45s}.zwit-opening.visible{opacity:1}.zwit-opening.leaving{opacity:0}.zwit-opening-ring{position:absolute;width:min(76vw,430px);aspect-ratio:1;border:1px solid #c6a96a33;border-radius:50%;animation:zwitOrbit 15s linear infinite}.zwit-opening-ring span{position:absolute;left:50%;top:50%;font:600 11px Inter,Arial;letter-spacing:.12em;color:#f4f0ea66;transform:rotate(calc(var(--i)*360deg/var(--n))) translateX(195px) rotate(calc(var(--i)*-360deg/var(--n)))}.zwit-opening-ring span:nth-child(3n){color:#d6b86fbb;font-size:13px}.zwit-opening-core{position:relative;display:grid;justify-items:center;gap:9px;text-align:center}.zwit-opening-core img{width:118px;height:118px;object-fit:contain;border-radius:26px;filter:drop-shadow(0 20px 45px #000)}.zwit-opening-core strong{font:500 45px Georgia,serif;letter-spacing:.12em;color:#d8bd77}.zwit-opening-core small{max-width:290px;color:#bcb4b0;font:500 12px/1.5 Inter,Arial}.zwit-opening.reduced .zwit-opening-ring{animation:none}@keyframes zwitOrbit{to{transform:rotate(360deg)}}
-    .zwit-day-separator{display:flex;align-items:center;gap:10px;margin:17px auto 11px;color:#aaa3a0;font:650 10px Inter,Arial;text-transform:capitalize}.zwit-day-separator:before,.zwit-day-separator:after{content:"";width:54px;height:1px;background:#ffffff16}.zwit-dated-message{position:relative;transition:transform .2s;touch-action:pan-y}.zwit-dated-message:after{content:attr(data-zwit-full-date);position:absolute;top:50%;right:calc(100% + 9px);transform:translateY(-50%);white-space:nowrap;color:#d8bd77;font:600 9px Inter,Arial;opacity:0;transition:.2s}.zwit-dated-message:hover:after,.zwit-dated-message:active:after{opacity:1}@media(max-width:720px){.zwit-dated-message:active{transform:translateX(-84px)}.zwit-dated-message:active:after{right:-76px;opacity:1}.zwit-opening-ring span{transform:rotate(calc(var(--i)*360deg/var(--n))) translateX(145px) rotate(calc(var(--i)*-360deg/var(--n)))}}
-    .zwit-profile-album-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.zwit-profile-album-actions button{min-height:46px;border:1px solid #c6a96a44;border-radius:15px;background:#c6a96a0e;color:#d8bd77;font:700 12px Inter,Arial;cursor:pointer}.zwit-album-modal{position:fixed;z-index:999999;inset:0;display:grid;place-items:center;padding:16px;background:#050507dd;backdrop-filter:blur(16px)}.zwit-album-modal>div{width:min(520px,100%);max-height:85vh;overflow:auto;padding:24px;border:1px solid #ffffff18;border-radius:25px;background:#111114;color:#f5f0ec}.zwit-album-modal header{position:relative}.zwit-album-modal header span{color:#d8bd77;font:800 10px Inter;letter-spacing:.15em}.zwit-album-modal h2{margin:8px 0;font:500 32px Georgia}.zwit-album-modal [data-close]{position:absolute;right:0;top:0;border:0;background:none;color:#fff;font-size:24px}.zwit-album-list{display:grid;gap:8px;margin:17px 0}.zwit-album-list label{display:flex;gap:11px;padding:13px;border:1px solid #ffffff10;border-radius:14px;background:#ffffff05}.zwit-album-list span{display:grid}.zwit-album-list small{color:#918b88}.zwit-album-modal select,.zwit-album-modal .primary{width:100%;min-height:45px;margin-top:10px;border-radius:14px}.zwit-album-modal select{padding:0 12px;background:#09090b;color:#fff;border:1px solid #ffffff18}.zwit-album-modal .primary{border:0;background:#c6a96a;color:#171109;font-weight:800}.zwit-toast{position:fixed;z-index:2147483647;left:50%;bottom:28px;transform:translate(-50%,18px);padding:12px 17px;border:1px solid #c6a96a55;border-radius:999px;background:#101012ee;color:#eee;opacity:0;transition:.25s}.zwit-toast.show{opacity:1;transform:translate(-50%,0)}.zwit-toast.error{border-color:#ef8ca766}
-  `;
-  document.head.appendChild(style);
+style.textContent = `
+  .zwit-official-brand{position:fixed;z-index:9500;top:calc(env(safe-area-inset-top,0px) + 10px);left:14px;display:grid;place-items:center;width:56px;height:56px;border:1px solid rgba(198,169,106,.3);border-radius:17px;background:#09090b;box-shadow:0 14px 42px rgba(0,0,0,.38);overflow:hidden;transition:transform .24s ease,border-color .24s ease}.zwit-official-brand:hover{transform:translateY(-1px) scale(1.025);border-color:rgba(216,189,119,.64)}.zwit-official-brand img{width:100%;height:100%;object-fit:cover;display:block}
+  .zwit-opening{position:fixed;z-index:2147483647;inset:0;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 50% 44%,#2f1723 0,#0d0c0f 38%,#030304 76%);color:#f5efe9;opacity:0;transition:opacity .68s cubic-bezier(.22,.61,.36,1)}.zwit-opening.visible{opacity:1}.zwit-opening.leaving{opacity:0}.zwit-opening-glow{position:absolute;width:min(90vw,720px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(198,169,106,.11),rgba(100,27,54,.07) 35%,transparent 68%);filter:blur(20px);animation:zwitBreath 3.2s ease-in-out infinite alternate}.zwit-opening-word-stage{position:relative;z-index:3;display:grid;justify-items:center;gap:13px;opacity:0;filter:blur(18px);transform:translateY(16px) scale(.94);transition:opacity .36s ease,filter .44s ease,transform .44s cubic-bezier(.22,.61,.36,1)}.zwit-opening-word-stage.is-visible{opacity:1;filter:blur(0);transform:translateY(0) scale(1)}.zwit-opening-word-stage small{font:700 10px Inter,Arial;letter-spacing:.28em;text-transform:uppercase;color:#d8bd77aa}.zwit-opening-word-stage strong{font:500 clamp(58px,12vw,112px)/.95 Georgia,serif;letter-spacing:.02em;color:#f5efe9;text-shadow:0 20px 70px rgba(198,169,106,.16)}.zwit-opening-mist{position:absolute;inset:-18%;z-index:4;pointer-events:none;opacity:0;transition:opacity .8s ease}.zwit-opening-mist i{position:absolute;left:50%;top:50%;width:clamp(300px,58vw,840px);height:clamp(130px,26vw,360px);border-radius:50%;background:radial-gradient(ellipse,rgba(244,240,234,.24),rgba(179,169,163,.08) 46%,transparent 72%);filter:blur(42px);transform:translate(calc(-50% + (var(--i) - 4)*9vw),calc(-50% + (var(--i) - 4)*5vh)) scale(.4);animation:zwitMist 2.2s cubic-bezier(.2,.65,.3,1) infinite alternate;animation-delay:calc(var(--i)*-.17s)}.zwit-opening.is-misting .zwit-opening-mist{opacity:1}.zwit-opening.is-misting .zwit-opening-word-stage{opacity:0;filter:blur(24px);transform:scale(1.08)}.zwit-opening-logo{position:relative;z-index:5;display:grid;justify-items:center;gap:9px;opacity:0;filter:blur(28px);transform:scale(.86);transition:opacity .9s ease,filter 1.05s ease,transform 1.05s cubic-bezier(.16,1,.3,1)}.zwit-opening-logo img{width:min(72vw,390px);aspect-ratio:1;object-fit:cover;border-radius:32px;box-shadow:0 34px 100px rgba(0,0,0,.6)}.zwit-opening-logo span{font:700 10px Inter,Arial;letter-spacing:.42em;color:#d8bd77}.zwit-opening.is-logo .zwit-opening-logo{opacity:1;filter:blur(0);transform:scale(1)}.zwit-opening.is-logo .zwit-opening-mist{opacity:.38}.zwit-opening.reduced .zwit-opening-word-stage,.zwit-opening.reduced .zwit-opening-mist{display:none}@keyframes zwitBreath{to{transform:scale(1.08);opacity:.72}}@keyframes zwitMist{0%{transform:translate(calc(-50% + (var(--i) - 4)*9vw),calc(-50% + (var(--i) - 4)*5vh)) scale(.42) rotate(-4deg)}100%{transform:translate(calc(-50% - (var(--i) - 4)*6vw),calc(-50% - (var(--i) - 4)*3vh)) scale(1.15) rotate(7deg)}}
+  .zwit-day-separator{display:flex;align-items:center;justify-content:center;gap:10px;margin:17px auto 11px;color:#aaa3a0;font:650 10px Inter,Arial;text-transform:capitalize}.zwit-day-separator:before,.zwit-day-separator:after{content:"";width:54px;height:1px;background:#ffffff16}
+  .zwit-profile-album-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.zwit-profile-album-actions button{min-height:46px;border:1px solid #c6a96a44;border-radius:15px;background:#c6a96a0e;color:#d8bd77;font:700 12px Inter,Arial;cursor:pointer}.zwit-album-modal{position:fixed;z-index:999999;inset:0;display:grid;place-items:center;padding:16px;background:#050507dd;backdrop-filter:blur(16px)}.zwit-album-modal>div{width:min(520px,100%);max-height:85vh;overflow:auto;padding:24px;border:1px solid #ffffff18;border-radius:25px;background:#111114;color:#f5f0ec}.zwit-album-modal header{position:relative}.zwit-album-modal header span{color:#d8bd77;font:800 10px Inter;letter-spacing:.15em}.zwit-album-modal h2{margin:8px 0;font:500 32px Georgia}.zwit-album-modal [data-close]{position:absolute;right:0;top:0;border:0;background:none;color:#fff;font-size:24px}.zwit-album-list{display:grid;gap:8px;margin:17px 0}.zwit-album-list label{display:flex;gap:11px;padding:13px;border:1px solid #ffffff10;border-radius:14px;background:#ffffff05}.zwit-album-list span{display:grid}.zwit-album-list small{color:#918b88}.zwit-album-modal select,.zwit-album-modal .primary{width:100%;min-height:45px;margin-top:10px;border-radius:14px}.zwit-album-modal select{padding:0 12px;background:#09090b;color:#fff;border:1px solid #ffffff18}.zwit-album-modal .primary{border:0;background:#c6a96a;color:#171109;font-weight:800}.zwit-toast{position:fixed;z-index:2147483647;left:50%;bottom:28px;transform:translate(-50%,18px);padding:12px 17px;border:1px solid #c6a96a55;border-radius:999px;background:#101012ee;color:#eee;opacity:0;transition:.25s}.zwit-toast.show{opacity:1;transform:translate(-50%,0)}.zwit-toast.error{border-color:#ef8ca766}
+  @media(max-width:720px){.zwit-official-brand{width:49px;height:49px;left:10px;border-radius:15px}.zwit-profile-album-actions{grid-template-columns:1fr}.zwit-opening-logo img{width:min(78vw,330px)}}
+`;
+document.head.appendChild(style);
+  installBrandLogo();
   showOpening();
   new MutationObserver(() => requestAnimationFrame(patch)).observe(document.documentElement, { childList:true, subtree:true });
   [0, 300, 1000].forEach((delay) => setTimeout(patch, delay));

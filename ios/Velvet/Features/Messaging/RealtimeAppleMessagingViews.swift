@@ -733,7 +733,6 @@ private struct RealtimeMessageBubble: View {
     let reactions: [MessageReaction]
     let currentUserID: UUID?
     let openImage: (URL) -> Void
-    @State private var dragOffset: CGFloat = 0
 
     private let reactionChoices: [(key: String, emoji: String)] = [
         ("like", "👍"),
@@ -745,40 +744,12 @@ private struct RealtimeMessageBubble: View {
     ]
 
     var body: some View {
-        ZStack(alignment: isMine ? .trailing : .leading) {
-            Text(messageDateLabel)
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(VelvetColor.champagneGold.opacity(0.82))
-                .padding(.horizontal, 8)
-                .opacity(abs(dragOffset) > 14 ? 1 : 0)
-
-            HStack(alignment: .bottom, spacing: 7) {
-                if isMine { Spacer(minLength: 48) }
-                messageColumn
-                if !isMine { Spacer(minLength: 48) }
-            }
-            .offset(x: dragOffset)
-            .gesture(
-                DragGesture(minimumDistance: 12)
-                    .onChanged { value in
-                        let allowed = isMine ? min(0, value.translation.width) : max(0, value.translation.width)
-                        dragOffset = max(-118, min(118, allowed))
-                    }
-                    .onEnded { _ in
-                        withAnimation(.spring(response: 0.30, dampingFraction: 0.82)) {
-                            dragOffset = 0
-                        }
-                    }
-            )
+        HStack(alignment: .bottom, spacing: 7) {
+            if isMine { Spacer(minLength: 48) }
+            messageColumn
+            if !isMine { Spacer(minLength: 48) }
         }
         .frame(maxWidth: .infinity)
-        .accessibilityHint("Glissez le message sur le côté pour afficher sa date complète.")
-    }
-
-    private var messageDateLabel: String {
-        RealtimeMessageDate.date(message.createdAt).formatted(
-            .dateTime.day().month(.abbreviated).year().hour().minute()
-        )
     }
 
     private var messageColumn: some View {

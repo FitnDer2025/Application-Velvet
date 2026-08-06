@@ -12,11 +12,8 @@ struct CompactVelvetTopBar: View {
 
     var body: some View {
         HStack(spacing: 9) {
-            VelvetMark(size: 25)
-            Text("ZWIT")
-                .font(VelvetTypography.brand(size: 14))
-                .tracking(2.8)
-                .foregroundStyle(VelvetColor.ivory)
+            VelvetMark(size: 48)
+                .accessibilityLabel("Zwit")
 
             Spacer()
 
@@ -38,7 +35,7 @@ struct CompactVelvetTopBar: View {
             }
         }
         .padding(.horizontal, 15)
-        .frame(height: 46)
+        .frame(height: 58)
         .background(.ultraThinMaterial)
         .background(VelvetColor.velvetBlack.opacity(0.58))
         .overlay(alignment: .bottom) {

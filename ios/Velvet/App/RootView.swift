@@ -5,6 +5,7 @@ struct RootView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var biometrics: BiometricLockService
     @EnvironmentObject private var screenshotProtection: ScreenshotProtectionService
+    @State private var showsBrandOpening = true
 
     var body: some View {
         ZStack {
@@ -12,8 +13,7 @@ struct RootView: View {
 
             switch appState.phase {
             case .launching:
-                LaunchView()
-                    .transition(.opacity)
+                Color.clear
             case .signedOut:
                 LoginView()
                     .transition(.opacity.combined(with: .scale(scale: 0.98)))
@@ -45,6 +45,15 @@ struct RootView: View {
                 MediaCaptureShield()
                     .transition(.opacity)
                     .zIndex(40)
+            }
+            if showsBrandOpening {
+                LaunchView {
+                    withAnimation(.easeOut(duration: 0.62)) {
+                        showsBrandOpening = false
+                    }
+                }
+                .transition(.opacity)
+                .zIndex(100)
             }
         }
         .animation(.easeInOut(duration: VelvetMotion.normal), value: appState.phase.id)
@@ -221,58 +230,138 @@ private struct MediaCaptureShield: View {
 
 private struct LaunchView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var appeared = false
-    @State private var orbit = false
+    let onComplete: () -> Void
+
+    @State private var wordIndex = 0
+    @State private var wordVisible = false
+    @State private var mistVisible = false
+    @State private var mistDrift = false
+    @State private var logoVisible = false
 
     private let whispers = [
-        "Chut", "Shh", "Ssst", "Silencio", "Silenzio", "Leise",
-        "Tyst", "Cicho", "Тише", "静かに", "쉿", "هدوء"
+        ("Chut", "FRANÇAIS"),
+        ("Silencio", "ESPAÑOL"),
+        ("Silenzio", "ITALIANO"),
+        ("嘘…", "中文")
     ]
 
     var body: some View {
         ZStack {
-            ForEach(Array(whispers.enumerated()), id: \.offset) { index, whisper in
-                Text(whisper)
-                    .font(VelvetTypography.caption(size: index.isMultiple(of: 3) ? 12 : 10, weight: .medium))
-                    .tracking(1.2)
-                    .foregroundStyle(index.isMultiple(of: 4) ? VelvetColor.champagneGold.opacity(0.72) : VelvetColor.ivory.opacity(0.34))
-                    .offset(x: 142)
-                    .rotationEffect(.degrees(Double(index) * (360 / Double(whispers.count))))
-                    .rotationEffect(.degrees(orbit ? 360 : 0))
-            }
+            LinearGradient(
+                colors: [Color.black, VelvetColor.velvetBurgundy.opacity(0.38), Color.black],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
 
             Circle()
-                .stroke(VelvetColor.champagneGold.opacity(0.16), lineWidth: 0.7)
-                .frame(width: 250, height: 250)
-                .scaleEffect(appeared ? 1 : 0.72)
+                .fill(VelvetColor.champagneGold.opacity(0.08))
+                .frame(width: 540, height: 540)
+                .blur(radius: 70)
+                .scaleEffect(logoVisible ? 1.08 : 0.78)
+                .opacity(logoVisible ? 0.75 : 0.28)
 
-            VStack(spacing: VelvetSpacing.md) {
-                VelvetMark(size: 104)
-                    .scaleEffect(appeared ? 1 : 0.82)
-                    .opacity(appeared ? 1 : 0)
+            VStack(spacing: 14) {
+                Text(whispers[wordIndex].1)
+                    .font(.system(size: 10, weight: .bold))
+                    .tracking(3.2)
+                    .foregroundStyle(VelvetColor.champagneGold.opacity(0.72))
+                Text(whispers[wordIndex].0)
+                    .font(VelvetTypography.brand(size: wordIndex == 3 ? 76 : 82))
+                    .foregroundStyle(VelvetColor.ivory)
+            }
+            .id(wordIndex)
+            .opacity(wordVisible ? 1 : 0)
+            .blur(radius: wordVisible ? 0 : 18)
+            .scaleEffect(wordVisible ? 1 : 0.92)
+            .offset(y: wordVisible ? 0 : 14)
 
-                Text("ZWIT")
-                    .font(VelvetTypography.brand(size: 29))
-                    .tracking(9)
+            ZwitMistLayer(isVisible: mistVisible, drifts: mistDrift)
+
+            VStack(spacing: 10) {
+                Image("VelvetMark")
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+                    .frame(width: 270, height: 270)
+                    .clipShape(RoundedRectangle(cornerRadius: 34, style: .continuous))
+                    .shadow(color: .black.opacity(0.68), radius: 44, y: 24)
+                Text("CHUT.")
+                    .font(.system(size: 10, weight: .bold))
+                    .tracking(4.8)
                     .foregroundStyle(VelvetColor.champagneGold)
-
-                Text("Un secret se partage. Jamais il ne s’impose.")
-                    .font(VelvetTypography.body(size: 13))
-                    .foregroundStyle(VelvetColor.textSecondary)
             }
-            .opacity(appeared ? 1 : 0)
+            .opacity(logoVisible ? 1 : 0)
+            .blur(radius: logoVisible ? 0 : 24)
+            .scaleEffect(logoVisible ? 1 : 0.84)
         }
-        .frame(width: 330, height: 330)
-        .onAppear {
-            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.72)) {
-                appeared = true
-            }
-            guard !reduceMotion else { return }
-            withAnimation(.linear(duration: 14).repeatForever(autoreverses: false)) {
-                orbit = true
-            }
-        }
+        .ignoresSafeArea()
+        .task { await runSequence() }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Zwit. Chut. Une expérience discrète et confidentielle.")
+    }
+
+    @MainActor
+    private func runSequence() async {
+        if reduceMotion {
+            logoVisible = true
+            try? await Task.sleep(for: .milliseconds(1250))
+            onComplete()
+            return
+        }
+
+        for index in whispers.indices {
+            wordIndex = index
+            withAnimation(.easeOut(duration: 0.38)) {
+                wordVisible = true
+            }
+            try? await Task.sleep(for: .milliseconds(610))
+            withAnimation(.easeIn(duration: 0.30)) {
+                wordVisible = false
+            }
+            try? await Task.sleep(for: .milliseconds(190))
+        }
+
+        withAnimation(.easeInOut(duration: 0.95)) {
+            mistVisible = true
+            mistDrift = true
+        }
+        try? await Task.sleep(for: .milliseconds(720))
+        withAnimation(.spring(response: 0.92, dampingFraction: 0.82)) {
+            logoVisible = true
+        }
+        try? await Task.sleep(for: .milliseconds(1650))
+        onComplete()
+    }
+}
+
+private struct ZwitMistLayer: View {
+    let isVisible: Bool
+    let drifts: Bool
+
+    var body: some View {
+        ZStack {
+            ForEach(0..<8, id: \.self) { index in
+                Ellipse()
+                    .fill(Color.white.opacity(index.isMultiple(of: 2) ? 0.13 : 0.08))
+                    .frame(
+                        width: CGFloat(330 + index * 38),
+                        height: CGFloat(128 + (index % 3) * 34)
+                    )
+                    .blur(radius: CGFloat(42 + index * 3))
+                    .offset(
+                        x: drifts ? CGFloat((index - 4) * -31) : CGFloat((index - 4) * 48),
+                        y: CGFloat((index % 4 - 2) * 48)
+                    )
+                    .scaleEffect(isVisible ? 1.18 : 0.38)
+                    .animation(
+                        .easeInOut(duration: 1.15 + Double(index) * 0.08)
+                            .delay(Double(index) * 0.035),
+                        value: drifts
+                    )
+            }
+        }
+        .opacity(isVisible ? 1 : 0)
+        .allowsHitTesting(false)
     }
 }
