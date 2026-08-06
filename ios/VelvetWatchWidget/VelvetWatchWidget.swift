@@ -94,7 +94,7 @@ private struct VelvetWatchWidget: Widget {
                     Color.clear
                 }
         }
-        .configurationDisplayName("Zwit")
+        .configurationDisplayName(ZwitWatchWidgetBrand.displayName)
         .description("Compte les activités non lues sans afficher de contenu privé.")
         .supportedFamilies([
             .accessoryCircular,
@@ -113,21 +113,30 @@ private struct VelvetWatchWidgetView: View {
         case .accessoryCircular:
             ZStack {
                 AccessoryWidgetBackground()
-                VStack(spacing: 0) {
-                    Text("V")
-                        .font(.system(size: 10, weight: .bold, design: .serif))
+                VStack(spacing: -2) {
+                    Image(ZwitWatchWidgetBrand.logoAsset)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 18)
+                        .accessibilityHidden(true)
                     Text("\(entry.snapshot.total)")
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
                 }
             }
             .widgetLabel {
-                Text("Activité Zwit")
+                Text(ZwitWatchWidgetBrand.activityLabel)
             }
 
         case .accessoryRectangular:
             HStack(spacing: 7) {
+                Image(ZwitWatchWidgetBrand.logoAsset)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 34, height: 34)
+                    .accessibilityHidden(true)
+
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("ZWIT")
+                    Text(ZwitWatchWidgetBrand.label)
                         .font(.system(size: 10, weight: .bold))
                     Text("\(entry.snapshot.total) non lu\(entry.snapshot.total > 1 ? "s" : "")")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -144,7 +153,7 @@ private struct VelvetWatchWidgetView: View {
             }
 
         default:
-            Text("Zwit \(entry.snapshot.total) · ✉︎\(entry.snapshot.messages) ◉\(entry.snapshot.visits) ♥\(entry.snapshot.likes)")
+            Text("\(ZwitWatchWidgetBrand.displayName) \(entry.snapshot.total) · ✉︎\(entry.snapshot.messages) ◉\(entry.snapshot.visits) ♥\(entry.snapshot.likes)")
         }
     }
 }

@@ -6,8 +6,10 @@
 
   const openingSelector = '.zwit-opening-v2,.zwit-opening-v3';
   const directMessageSelector = '[data-message-id],[data-created-at],[data-message-created-at],.message-row,.chat-message,.message-bubble';
-  const officialLogo = '/assets/zwit-logo-transparent.png?v=20260806-8';
+  const officialLogo = window.ZWIT_BRAND?.assets?.splash || '/assets/zwit-logo-transparent.png?v=20260806-9';
   let closingOpening = false;
+  let dateTimer = 0;
+  let lastSignature = '';
 
   function closeOpening() {
     const layer = document.querySelector(openingSelector);
@@ -72,16 +74,12 @@
     if (date.toDateString() === yesterday.toDateString()) return 'Hier';
 
     return new Intl.DateTimeFormat('fr-FR', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
     }).format(date);
   }
 
   function messageRows() {
     const rows = [...document.querySelectorAll(directMessageSelector)];
-
     document.querySelectorAll('time[datetime]').forEach((time) => {
       const row = time.closest(directMessageSelector);
       if (row) rows.push(row);
@@ -92,9 +90,25 @@
       .sort((left, right) => parseDate(left) - parseDate(right));
   }
 
-  function installCurrentDate(rows) {
-    const latest = rows.at(-1);
-    if (!latest) return;
+  function currentVisibleMessage(rows) {
+    const viewportCenter = window.innerHeight * 0.42;
+    const visible = rows
+      .map((row) => ({ row, rect: row.getBoundingClientRect() }))
+      .filter(({ rect }) => rect.bottom > 0 && rect.top < window.innerHeight)
+      .sort((left, right) => Math.abs(left.rect.top - viewportCenter) - Math.abs(right.rect.top - viewportCenter));
+    return visible[0]?.row || rows.at(-1);
+  }
+
+  function showCurrentDate(rows, force = false) {
+    const target = currentVisibleMessage(rows);
+    if (!target) return;
+
+    const date = parseDate(target);
+    if (!date) return;
+
+    const signature = `${date.toDateString()}-${rows.length}`;
+    if (!force && signature === lastSignature) return;
+    lastSignature = signature;
 
     let badge = document.querySelector('[data-zwit-current-message-date]');
     if (!badge) {
@@ -104,21 +118,25 @@
       document.body.appendChild(badge);
     }
 
-    const latestDate = parseDate(latest);
     const fullDate = new Intl.DateTimeFormat('fr-FR', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-    }).format(latestDate);
-    const relative = dayLabel(latestDate);
+    }).format(date);
+    const relative = dayLabel(date);
     badge.textContent = relative === 'Aujourd’hui' || relative === 'Hier'
       ? `${relative} · ${fullDate}`
       : fullDate;
+
+    badge.classList.add('visible');
+    clearTimeout(dateTimer);
+    dateTimer = window.setTimeout(() => badge.classList.remove('visible'), 2000);
   }
 
-  function patchMessageDates() {
+  function patchMessageDates(forceDate = false) {
     const rows = messageRows();
 
     if (!rows.length) {
       document.querySelector('[data-zwit-current-message-date]')?.remove();
+      lastSignature = '';
       return;
     }
 
@@ -140,7 +158,19 @@
       previousDay = day;
     });
 
-    installCurrentDate(rows);
+    showCurrentDate(rows, forceDate);
+  }
+
+  function installScrollDateTrigger() {
+    let scrollFrame = 0;
+    document.addEventListener('scroll', () => {
+      if (scrollFrame) cancelAnimationFrame(scrollFrame);
+      scrollFrame = requestAnimationFrame(() => {
+        scrollFrame = 0;
+        const rows = messageRows();
+        if (rows.length) showCurrentDate(rows, true);
+      });
+    }, true);
   }
 
   const style = document.createElement('style');
@@ -151,13 +181,15 @@
     .zwit-opening-v2 img,.zwit-opening-v3 img{background:transparent!important;object-fit:contain!important}
     .zwit-day-separator{display:flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;width:100%!important;margin:18px auto 12px!important;color:#d8bd77!important;font:700 11px Inter,Arial!important;text-transform:capitalize!important;position:relative!important;z-index:3!important}
     .zwit-day-separator:before,.zwit-day-separator:after{content:""!important;flex:1 1 52px!important;max-width:92px!important;height:1px!important;background:#d8bd7738!important}
-    .zwit-current-message-date{position:fixed;z-index:9500;top:max(72px,calc(env(safe-area-inset-top) + 62px));left:50%;transform:translateX(-50%);max-width:calc(100vw - 32px);padding:7px 14px;border:1px solid #d8bd7738;border-radius:999px;background:#111114e8;color:#d8bd77;backdrop-filter:blur(16px);box-shadow:0 10px 28px #0006;font:700 11px Inter,Arial;text-align:center;text-transform:capitalize;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+    .zwit-current-message-date{position:fixed;z-index:9500;top:max(72px,calc(env(safe-area-inset-top) + 62px));left:50%;transform:translate(-50%,-8px);max-width:calc(100vw - 32px);padding:7px 14px;border:1px solid #d8bd7738;border-radius:999px;background:#111114e8;color:#d8bd77;backdrop-filter:blur(16px);box-shadow:0 10px 28px #0006;font:700 11px Inter,Arial;text-align:center;text-transform:capitalize;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .22s ease,transform .22s ease,visibility 0s linear .22s}
+    .zwit-current-message-date.visible{opacity:1;visibility:visible;transform:translate(-50%,0);transition-delay:0s}
     @media(max-width:720px){.zwit-current-message-date{top:max(66px,calc(env(safe-area-inset-top) + 56px));font-size:10px;padding:6px 12px}}
   `;
   document.head.appendChild(style);
 
   enforceOpeningLogo();
-  patchMessageDates();
+  patchMessageDates(true);
+  installScrollDateTrigger();
 
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
@@ -165,9 +197,9 @@
         if (node instanceof Element) enforceOpeningLogo(node);
       });
     });
-    requestAnimationFrame(patchMessageDates);
+    requestAnimationFrame(() => patchMessageDates(false));
   });
 
   observer.observe(document.documentElement, { childList: true, subtree: true });
-  [250, 900, 1800].forEach((delay) => setTimeout(patchMessageDates, delay));
+  [250, 900, 1800].forEach((delay) => setTimeout(() => patchMessageDates(delay === 250), delay));
 })();

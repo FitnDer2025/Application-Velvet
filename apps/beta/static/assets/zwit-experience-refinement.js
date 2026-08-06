@@ -4,7 +4,7 @@
   if (window.__ZWIT_EXPERIENCE_REFINEMENT__) return;
   window.__ZWIT_EXPERIENCE_REFINEMENT__ = true;
 
-  const logoSource = '/assets/zwit-logo-1024.jpg?v=20260806-5';
+  const logoSource = window.ZWIT_BRAND?.assets?.splash || '/assets/zwit-logo-transparent.png?v=20260806-9';
   const words = [
     { word: 'Chut', lang: 'fr' },
     { word: 'Silencio', lang: 'es' },
@@ -14,7 +14,7 @@
   const wordInterval = 1800;
   const wordDuration = 2850;
   const wordsEnd = ((words.length - 1) * wordInterval) + wordDuration;
-  const legacyLogo = /(?:velvet|zwit)[^/?#]*(?:logo|icon|mark)|zwit-logo-1024\.(?:png|svg|webp)|velvet-icon[^/?#]*/i;
+  const legacyLogo = /(?:velvet|zwit)[^/?#]*(?:logo|icon|mark)|zwit-logo-1024\.(?:jpg|png|svg|webp)|velvet-icon[^/?#]*/i;
 
   const style = document.createElement('style');
   style.id = 'zwitExperienceRefinementStyles';
@@ -108,31 +108,23 @@
     if (!(image instanceof HTMLImageElement)) return;
     if (image.src !== new URL(logoSource, location.href).href) image.src = logoSource;
     image.alt = 'Zwit';
+    image.style.background = 'transparent';
     image.style.objectFit = 'contain';
     image.style.objectPosition = 'center';
   }
 
   function enforceOfficialLogo(root = document) {
-    const brands = [];
-    if (root instanceof Element && root.matches('[data-zwit-global-brand]')) brands.push(root);
-    if (root.querySelectorAll) brands.push(...root.querySelectorAll('[data-zwit-global-brand]'));
-    brands.forEach((brand) => {
-      const image = brand.querySelector('img');
-      if (image) applyLogo(image);
-      brand.querySelectorAll('span').forEach((label) => label.remove());
-    });
-
     const images = [];
     if (root instanceof HTMLImageElement) images.push(root);
     if (root.querySelectorAll) images.push(...root.querySelectorAll('img'));
     images.forEach((image) => {
       const source = `${image.getAttribute('src') || ''} ${image.currentSrc || ''}`;
-      if (legacyLogo.test(source) || image.closest('[data-zwit-global-brand],.zwit-logo-reveal,.zwit-logo-environment')) applyLogo(image);
+      if (legacyLogo.test(source) || image.closest('.zwit-logo-reveal,.zwit-logo-environment')) applyLogo(image);
     });
 
     document.querySelectorAll('link[rel~="icon"]').forEach((link) => {
-      link.href = logoSource;
-      link.type = 'image/jpeg';
+      link.href = window.ZWIT_BRAND?.assets?.icon || logoSource;
+      link.type = 'image/png';
     });
   }
 
