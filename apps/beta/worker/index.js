@@ -7,6 +7,7 @@ import { onRequestPost as logout } from '../../../functions/api/auth/logout.js';
 import { onRequestGet as authConfig } from '../../../functions/api/auth/config.js';
 import { onRequestPost as recoveryRequest } from '../../../functions/api/auth/recovery-request.js';
 import { onRequestPost as passwordUpdate } from '../../../functions/api/auth/password-update.js';
+import { onRequestPost as waitlistPost } from '../../../functions/api/waitlist.js';
 import {
   onRequestGet as memberProfileGet,
   onRequestPost as memberProfilePost
@@ -134,6 +135,10 @@ import {
   onRequestPost as controlWorkspacePost
 } from '../../../functions/api/control/workspace.js';
 import {
+  onRequestGet as controlWaitlistGet,
+  onRequestPatch as controlWaitlistPatch
+} from '../../../functions/api/control/waitlist.js';
+import {
   onRequestGet as testAgentsGet,
   onRequestPost as testAgentsPost
 } from '../../../functions/api/control/test-agents.js';
@@ -152,6 +157,7 @@ const API_ROUTES = new Map([
   ['GET /api/auth/config', authConfig],
   ['POST /api/auth/recovery-request', recoveryRequest],
   ['POST /api/auth/password-update', passwordUpdate],
+  ['POST /api/waitlist', waitlistPost],
   ['GET /api/members/profile', memberProfileGet],
   ['POST /api/members/profile', memberProfilePost],
   ['POST /api/members/profile-copy', memberProfileCopyPost],
@@ -225,6 +231,8 @@ const API_ROUTES = new Map([
   ['GET /api/pro/marketing/media', proMarketingMediaGet],
   ['GET /api/control/workspace', controlWorkspaceGet],
   ['POST /api/control/workspace', controlWorkspacePost],
+  ['GET /api/control/waitlist', controlWaitlistGet],
+  ['PATCH /api/control/waitlist', controlWaitlistPatch],
   ['GET /api/control/test-agents', testAgentsGet],
   ['POST /api/control/test-agents', testAgentsPost],
   ['POST /api/control/studio-media', studioMediaPost],
