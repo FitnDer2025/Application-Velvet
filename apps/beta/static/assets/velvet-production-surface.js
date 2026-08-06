@@ -147,7 +147,7 @@
 
   const style = document.createElement('style');
   style.id = 'velvetProductionSurfaceStyles';
-  style.textContent = '#velvetMarketingBadge,#velvetMarketingProBadge,[data-beta-badge],[data-demo-badge],.beta-badge,.demo-badge{display:none!important}';
+  style.textContent = '#velvetMarketingBadge,#velvetMarketingProBadge,[data-beta-badge],[data-demo-badge],.beta-badge,.demo-badge{display:none!important}.zwit-opening-v2{visibility:hidden!important}.zwit-opening-v2 .zwit-word span{display:none!important}';
   document.head.appendChild(style);
   installCanvasBrandGuard();
   installSpeechBrandGuard();
@@ -172,10 +172,26 @@
   document.addEventListener('submit', (event) => clean(event.target), true);
   window.addEventListener('pageshow', () => clean(document));
   [0,250,1000].forEach((delay) => setTimeout(() => clean(document), delay));
-  if (!document.querySelector('script[data-zwit-experience]')) {
+
+  const loadExperience = () => {
+    if (document.querySelector('script[data-zwit-experience]')) return;
     const experience = document.createElement('script');
-    experience.src = '/assets/zwit-experience.js?v=20260806-2';
+    experience.src = '/assets/zwit-experience.js?v=20260806-5';
     experience.dataset.zwitExperience = 'true';
     document.head.appendChild(experience);
-  }
+  };
+
+  const loadRefinement = () => {
+    if (document.querySelector('script[data-zwit-experience-refinement]')) {
+      loadExperience();
+      return;
+    }
+    const refinement = document.createElement('script');
+    refinement.src = '/assets/zwit-experience-refinement.js?v=20260806-5';
+    refinement.dataset.zwitExperienceRefinement = 'true';
+    refinement.addEventListener('load', loadExperience, { once:true });
+    document.head.appendChild(refinement);
+  };
+
+  loadRefinement();
 })();
