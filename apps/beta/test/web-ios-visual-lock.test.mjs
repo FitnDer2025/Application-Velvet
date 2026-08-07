@@ -9,19 +9,23 @@ test('la correction Web ne remplace pas le code iOS par une WebView', async () =
   assert.doesNotMatch(root, /WKWebView|SFSafariViewController/);
 });
 
-test('Web et PWA exécutent un seul cœur fonctionnel sous un shell V1.1', async () => {
-  const [html, shell, worker] = await Promise.all([
+test('Web et PWA exécutent un seul cœur fonctionnel sous un shell iOS-source V1.5', async () => {
+  const [html, shell, iosSource, worker] = await Promise.all([
     read('apps/web/velvet-members-beta-live.html'),
     read('apps/beta/static/assets/velvet-web-ios-parity.js'),
+    read('apps/beta/static/assets/zwit-ios-source-of-truth.js'),
     read('apps/beta/static/sw.js')
   ]);
   assert.doesNotThrow(() => new Function(shell));
+  assert.doesNotThrow(() => new Function(iosSource));
   assert.match(html, /members-live\.js\?v=20260803-4/);
   assert.ok(html.indexOf('members-live.js') < html.indexOf('velvet-web-ios-parity.js'));
+  assert.ok(html.indexOf('velvet-web-ios-parity.js') < html.indexOf('zwit-ios-source-of-truth.js'));
   assert.doesNotMatch(html, /velvet-people-first\.js/);
-  assert.equal((html.match(/<nav class="bottom-nav"[\s\S]*?<\/nav>/)?.[0].match(/data-route=/g) || []).length, 5);
-  assert.match(shell, /PRIMARY_ROUTES = \['home', 'discover', 'venues', 'conversations', 'me'\]/);
-  assert.match(worker, /const CACHE = 'velvet-beta-shell-v30'/);
+  assert.equal((html.match(/<nav class="bottom-nav"[\s\S]*?<\/nav>/)?.[0].match(/data-route=/g) || []).length, 6);
+  assert.match(shell, /PRIMARY_ROUTES = \['home', 'discover', 'maps', 'venues', 'conversations', 'me'\]/);
+  assert.match(iosSource, /dataset\.zwitUiSource = 'ios'/);
+  assert.match(worker, /const CACHE = 'velvet-beta-shell-v31'/);
 });
 
 test('les photos Supabase alimentent le fil, les résultats et les fiches complètes', async () => {
