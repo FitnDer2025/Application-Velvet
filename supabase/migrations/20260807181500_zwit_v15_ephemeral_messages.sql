@@ -22,6 +22,77 @@ create index if not exists message_ephemeral_expiry_idx
 alter table public.message_ephemeral_attachments enable row level security;
 revoke all on table public.message_ephemeral_attachments from anon, authenticated;
 
+create or replace function public.zwit_v15_register_ephemeral_attachment(
+  target_attachment_id uuid,
+  target_message_id uuid,
+  target_conversation_id uuid,
+  target_mode text,
+  target_expires_at timestamptz
+)
+returns table (
+  attachment_id uuid,
+  message_id uuid,
+  mode text,
+  expires_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_attachment public.message_attachments%rowtype;
+  v_message public.messages%rowtype;
+begin
+  if v_user_id is null then raise exception 'authentication_required'; end if;
+  if target_mode not in ('view_once', 'expires') then raise exception 'invalid_ephemeral_mode'; end if;
+  if target_expires_at is null or target_expires_at <= now() or target_expires_at > now() + interval '24 hours 5 minutes' then
+    raise exception 'invalid_ephemeral_expiry';
+  end if;
+
+  if not exists (
+    select 1 from public.conversation_members cm
+    where cm.conversation_id = target_conversation_id
+      and cm.user_id = v_user_id
+      and cm.left_at is null
+  ) then
+    raise exception 'conversation_access_denied';
+  end if;
+
+  if (select count(*) from public.conversation_members cm where cm.conversation_id = target_conversation_id and cm.left_at is null) <> 2 then
+    raise exception 'direct_conversation_required';
+  end if;
+
+  select * into v_message
+  from public.messages m
+  where m.id = target_message_id
+    and m.conversation_id = target_conversation_id
+    and m.sender_user_id = v_user_id;
+  if not found then raise exception 'ephemeral_message_ownership_required'; end if;
+
+  select * into v_attachment
+  from public.message_attachments a
+  where a.id = target_attachment_id
+    and a.message_id = target_message_id
+    and a.conversation_id = target_conversation_id
+    and a.uploader_user_id = v_user_id;
+  if not found then raise exception 'ephemeral_attachment_ownership_required'; end if;
+  if v_attachment.storage_path not like 'messages-ephemeral/%' then raise exception 'ephemeral_storage_required'; end if;
+
+  insert into public.message_ephemeral_attachments (
+    attachment_id, message_id, conversation_id, sender_user_id, mode, expires_at
+  ) values (
+    target_attachment_id, target_message_id, target_conversation_id, v_user_id, target_mode, target_expires_at
+  )
+  on conflict (attachment_id) do nothing;
+
+  return query
+    select meta.attachment_id, meta.message_id, meta.mode, meta.expires_at
+    from public.message_ephemeral_attachments meta
+    where meta.attachment_id = target_attachment_id;
+end;
+$$;
+
 create or replace function public.zwit_v15_open_ephemeral_message(target_message_id uuid)
 returns table (
   attachment_id uuid,
@@ -106,5 +177,7 @@ begin
 end;
 $$;
 
+revoke all on function public.zwit_v15_register_ephemeral_attachment(uuid, uuid, uuid, text, timestamptz) from public;
 revoke all on function public.zwit_v15_open_ephemeral_message(uuid) from public;
+grant execute on function public.zwit_v15_register_ephemeral_attachment(uuid, uuid, uuid, text, timestamptz) to authenticated;
 grant execute on function public.zwit_v15_open_ephemeral_message(uuid) to authenticated;
