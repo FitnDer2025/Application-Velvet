@@ -13,7 +13,9 @@
     me: '<circle cx="12" cy="8.2" r="3.6"/><path d="M4.9 20.2c.7-4.1 3.1-6.2 7.1-6.2s6.4 2.1 7.1 6.2"/>',
     notifications: '<path d="M6.2 9.6a5.8 5.8 0 0 1 11.6 0c0 6 2.4 6.5 2.4 6.5H3.8s2.4-.5 2.4-6.5Z"/><path d="M9.5 19.1a2.8 2.8 0 0 0 5 0"/>',
     menu: '<path d="M4 6.3h16M4 12h16M4 17.7h16"/>',
-    tonight: '<path d="M19.6 15.3A8.4 8.4 0 0 1 8.7 4.4 8.4 8.4 0 1 0 19.6 15.3Z"/><path d="m17.8 4.3.5 1.1 1.1.5-1.1.5-.5 1.1-.5-1.1-1.1-.5 1.1-.5z"/>'
+    tonight: '<path d="M19.6 15.3A8.4 8.4 0 0 1 8.7 4.4 8.4 8.4 0 1 0 19.6 15.3Z"/><path d="m17.8 4.3.5 1.1 1.1.5-1.1.5-.5 1.1-.5-1.1-1.1-.5 1.1-.5z"/>',
+    photo: '<rect x="3.2" y="5" width="17.6" height="14" rx="2.4"/><circle cx="9" cy="10" r="1.8"/><path d="m5.8 17 4.3-4.2 3.1 2.8 2.2-2 2.8 3.4"/>',
+    mic: '<rect x="9" y="3.2" width="6" height="11" rx="3"/><path d="M5.8 11.2a6.2 6.2 0 0 0 12.4 0M12 17.4v3.4M8.8 20.8h6.4"/>'
   };
 
   const ROUTE_ICON = {
@@ -83,6 +85,15 @@
     if (!form) return;
     form.classList.add('zwit-ios-composer');
 
+    const photo = form.querySelector('.attachment-picker');
+    const photoLabel = photo?.querySelector(':scope > span');
+    if (photo && photoLabel && photoLabel.dataset.zwitIosLabel !== '1') {
+      photo.classList.add('zwit-ios-photo-action');
+      photo.setAttribute('aria-label', 'Ajouter une photo, une vidéo ou un PDF');
+      photoLabel.innerHTML = `${svg('photo')}<small>Photo</small>`;
+      photoLabel.dataset.zwitIosLabel = '1';
+    }
+
     const ephemeral = form.querySelector('[data-zwit-ephemeral-pick]');
     if (ephemeral && ephemeral.dataset.zwitIosLabel !== '1') {
       ephemeral.innerHTML = `<span class="zwit-ios-action-icon">1×</span><small>Éphémère</small>`;
@@ -90,15 +101,9 @@
     }
 
     const voice = form.querySelector('[data-zwit-voice-record]');
-    if (voice && voice.dataset.zwitIosLabel !== '1' && !voice.classList.contains('recording')) {
-      voice.innerHTML = `${svg('conversations')}<small>Vocal</small>`;
+    if (voice && !voice.classList.contains('recording') && !voice.querySelector('.zwit-ios-symbol')) {
+      voice.innerHTML = `${svg('mic')}<small>Vocal</small>`;
       voice.dataset.zwitIosLabel = '1';
-    }
-
-    const attachment = form.querySelector('[data-message-attachment-trigger], .message-attachment-button, button[aria-label*="pièce" i], button[aria-label*="photo" i]');
-    if (attachment && attachment.dataset.zwitIosLabel !== '1') {
-      attachment.dataset.zwitIosLabel = '1';
-      attachment.setAttribute('aria-label', attachment.getAttribute('aria-label') || 'Ajouter une photo ou un document');
     }
   }
 
