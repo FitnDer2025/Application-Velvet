@@ -1,9 +1,8 @@
 -- Zwit v1.5 — Priorité capitale #3
 -- Réservation, capacité, liste d'attente et promotion automatique.
--- Migration additive : les événements existants restent sans limite tant qu'aucune capacité n'est configurée.
+-- Le contrat historique events.capacity / events.registration_open reste la source de vérité.
 
 alter table if exists public.events
-  add column if not exists capacity_places integer,
   add column if not exists registration_mode text not null default 'instant',
   add column if not exists registration_closes_at timestamptz,
   add column if not exists max_places_per_registration integer not null default 4,
@@ -11,16 +10,6 @@ alter table if exists public.events
 
 do $$
 begin
-  if not exists (
-    select 1 from pg_constraint
-    where conname = 'events_capacity_places_positive'
-      and conrelid = 'public.events'::regclass
-  ) then
-    alter table public.events
-      add constraint events_capacity_places_positive
-      check (capacity_places is null or capacity_places > 0);
-  end if;
-
   if not exists (
     select 1 from pg_constraint
     where conname = 'events_registration_mode_valid'
@@ -47,11 +36,12 @@ create index if not exists event_registrations_event_queue_idx
 
 create or replace function public.zwit_v15_event_booking_state(target_event_id uuid)
 returns table (
-  capacity_places integer,
+  capacity integer,
   occupied_places bigint,
   pending_places bigint,
   waitlisted_places bigint,
   places_remaining bigint,
+  registration_open boolean,
   registration_mode text,
   registration_closes_at timestamptz,
   max_places_per_registration integer,
@@ -63,18 +53,19 @@ security definer
 set search_path = public, pg_temp
 as $$
   select
-    e.capacity_places,
+    e.capacity,
     coalesce(sum(r.places) filter (where r.status in ('confirmed', 'checked_in')), 0)::bigint as occupied_places,
     coalesce(sum(r.places) filter (where r.status = 'pending'), 0)::bigint as pending_places,
     coalesce(sum(r.places) filter (where r.status = 'waitlisted'), 0)::bigint as waitlisted_places,
     case
-      when e.capacity_places is null then null
+      when e.capacity is null then null
       else greatest(
-        e.capacity_places::bigint
+        e.capacity::bigint
           - coalesce(sum(r.places) filter (where r.status in ('pending', 'confirmed', 'checked_in')), 0)::bigint,
         0
       )
     end as places_remaining,
+    coalesce(e.registration_open, true),
     e.registration_mode,
     e.registration_closes_at,
     e.max_places_per_registration,
@@ -115,6 +106,17 @@ begin
     raise exception 'authentication_required';
   end if;
 
+  if not exists (
+    select 1
+    from public.profile_members pm
+    join public.member_profiles mp on mp.id = pm.profile_id
+    where pm.user_id = v_user_id
+      and pm.status = 'active'
+      and mp.admission_status = 'approved'
+  ) then
+    raise exception 'member_not_admitted';
+  end if;
+
   select * into v_event
   from public.events
   where public.events.id = target_event_id
@@ -132,7 +134,8 @@ begin
     raise exception 'event_already_started';
   end if;
 
-  if v_event.registration_mode = 'closed'
+  if coalesce(v_event.registration_open, true) is not true
+     or v_event.registration_mode = 'closed'
      or (v_event.registration_closes_at is not null and v_event.registration_closes_at <= now()) then
     raise exception 'registrations_closed';
   end if;
@@ -151,14 +154,18 @@ begin
   limit 1
   for update;
 
+  if v_registration.id is not null and v_registration.status = 'checked_in' then
+    raise exception 'registration_already_checked_in';
+  end if;
+
   select coalesce(sum(r.places), 0)::bigint into v_reserved
   from public.event_registrations r
   where r.event_id = target_event_id
     and r.status in ('pending', 'confirmed', 'checked_in')
     and (v_registration.id is null or r.id <> v_registration.id);
 
-  if v_event.capacity_places is not null
-     and v_reserved + requested_places > v_event.capacity_places then
+  if v_event.capacity is not null
+     and v_reserved + requested_places > v_event.capacity then
     v_next_status := 'waitlisted';
   elsif v_event.registration_mode = 'approval' then
     v_next_status := 'pending';
@@ -208,6 +215,7 @@ as $$
 declare
   v_user_id uuid := auth.uid();
   v_event public.events%rowtype;
+  v_own_registration_id uuid;
   v_waiting public.event_registrations%rowtype;
   v_reserved bigint := 0;
   v_remaining bigint;
@@ -227,32 +235,37 @@ begin
     raise exception 'event_not_found';
   end if;
 
-  update public.event_registrations r
-  set status = 'cancelled', updated_at = now()
+  select r.id into v_own_registration_id
+  from public.event_registrations r
   where r.event_id = target_event_id
     and r.user_id = v_user_id
     and r.status in ('pending', 'confirmed', 'waitlisted')
-  returning true into cancelled;
+  order by r.created_at desc
+  limit 1
+  for update;
 
-  cancelled := coalesce(cancelled, false);
-
-  if not cancelled then
+  if v_own_registration_id is null then
+    cancelled := false;
     promoted_count := 0;
     return next;
     return;
   end if;
 
+  update public.event_registrations r
+  set status = 'cancelled', updated_at = now()
+  where r.id = v_own_registration_id;
+
   v_promoted_status := case when v_event.registration_mode = 'approval' then 'pending' else 'confirmed' end;
 
   loop
-    if v_event.capacity_places is null then
+    if v_event.capacity is null then
       v_remaining := 2147483647;
     else
       select coalesce(sum(r.places), 0)::bigint into v_reserved
       from public.event_registrations r
       where r.event_id = target_event_id
         and r.status in ('pending', 'confirmed', 'checked_in');
-      v_remaining := greatest(v_event.capacity_places::bigint - v_reserved, 0);
+      v_remaining := greatest(v_event.capacity::bigint - v_reserved, 0);
     end if;
 
     exit when v_remaining <= 0;
@@ -276,6 +289,7 @@ begin
     v_promoted := v_promoted + 1;
   end loop;
 
+  cancelled := true;
   promoted_count := v_promoted;
   return next;
 end;
