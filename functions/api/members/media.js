@@ -1,6 +1,7 @@
 import { supabase } from '../auth/_shared.js';
 
 const INTERNAL_ENVIRONMENTS = new Set(['development', 'dev', 'staging', 'preview', 'internal', 'test']);
+const EPHEMERAL_PREFIX = 'messages-ephemeral/';
 
 function mediaUrl(env, signedPath) {
   const supabaseBase = String(env.SUPABASE_URL).replace(/\/$/, '');
@@ -60,7 +61,7 @@ async function signedInternalMediaUrl(env, path, expiresIn, transform = null) {
   return response.ok && payload.signedURL ? mediaUrl(env, String(payload.signedURL)) : null;
 }
 
-export async function signedMediaUrl(env, session, path, expiresIn = 600, transform = null) {
+async function signMedia(env, session, path, expiresIn = 600, transform = null) {
   if (!path) return null;
   const ttl = Math.max(60, Math.min(3600, Number(expiresIn) || 600));
   const normalized = cleanTransform(transform);
@@ -84,6 +85,17 @@ export async function signedMediaUrl(env, session, path, expiresIn = 600, transf
     return signedInternalMediaUrl(env, path, ttl, transform);
   }
   return null;
+}
+
+export async function signedMediaUrl(env, session, path, expiresIn = 600, transform = null) {
+  if (String(path || '').startsWith(EPHEMERAL_PREFIX)) return null;
+  return signMedia(env, session, path, expiresIn, transform);
+}
+
+export async function signedEphemeralMediaUrl(env, session, path, expiresIn = 60) {
+  if (!String(path || '').startsWith(EPHEMERAL_PREFIX)) return null;
+  // Même après ouverture, l'URL reste très courte et ne doit jamais être mise en cache durablement.
+  return signMedia(env, session, path, Math.max(60, Math.min(120, Number(expiresIn) || 60)), null);
 }
 
 async function enrichRows(env, session, rows = []) {
