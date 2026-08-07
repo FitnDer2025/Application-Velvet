@@ -89,7 +89,7 @@
     try {
       const result = await studioApi({ action: 'generate_prompt', brief: currentBrief() });
       promptPanel(result.prompt, result.generative);
-      toast(result.generative ? 'Concept généré par l’IA Velvet.' : 'Concept généré par le moteur Zwit local.');
+      toast(result.generative ? 'Concept généré par Zwit IA.' : 'Concept généré par le moteur Zwit local.');
     } catch (error) {
       toast(`Génération impossible : ${error.message}`, 'error');
     } finally {

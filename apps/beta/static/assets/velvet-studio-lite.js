@@ -72,7 +72,7 @@
       <h1>Décrivez la démonstration.<br>Zwit réalise la vidéo.</h1>
       <p>L’IA écrit la narration et la voix off. Les images proviennent directement de l’environnement Zwit avec des données fictives internes.</p>
       <div class="vsl-compose">
-        <textarea data-vsl-home-prompt placeholder="Crée une démonstration générale de Velvet. Montre l’accueil, la recherche, un profil, la messagerie, les sorties et la carte, avec une voix off française premium."></textarea>
+        <textarea data-vsl-home-prompt placeholder="Crée une démonstration générale de Zwit. Montre l’accueil, la recherche, un profil, la messagerie, les sorties et la carte, avec une voix off française premium."></textarea>
         <button class="vsl-primary" data-vsl-open>Créer la démonstration<small>Interface Zwit + voix off + montage</small></button>
       </div>
       <div class="vsl-points"><span>Ouverture immédiate</span><span>Aucune image inventée</span><span>Données synthétiques</span><span>Export vidéo avec voix</span></div>

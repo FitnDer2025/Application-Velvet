@@ -271,7 +271,7 @@
     if (event.target.closest('[data-vss-test-voice]')) {
       event.preventDefault();
       setBusy(true, 'Lecture…');
-      speak(state.draft.product === 'pro' ? 'Zwit Pro. Donnez à votre établissement la visibilité qu’il mérite.' : 'Velvet. Là où les plus belles rencontres commencent.', true)
+      speak(state.draft.product === 'pro' ? 'Zwit Pro. Donnez à votre établissement la visibilité qu’il mérite.' : 'Zwit. Là où les plus belles rencontres commencent.', true)
         .then(() => setMessage('Voix française prête pour le tournage.', 'ok'))
         .catch((error) => setMessage(error.message, 'error'))
         .finally(() => setBusy(false));

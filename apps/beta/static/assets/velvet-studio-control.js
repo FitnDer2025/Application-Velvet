@@ -143,12 +143,12 @@
       promise: 'Zwit réunit les personnes, les événements, les établissements et les outils de confiance dans une expérience unique.',
       duration,
       scenes: [
-        ['00–04 s','Logo Zwit','Le ruban forme le V sur fond Noir Velvet.','Le libertinage évolue.'],
+        ['00–04 s','Logo Zwit','Le ruban forme le V sur fond noir profond.','Le libertinage évolue.'],
         ['04–11 s','Problème actuel','Plans rapides : recherches dispersées, échanges sans contexte, organisation complexe.','Les rencontres libres méritaient une expérience plus humaine.'],
         ['11–22 s','Zwit en action','Captures réelles : recherche, profils, messagerie, carte et événements.','Découvrir, échanger et préparer une rencontre dans un même univers.'],
         ['22–32 s','Confiance','Pacte Zwit, vérification, albums privés, contrôle du consentement.','La confiance n’est pas une option. Elle est intégrée à chaque étape.'],
         ['32–40 s','Écosystème','Zwit Pro : événement, réservations, participants, statistiques.','Et pour les professionnels, une gestion plus simple et une communauté mieux engagée.'],
-        ['40–45 s','Signature','Logo, application et appel à l’action.','Velvet. Là où les plus belles rencontres commencent.']
+        ['40–45 s','Signature','Logo, application et appel à l’action.','Zwit. Là où les plus belles rencontres commencent.']
       ]
     };
     render();
@@ -175,7 +175,7 @@
       ['Cohérence visuelle','Noir Zwit, Bordeaux et Or Champagne','ok'],
       ['Validation humaine','Aucune publication automatique','ok']
     ];
-    return `${pageHead('Brand Guard','Avant tout export, la campagne est contrôlée contre les règles produit, visuelles, légales et éthiques de Velvet.','')}${tabs()}<section class="vs-card"><div class="vs-provider-list">${checks.map(c=>`<article class="vs-provider"><div><strong>${safe(c[0])}</strong><span>${safe(c[1])}</span></div><span class="vs-badge ok">Conforme</span></article>`).join('')}</div></section>`;
+    return `${pageHead('Brand Guard','Avant tout export, la campagne est contrôlée contre les règles produit, visuelles, légales et éthiques de Zwit.','')}${tabs()}<section class="vs-card"><div class="vs-provider-list">${checks.map(c=>`<article class="vs-provider"><div><strong>${safe(c[0])}</strong><span>${safe(c[1])}</span></div><span class="vs-badge ok">Conforme</span></article>`).join('')}</div></section>`;
   }
 
   function saveDraft() {

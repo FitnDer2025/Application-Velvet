@@ -191,7 +191,7 @@
     });
     if (!stream.getAudioTracks().length) {
       stream.getTracks().forEach((track) => track.stop());
-      throw new Error('Active « Partager l’audio de l’onglet » puis sélectionne cet onglet Velvet.');
+      throw new Error('Active « Partager l’audio de l’onglet » puis sélectionne cet onglet Zwit.');
     }
     return stream;
   }
@@ -284,7 +284,7 @@
 
     title.parentElement.classList.remove('visible');
     outro.classList.remove('hidden');
-    const closing = job.plan.closingLine || (job.product === 'pro' ? 'Zwit Pro. Donnez à votre établissement la visibilité qu’il mérite.' : 'Velvet. Là où les plus belles rencontres commencent.');
+    const closing = job.plan.closingLine || (job.product === 'pro' ? 'Zwit Pro. Donnez à votre établissement la visibilité qu’il mérite.' : 'Zwit. Là où les plus belles rencontres commencent.');
     await speak(closing);
     await wait(900);
   }
@@ -335,7 +335,7 @@
     state.outputUrl = URL.createObjectURL(blob);
     const extension = mime.includes('mp4') ? 'mp4' : 'webm';
     const universe = job.product === 'pro' ? 'pro' : 'membre';
-    const filename = `velvet-${universe}-${job.format.replace(':', 'x')}-${Date.now()}.${extension}`;
+    const filename = `zwit-${universe}-${job.format.replace(':', 'x')}-${Date.now()}.${extension}`;
     result.hidden = false;
     result.innerHTML = `<section class="vsc-result-card"><span>VIDÉO PRÊTE</span><h1>Le véritable Zwit, en mouvement.</h1><p>Voix française intégrée · ${job.format} · ${job.product === 'pro' ? 'Zwit Pro' : 'Zwit Membre'}</p><video src="${state.outputUrl}" controls playsinline></video><div><a href="${state.outputUrl}" download="${filename}">Télécharger la vidéo</a><button type="button" data-vsc-restart>Refaire un tournage</button><a href="/control/">Retour à Zwit Studio</a></div></section>`;
     frame.hidden = true;
