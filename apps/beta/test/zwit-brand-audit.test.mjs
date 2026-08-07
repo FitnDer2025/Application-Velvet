@@ -37,27 +37,29 @@ function literalValues(line) {
   return values;
 }
 
+function stripTechnicalVelvet(value) {
+  let text = String(value).replace(/\\"/g, '"').replace(/\\'/g, "'");
+  text = text
+    .replace(/velvet:\/\/[^\s"'<>]*/gi, '')
+    .replace(/(?:group\.)?com\.velvet[a-z0-9._-]*/gi, '')
+    .replace(/\bVELVET_[A-Z0-9_]+\b/g, '')
+    .replace(/\bVelvet[A-Z][A-Za-z0-9_]*\b/g, '')
+    .replace(/\bvelvet[A-Z][A-Za-z0-9_]*\b/g, '')
+    .replace(/\b(?:public\.)?velvet_[a-z0-9_.-]+\b/gi, '')
+    .replace(/\bdata-velvet-[a-z0-9_-]+\b/gi, '')
+    .replace(/\.velvet-[a-z0-9_-]+\b/gi, '')
+    .replace(/\b(?:class|id)=["'][^"']*\bvelvet-[a-z0-9_-]+[^"']*["']/gi, '')
+    .replace(/\/[^\s"'<>]*velvet[^\s"'<>]*/gi, '')
+    .replace(/\bX-Velvet-[A-Za-z0-9_-]+\b/gi, '')
+    .replace(/\bVelvet-iOS\/[A-Za-z0-9_.-]+\b/gi, '');
+  return text;
+}
+
 function isTechnical(value) {
   const text = String(value).trim();
   if (!text) return true;
-  return [
-    /^velvet:\/\//i,
-    /^(?:group\.)?com\.velvet/i,
-    /^VELVET_[A-Z0-9_]+$/,
-    /^Velvet[A-Z][A-Za-z0-9_]*$/,
-    /^velvet[A-Z][A-Za-z0-9_]*$/,
-    /^velvet[._/-][A-Za-z0-9_./-]+$/i,
-    /^\/[^\s]*velvet[^\s]*$/i,
-    /\.(?:js|mjs|css|png|jpe?g|svg|swift|plist|entitlements|json)$/i,
-    /^(?:bucket|table|storage|schema|key|kind|target|scheme|migration):?\s*velvet/i,
-    /^velvet_private(?:\.|$)/i,
-    /^public\.velvet_/i,
-    /^\[?data-velvet-[a-z0-9_-]+\]?$/i,
-    /^\.velvet-[a-z0-9_-]+$/i,
-    /\\s|\[\^/ ,
-    /^X-Velvet-/i,
-    /^Velvet-iOS\//i
-  ].some((pattern) => pattern.test(text));
+  if (/\\s|\[\^/.test(text)) return true;
+  return !/\bvelvet\b/i.test(stripTechnicalVelvet(text));
 }
 
 function visibleVelvetFindings() {
