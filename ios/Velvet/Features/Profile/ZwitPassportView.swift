@@ -5,7 +5,7 @@ struct ZwitPassportView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
 
-    private let client = APIClient(baseURL: APIConfiguration.baseURL)
+    private let client = APIClient()
 
     var body: some View {
         ScrollView {
