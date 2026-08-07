@@ -98,39 +98,7 @@ test('le compte admin change d’espace ou revient à la connexion sans modifier
   await expect(access.getByRole('link', { name: 'Membres' })).toHaveAttribute('aria-current', 'page');
   await expect(access.getByRole('link', { name: 'Zwit Pro' })).toHaveAttribute('href', '/pro/');
   await expect(access.getByRole('link', { name: 'Zwit Control' })).toHaveAttribute('href', '/control/');
-  const changeButton = access.getByRole('button', { name: 'Changer de compte' });
-  try {
-    await changeButton.click({ trial: true, timeout: 6000 });
-  } catch (error) {
-    const diagnostics = await changeButton.evaluate((node) => {
-      const rect = node.getBoundingClientRect();
-      const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
-      const stack = document.elementsFromPoint(x, y).slice(0, 8).map((element) => {
-        const style = getComputedStyle(element);
-        return {
-          tag: element.tagName,
-          id: element.id,
-          className: typeof element.className === 'string' ? element.className : '',
-          zIndex: style.zIndex,
-          pointerEvents: style.pointerEvents,
-          position: style.position
-        };
-      });
-      const style = getComputedStyle(node);
-      return {
-        disabled: node.disabled,
-        connected: node.isConnected,
-        rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
-        pointerEvents: style.pointerEvents,
-        visibility: style.visibility,
-        opacity: style.opacity,
-        stack
-      };
-    });
-    throw new Error(`change_account_not_actionable ${JSON.stringify(diagnostics)} :: ${error.message}`);
-  }
-  await changeButton.click();
+  await access.getByRole('button', { name: 'Changer de compte' }).click();
   await expect(page).toHaveURL(/\/\?mode=login$/);
   await expect(page.locator('#vg-login')).toBeVisible();
 });
