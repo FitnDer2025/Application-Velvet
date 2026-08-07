@@ -1,6 +1,12 @@
 name: Velvet Apple build
 
 on:
+  push:
+    branches:
+      - v1-lived-demo
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios-build.yml'
   pull_request:
     paths:
       - 'ios/**'

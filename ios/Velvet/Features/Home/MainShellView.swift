@@ -4,6 +4,7 @@ struct MainShellView: View {
     private enum Tab: String, CaseIterable {
         case home
         case people
+        case map
         case places
         case messages
         case profile
@@ -12,6 +13,7 @@ struct MainShellView: View {
             switch self {
             case .home: "Accueil"
             case .people: "Membres"
+            case .map: "Carte"
             case .places: "Lieux"
             case .messages: "Messages"
             case .profile: "Profil"
@@ -22,6 +24,7 @@ struct MainShellView: View {
             switch self {
             case .home: "house"
             case .people: "person.2"
+            case .map: "map"
             case .places: "building.2"
             case .messages: "bubble.left.and.bubble.right"
             case .profile: "person.crop.circle"
@@ -32,6 +35,7 @@ struct MainShellView: View {
             switch self {
             case .home: "house.fill"
             case .people: "person.2.fill"
+            case .map: "map.fill"
             case .places: "building.2.fill"
             case .messages: "bubble.left.and.bubble.right.fill"
             case .profile: "person.crop.circle.fill"
@@ -193,6 +197,8 @@ struct MainShellView: View {
             NavigationStack { PeopleFirstHomeView(profile: profile) }
         case .people:
             NavigationStack { PremiumDiscoveryGridView(currentProfile: profile) }
+        case .map:
+            NavigationStack { MemberMapView() }
         case .places:
             NavigationStack { PeopleFirstClubDirectoryView() }
         case .messages:
@@ -316,8 +322,11 @@ struct MainShellView: View {
                 }
             }
 
-        case .events, .maps:
+        case .events:
             selectedTab = .places
+
+        case .maps:
+            selectedTab = .map
 
         case .profile:
             if let id = route.profileID,
