@@ -1,0 +1,72 @@
+name: Zwit visible brand source fix
+
+on:
+  push:
+    branches:
+      - release/zwit-v1.5-seven-capitals
+    paths:
+      - '.github/workflows/zwit-visible-brand-source-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-visible-brand:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/zwit-v1.5-seven-capitals
+      - name: Replace remaining public Studio strings
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          changes = {
+              Path('apps/beta/static/assets/velvet-studio-lite.js'): [
+                  ('Crée une démonstration générale de Velvet.', 'Crée une démonstration générale de Zwit.', 1),
+              ],
+              Path('apps/beta/static/assets/velvet-studio-control.js'): [
+                  ('règles produit, visuelles, légales et éthiques de Velvet.', 'règles produit, visuelles, légales et éthiques de Zwit.', 1),
+                  ('Velvet. Là où les plus belles rencontres commencent.', 'Zwit. Là où les plus belles rencontres commencent.', 1),
+                  ('Le ruban forme le V sur fond Noir Velvet.', 'Le ruban forme le V sur fond noir profond.', 1),
+              ],
+              Path('apps/beta/static/assets/velvet-studio-capture.js'): [
+                  ('`velvet-${universe}-${job.format.replace(\':\', \'x\')}-${Date.now()}.${extension}`', '`zwit-${universe}-${job.format.replace(\':\', \'x\')}-${Date.now()}.${extension}`', 1),
+                  ('Velvet. Là où les plus belles rencontres commencent.', 'Zwit. Là où les plus belles rencontres commencent.', 1),
+                  ('sélectionne cet onglet Velvet.', 'sélectionne cet onglet Zwit.', 1),
+              ],
+              Path('apps/beta/static/assets/velvet-studio-ai.js'): [
+                  ('Concept généré par l’IA Velvet.', 'Concept généré par Zwit IA.', 1),
+              ],
+              Path('apps/beta/static/assets/velvet-studio-ai-module.js'): [
+                  ('Velvet. Là où les plus belles rencontres commencent.', 'Zwit. Là où les plus belles rencontres commencent.', 1),
+              ],
+          }
+
+          for path, replacements in changes.items():
+              source = path.read_text(encoding='utf-8')
+              for old, new, expected in replacements:
+                  count = source.count(old)
+                  if count != expected:
+                      raise SystemExit(f'{path}: expected {expected} occurrence(s) of {old!r}, found {count}')
+                  source = source.replace(old, new)
+              path.write_text(source, encoding='utf-8')
+          PY
+      - name: Verify public Studio strings
+        run: |
+          grep -F 'Crée une démonstration générale de Zwit.' apps/beta/static/assets/velvet-studio-lite.js
+          grep -F 'règles produit, visuelles, légales et éthiques de Zwit.' apps/beta/static/assets/velvet-studio-control.js
+          grep -F 'Zwit. Là où les plus belles rencontres commencent.' apps/beta/static/assets/velvet-studio-control.js
+          grep -F 'fond noir profond.' apps/beta/static/assets/velvet-studio-control.js
+          grep -F 'zwit-${universe}' apps/beta/static/assets/velvet-studio-capture.js
+          grep -F 'sélectionne cet onglet Zwit.' apps/beta/static/assets/velvet-studio-capture.js
+          grep -F 'Concept généré par Zwit IA.' apps/beta/static/assets/velvet-studio-ai.js
+          grep -F 'Zwit. Là où les plus belles rencontres commencent.' apps/beta/static/assets/velvet-studio-ai-module.js
+      - name: Commit source fixes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/beta/static/assets/velvet-studio-lite.js apps/beta/static/assets/velvet-studio-control.js apps/beta/static/assets/velvet-studio-capture.js apps/beta/static/assets/velvet-studio-ai.js apps/beta/static/assets/velvet-studio-ai-module.js
+          git commit -m 'fix(brand): finish Zwit Studio public copy migration'
+          git push origin HEAD:release/zwit-v1.5-seven-capitals
