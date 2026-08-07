@@ -1,4 +1,16 @@
 (() => {
+  const v15Style = document.createElement('link');
+  v15Style.rel = 'stylesheet';
+  v15Style.href = '/assets/zwit-pro-guestlist.css?v=20260807-1';
+  v15Style.dataset.zwitProGuestlist = 'style';
+  document.head.appendChild(v15Style);
+
+  const v15Runtime = document.createElement('script');
+  v15Runtime.src = '/assets/zwit-pro-guestlist.js?v=20260807-1';
+  v15Runtime.defer = true;
+  v15Runtime.dataset.zwitProGuestlist = 'runtime';
+  document.head.appendChild(v15Runtime);
+
   const api = async (options = {}) => {
     const response = await fetch('/api/pro/workspace', {
       credentials: 'same-origin',
@@ -11,7 +23,7 @@
   };
   const kindLabel = { club: 'Club privé', spa: 'Spa privé', bar: 'Bar libertin', love_room: 'Love room', other: 'Autre lieu' };
   const kindValue = { 'Club privé': 'club', 'Spa privé': 'spa', 'Bar libertin': 'bar', 'Love room': 'love_room' };
-  const avatar = (name) => `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><rect width="100%" height="100%" fill="#471629"/><text x="50%" y="55%" text-anchor="middle" fill="#d5b477" font-size="42" font-family="serif">${String(name || 'V').split(/\s+/).map((x) => x[0]).join('').slice(0, 2)}</text></svg>`)}`;
+  const avatar = (name) => `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><rect width="100%" height="100%" fill="#471629"/><text x="50%" y="55%" text-anchor="middle" fill="#d5b477" font-size="42" font-family="serif">${String(name || 'Z').split(/\s+/).map((x) => x[0]).join('').slice(0, 2)}</text></svg>`)}`;
   let workspace = null;
   menu.splice(0, menu.length, ...menu.filter((item) => ['dashboard', 'venue', 'events', 'bookings'].includes(item[0])));
   localStorage.removeItem('velvetProCrmV1');
@@ -150,7 +162,7 @@
     const registrations = S.bookings.filter((booking) => events.some((event) => event.id === booking.event));
     return `<div class="ey">Pilotage réel · Supabase</div><h1>${esc(venue().name)}</h1><p class="lead">Cette vue ne contient plus aucune donnée de démonstration.</p>
       <div class="kpis"><div class="kpi"><small>Soirées</small><b>${events.length}</b></div><div class="kpi"><small>À venir</small><b>${events.filter((item) => new Date(item.date) >= new Date()).length}</b></div><div class="kpi"><small>Inscriptions</small><b>${registrations.length}</b></div><div class="kpi"><small>Places réservées</small><b>${registrations.reduce((sum, item) => sum + item.people, 0)}</b></div><div class="kpi"><small>Fiche publique</small><b>${venue().status === 'published' ? 'Active' : 'Brouillon'}</b></div></div>
-      <div class="section-head"><div><h2>Agenda</h2><p>Événements enregistrés dans la mémoire Velvet.</p></div><button class="btn" onclick="openEventModal()">Créer une soirée</button></div>${eventCards(events)}`;
+      <div class="section-head"><div><h2>Agenda</h2><p>Événements enregistrés dans la mémoire Zwit.</p></div><button class="btn" onclick="openEventModal()">Créer une soirée</button></div>${eventCards(events)}`;
   };
   membersPage = () => neutral('CRM membres en construction', 'Seuls les membres réellement inscrits à vos soirées seront visibles ici. Les segments et notes serveur arrivent dans le lot suivant.');
   messagesPage = () => neutral('Messagerie Pro en construction', 'Le raccordement aux conversations réelles sera activé sans conserver les anciens échanges fictifs.');
