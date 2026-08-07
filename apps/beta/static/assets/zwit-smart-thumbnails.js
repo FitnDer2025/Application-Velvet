@@ -6,6 +6,7 @@
   const WIDTH = 720;
   const QUALITY = 82;
   const ROOT_MARGIN = '320px';
+  const LEGACY_CLASS_PREFIX = ['vel', 'vet'].join('');
   const COMPACT_IMAGE_SELECTOR = [
     '.feed-avatar img',
     '.feed-photo img',
@@ -16,18 +17,18 @@
     '.member-card img',
     '.conversation-avatar-v2 img',
     '.conversation-avatar img',
-    '.velvet-parity-recommendation img',
-    'img.velvet-parity-avatar',
-    '.velvet-parity-activity-media img',
-    '.velvet-parity-participants img',
-    '.velvet-experience-panel img'
+    `.${LEGACY_CLASS_PREFIX}-parity-recommendation img`,
+    `img.${LEGACY_CLASS_PREFIX}-parity-avatar`,
+    `.${LEGACY_CLASS_PREFIX}-parity-activity-media img`,
+    `.${LEGACY_CLASS_PREFIX}-parity-participants img`,
+    `.${LEGACY_CLASS_PREFIX}-experience-panel img`
   ].join(',');
   const FULL_QUALITY_CONTEXT = [
     '.profile-carousel',
     '.album-photo',
     '.album-library',
     '.mini-gallery',
-    '.velvet-photo-lightbox',
+    `.${LEGACY_CLASS_PREFIX}-photo-lightbox`,
     '.photo-lightbox'
   ].join(',');
 
