@@ -1,6 +1,6 @@
-const CACHE = 'velvet-beta-shell-v30';
+const CACHE = 'velvet-beta-shell-v31';
 // Caches historiques explicitement supprimés pendant l’activation :
-// velvet-beta-shell-v18 à velvet-beta-shell-v29.
+// velvet-beta-shell-v18 à velvet-beta-shell-v30.
 const APP_SHELL = [
   '/assets/members-live.css',
   '/assets/members-live.js?v=20260803-4',
@@ -19,6 +19,25 @@ const APP_SHELL = [
   '/assets/velvet-mobile-feed-hotfix.js?v=20260803-3',
   '/assets/velvet-chat-whatsapp.css?v=20260731-1',
   '/assets/velvet-chat-whatsapp.js?v=20260731-1',
+  '/assets/zwit-conversation-respect.css?v=20260807-1',
+  '/assets/zwit-conversation-respect.js?v=20260807-1',
+  '/assets/zwit-voice-notes.css?v=20260807-1',
+  '/assets/zwit-voice-notes.js?v=20260807-1',
+  '/assets/zwit-ephemeral-messaging.css?v=20260807-1',
+  '/assets/zwit-ephemeral-messaging.js?v=20260807-1',
+  '/assets/zwit-video-call.css?v=20260807-1',
+  '/assets/zwit-video-call.js?v=20260807-1',
+  '/assets/zwit-contextual-recommendations.css?v=20260807-1',
+  '/assets/zwit-contextual-recommendations.js?v=20260807-1',
+  '/assets/zwit-private-spaces.css?v=20260807-1',
+  '/assets/zwit-private-spaces.js?v=20260807-1',
+  '/assets/zwit-passport.css?v=20260807-1',
+  '/assets/zwit-passport.js?v=20260807-1',
+  '/assets/zwit-tonight.css?v=20260807-1',
+  '/assets/zwit-tonight.js?v=20260807-1',
+  '/assets/zwit-event-booking.css?v=20260807-1',
+  '/assets/zwit-event-booking.js?v=20260807-1',
+  '/assets/zwit-member-checkin.js?v=20260807-1',
   '/assets/velvet-mobile-viewport-guard.css?v=20260731-2',
   '/assets/velvet-mobile-viewport-guard.js?v=20260731-2',
   '/assets/velvet-social-interactions-hotfix.css?v=20260731-1',
@@ -31,8 +50,11 @@ const APP_SHELL = [
   '/assets/velvet-experience-management.js?v=20260731-1',
   '/assets/velvet-interaction-recovery.css?v=20260803-3',
   '/assets/velvet-interaction-recovery.js?v=20260803-3',
-  '/assets/velvet-web-ios-parity.css?v=20260803-3',
-  '/assets/velvet-web-ios-parity.js?v=20260803-3',
+  '/assets/velvet-web-ios-parity.css?v=20260807-1',
+  '/assets/velvet-web-ios-parity.js?v=20260807-1',
+  '/assets/zwit-ios-source-of-truth.css?v=20260807-1',
+  '/assets/zwit-ios-source-of-truth.js?v=20260807-1',
+  '/assets/zwit-logo-transparent.png?v=20260806-10',
   '/assets/pwa-ios.js?v=20260803-2',
   '/assets/photo-protection.js?v=20260731-5',
   '/assets/location-verification.js?v=20260803-1',
