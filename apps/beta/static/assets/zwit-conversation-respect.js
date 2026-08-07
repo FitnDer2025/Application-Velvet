@@ -44,7 +44,7 @@
   function setComposerEnabled(page, enabled, reason = '') {
     const form = page.querySelector('#messageForm');
     if (!form) return;
-    form.dataset.zwitRequestLocked = enabled ? '0' : '1';
+    form.setAttribute('data-zwit-request-locked', enabled ? '0' : '1');
     const controls = form.querySelectorAll('textarea, input[type="file"], button[type="submit"], .attachment-picker');
     controls.forEach((control) => {
       if ('disabled' in control) control.disabled = !enabled;
@@ -190,7 +190,7 @@
 
   document.addEventListener('submit', (event) => {
     const form = event.target.closest('#messageForm');
-    if (!form || form.dataset.zwitRequestLocked !== '1') return;
+    if (!form || form.getAttribute('data-zwit-request-locked') !== '1') return;
     event.preventDefault();
     event.stopImmediatePropagation();
   }, true);
