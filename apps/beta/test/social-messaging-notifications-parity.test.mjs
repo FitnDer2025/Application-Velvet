@@ -87,11 +87,12 @@ test('le Web et la PWA affichent accusés réactions saisie historique et push h
 });
 
 test('iOS utilise le même état temps réel et archive les notifications', async () => {
-  const [models, service, store, messaging, shell, managedInbox, notifications, memberDetail, discovery] = await Promise.all([
+  const [models, service, store, messaging, premiumMessaging, shell, managedInbox, notifications, memberDetail, discovery] = await Promise.all([
     read('ios/Velvet/Core/Models/DirectoryModels.swift'),
     read('ios/Velvet/Core/Session/SessionService+IOSSocial.swift'),
     read('ios/Velvet/Core/Session/VelvetStore.swift'),
     read('ios/Velvet/Features/Messaging/RealtimeAppleMessagingViews.swift'),
+    read('ios/Velvet/Features/Messaging/ZwitPremiumConversationView.swift'),
     read('ios/Velvet/Features/Home/MainShellView.swift'),
     read('ios/Velvet/Features/Messaging/ManagedConversationsView.swift'),
     read('ios/Velvet/Features/Home/NotificationsView.swift'),
@@ -113,8 +114,13 @@ test('iOS utilise le même état temps réel et archive les notifications', asyn
   assert.match(messaging, /contextMenu/);
   assert.match(messaging, /composerIdentity = UUID\(\)/);
   assert.match(messaging, /setTyping/);
+  assert.match(premiumMessaging, /RealtimeAppleConversationView/);
+  assert.match(premiumMessaging, /Photo/);
+  assert.match(premiumMessaging, /Éphémère/);
+  assert.match(premiumMessaging, /Vocal/);
   assert.match(shell, /ManagedConversationsView/);
-  assert.match(shell, /RealtimeAppleConversationView/);
+  assert.match(shell, /ZwitPremiumConversationView/);
+  assert.match(managedInbox, /ZwitPremiumConversationView/);
   assert.match(managedInbox, /removeConversation/);
   assert.match(notifications, /Tout archiver/);
   assert.match(notifications, /NotificationActivityTab/);
