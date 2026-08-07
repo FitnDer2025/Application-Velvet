@@ -102,6 +102,26 @@ test('Zwit Pro expose le cockpit guest-list et les réglages de réservation ré
   assert.match(api, /guest_list_enabled/);
 });
 
+test('iOS partage le même moteur de réservation et connaît tous les états v1.5', async () => {
+  const [models, service, existingView, session] = await Promise.all([
+    read('ios/Velvet/Core/Models/EventBookingV15.swift'),
+    read('ios/Velvet/Core/Session/SessionService+EventBookingV15.swift'),
+    read('ios/Velvet/Features/Places/IntelligentPlacesEventsView.swift'),
+    read('ios/Velvet/Core/Session/SessionService.swift')
+  ]);
+  assert.match(models, /Réservation confirmée/);
+  assert.match(models, /En attente de validation/);
+  assert.match(models, /Liste d’attente/);
+  assert.match(models, /Présence confirmée/);
+  assert.match(service, /\/api\/members\/event-registrations/);
+  assert.match(service, /visibleToParticipants/);
+  assert.match(service, /cancelEventBooking/);
+  assert.match(existingView, /IntelligentEventDetailView/);
+  assert.match(existingView, /Participants visibles/);
+  assert.match(session, /func register\(eventID: UUID/);
+  assert.match(session, /\/api\/members\/event-registrations/);
+});
+
 test('les runtimes de réservation v1.5 passent le parseur JavaScript de Node', async () => {
   await execFileAsync(process.execPath, ['--check', 'functions/api/members/event-registrations.js']);
   await execFileAsync(process.execPath, ['--check', 'apps/beta/static/assets/zwit-event-booking.js']);
