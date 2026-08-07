@@ -49,7 +49,7 @@ test('Zwit Pro génère un QR compact local sans transmettre le token à un serv
   assert.match(pro, /Renouvellement sécurisé/);
 });
 
-test('le membre conserve le check-in pendant une authentification et met le Passeport à jour', async () => {
+test('le membre conserve le check-in pendant une authentification Web et met le Passeport à jour', async () => {
   const [html, member, passport] = await Promise.all([
     read('apps/web/velvet-members-beta-live.html'),
     read('apps/beta/static/assets/zwit-member-checkin.js'),
@@ -72,6 +72,24 @@ test('les API de check-in n’exposent pas une validation sans rôle Pro ou admi
   assert.match(proApi, /pro_access_required/);
   assert.match(memberApi, /requireAdmittedMember/);
   assert.match(memberApi, /passportUpdated: true/);
+});
+
+test('la caméra iPhone ouvre le schéma technique historique puis reprend le check-in après connexion', async () => {
+  const [model, service, state, root, plist] = await Promise.all([
+    read('ios/Velvet/Core/Models/CheckinV15.swift'),
+    read('ios/Velvet/Core/Session/SessionService+CheckinV15.swift'),
+    read('ios/Velvet/App/AppState.swift'),
+    read('ios/Velvet/App/ZwitRootContainer.swift'),
+    read('ios/Velvet/Resources/Info.plist')
+  ]);
+  assert.match(model, /url\.scheme\?\.lowercased\(\) == "velvet"/);
+  assert.match(model, /url\.host\?\.lowercased\(\) == "checkin"/);
+  assert.match(service, /\/api\/members\/check-in/);
+  assert.match(state, /pendingCheckinToken/);
+  assert.match(state, /redeemPendingCheckinIfPossible/);
+  assert.match(state, /Ton Passeport Zwit vient d’être mis à jour/);
+  assert.match(root, /onOpenURL\(perform: appState\.handle\)/);
+  assert.match(plist, /<string>velvet<\/string>/);
 });
 
 test('les runtimes QR v1.5 passent le parseur JavaScript de Node', async () => {
