@@ -1,0 +1,78 @@
+name: Zwit visible brand source fix
+
+on:
+  push:
+    branches:
+      - release/zwit-v1.5-seven-capitals
+    paths:
+      - '.github/workflows/zwit-visible-brand-source-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-visible-brand:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/zwit-v1.5-seven-capitals
+      - name: Replace remaining public iOS copy
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          changes = {
+              Path('ios/Velvet/Core/Session/SessionService.swift'): [
+                  ('fileName: "velvet-\\(UUID().uuidString).jpg"', 'fileName: "zwit-\\(UUID().uuidString).jpg"', 1),
+              ],
+              Path('ios/Velvet/Features/Authentication/SignUpView.swift'): [
+                  ('Entre dans Velvet.', 'Entre dans Zwit.', 1),
+              ],
+              Path('ios/Velvet/Features/Discovery/DiscoveryView.swift'): [
+                  ('La recherche s’ouvre dès que ton profil est admis par Velvet.', 'La recherche s’ouvre dès que ton profil est admis par Zwit.', 1),
+              ],
+              Path('ios/Velvet/Features/Discovery/PremiumDiscoveryGridView.swift'): [
+                  ('Une sélection élégante et lisible pour découvrir rapidement les univers Velvet.', 'Une sélection élégante et lisible pour découvrir rapidement les univers Zwit.', 1),
+                  ('La recherche s’ouvre dès que ton profil est admis par Velvet.', 'La recherche s’ouvre dès que ton profil est admis par Zwit.', 1),
+              ],
+              Path('ios/Velvet/Features/Home/PremiumHomeView.swift'): [
+                  ('L’espace complet s’ouvrira après validation par Velvet.', 'L’espace complet s’ouvrira après validation par Zwit.', 1),
+              ],
+              Path('ios/Velvet/Features/Onboarding/ProfileSetupView.swift'): [
+                  ('Le prestataire renvoie uniquement un statut. Aucun document n’est stocké par Velvet.', 'Le prestataire renvoie uniquement un statut. Aucun document n’est stocké par Zwit.', 1),
+              ],
+              Path('ios/Velvet/Features/Places/IntelligentPlacesEventsView.swift'): [
+                  ('La sortie est publiée dans Velvet.', 'La sortie est publiée dans Zwit.', 1),
+              ],
+              Path('ios/Velvet/Features/Places/PlacesEventsView.swift'): [
+                  ('Les événements et établissements effectivement publiés dans Velvet.', 'Les événements et établissements effectivement publiés dans Zwit.', 1),
+              ],
+          }
+
+          for path, replacements in changes.items():
+              source = path.read_text(encoding='utf-8')
+              for old, new, expected in replacements:
+                  count = source.count(old)
+                  if count != expected:
+                      raise SystemExit(f'{path}: expected {expected} occurrence(s) of {old!r}, found {count}')
+                  source = source.replace(old, new)
+              path.write_text(source, encoding='utf-8')
+          PY
+      - name: Verify iOS copy
+        run: |
+          grep -F 'fileName: "zwit-\(UUID().uuidString).jpg"' ios/Velvet/Core/Session/SessionService.swift
+          grep -F 'Entre dans Zwit.' ios/Velvet/Features/Authentication/SignUpView.swift
+          grep -F 'admis par Zwit.' ios/Velvet/Features/Discovery/DiscoveryView.swift
+          grep -F 'univers Zwit.' ios/Velvet/Features/Discovery/PremiumDiscoveryGridView.swift
+          grep -F 'validation par Zwit.' ios/Velvet/Features/Home/PremiumHomeView.swift
+          grep -F 'stocké par Zwit.' ios/Velvet/Features/Onboarding/ProfileSetupView.swift
+          grep -F 'publiée dans Zwit.' ios/Velvet/Features/Places/IntelligentPlacesEventsView.swift
+          grep -F 'publiés dans Zwit.' ios/Velvet/Features/Places/PlacesEventsView.swift
+      - name: Commit copy fixes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ios/Velvet/Core/Session/SessionService.swift ios/Velvet/Features/Authentication/SignUpView.swift ios/Velvet/Features/Discovery/DiscoveryView.swift ios/Velvet/Features/Discovery/PremiumDiscoveryGridView.swift ios/Velvet/Features/Home/PremiumHomeView.swift ios/Velvet/Features/Onboarding/ProfileSetupView.swift ios/Velvet/Features/Places/IntelligentPlacesEventsView.swift ios/Velvet/Features/Places/PlacesEventsView.swift
+          git commit -m 'fix(brand): migrate remaining iOS visible copy to Zwit'
+          git push origin HEAD:release/zwit-v1.5-seven-capitals
