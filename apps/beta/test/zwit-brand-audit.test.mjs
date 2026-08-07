@@ -162,7 +162,7 @@ test('aucune chaîne utilisateur des trois socles ne contient encore Velvet', ()
   if (findings.length) {
     console.error('\nOccurrences visibles restantes de Velvet :');
     findings.forEach((finding) => {
-      console.error(`- ${finding.path}:${finding.line} → ${finding.value}`);
+      console.error(`error: brand_visible_finding ${finding.path}:${finding.line} → ${finding.value}`);
     });
   }
   assert.deepEqual(findings, []);
