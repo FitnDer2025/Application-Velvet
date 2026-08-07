@@ -283,7 +283,7 @@ function fallbackCopy(event, venue, networks, tone, cta) {
     versions: {
       facebook: `${base}\n\n${hashtags.slice(0, 4).join(' ')}`,
       instagram: `${base}\n\n${hashtags.join(' ')}`,
-      tiktok: `${context.title}. ${context.date}. ${cta || 'Retrouvez toutes les informations sur Velvet.'}\n\n${hashtags.slice(0, 5).join(' ')}`
+      tiktok: `${context.title}. ${context.date}. ${cta || 'Retrouvez toutes les informations sur Zwit.'}\n\n${hashtags.slice(0, 5).join(' ')}`
     },
     hashtags,
     tone: tone || 'premium',
