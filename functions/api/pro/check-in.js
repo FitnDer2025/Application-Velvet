@@ -26,6 +26,9 @@ export async function onRequestPost({ request, env }) {
 
     const origin = new URL(request.url).origin;
     const checkinUrl = `${origin}/membres/?checkin=${encodeURIComponent(session.token)}`;
+    // Le deep-link historique reste volontairement velvet:// : il s'agit d'un identifiant
+    // technique iOS, pas de la marque visible. Le payload tient dans un QR v4-L local.
+    const qrPayload = `velvet://checkin?token=${session.token}`;
     return withSession({
       ok: true,
       checkin: {
@@ -34,6 +37,7 @@ export async function onRequestPost({ request, env }) {
         establishmentId: session.establishment_id,
         eventTitle: session.event_title,
         token: session.token,
+        qrPayload,
         checkinUrl,
         expiresAt: session.expires_at,
         ttlSeconds
