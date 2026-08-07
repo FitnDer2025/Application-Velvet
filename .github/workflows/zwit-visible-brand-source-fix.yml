@@ -1,0 +1,68 @@
+name: Zwit visible brand source fix
+
+on:
+  push:
+    branches:
+      - release/zwit-v1.5-seven-capitals
+    paths:
+      - '.github/workflows/zwit-visible-brand-source-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-visible-brand:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/zwit-v1.5-seven-capitals
+      - name: Replace remaining public Control and iOS copy
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          changes = {
+              Path('ios/Velvet/Features/Places/ProfileOutingsView.swift'): [
+                  ('La présence sera affichée au pluriel sur Velvet.', 'La présence sera affichée au pluriel sur Zwit.', 1),
+                  ('La présence sera affichée au singulier sur Velvet.', 'La présence sera affichée au singulier sur Zwit.', 1),
+              ],
+              Path('ios/Velvet/Features/Profile/PrivacySettingsView.swift'): [
+                  ('selon la politique de conservation Velvet.', 'selon la politique de conservation Zwit.', 1),
+              ],
+              Path('functions/_middleware.js'): [
+                  ('Accès non autorisé pour ce rôle Velvet.', 'Accès non autorisé pour ce rôle Zwit.', 1),
+              ],
+              Path('functions/api/control/studio-media.js'): [
+                  ('Velvet. Là où les plus belles rencontres commencent.', 'Zwit. Là où les plus belles rencontres commencent.', 2),
+                  ('campagne française premium pour Velvet.', 'campagne française premium pour Zwit.', 1),
+                  ('à travers la véritable interface Velvet.', 'à travers la véritable interface Zwit.', 1),
+                  ('uniquement par la navigation dans Velvet.', 'uniquement par la navigation dans Zwit.', 1),
+              ],
+          }
+
+          for path, replacements in changes.items():
+              source = path.read_text(encoding='utf-8')
+              for old, new, expected in replacements:
+                  count = source.count(old)
+                  if count != expected:
+                      raise SystemExit(f'{path}: expected {expected} occurrence(s) of {old!r}, found {count}')
+                  source = source.replace(old, new)
+              path.write_text(source, encoding='utf-8')
+          PY
+      - name: Verify copy
+        run: |
+          grep -F 'sur Zwit.' ios/Velvet/Features/Places/ProfileOutingsView.swift
+          grep -F 'conservation Zwit.' ios/Velvet/Features/Profile/PrivacySettingsView.swift
+          grep -F 'rôle Zwit.' functions/_middleware.js
+          grep -F 'Zwit. Là où les plus belles rencontres commencent.' functions/api/control/studio-media.js
+          grep -F 'premium pour Zwit.' functions/api/control/studio-media.js
+          grep -F 'interface Zwit.' functions/api/control/studio-media.js
+          grep -F 'navigation dans Zwit.' functions/api/control/studio-media.js
+      - name: Commit copy fixes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ios/Velvet/Features/Places/ProfileOutingsView.swift ios/Velvet/Features/Profile/PrivacySettingsView.swift functions/_middleware.js functions/api/control/studio-media.js
+          git commit -m 'fix(brand): migrate remaining Control and iOS copy to Zwit'
+          git push origin HEAD:release/zwit-v1.5-seven-capitals
