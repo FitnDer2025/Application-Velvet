@@ -58,7 +58,8 @@
 
   const technicalValue = (value) => {
     const text = String(value || '');
-    return /(?:velvet:\/\/|com\.velvet|velvet[_-](?:media|beta|pro|notification|app|control|studio)|VELVET_[A-Z0-9_]+|\/api\/[^\s"']*velvet|supabase[^\s"']*velvet)/i.test(text);
+    return /(?:velvet:\/\/|com\.velvet|velvet[_-](?:media|beta|pro|notification|app|control|studio)|VELVET_[A-Z0-9_]+|\/api\/[^\s"']*velvet|supabase[^\s"']*velvet)/i.test(text)
+      || /[A-Z0-9._%+-]+@[A-Z0-9.-]*velvet[A-Z0-9.-]*/i.test(text);
   };
 
   const replaceVisible = (value) => {
@@ -95,7 +96,10 @@
   }
 
   function normalizeControlValue(element) {
-    if (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLOptionElement)) return;
+    // Never rewrite user-entered values. Source copy is migrated at build time;
+    // runtime branding must not alter emails, search terms, messages or profile text.
+    if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) return;
+    if (!(element instanceof HTMLOptionElement)) return;
     const current = element.value;
     const next = replaceVisible(current);
     if (next === current) return;
@@ -178,7 +182,7 @@
     if (element instanceof HTMLImageElement) normalizeBrandImage(element);
     normalizeControlValue(element);
 
-    for (const attribute of ['title', 'aria-label', 'placeholder', 'alt', 'value']) {
+    for (const attribute of ['title', 'aria-label', 'placeholder', 'alt']) {
       if (!element.hasAttribute(attribute)) continue;
       const current = element.getAttribute(attribute);
       const next = replaceVisible(current);
@@ -251,8 +255,6 @@
   });
 
   observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true });
-  document.addEventListener('input', (event) => normalizeControlValue(event.target), true);
-  document.addEventListener('change', (event) => normalizeControlValue(event.target), true);
   window.addEventListener('pageshow', () => normalizeRoot(document));
   [150, 600, 1400, 3000].forEach((delay) => setTimeout(() => normalizeRoot(document), delay));
 })();
