@@ -7,3 +7,12 @@
   target.searchParams.set('velvet_capture', token);
   location.replace(target.toString());
 })();
+
+(() => {
+  if (window.ZwitMediaOptimizer || document.querySelector('script[data-zwit-media-optimizer]')) return;
+  const script = document.createElement('script');
+  script.src = '/assets/zwit-media-optimizer.js?v=20260807-2';
+  script.async = true;
+  script.dataset.zwitMediaOptimizer = 'true';
+  document.head.appendChild(script);
+})();
