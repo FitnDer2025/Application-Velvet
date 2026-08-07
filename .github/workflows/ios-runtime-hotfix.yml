@@ -1,0 +1,88 @@
+name: Apply Zwit iOS runtime hotfix
+
+on:
+  push:
+    branches:
+      - fix/ios-launch-date-map
+
+permissions:
+  contents: write
+
+jobs:
+  patch-build:
+    runs-on: macos-15
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore map, permanent message date and Apple push CI
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f"Pattern not found in {path}: {old[:100]!r}")
+              p.write_text(text.replace(old, new, 1))
+
+          shell = 'ios/Velvet/Features/Home/MainShellView.swift'
+          replace_once(shell, '        case people\n        case places', '        case people\n        case map\n        case places')
+          replace_once(shell, '            case .people: "Membres"\n            case .places: "Lieux"', '            case .people: "Membres"\n            case .map: "Carte"\n            case .places: "Lieux"')
+          replace_once(shell, '            case .people: "person.2"\n            case .places: "building.2"', '            case .people: "person.2"\n            case .map: "map"\n            case .places: "building.2"')
+          replace_once(shell, '            case .people: "person.2.fill"\n            case .places: "building.2.fill"', '            case .people: "person.2.fill"\n            case .map: "map.fill"\n            case .places: "building.2.fill"')
+          replace_once(shell, '        case .people:\n            NavigationStack { PremiumDiscoveryGridView(currentProfile: profile) }\n        case .places:', '        case .people:\n            NavigationStack { PremiumDiscoveryGridView(currentProfile: profile) }\n        case .map:\n            NavigationStack { MemberMapView() }\n        case .places:')
+          replace_once(shell, '        case .events, .maps:\n            selectedTab = .places', '        case .events:\n            selectedTab = .places\n\n        case .maps:\n            selectedTab = .map')
+
+          messages = 'ios/Velvet/Features/Messaging/RealtimeAppleMessagingViews.swift'
+          replace_once(messages, '            Text(RealtimeMessageDate.time(message.createdAt))', '            Text(RealtimeMessageDate.permanent(message.createdAt))')
+          replace_once(messages, '''    static func time(_ value: String?) -> String {\n        let date = date(value)\n        guard date != .distantPast else { return "" }\n        return date.formatted(date: .omitted, time: .shortened)\n    }\n\n    static func short''', '''    static func time(_ value: String?) -> String {\n        let date = date(value)\n        guard date != .distantPast else { return "" }\n        return date.formatted(date: .omitted, time: .shortened)\n    }\n\n    static func permanent(_ value: String?) -> String {\n        let date = date(value)\n        guard date != .distantPast else { return "" }\n        return date.formatted(.dateTime.day(.twoDigits).month(.twoDigits).year().hour().minute())\n    }\n\n    static func short''')
+
+          workflow = '.github/workflows/ios-build.yml'
+          replace_once(workflow, '''on:\n  pull_request:\n    paths:\n      - 'ios/**'\n      - '.github/workflows/ios-build.yml'\n  workflow_dispatch:\n''', '''on:\n  push:\n    branches:\n      - v1-lived-demo\n    paths:\n      - 'ios/**'\n      - '.github/workflows/ios-build.yml'\n  pull_request:\n    paths:\n      - 'ios/**'\n      - '.github/workflows/ios-build.yml'\n  workflow_dispatch:\n''')
+
+          app = Path('ios/Velvet/VelvetApp.swift').read_text()
+          launch = Path('ios/Velvet/App/ZwitNativeLaunchExperience.swift').read_text()
+          if 'ZwitNativeLaunchExperience' not in app or 'private let words = ["Chut", "Silencio", "Silenzio", "嘘"]' not in launch:
+              raise SystemExit('Native launch experience is not wired correctly')
+
+          hotfix = Path('.github/workflows/ios-runtime-hotfix.yml')
+          if hotfix.exists():
+              hotfix.unlink()
+          PY
+
+      - name: Validate restored iOS contracts
+        shell: bash
+        run: |
+          grep -q 'case map' ios/Velvet/Features/Home/MainShellView.swift
+          grep -q 'NavigationStack { MemberMapView() }' ios/Velvet/Features/Home/MainShellView.swift
+          grep -q 'RealtimeMessageDate.permanent(message.createdAt)' ios/Velvet/Features/Messaging/RealtimeAppleMessagingViews.swift
+          grep -q 'case .maps:' ios/Velvet/Features/Home/MainShellView.swift
+          grep -q 'ZwitNativeLaunchExperience' ios/Velvet/VelvetApp.swift
+          grep -q 'v1-lived-demo' .github/workflows/ios-build.yml
+
+      - name: Compile Zwit for iOS Simulator
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild -quiet \
+            -project ios/Velvet.xcodeproj \
+            -scheme Velvet \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Commit validated native fix
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix(ios): restore launch date and map navigation'
+          git push origin HEAD:fix/ios-launch-date-map
