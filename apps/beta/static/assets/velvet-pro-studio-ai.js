@@ -283,7 +283,7 @@
   }
 
   function previewMarkup() {
-    if (!state.selectedRender && !state.generated.length) return '<div class="vpsai-empty"><b>✦</b><strong>Votre affiche apparaîtra ici</strong><p>Le décor sera généré par l’IA. Le logo, les photos et tous les textes seront ensuite composés exactement par Velvet.</p></div>';
+    if (!state.selectedRender && !state.generated.length) return '<div class="vpsai-empty"><b>✦</b><strong>Votre affiche apparaîtra ici</strong><p>Le décor sera généré par l’IA. Le logo, les photos et tous les textes seront ensuite composés exactement par Zwit.</p></div>';
     const render = state.selectedRender || state.generated[0];
     return `<canvas data-vpsai-main-canvas></canvas><div class="vpsai-render-actions"><button data-vpsai-download="png">Télécharger PNG</button><button data-vpsai-download="jpg">Télécharger JPG</button><button data-vpsai-tab="animate">Animer cette affiche</button><button data-vpsai-show-all>Voir toutes les variantes</button></div>`;
   }
@@ -650,7 +650,7 @@
     if (!blob && render.previewUrl) blob = await fetch(render.previewUrl).then((response) => response.blob());
     if (!blob) return;
     const url = URL.createObjectURL(blob); const link = document.createElement('a');
-    link.href=url; link.download=`${slug(state.project?.title || 'affiche-velvet')}-${render.format.replace(':','x')}.${type==='jpg'?'jpg':'png'}`; link.click();
+    link.href=url; link.download=`${slug(state.project?.title || 'affiche-zwit')}-${render.format.replace(':','x')}.${type==='jpg'?'jpg':'png'}`; link.click();
     setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
   function slug(value){return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,80);}
