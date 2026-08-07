@@ -24,69 +24,6 @@ create index if not exists conversation_requests_requester_idx
 alter table public.conversation_requests enable row level security;
 revoke all on table public.conversation_requests from anon, authenticated;
 
-create or replace function public.zwit_v15_ensure_conversation_request(target_conversation_id uuid)
-returns table (
-  status text,
-  role text,
-  can_send boolean,
-  intro_messages_sent bigint,
-  follow_up_at timestamptz
-)
-language plpgsql
-security definer
-set search_path = public, pg_temp
-as $$
-declare
-  v_user_id uuid := auth.uid();
-  v_recipient uuid;
-  v_member_count integer;
-  v_existing_messages bigint;
-  v_request public.conversation_requests%rowtype;
-begin
-  if v_user_id is null then raise exception 'authentication_required'; end if;
-
-  select count(*)::integer,
-         max(cm.user_id) filter (where cm.user_id <> v_user_id)
-    into v_member_count, v_recipient
-  from public.conversation_members cm
-  where cm.conversation_id = target_conversation_id
-    and cm.left_at is null;
-
-  if v_member_count <> 2 or v_recipient is null or not exists (
-    select 1 from public.conversation_members cm
-    where cm.conversation_id = target_conversation_id
-      and cm.user_id = v_user_id
-      and cm.left_at is null
-  ) then
-    raise exception 'direct_conversation_required';
-  end if;
-
-  select * into v_request
-  from public.conversation_requests cr
-  where cr.conversation_id = target_conversation_id
-  for update;
-
-  if not found then
-    select count(*)::bigint into v_existing_messages
-    from public.messages m
-    where m.conversation_id = target_conversation_id;
-
-    insert into public.conversation_requests (
-      conversation_id, requester_user_id, recipient_user_id, status, accepted_at
-    ) values (
-      target_conversation_id,
-      v_user_id,
-      v_recipient,
-      case when v_existing_messages > 0 then 'accepted' else 'pending' end,
-      case when v_existing_messages > 0 then now() else null end
-    )
-    returning * into v_request;
-  end if;
-
-  return query select * from public.zwit_v15_conversation_request_state(target_conversation_id);
-end;
-$$;
-
 create or replace function public.zwit_v15_conversation_request_state(target_conversation_id uuid)
 returns table (
   status text,
@@ -155,6 +92,69 @@ begin
         then coalesce(v_request.first_message_at, v_request.requested_at) + interval '24 hours'
       else null
     end;
+end;
+$$;
+
+create or replace function public.zwit_v15_ensure_conversation_request(target_conversation_id uuid)
+returns table (
+  status text,
+  role text,
+  can_send boolean,
+  intro_messages_sent bigint,
+  follow_up_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_recipient uuid;
+  v_member_count integer;
+  v_existing_messages bigint;
+  v_request public.conversation_requests%rowtype;
+begin
+  if v_user_id is null then raise exception 'authentication_required'; end if;
+
+  select count(*)::integer,
+         max(cm.user_id) filter (where cm.user_id <> v_user_id)
+    into v_member_count, v_recipient
+  from public.conversation_members cm
+  where cm.conversation_id = target_conversation_id
+    and cm.left_at is null;
+
+  if v_member_count <> 2 or v_recipient is null or not exists (
+    select 1 from public.conversation_members cm
+    where cm.conversation_id = target_conversation_id
+      and cm.user_id = v_user_id
+      and cm.left_at is null
+  ) then
+    raise exception 'direct_conversation_required';
+  end if;
+
+  select * into v_request
+  from public.conversation_requests cr
+  where cr.conversation_id = target_conversation_id
+  for update;
+
+  if not found then
+    select count(*)::bigint into v_existing_messages
+    from public.messages m
+    where m.conversation_id = target_conversation_id;
+
+    insert into public.conversation_requests (
+      conversation_id, requester_user_id, recipient_user_id, status, accepted_at
+    ) values (
+      target_conversation_id,
+      v_user_id,
+      v_recipient,
+      case when v_existing_messages > 0 then 'accepted' else 'pending' end,
+      case when v_existing_messages > 0 then now() else null end
+    )
+    returning * into v_request;
+  end if;
+
+  return query select * from public.zwit_v15_conversation_request_state(target_conversation_id);
 end;
 $$;
 
