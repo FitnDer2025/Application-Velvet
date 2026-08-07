@@ -36,7 +36,11 @@ async function enrichAttachments(env, session, messages = []) {
     ...message,
     attachments: await Promise.all((message.message_attachments || []).map(async (attachment) => ({
       ...attachment,
-      previewUrl: await signedMediaUrl(env, session, attachment.storage_path)
+      // Ephemeral media is never signed in the normal timeline. Opening it is
+      // an explicit PATCH on /ephemeral-message with its own one-time gate.
+      previewUrl: attachment.attachment_kind === 'ephemeral'
+        ? null
+        : await signedMediaUrl(env, session, attachment.storage_path)
     })))
   })));
 }
@@ -46,6 +50,17 @@ async function deleteStoredFile(env, session, path) {
   await supabase(env, `/storage/v1/object/velvet-media/${path}`, {
     method: 'DELETE'
   }, session.access_token).catch(() => null);
+}
+
+async function rollbackMessage(env, session, messageId, conversationId) {
+  if (!messageId || !conversationId) return;
+  await restJson(env, '/rest/v1/rpc/zwit_v15_rollback_own_message', session, {
+    method: 'POST',
+    body: JSON.stringify({
+      target_message_id: messageId,
+      target_conversation_id: conversationId
+    })
+  }).catch(() => null);
 }
 
 async function conversationMembership(env, access, conversationId) {
@@ -266,7 +281,7 @@ export async function onRequestGet({ request, env }) {
 
     const messagesPromise = restJson(
       env,
-      `/rest/v1/messages?select=id,conversation_id,sender_user_id,sender_identity,body,created_at,edited_at,message_attachments(id,media_type,mime_type,original_name,size_bytes,storage_path,created_at)&conversation_id=eq.${conversationId}&deleted_at=is.null&order=created_at.asc&limit=500`,
+      `/rest/v1/messages?select=id,conversation_id,sender_user_id,sender_identity,body,created_at,edited_at,message_attachments(id,media_type,mime_type,original_name,size_bytes,storage_path,attachment_kind,duration_seconds,created_at)&conversation_id=eq.${conversationId}&deleted_at=is.null&order=created_at.asc&limit=500`,
       access.session
     ).catch(() => restJson(
       env,
@@ -307,6 +322,8 @@ export async function onRequestGet({ request, env }) {
 export async function onRequestPost({ request, env, waitUntil }) {
   const uploadedPaths = [];
   let cleanupSession = null;
+  let createdMessageId = '';
+  let createdConversationId = '';
   try {
     const access = await memberSession(request, env);
     if (access.response) return access.response;
@@ -352,6 +369,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
         size_bytes: file.size
       });
     }
+
+    // The same messages insert is used for text and media so the v1.5
+    // conversation-request trigger cannot be bypassed by a photo or document.
     const created = await restJson(
       env,
       '/rest/v1/messages?select=id,conversation_id,sender_user_id,sender_identity,body,created_at',
@@ -371,23 +391,36 @@ export async function onRequestPost({ request, env, waitUntil }) {
     if (!savedMessage?.id || savedMessage.conversation_id !== conversationId) {
       throw new Error('message_persistence_failed');
     }
+    createdMessageId = savedMessage.id;
+    createdConversationId = conversationId;
+
     if (attachments.length) {
-      const savedAttachments = await restJson(
-        env,
-        '/rest/v1/message_attachments?select=id,message_id,conversation_id,media_type,mime_type,original_name,size_bytes,storage_path,created_at',
-        access.session,
-        {
-          method: 'POST',
-          headers: { prefer: 'return=representation' },
-          body: JSON.stringify(attachments.map((attachment) => ({
-            ...attachment,
-            message_id: savedMessage.id,
-            conversation_id: conversationId,
-            uploader_user_id: access.account.userId
-          })))
-        }
-      );
-      if (savedAttachments?.length !== attachments.length) throw new Error('message_attachment_persistence_failed');
+      const savedAttachments = [];
+      for (const attachment of attachments) {
+        const rows = await restJson(
+          env,
+          '/rest/v1/rpc/zwit_v15_register_message_attachment',
+          access.session,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              target_message_id: savedMessage.id,
+              target_conversation_id: conversationId,
+              target_storage_path: attachment.storage_path,
+              target_media_type: attachment.media_type,
+              target_mime_type: attachment.mime_type,
+              target_original_name: attachment.original_name,
+              target_size_bytes: attachment.size_bytes,
+              target_attachment_kind: 'media',
+              target_duration_seconds: null
+            })
+          }
+        );
+        const row = rows?.[0];
+        if (!row?.id) throw new Error('message_attachment_persistence_failed');
+        savedAttachments.push(row);
+      }
+
       savedMessage.attachments = await Promise.all(savedAttachments.map(async (attachment) => ({
         ...attachment,
         previewUrl: await signedMediaUrl(env, access.session, attachment.storage_path)
@@ -431,6 +464,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
 
     return withSession({ ok: true, message: savedMessage }, access.session, 201);
   } catch (error) {
+    if (cleanupSession && createdMessageId && createdConversationId) {
+      await rollbackMessage(env, cleanupSession, createdMessageId, createdConversationId);
+    }
     if (cleanupSession) {
       await Promise.all(uploadedPaths.map((path) => deleteStoredFile(env, cleanupSession, path)));
     }
