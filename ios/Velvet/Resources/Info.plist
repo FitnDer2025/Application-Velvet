@@ -39,6 +39,8 @@
 	<string>Zwit utilise une position approximative pour classer les profils, clubs et sorties proches, sans enregistrer votre adresse exacte.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Face ID protège l’accès à ton espace privé Zwit lorsque l’application est verrouillée.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Zwit utilise le microphone uniquement lorsque tu choisis d’enregistrer un message vocal dans une conversation privée.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchScreen</key>
