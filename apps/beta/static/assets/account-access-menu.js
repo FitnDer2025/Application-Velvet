@@ -135,6 +135,7 @@
 
   const style = document.createElement('style');
   style.textContent = `
+    .sidebar{overflow-y:auto!important;overscroll-behavior-y:contain;scrollbar-width:thin}.sidebar-foot{flex-shrink:0}
     .velvet-account-access{display:grid;gap:8px;margin-bottom:10px;padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:15px;background:rgba(255,255,255,.035);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     .velvet-account-kicker{margin:0!important;color:#c6a96a!important;font-size:9px!important;letter-spacing:.15em!important}
     .velvet-account-access nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
