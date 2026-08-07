@@ -1,0 +1,59 @@
+name: Zwit visible brand source fix
+
+on:
+  push:
+    branches:
+      - release/zwit-v1.5-seven-capitals
+    paths:
+      - '.github/workflows/zwit-visible-brand-source-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-visible-brand:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/zwit-v1.5-seven-capitals
+      - name: Replace remaining public Member strings
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          changes = {
+              Path('apps/beta/static/assets/members-live.js'): [
+                  ('Créons votre page Velvet.', 'Créons votre page Zwit.', 1),
+                  ('Ces valeurs aideront les autres membres à comprendre immédiatement votre manière de vivre Velvet.', 'Ces valeurs aideront les autres membres à comprendre immédiatement votre manière de vivre Zwit.', 1),
+                  ('Profil enregistré dans la mémoire Velvet.', 'Profil enregistré dans la mémoire Zwit.', 1),
+                  ('Synchronisée avec ton compte Velvet.', 'Synchronisée avec ton compte Zwit.', 1),
+              ],
+              Path('apps/beta/static/assets/location-verification.js'): [
+                  ('aucune pièce d’identité, identité civile ou date de naissance n’est conservée par Velvet.', 'aucune pièce d’identité, identité civile ou date de naissance n’est conservée par Zwit.', 1),
+              ],
+          }
+
+          for path, replacements in changes.items():
+              source = path.read_text(encoding='utf-8')
+              for old, new, expected in replacements:
+                  count = source.count(old)
+                  if count != expected:
+                      raise SystemExit(f'{path}: expected {expected} occurrence(s) of {old!r}, found {count}')
+                  source = source.replace(old, new)
+              path.write_text(source, encoding='utf-8')
+          PY
+      - name: Verify Member copy
+        run: |
+          grep -F 'Créons votre page Zwit.' apps/beta/static/assets/members-live.js
+          grep -F 'vivre Zwit.' apps/beta/static/assets/members-live.js
+          grep -F 'mémoire Zwit.' apps/beta/static/assets/members-live.js
+          grep -F 'compte Zwit.' apps/beta/static/assets/members-live.js
+          grep -F 'conservée par Zwit.' apps/beta/static/assets/location-verification.js
+      - name: Commit copy fixes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/beta/static/assets/members-live.js apps/beta/static/assets/location-verification.js
+          git commit -m 'fix(brand): finish Zwit Member visible copy migration'
+          git push origin HEAD:release/zwit-v1.5-seven-capitals
