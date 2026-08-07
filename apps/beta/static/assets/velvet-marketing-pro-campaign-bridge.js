@@ -178,7 +178,7 @@
       versions: {
         facebook: `${base}\n\n${tags.slice(0, 3).join(' ')}`,
         instagram: `${base}\n\n${tags.join(' ')}`,
-        tiktok: `${context.title}. ${context.date}. ${cta || 'Toutes les informations sont sur Velvet.'}\n\n${tags.join(' ')}`
+        tiktok: `${context.title}. ${context.date}. ${cta || 'Toutes les informations sont sur Zwit.'}\n\n${tags.join(' ')}`
       },
       hashtags: tags,
       tone: tone || 'premium',

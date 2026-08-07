@@ -3452,7 +3452,7 @@
     return `<div class="page">${pageHead(
       'Activité authentique',
       'Notifications',
-      'Chaque élément correspond à une action réellement enregistrée dans Velvet.',
+      'Chaque élément correspond à une action réellement enregistrée dans Zwit.',
       state.unreadCount ? `<button class="secondary" data-read-all-notifications>Tout marquer comme lu · ${state.unreadCount}</button>` : ''
     )}
       ${notifications.length ? `<section class="notification-feed profile-preview-feed">${notifications.map(notificationTile).join('')}</section>` : emptyState('Aucune notification', 'Les messages, réactions, accès aux albums et inscriptions apparaîtront ici lorsqu’une action réelle aura lieu.', '○')}
@@ -4177,7 +4177,7 @@
         };
         state.socialActions[id] = social;
       } catch (error) {
-        toast('La consultation n’a pas pu être ajoutée à ta mémoire Velvet.', true);
+        toast('La consultation n’a pas pu être ajoutée à ta mémoire Zwit.', true);
       }
     }
     content.innerHTML = renderProfile(profile, id === state.profile.id);

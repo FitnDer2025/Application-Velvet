@@ -41,7 +41,7 @@
     fixed_information: {
       address: 'Lille · adresse communiquée avant la soirée',
       phone: '03 20 00 00 00',
-      website: 'maison-velvet.demo',
+      website: 'maison-zwit.demo',
       instagram: '@maisonvelvet.demo'
     },
     recurring_features: ['Lounge', 'Vestiaire', 'Bar', 'Piste de danse', 'Parking privé'],
@@ -72,7 +72,7 @@
       audience: 'Couples, femmes et membres sélectionnés',
       address: 'Lille · adresse communiquée avant la soirée',
       phone: '03 20 00 00 00',
-      website: 'maison-velvet.demo',
+      website: 'maison-zwit.demo',
       amenities: ['Lounge', 'Vestiaire', 'Bar', 'Parking privé']
     },
     creative_payload: {
