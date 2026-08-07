@@ -62,7 +62,16 @@ jobs:
             done
             exit 1
           fi
-      - run: npm test
+      - name: Run npm test
+        run: |
+          set -o pipefail
+          LOG="$RUNNER_TEMP/zwit-tests.log"
+          if ! npm test 2>&1 | tee "$LOG"; then
+            grep -E 'not ok|AssertionError|ERR_ASSERTION|error:|fail' "$LOG" | tail -n 80 | while IFS= read -r line; do
+              echo "::error title=Zwit tests::$line"
+            done
+            exit 1
+          fi
       - run: npm run build:beta
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run recipe:browser
