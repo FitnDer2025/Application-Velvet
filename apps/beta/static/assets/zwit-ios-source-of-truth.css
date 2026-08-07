@@ -1,0 +1,576 @@
+/*
+ * Zwit 1.5 — iOS is the visual source of truth.
+ * This file intentionally sits after the historical Web styles and only owns
+ * presentation/chrome. Business logic and technical Velvet identifiers remain unchanged.
+ */
+:root {
+  --zwit-ios-bg: #0b080a;
+  --zwit-ios-panel: #151013;
+  --zwit-ios-panel-raised: #1b1418;
+  --zwit-ios-burgundy: #7e2045;
+  --zwit-ios-burgundy-light: #b54570;
+  --zwit-ios-gold: #d9b879;
+  --zwit-ios-ivory: #f6eee6;
+  --zwit-ios-muted: #a99da2;
+  --zwit-ios-border: rgba(255,255,255,.085);
+  --zwit-ios-glass: rgba(11,8,10,.78);
+  --zwit-ios-fast: 140ms;
+  --zwit-ios-normal: 220ms;
+  --zwit-ios-ease: cubic-bezier(.2,.8,.2,1);
+  --zwit-ios-radius-s: 13px;
+  --zwit-ios-radius-m: 18px;
+  --zwit-ios-radius-l: 22px;
+  --zwit-ios-radius-xl: 28px;
+}
+
+html[data-zwit-ui-source="ios"] {
+  background: var(--zwit-ios-bg);
+  color-scheme: dark;
+}
+
+body.zwit-ios-source-of-truth {
+  background:
+    radial-gradient(circle at 92% -8%, rgba(126,32,69,.16), transparent 31rem),
+    var(--zwit-ios-bg);
+  color: var(--zwit-ios-ivory);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body.zwit-ios-source-of-truth .zwit-ios-symbol {
+  display: block;
+  width: 20px;
+  height: 20px;
+  overflow: visible;
+}
+
+body.zwit-ios-source-of-truth .brand-mark {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.09);
+  background: rgba(11,8,10,.92);
+  box-shadow: 0 10px 28px rgba(78,20,42,.24);
+}
+
+body.zwit-ios-source-of-truth .brand-mark img {
+  display: block;
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+}
+
+body.zwit-ios-source-of-truth .card,
+body.zwit-ios-source-of-truth .empty,
+body.zwit-ios-source-of-truth .notification-tile,
+body.zwit-ios-source-of-truth .profile-preview-card,
+body.zwit-ios-source-of-truth .discover-grid-tile,
+body.zwit-ios-source-of-truth .discover-horizontal-tile,
+body.zwit-ios-source-of-truth .venue-tile {
+  border-color: var(--zwit-ios-border);
+  background: rgba(27,20,24,.70);
+  box-shadow: 0 18px 45px rgba(0,0,0,.12);
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+}
+
+body.zwit-ios-source-of-truth .primary {
+  border: 1px solid rgba(181,69,112,.24);
+  background: linear-gradient(135deg,var(--zwit-ios-burgundy-light),var(--zwit-ios-burgundy));
+  color: white;
+  box-shadow: 0 10px 28px rgba(126,32,69,.20);
+}
+
+body.zwit-ios-source-of-truth .secondary {
+  border-color: var(--zwit-ios-border);
+  background: rgba(255,255,255,.035);
+  color: var(--zwit-ios-ivory);
+}
+
+body.zwit-ios-source-of-truth button,
+body.zwit-ios-source-of-truth a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.zwit-ios-source-of-truth button:active,
+body.zwit-ios-source-of-truth a:active {
+  transform: scale(.985);
+}
+
+body.zwit-ios-source-of-truth .eyebrow,
+body.zwit-ios-source-of-truth .section-heading > span,
+body.zwit-ios-source-of-truth .page-head .eyebrow {
+  color: var(--zwit-ios-gold);
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+body.zwit-ios-source-of-truth .page-head h1,
+body.zwit-ios-source-of-truth .ios-home-header h1,
+body.zwit-ios-source-of-truth .section-heading h2 {
+  color: var(--zwit-ios-ivory);
+  font-family: ui-serif, "New York", Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -.025em;
+}
+
+body.zwit-ios-source-of-truth input,
+body.zwit-ios-source-of-truth textarea,
+body.zwit-ios-source-of-truth select {
+  border-color: var(--zwit-ios-border);
+  background: rgba(14,11,13,.86);
+  color: var(--zwit-ios-ivory);
+}
+
+body.zwit-ios-source-of-truth input:focus,
+body.zwit-ios-source-of-truth textarea:focus,
+body.zwit-ios-source-of-truth select:focus {
+  border-color: rgba(217,184,121,.48);
+  box-shadow: 0 0 0 3px rgba(217,184,121,.08);
+  outline: 0;
+}
+
+/* Messaging — same visual hierarchy as the active SwiftUI conversation. */
+body.zwit-ios-source-of-truth .velvet-direct-conversation,
+body.zwit-ios-source-of-truth .conversation-v2,
+body.zwit-ios-source-of-truth .conversation {
+  border-color: var(--zwit-ios-border);
+  background: rgba(21,16,19,.76);
+  box-shadow: none;
+}
+
+body.zwit-ios-source-of-truth .message {
+  border: 1px solid var(--zwit-ios-border);
+  border-radius: 19px 19px 19px 5px;
+  background: linear-gradient(145deg,var(--zwit-ios-panel-raised),var(--zwit-ios-panel));
+  box-shadow: none;
+}
+
+body.zwit-ios-source-of-truth .message.mine {
+  border-color: rgba(181,69,112,.30);
+  border-radius: 19px 19px 5px 19px;
+  background: linear-gradient(145deg,var(--zwit-ios-burgundy-light),var(--zwit-ios-burgundy));
+  color: white;
+}
+
+body.zwit-ios-source-of-truth #messageForm.zwit-ios-composer,
+body.zwit-ios-source-of-truth .composer-v2 {
+  border-color: var(--zwit-ios-border);
+  background: rgba(11,8,10,.86);
+  backdrop-filter: blur(24px) saturate(135%);
+  -webkit-backdrop-filter: blur(24px) saturate(135%);
+}
+
+body.zwit-ios-source-of-truth #messageForm.zwit-ios-composer [data-zwit-voice-record],
+body.zwit-ios-source-of-truth #messageForm.zwit-ios-composer [data-zwit-ephemeral-pick] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 42px;
+  height: 38px;
+  padding: 0 9px;
+  border: 1px solid rgba(217,184,121,.15);
+  border-radius: 999px;
+  background: rgba(217,184,121,.055);
+  color: var(--zwit-ios-gold);
+  box-shadow: none;
+}
+
+body.zwit-ios-source-of-truth #messageForm.zwit-ios-composer [data-zwit-voice-record] small,
+body.zwit-ios-source-of-truth #messageForm.zwit-ios-composer [data-zwit-ephemeral-pick] small {
+  font-size: 9px;
+  font-weight: 650;
+}
+
+body.zwit-ios-source-of-truth #messageForm.zwit-ios-composer [data-zwit-voice-record] .zwit-ios-symbol {
+  width: 15px;
+  height: 15px;
+}
+
+body.zwit-ios-source-of-truth .zwit-ios-action-icon {
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+body.zwit-ios-source-of-truth .zwit-voice-player,
+body.zwit-ios-source-of-truth .zwit-ephemeral-open {
+  border-color: rgba(217,184,121,.16);
+  border-radius: 14px;
+  background: rgba(255,255,255,.045);
+}
+
+/* Keep v1.5 feature surfaces in the same premium language. */
+body.zwit-ios-source-of-truth [class*="zwit-passport"],
+body.zwit-ios-source-of-truth [class*="zwit-tonight"],
+body.zwit-ios-source-of-truth [class*="zwit-event-booking"] {
+  --accent: var(--zwit-ios-gold);
+}
+
+@media (min-width: 901px) {
+  body.zwit-ios-source-of-truth .sidebar {
+    width: 236px;
+    border-right: 1px solid var(--zwit-ios-border);
+    background: rgba(11,8,10,.82);
+    backdrop-filter: blur(28px) saturate(130%);
+    -webkit-backdrop-filter: blur(28px) saturate(130%);
+  }
+
+  body.zwit-ios-source-of-truth .sidebar nav button,
+  body.zwit-ios-source-of-truth .sidebar-tools button {
+    min-height: 46px;
+    border-radius: 14px;
+    color: var(--zwit-ios-muted);
+  }
+
+  body.zwit-ios-source-of-truth .sidebar nav button.active {
+    border-color: rgba(217,184,121,.14);
+    background: rgba(217,184,121,.075);
+    color: var(--zwit-ios-gold);
+  }
+
+  body.zwit-ios-source-of-truth main {
+    margin-left: 236px;
+    padding-top: 34px;
+  }
+}
+
+@media (max-width: 900px) {
+  html[data-zwit-ui-source="ios"],
+  body.zwit-ios-source-of-truth {
+    width: 100%;
+    min-width: 320px;
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+  }
+
+  body.zwit-ios-source-of-truth .mobile-head {
+    position: fixed;
+    z-index: 60;
+    inset: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: calc(58px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 12px 0;
+    border-bottom: .7px solid var(--zwit-ios-border);
+    background: rgba(11,8,10,.74);
+    box-shadow: none;
+    backdrop-filter: blur(28px) saturate(145%);
+    -webkit-backdrop-filter: blur(28px) saturate(145%);
+  }
+
+  body.zwit-ios-source-of-truth .mobile-head .brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 58px;
+    padding: 0;
+  }
+
+  body.zwit-ios-source-of-truth .mobile-head .brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+  }
+
+  body.zwit-ios-source-of-truth .mobile-head .brand strong {
+    color: var(--zwit-ios-ivory);
+    font: 500 19px/1 ui-serif, "New York", Georgia, serif;
+    letter-spacing: -.01em;
+  }
+
+  body.zwit-ios-source-of-truth .mobile-head-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  /* Ce soir lives in the profile flow on iOS, not in the persistent header. */
+  body.zwit-ios-source-of-truth .mobile-head-actions [data-zwit-route="tonight"] {
+    display: none !important;
+  }
+
+  body.zwit-ios-source-of-truth .mobile-head-actions > button {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    padding: 0;
+    border: .7px solid var(--zwit-ios-border);
+    border-radius: 50%;
+    background: rgba(255,255,255,.035);
+    color: var(--zwit-ios-gold);
+    font-size: 0;
+    box-shadow: none;
+  }
+
+  body.zwit-ios-source-of-truth .mobile-head-actions .zwit-ios-symbol {
+    width: 18px;
+    height: 18px;
+  }
+
+  body.zwit-ios-source-of-truth .sidebar {
+    inset: 0 auto 0 0;
+    z-index: 70;
+    width: min(390px,calc(100vw - 38px));
+    height: 100dvh;
+    padding-top: calc(18px + env(safe-area-inset-top));
+    border-right: 1px solid rgba(217,184,121,.14);
+    border-radius: 0 26px 26px 0;
+    background: rgba(18,13,16,.97);
+    box-shadow: 24px 0 90px rgba(0,0,0,.58);
+    backdrop-filter: blur(30px) saturate(125%);
+    -webkit-backdrop-filter: blur(30px) saturate(125%);
+  }
+
+  body.zwit-ios-source-of-truth .sidebar nav button,
+  body.zwit-ios-source-of-truth .sidebar-tools button {
+    min-height: 48px;
+    border-radius: 14px;
+  }
+
+  body.zwit-ios-source-of-truth main {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: calc(76px + env(safe-area-inset-top)) 16px calc(82px + env(safe-area-inset-bottom));
+  }
+
+  body.zwit-ios-source-of-truth main > .page,
+  body.zwit-ios-source-of-truth main > .form-shell,
+  body.zwit-ios-source-of-truth .zwit-ios-surface {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  body.zwit-ios-source-of-truth .page-head,
+  body.zwit-ios-source-of-truth .ios-home-header,
+  body.zwit-ios-source-of-truth .zwit-ios-page-head {
+    margin: 0 0 22px;
+    padding: 0;
+  }
+
+  body.zwit-ios-source-of-truth .page-head h1,
+  body.zwit-ios-source-of-truth .ios-home-header h1 {
+    margin: 3px 0 8px;
+    font-size: clamp(36px,10.5vw,44px);
+    line-height: .98;
+  }
+
+  body.zwit-ios-source-of-truth .page-head p:not(.eyebrow),
+  body.zwit-ios-source-of-truth .ios-home-header > p:last-child {
+    max-width: 100%;
+    margin-top: 8px;
+    color: var(--zwit-ios-muted);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  body.zwit-ios-source-of-truth .section-heading h2 {
+    font-size: 27px;
+    line-height: 1.03;
+  }
+
+  body.zwit-ios-source-of-truth .home-discovery-rail {
+    grid-auto-columns: min(43vw,164px);
+    gap: 11px;
+    margin-inline: -16px;
+    padding: 2px 16px 10px;
+    scroll-padding-inline: 16px;
+    scroll-snap-type: x mandatory;
+  }
+
+  body.zwit-ios-source-of-truth .home-discovery-card {
+    border-radius: 20px;
+    scroll-snap-align: start;
+  }
+
+  body.zwit-ios-source-of-truth .home-feed,
+  body.zwit-ios-source-of-truth .home-feed-list {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  body.zwit-ios-source-of-truth .home-feed-card,
+  body.zwit-ios-source-of-truth .card,
+  body.zwit-ios-source-of-truth .empty,
+  body.zwit-ios-source-of-truth .notification-tile,
+  body.zwit-ios-source-of-truth .profile-preview-card,
+  body.zwit-ios-source-of-truth .venue-tile {
+    border-radius: var(--zwit-ios-radius-l);
+  }
+
+  body.zwit-ios-source-of-truth .discover-profile-results.grid,
+  body.zwit-ios-source-of-truth .venue-directory-grid {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 10px;
+  }
+
+  body.zwit-ios-source-of-truth .hero {
+    min-height: min(69dvh,620px);
+    border-radius: 26px;
+  }
+
+  body.zwit-ios-source-of-truth .hero-copy {
+    right: 18px;
+    bottom: 22px;
+    left: 18px;
+  }
+
+  body.zwit-ios-source-of-truth .hero-copy h1 {
+    font-size: clamp(40px,13vw,56px);
+    line-height: .94;
+  }
+
+  body.zwit-ios-source-of-truth .profile-nav {
+    top: calc(58px + env(safe-area-inset-top));
+    margin-inline: -16px;
+    padding: 8px 16px;
+    background: rgba(11,8,10,.90);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  body.zwit-ios-source-of-truth .bottom-nav {
+    position: fixed;
+    z-index: 58;
+    inset: auto 0 0;
+    display: grid;
+    grid-template-columns: repeat(6,minmax(0,1fr));
+    min-height: calc(61px + env(safe-area-inset-bottom));
+    padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
+    border-top: .7px solid var(--zwit-ios-border) !important;
+    background: rgba(11,8,10,.76) !important;
+    box-shadow: 0 -12px 35px rgba(0,0,0,.12);
+    backdrop-filter: blur(28px) saturate(145%);
+    -webkit-backdrop-filter: blur(28px) saturate(145%);
+  }
+
+  body.zwit-ios-source-of-truth .bottom-nav button {
+    display: grid;
+    grid-template-rows: 27px 12px;
+    place-items: center;
+    min-width: 0;
+    height: 52px;
+    padding: 3px 0 2px;
+    border: .7px solid transparent;
+    border-radius: 13px;
+    background: transparent;
+    color: var(--zwit-ios-muted);
+    box-shadow: none;
+  }
+
+  body.zwit-ios-source-of-truth .bottom-nav button > span {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 26px;
+  }
+
+  body.zwit-ios-source-of-truth .bottom-nav .zwit-ios-symbol {
+    width: 18px;
+    height: 18px;
+  }
+
+  body.zwit-ios-source-of-truth .bottom-nav small {
+    overflow: visible;
+    color: inherit;
+    font-size: 7.5px;
+    font-weight: 560;
+    line-height: 1;
+    letter-spacing: -.01em;
+    white-space: nowrap;
+  }
+
+  body.zwit-ios-source-of-truth .bottom-nav button.active {
+    border-color: rgba(217,184,121,.14);
+    background: rgba(217,184,121,.075);
+    color: var(--zwit-ios-gold);
+  }
+
+  body.zwit-ios-source-of-truth .velvet-direct-conversation {
+    min-height: calc(100dvh - 158px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    margin-inline: -8px;
+    border-radius: 22px;
+  }
+
+  body.zwit-ios-source-of-truth .velvet-direct-conversation .messages {
+    padding-inline: 10px;
+  }
+
+  body.zwit-ios-source-of-truth #messageForm.zwit-ios-composer {
+    position: sticky;
+    bottom: calc(61px + env(safe-area-inset-bottom));
+    z-index: 8;
+    gap: 6px;
+    margin-inline: -1px;
+    padding: 7px;
+    border-top: .7px solid var(--zwit-ios-border);
+  }
+
+  body.zwit-ios-source-of-truth #messageForm.zwit-ios-composer input[type="text"],
+  body.zwit-ios-source-of-truth #messageForm.zwit-ios-composer textarea {
+    min-height: 40px;
+    border-radius: 18px;
+  }
+
+  body.zwit-ios-source-of-truth #messageForm.zwit-ios-composer [data-zwit-voice-record],
+  body.zwit-ios-source-of-truth #messageForm.zwit-ios-composer [data-zwit-ephemeral-pick] {
+    width: 38px;
+    min-width: 38px;
+    padding: 0;
+    border-radius: 50%;
+  }
+
+  body.zwit-ios-source-of-truth #messageForm.zwit-ios-composer [data-zwit-voice-record] small,
+  body.zwit-ios-source-of-truth #messageForm.zwit-ios-composer [data-zwit-ephemeral-pick] small {
+    display: none;
+  }
+
+  body.zwit-ios-source-of-truth .zwit-ephemeral-panel,
+  body.zwit-ios-source-of-truth .zwit-ephemeral-viewer-top,
+  body.zwit-ios-source-of-truth .zwit-tonight-panel,
+  body.zwit-ios-source-of-truth .zwit-passport-card {
+    border-color: var(--zwit-ios-border);
+    background: rgba(21,16,19,.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+}
+
+@media (max-width: 390px) {
+  body.zwit-ios-source-of-truth main {
+    padding-inline: 12px;
+  }
+
+  body.zwit-ios-source-of-truth .home-discovery-rail,
+  body.zwit-ios-source-of-truth .profile-nav {
+    margin-inline: -12px;
+    padding-inline: 12px;
+  }
+
+  body.zwit-ios-source-of-truth .bottom-nav small {
+    font-size: 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.zwit-ios-source-of-truth *,
+  body.zwit-ios-source-of-truth *::before,
+  body.zwit-ios-source-of-truth *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
