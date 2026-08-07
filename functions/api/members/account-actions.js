@@ -71,7 +71,7 @@ function lifecycleEmail(action, confirmationUrl, profileName) {
       '',
       `Confirmer : ${confirmationUrl}`,
       '',
-      'Ce lien personnel expire dans 48 heures. Si vous n’êtes pas à l’origine de cette demande, ne le validez pas et contactez Velvet.'
+      'Ce lien personnel expire dans 48 heures. Si vous n’êtes pas à l’origine de cette demande, ne le validez pas et contactez Zwit.'
     ].join('\n'),
     html: `<div style="background:#0b080a;padding:32px;color:#f8eee8;font-family:Arial,sans-serif"><div style="max-width:620px;margin:auto;padding:34px;border:1px solid #50313d;border-radius:26px;background:#171014"><p style="color:#d9b879;letter-spacing:2px;text-transform:uppercase;font-size:11px">Zwit · confirmation de sécurité</p><h1 style="font-family:Georgia,serif;font-weight:400">Confirmer la ${label}</h1><p style="color:#d5c8cc;line-height:1.7">Une demande concerne le profil <strong>${escape(profileName)}</strong>. ${delay}</p><a href="${escape(confirmationUrl)}" style="display:inline-block;margin-top:18px;padding:14px 22px;border-radius:999px;background:#9f2852;color:white;text-decoration:none;font-weight:700">Vérifier et confirmer</a><p style="margin-top:22px;color:#94878c;font-size:12px">Lien personnel valable 48 heures. Ne le partagez pas.</p></div></div>`
   };

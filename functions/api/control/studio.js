@@ -49,7 +49,7 @@ function localPrompt(brief = {}) {
       'Terminer sur le logo Zwit et la signature : Là où les plus belles rencontres commencent.'
     ].join(' '),
     negativePrompt: 'nudité, sexualité explicite, vulgarité, mineur, personne réelle identifiable, interface inventée, promesse non disponible, couleurs criardes, texte illisible, watermark, logo tiers',
-    voiceOver: 'Pendant des années, les rencontres se sont limitées à des profils et des messages. Zwit réunit enfin les personnes, les établissements et les événements dans une expérience pensée autour de la confiance, de la discrétion et du consentement. Velvet. Là où les plus belles rencontres commencent.',
+    voiceOver: 'Pendant des années, les rencontres se sont limitées à des profils et des messages. Zwit réunit enfin les personnes, les établissements et les événements dans une expérience pensée autour de la confiance, de la discrétion et du consentement. Zwit. Là où les plus belles rencontres commencent.',
     scenes: [
       { seconds: '0–4', visual: 'Ruban bordeaux formant le V Zwit sur fond noir', message: 'Le libertinage évolue.' },
       { seconds: '4–12', visual: 'Capture réelle de la découverte et de la recherche membres', message: 'Des rencontres de qualité.' },

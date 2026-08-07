@@ -183,7 +183,7 @@ export async function deliverBrowserActivity(env, {
           icon: '/assets/velvet-icon-192.png',
           badge: '/assets/velvet-icon-192.png',
           image: image || undefined,
-          tag: clean(tag, 180) || `velvet-${eventType}`,
+          tag: clean(tag, 180) || `zwit-${eventType}`,
           navigate: navigate || '/membres/?route=notifications',
           requireInteraction: false
         },

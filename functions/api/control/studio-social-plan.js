@@ -31,7 +31,7 @@ function memberFallback(brief, duration, format) {
   return {
     product: 'member', title: 'Une envie devient une histoire', format, duration, brief,
     narrativeArc: 'mystère → attirance → émotion → connexion → projection → désir de rejoindre Zwit',
-    closingLine: 'Velvet. Là où les plus belles rencontres commencent.',
+    closingLine: 'Zwit. Là où les plus belles rencontres commencent.',
     scenes: screens.map((screen, index) => ({
       screen, action: screen, title: copy[screen][0], onScreen: copy[screen][1], voice: copy[screen][2], emotion: copy[screen][3], duration: sceneDuration, beat: index + 1
     }))

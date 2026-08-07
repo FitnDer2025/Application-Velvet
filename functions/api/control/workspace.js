@@ -17,7 +17,7 @@ function randomPromotionCode() {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   const bytes = crypto.getRandomValues(new Uint8Array(12));
   const token = [...bytes].map((byte) => alphabet[byte % alphabet.length]).join('');
-  return `VELVET-${token.slice(0, 4)}-${token.slice(4, 8)}-${token.slice(8, 12)}`;
+  return `ZWIT-${token.slice(0, 4)}-${token.slice(4, 8)}-${token.slice(8, 12)}`;
 }
 
 async function sha256(value) {
