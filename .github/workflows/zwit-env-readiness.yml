@@ -1,0 +1,40 @@
+name: Zwit environment readiness
+
+on:
+  push:
+    branches:
+      - verify/zwit-v15-delivery
+    paths:
+      - '.github/workflows/zwit-env-readiness.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      ZWIT_TURN_URLS: ${{ secrets.ZWIT_TURN_URLS }}
+      ZWIT_TURN_USERNAME: ${{ secrets.ZWIT_TURN_USERNAME }}
+      ZWIT_TURN_CREDENTIAL: ${{ secrets.ZWIT_TURN_CREDENTIAL }}
+    steps:
+      - name: Report credential readiness without values
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY DATABASE_URL SUPABASE_DB_URL SUPABASE_ACCESS_TOKEN SUPABASE_PROJECT_REF CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID ZWIT_TURN_URLS ZWIT_TURN_USERNAME ZWIT_TURN_CREDENTIAL; do
+            if [ -n "${!name:-}" ]; then
+              echo "${name}=SET"
+            else
+              echo "${name}=UNSET"
+            fi
+          done
