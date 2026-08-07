@@ -9,6 +9,8 @@
   let lastLoadedAt = 0;
   let selectedEventId = '';
   let renderQueued = false;
+  let qrRefreshTimer = null;
+  let qrCountdownTimer = null;
 
   const e = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -28,6 +30,18 @@
     return payload;
   }
 
+  async function checkinApi(options = {}) {
+    const response = await fetch('/api/pro/check-in', {
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: options.body ? { 'content-type': 'application/json' } : {},
+      ...options
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || 'checkin_session_failed');
+    return payload;
+  }
+
   function toast(message, error = false) {
     const node = document.querySelector('#toast') || document.querySelector('.toast');
     if (!node) return;
@@ -35,6 +49,24 @@
     node.classList.toggle('error', error);
     node.classList.add('show');
     window.setTimeout(() => node.classList.remove('show'), 3200);
+  }
+
+  function ensureQrRuntime() {
+    if (window.ZwitQRV4) return Promise.resolve(window.ZwitQRV4);
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector('script[data-zwit-qr-v4]');
+      if (existing) {
+        existing.addEventListener('load', () => resolve(window.ZwitQRV4), { once: true });
+        existing.addEventListener('error', reject, { once: true });
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = '/assets/zwit-qr-v4.js?v=20260807-1';
+      script.dataset.zwitQrV4 = '1';
+      script.onload = () => resolve(window.ZwitQRV4);
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
   }
 
   function activeVenueId(data) {
@@ -136,7 +168,7 @@
     const checkedIn = registrations.filter((row) => status(row) === 'checked_in').length;
 
     return `<section class="zpg-cockpit" data-zpg-cockpit>
-      <div class="zpg-head"><div><span>PILOTAGE RÉEL · V1.5</span><h2>Guest-list & accueil</h2><p>Une seule file, de la demande au check-in. La capacité est verrouillée côté serveur.</p></div><select data-zpg-event>${events.map(eventOption).join('')}</select></div>
+      <div class="zpg-head"><div><span>PILOTAGE RÉEL · V1.5</span><h2>Guest-list & accueil</h2><p>Une seule file, de la demande au check-in. La capacité est verrouillée côté serveur.</p></div><div class="zpg-head-actions"><select data-zpg-event>${events.map(eventOption).join('')}</select><button type="button" data-zpg-open-qr="${e(event.id)}">QR d’entrée</button></div></div>
       <div class="zpg-kpis"><article><small>Engagées</small><strong>${stats.engaged}<i> / ${stats.total}</i></strong></article><article><small>À valider</small><strong>${pending}</strong></article><article><small>Confirmés</small><strong>${confirmed}</strong></article><article><small>Attente</small><strong>${waiting}</strong></article><article><small>Présents</small><strong>${checkedIn}</strong></article></div>
       <div class="zpg-capacity"><div><strong>${stats.remaining} place${stats.remaining > 1 ? 's' : ''} disponible${stats.remaining > 1 ? 's' : ''}</strong><small>${stats.waiting ? `${stats.waiting} place${stats.waiting > 1 ? 's' : ''} en attente` : 'Aucune attente'}</small></div><div class="zpg-meter"><i style="width:${Math.min(100, Math.round((stats.engaged / Math.max(1, stats.total)) * 100))}%"></i></div></div>
       ${settingsMarkup(event)}
@@ -218,6 +250,63 @@
     }
   }
 
+  function clearQrTimers() {
+    if (qrRefreshTimer) window.clearTimeout(qrRefreshTimer);
+    if (qrCountdownTimer) window.clearInterval(qrCountdownTimer);
+    qrRefreshTimer = null;
+    qrCountdownTimer = null;
+  }
+
+  function closeQr() {
+    clearQrTimers();
+    document.querySelector('[data-zpg-qr-modal]')?.remove();
+  }
+
+  function updateCountdown(modal, expiresAt) {
+    const target = modal.querySelector('[data-zpg-qr-countdown]');
+    const tick = () => {
+      const seconds = Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 1000));
+      if (target) target.textContent = `Renouvellement sécurisé dans ${seconds}s`;
+    };
+    tick();
+    qrCountdownTimer = window.setInterval(tick, 1000);
+  }
+
+  async function refreshQr(eventId, modal) {
+    const qr = await ensureQrRuntime();
+    const payload = await checkinApi({
+      method: 'POST',
+      body: JSON.stringify({ eventId, ttlSeconds: 120 })
+    });
+    const checkin = payload.checkin;
+    if (!checkin?.qrPayload || !qr) throw new Error('qr_payload_missing');
+    const image = modal.querySelector('[data-zpg-qr-image]');
+    const title = modal.querySelector('[data-zpg-qr-title]');
+    if (image) image.src = qr.dataUrl(checkin.qrPayload);
+    if (title) title.textContent = checkin.eventTitle || 'Entrée Zwit';
+    modal.dataset.browserLink = checkin.checkinUrl || '';
+    clearQrTimers();
+    updateCountdown(modal, checkin.expiresAt);
+    const delay = Math.max(30000, new Date(checkin.expiresAt).getTime() - Date.now() - 25000);
+    qrRefreshTimer = window.setTimeout(() => refreshQr(eventId, modal).catch(() => closeQr()), delay);
+  }
+
+  async function openQr(eventId) {
+    closeQr();
+    const modal = document.createElement('div');
+    modal.className = 'zpg-qr-modal';
+    modal.dataset.zpgQrModal = '1';
+    modal.innerHTML = `<div class="zpg-qr-panel"><button type="button" class="zpg-qr-close" data-zpg-close-qr aria-label="Fermer">×</button><span>ACCUEIL ZWIT · QR TOURNANT</span><h2 data-zpg-qr-title>Préparation du QR…</h2><p>Le membre ouvre Zwit et scanne ce code. Seules les réservations confirmées peuvent valider leur présence.</p><div class="zpg-qr-frame"><img data-zpg-qr-image alt="QR de check-in Zwit"><div class="zpg-qr-loading">Génération sécurisée…</div></div><strong data-zpg-qr-countdown>Connexion…</strong><small>Le code change automatiquement. Le précédent devient inutilisable.</small><button type="button" class="zpg-qr-browser" data-zpg-copy-checkin>Copier le lien navigateur</button></div>`;
+    document.body.appendChild(modal);
+    requestAnimationFrame(() => modal.classList.add('visible'));
+    try {
+      await refreshQr(eventId, modal);
+      modal.querySelector('.zpg-qr-loading')?.remove();
+    } catch (error) {
+      modal.querySelector('.zpg-qr-loading').textContent = error.message === 'checkin_too_early' ? 'Le QR ouvrira à l’approche de la soirée.' : 'QR momentanément indisponible.';
+    }
+  }
+
   document.addEventListener('change', (event) => {
     const select = event.target.closest('[data-zpg-event]');
     if (!select) return;
@@ -230,9 +319,26 @@
   });
 
   document.addEventListener('click', (event) => {
-    const button = event.target.closest('[data-v15-reg-action]');
-    if (!button) return;
-    setRegistrationStatus(button.dataset.registrationId, button.dataset.v15RegAction, button);
+    const registrationButton = event.target.closest('[data-v15-reg-action]');
+    if (registrationButton) {
+      setRegistrationStatus(registrationButton.dataset.registrationId, registrationButton.dataset.v15RegAction, registrationButton);
+      return;
+    }
+    const qrButton = event.target.closest('[data-zpg-open-qr]');
+    if (qrButton) {
+      openQr(qrButton.dataset.zpgOpenQr);
+      return;
+    }
+    if (event.target.closest('[data-zpg-close-qr]') || (event.target.matches('[data-zpg-qr-modal]'))) {
+      closeQr();
+      return;
+    }
+    const copy = event.target.closest('[data-zpg-copy-checkin]');
+    if (copy) {
+      const link = copy.closest('[data-zpg-qr-modal]')?.dataset.browserLink;
+      if (!link) return;
+      navigator.clipboard?.writeText(link).then(() => toast('Lien de check-in copié.')).catch(() => toast('Impossible de copier le lien.', true));
+    }
   });
 
   document.addEventListener('submit', (event) => {
