@@ -7,20 +7,17 @@ create table if not exists public.message_ephemeral_attachments (
   conversation_id uuid not null references public.conversations(id) on delete cascade,
   sender_user_id uuid not null references auth.users(id) on delete cascade,
   mode text not null default 'view_once' check (mode in ('view_once', 'expires')),
-  expires_at timestamptz,
+  expires_at timestamptz not null,
   opened_by_user_id uuid references auth.users(id) on delete set null,
   opened_at timestamptz,
   created_at timestamptz not null default now(),
-  constraint message_ephemeral_expiry_required check (
-    (mode = 'view_once') or (mode = 'expires' and expires_at is not null)
-  )
+  constraint message_ephemeral_expiry_valid check (expires_at > created_at)
 );
 
 create index if not exists message_ephemeral_conversation_idx
   on public.message_ephemeral_attachments (conversation_id, created_at desc);
 create index if not exists message_ephemeral_expiry_idx
-  on public.message_ephemeral_attachments (expires_at)
-  where expires_at is not null;
+  on public.message_ephemeral_attachments (expires_at);
 
 alter table public.message_ephemeral_attachments enable row level security;
 revoke all on table public.message_ephemeral_attachments from anon, authenticated;
@@ -75,7 +72,7 @@ begin
     raise exception 'conversation_access_denied';
   end if;
 
-  if v_meta.mode = 'expires' and v_meta.expires_at <= v_now then
+  if v_meta.expires_at <= v_now then
     raise exception 'ephemeral_message_expired';
   end if;
 
