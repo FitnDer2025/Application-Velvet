@@ -806,7 +806,7 @@ private struct RealtimeMessageBubble: View {
 
     private var timestamp: some View {
         HStack(spacing: 4) {
-            Text(RealtimeMessageDate.time(message.createdAt))
+            Text(RealtimeMessageDate.permanent(message.createdAt))
             if isMine {
                 Image(systemName: receiptIcon)
             }
@@ -1099,6 +1099,12 @@ private enum RealtimeMessageDate {
         let date = date(value)
         guard date != .distantPast else { return "" }
         return date.formatted(date: .omitted, time: .shortened)
+    }
+
+    static func permanent(_ value: String?) -> String {
+        let date = date(value)
+        guard date != .distantPast else { return "" }
+        return date.formatted(.dateTime.day(.twoDigits).month(.twoDigits).year().hour().minute())
     }
 
     static func short(_ value: String?) -> String {
