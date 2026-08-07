@@ -7,6 +7,8 @@ import {
 } from './_shared.js';
 import { enrichProfilesMedia } from './media.js';
 
+// Migration contract: legacy register_for_event / cancel_my_event_registration
+// are intentionally replaced by the transactional v1.5 RPCs below.
 function validUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value || '');
 }
