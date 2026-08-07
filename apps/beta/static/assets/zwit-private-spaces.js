@@ -93,6 +93,58 @@
     main.innerHTML=`<section class="zps-members"><button type="button" class="zps-back" data-zps-reopen>← Conversation</button><span>MEMBRES</span><h3>${esc(activeSpace.title)}</h3><div>${members.map(m=>`<article><i>${esc((m.display_name||'Z').slice(0,1).toUpperCase())}</i><strong>${esc(m.display_name||'Membre Zwit')}</strong><small>${m.mine?'Vous':m.role==='owner'?'Créateur':m.role==='moderator'?'Modérateur':m.membership_status==='invited'?'Invité':'Membre'}</small></article>`).join('')}</div>${activeSpace.kind==='circle'&&activeSpace.role!=='owner'?'<button type="button" class="danger" data-zps-leave>Quitter ce cercle</button>':''}</section>`;
   }
 
+  function manageableCircles(){
+    return spaces.filter(s=>s.kind==='circle'&&s.status!=='invited'&&['owner','moderator'].includes(s.role));
+  }
+
+  async function sendCircleInvite(spaceId, profileId){
+    await api({method:'POST',body:JSON.stringify({action:'invite_profile',spaceId,profileId})});
+    toast('Invitation envoyée dans le cercle.');
+    close();
+  }
+
+  function showCirclePicker(profileId){
+    const circles=manageableCircles();
+    const main=layer?.querySelector('[data-zps-main]');
+    if(!main)return;
+    if(!circles.length){
+      main.innerHTML='<div class="zps-empty"><strong>Créez d’abord un cercle.</strong><p>Vous pourrez ensuite inviter ce profil dans un espace privé que vous administrez.</p><button type="button" data-zps-new>Nouveau cercle</button></div>';
+      return;
+    }
+    main.innerHTML=`<section class="zps-members"><button type="button" class="zps-back" data-zps-back>← Vos espaces</button><span>INVITATION PRIVÉE</span><h3>Inviter dans un cercle</h3><div>${circles.map(circle=>`<article><i>◎</i><strong>${esc(circle.title)}</strong><button type="button" data-zps-invite-circle="${esc(circle.space_id)}" data-zps-profile-id="${esc(profileId)}">Inviter</button></article>`).join('')}</div></section>`;
+  }
+
+  async function inviteProfile(profileId){
+    if(!profileId)return;
+    try{
+      if(!layer)shell();
+      await loadList();
+      const circles=manageableCircles();
+      if(circles.length===1){
+        await sendCircleInvite(circles[0].space_id,profileId);
+        return;
+      }
+      showCirclePicker(profileId);
+    }catch{
+      toast('Impossible de préparer cette invitation.',true);
+    }
+  }
+
+  function enhanceProfiles(){
+    document.querySelectorAll('[data-message-profile]').forEach(messageButton=>{
+      const profileId=messageButton.dataset.messageProfile;
+      if(!/^[0-9a-f-]{36}$/i.test(profileId||''))return;
+      const host=messageButton.parentElement;
+      if(!host||host.querySelector(`[data-zps-invite-profile="${profileId}"]`))return;
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='secondary';
+      button.dataset.zpsInviteProfile=profileId;
+      button.textContent='Inviter dans un cercle';
+      messageButton.insertAdjacentElement('afterend',button);
+    });
+  }
+
   async function open(){ if(layer)return; shell(); try{await loadList();}catch{layer.querySelector('[data-zps-main]').innerHTML='<div class="zps-empty"><strong>Espaces indisponibles.</strong><p>Réessayez dans quelques instants.</p></div>';} }
 
   async function joinEventChat(eventId){
@@ -113,6 +165,8 @@
 
   document.addEventListener('click',event=>{
     if(event.target.closest('[data-zwit-spaces-open]')) return open();
+    const inviteProfileButton=event.target.closest('[data-zps-invite-profile]');if(inviteProfileButton){event.preventDefault();event.stopPropagation();return inviteProfile(inviteProfileButton.dataset.zpsInviteProfile);}
+    const inviteCircleButton=event.target.closest('[data-zps-invite-circle]');if(inviteCircleButton){inviteCircleButton.disabled=true;sendCircleInvite(inviteCircleButton.dataset.zpsInviteCircle,inviteCircleButton.dataset.zpsProfileId).catch(()=>{inviteCircleButton.disabled=false;toast('Invitation impossible.',true);});return;}
     if(event.target.closest('[data-zps-close]')||event.target.matches('[data-zwit-spaces-layer]')) return close();
     if(event.target.closest('[data-zps-new]')) return createCircleForm();
     if(event.target.closest('[data-zps-back]')){stopPoll();activeSpace=null;return renderList();}
@@ -130,7 +184,7 @@
     const send=event.target.closest('[data-zps-send]');if(send){event.preventDefault();const textarea=send.querySelector('textarea');const text=textarea.value.trim();if(!text)return;const btn=send.querySelector('button');btn.disabled=true;api({method:'POST',body:JSON.stringify({action:'send',spaceId:activeSpace.space_id,message:text})}).then(async()=>{textarea.value='';btn.disabled=false;await refreshMessages(false);}).catch(()=>{btn.disabled=false;toast('Message non envoyé.',true);});}
   });
 
-  const observer=new MutationObserver(()=>{ensureNav();enhanceEvents();});observer.observe(document.documentElement,{childList:true,subtree:true});
-  ensureNav();enhanceEvents();
-  window.ZwitPrivateSpaces=Object.freeze({open,joinEventChat});
+  const observer=new MutationObserver(()=>{ensureNav();enhanceEvents();enhanceProfiles();});observer.observe(document.documentElement,{childList:true,subtree:true});
+  ensureNav();enhanceEvents();enhanceProfiles();
+  window.ZwitPrivateSpaces=Object.freeze({open,joinEventChat,inviteProfile});
 })();
