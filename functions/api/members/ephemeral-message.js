@@ -151,18 +151,16 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const expiresAt = new Date(Date.now() + expiresMinutes * 60_000).toISOString();
     const metadata = await restJson(
       env,
-      '/rest/v1/message_ephemeral_attachments?select=attachment_id,message_id,mode,expires_at,created_at',
+      '/rest/v1/rpc/zwit_v15_register_ephemeral_attachment',
       access.session,
       {
         method: 'POST',
-        headers: { prefer: 'return=representation' },
         body: JSON.stringify({
-          attachment_id: attachment.id,
-          message_id: message.id,
-          conversation_id: conversationId,
-          sender_user_id: access.account.userId,
-          mode,
-          expires_at: expiresAt
+          target_attachment_id: attachment.id,
+          target_message_id: message.id,
+          target_conversation_id: conversationId,
+          target_mode: mode,
+          target_expires_at: expiresAt
         })
       }
     );
