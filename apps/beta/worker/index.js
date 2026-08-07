@@ -34,6 +34,7 @@ import {
   onRequestGet as messagesGet,
   onRequestPost as messagesPost
 } from '../../../functions/api/members/messages.js';
+import { onRequestPost as messageMediaPost } from '../../../functions/api/members/message-media.js';
 import {
   onRequestDelete as memberPlansDelete,
   onRequestGet as memberPlansGet,
@@ -227,6 +228,7 @@ const API_ROUTES = new Map([
   ['POST /api/members/organizer-request', organizerRequestPost],
   ['GET /api/members/messages', messagesGet],
   ['POST /api/members/messages', messagesPost],
+  ['POST /api/members/message-media', messageMediaPost],
   ['GET /api/members/plans', memberPlansGet],
   ['POST /api/members/plans', memberPlansPost],
   ['DELETE /api/members/plans', memberPlansDelete],
