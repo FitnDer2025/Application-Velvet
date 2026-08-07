@@ -33,8 +33,9 @@ jobs:
           set -euo pipefail
           for name in SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY DATABASE_URL SUPABASE_DB_URL SUPABASE_ACCESS_TOKEN SUPABASE_PROJECT_REF CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID ZWIT_TURN_URLS ZWIT_TURN_USERNAME ZWIT_TURN_CREDENTIAL; do
             if [ -n "${!name:-}" ]; then
-              echo "${name}=SET"
+              state='SET'
             else
-              echo "${name}=UNSET"
+              state='UNSET'
             fi
+            echo "::notice title=Zwit environment readiness::${name}=${state}"
           done
