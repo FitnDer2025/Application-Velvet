@@ -14,6 +14,7 @@
     notifications: '<path d="M6.2 9.6a5.8 5.8 0 0 1 11.6 0c0 6 2.4 6.5 2.4 6.5H3.8s2.4-.5 2.4-6.5Z"/><path d="M9.5 19.1a2.8 2.8 0 0 0 5 0"/>',
     menu: '<path d="M4 6.3h16M4 12h16M4 17.7h16"/>',
     tonight: '<path d="M19.6 15.3A8.4 8.4 0 0 1 8.7 4.4 8.4 8.4 0 1 0 19.6 15.3Z"/><path d="m17.8 4.3.5 1.1 1.1.5-1.1.5-.5 1.1-.5-1.1-1.1-.5 1.1-.5z"/>',
+    passport: '<path d="M12 3 19 6v5c0 4.8-2.9 8.2-7 10-4.1-1.8-7-5.2-7-10V6l7-3Z"/><path d="m9.2 12 1.8 1.8 3.9-4.1"/>',
     photo: '<rect x="3.2" y="5" width="17.6" height="14" rx="2.4"/><circle cx="9" cy="10" r="1.8"/><path d="m5.8 17 4.3-4.2 3.1 2.8 2.2-2 2.8 3.4"/>',
     mic: '<rect x="9" y="3.2" width="6" height="11" rx="3"/><path d="M5.8 11.2a6.2 6.2 0 0 0 12.4 0M12 17.4v3.4M8.8 20.8h6.4"/>'
   };
@@ -107,6 +108,39 @@
     }
   }
 
+  function upgradeOwnProfileNavigation() {
+    const nav = document.querySelector('#content .profile-nav');
+    if (!nav || !document.querySelector('#content [data-edit-profile]')) return;
+
+    if (!nav.querySelector('[data-zwit-route="tonight"]')) {
+      const tonight = document.createElement('button');
+      tonight.type = 'button';
+      tonight.dataset.zwitRoute = 'tonight';
+      tonight.className = 'zwit-ios-profile-special';
+      tonight.innerHTML = `${svg('tonight')}<span>Ce soir</span>`;
+      nav.append(tonight);
+    }
+
+    if (!nav.querySelector('[data-zwit-passport-focus]')) {
+      const passport = document.createElement('button');
+      passport.type = 'button';
+      passport.dataset.zwitPassportFocus = '1';
+      passport.className = 'zwit-ios-profile-special';
+      passport.innerHTML = `${svg('passport')}<span>Passeport</span>`;
+      nav.append(passport);
+    }
+  }
+
+  function focusPassport() {
+    const target = document.getElementById('zwitPassport');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    document.dispatchEvent(new CustomEvent('zwit:passport-refresh'));
+    window.setTimeout(() => document.getElementById('zwitPassport')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 220);
+  }
+
   function upgradeDynamicSurfaces() {
     document.querySelectorAll('.page,.form-shell,.velvet-direct-conversation').forEach((node) => {
       node.classList.add('zwit-ios-surface');
@@ -115,6 +149,7 @@
       node.classList.add('zwit-ios-page-head');
     });
     upgradeMessagingComposer();
+    upgradeOwnProfileNavigation();
   }
 
   let frame = 0;
@@ -131,6 +166,13 @@
     if (frame) return;
     frame = requestAnimationFrame(synchronize);
   }
+
+  document.addEventListener('click', (event) => {
+    if (event.target.closest('[data-zwit-passport-focus]')) {
+      event.preventDefault();
+      focusPassport();
+    }
+  });
 
   new MutationObserver(schedule).observe(document.documentElement, {
     childList: true,
