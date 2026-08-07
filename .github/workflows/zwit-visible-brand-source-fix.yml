@@ -1,0 +1,61 @@
+name: Zwit visible brand source fix
+
+on:
+  push:
+    branches:
+      - release/zwit-v1.5-seven-capitals
+    paths:
+      - '.github/workflows/zwit-visible-brand-source-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-visible-brand:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/zwit-v1.5-seven-capitals
+      - name: Fix remaining public copy and preserve technical CSS selectors
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              Path('apps/beta/static/assets/velvet-studio-ai-module.js'): [
+                  ('lancer le vrai tournage Velvet.', 'lancer le vrai tournage Zwit.', 1),
+              ],
+              Path('apps/beta/static/assets/velvet-social-realtime.js'): [
+                  ('sur cet environnement Velvet.', 'sur cet environnement Zwit.', 1),
+              ],
+              Path('apps/beta/test/zwit-brand-audit.test.mjs'): [
+                  (
+                      "    /^\\[?data-velvet-[a-z0-9_-]+\\]?$/i,\n    /\\\\s|\\[\\^/,",
+                      "    /^\\[?data-velvet-[a-z0-9_-]+\\]?$/i,\n    /^\\.velvet-[a-z0-9_-]+$/i,\n    /\\\\s|\\[\\^/ ,".replace(' / ,', '/,'),
+                      1
+                  ),
+              ],
+          }
+
+          for path, changes in replacements.items():
+              source = path.read_text(encoding='utf-8')
+              for old, new, expected in changes:
+                  count = source.count(old)
+                  if count != expected:
+                      raise SystemExit(f'{path}: expected {expected} occurrence(s) of {old!r}, found {count}')
+                  source = source.replace(old, new)
+              path.write_text(source, encoding='utf-8')
+          PY
+      - name: Verify cleanup
+        run: |
+          grep -F 'lancer le vrai tournage Zwit.' apps/beta/static/assets/velvet-studio-ai-module.js
+          grep -F 'sur cet environnement Zwit.' apps/beta/static/assets/velvet-social-realtime.js
+          grep -F '/^\.velvet-[a-z0-9_-]+$/i' apps/beta/test/zwit-brand-audit.test.mjs
+      - name: Commit cleanup
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/beta/static/assets/velvet-studio-ai-module.js apps/beta/static/assets/velvet-social-realtime.js apps/beta/test/zwit-brand-audit.test.mjs
+          git commit -m 'fix(brand): distinguish public copy from technical CSS selectors'
+          git push origin HEAD:release/zwit-v1.5-seven-capitals
