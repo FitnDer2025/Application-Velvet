@@ -37,21 +37,23 @@
   <link rel="stylesheet" href="/assets/velvet-social-realtime.css?v=20260731-1">
   <link rel="stylesheet" href="/assets/velvet-experience-management.css?v=20260731-1">
   <link rel="stylesheet" href="/assets/velvet-interaction-recovery.css?v=20260803-3">
-  <link rel="stylesheet" href="/assets/velvet-web-ios-parity.css?v=20260803-3">
+  <link rel="stylesheet" href="/assets/velvet-web-ios-parity.css?v=20260807-1">
   <link rel="stylesheet" href="/assets/zwit-passport.css?v=20260807-1">
   <link rel="stylesheet" href="/assets/zwit-tonight.css?v=20260807-1">
   <link rel="stylesheet" href="/assets/zwit-event-booking.css?v=20260807-1">
+  <link rel="stylesheet" href="/assets/zwit-ios-source-of-truth.css?v=20260807-1">
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar" aria-label="Navigation Zwit">
       <a class="brand" href="/membres/" aria-label="Accueil Zwit">
-        <span class="brand-mark">V</span>
+        <span class="brand-mark" aria-hidden="true"></span>
         <span><strong>Zwit</strong><small>BETA privée</small></span>
       </a>
       <nav id="mainNav" aria-label="Espaces principaux">
         <button type="button" data-route="home"><span>⌂</span>Accueil</button>
         <button type="button" data-route="discover"><span>⌕</span>Membres</button>
+        <button type="button" data-route="maps"><span>⌖</span>Carte</button>
         <button type="button" data-route="venues"><span>⌂</span>Lieux</button>
         <button type="button" data-route="conversations"><span>◌</span>Messages</button>
         <button type="button" data-route="me"><span>♡</span>Profil</button>
@@ -60,7 +62,6 @@
         <p>PLUS DE ZWIT</p>
         <button type="button" class="zwit-tonight-nav" data-zwit-route="tonight"><span>◐</span>Ce soir</button>
         <button type="button" data-route="events"><span>✦</span>Sorties & agenda</button>
-        <button type="button" data-route="maps"><span>⌖</span>Carte</button>
         <button type="button" data-route="notifications"><span>○</span>Notifications</button>
         <button type="button" data-route="settings"><span>⚙</span>Paramètres</button>
       </div>
@@ -70,9 +71,9 @@
     </aside>
 
     <header class="mobile-head">
-      <a class="brand compact" href="/membres/"><span class="brand-mark">V</span><strong>Zwit</strong></a>
+      <a class="brand compact" href="/membres/" aria-label="Accueil Zwit"><span class="brand-mark" aria-hidden="true"></span><strong>Zwit</strong></a>
       <div class="mobile-head-actions">
-        <button type="button" data-zwit-route="tonight" aria-label="Ce soir">Ce soir</button>
+        <button type="button" data-zwit-route="tonight" aria-label="Ce soir"><span>◐</span>Ce soir</button>
         <button type="button" data-route="notifications" aria-label="Notifications">○</button>
         <button type="button" id="mobileMenuButton" aria-expanded="false" aria-controls="mainNav" aria-label="Ouvrir le menu">Menu</button>
       </div>
@@ -88,6 +89,7 @@
     <nav class="bottom-nav" aria-label="Navigation mobile">
       <button type="button" data-route="home"><span>⌂</span><small>Accueil</small></button>
       <button type="button" data-route="discover"><span>⌕</span><small>Membres</small></button>
+      <button type="button" data-route="maps"><span>⌖</span><small>Carte</small></button>
       <button type="button" data-route="venues"><span>⌂</span><small>Lieux</small></button>
       <button type="button" data-route="conversations"><span>◌</span><small>Messages</small></button>
       <button type="button" data-route="me"><span>♡</span><small>Profil</small></button>
@@ -120,7 +122,8 @@
   <script src="/assets/velvet-push-deeplink.js?v=20260731-1" defer></script>
   <script src="/assets/velvet-experience-management.js?v=20260731-1" defer></script>
   <script src="/assets/velvet-interaction-recovery.js?v=20260803-3" defer></script>
-  <script src="/assets/velvet-web-ios-parity.js?v=20260803-3" defer></script>
+  <script src="/assets/velvet-web-ios-parity.js?v=20260807-1" defer></script>
   <script src="/assets/account-access-menu.js?v=20260804-1" defer></script>
+  <script src="/assets/zwit-ios-source-of-truth.js?v=20260807-1" defer></script>
 </body>
 </html>
