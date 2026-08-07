@@ -10,6 +10,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: zwit-ios-runtime-hotfix
+  cancel-in-progress: true
+
 jobs:
   patch-build:
     runs-on: macos-15
@@ -79,4 +83,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add ios/Velvet/Features/Home/MainShellView.swift ios/Velvet/Features/Messaging/RealtimeAppleMessagingViews.swift
           git commit -m 'fix(ios): restore permanent message dates and map tab'
+          git pull --rebase origin fix/ios-launch-date-map
           git push origin HEAD:fix/ios-launch-date-map
