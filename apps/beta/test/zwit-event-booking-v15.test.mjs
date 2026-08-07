@@ -51,6 +51,24 @@ test('les écritures de réservation v1.5 restent réservées aux membres admis'
   assert.match(migration, /v_user_id uuid := auth\.uid\(\)/);
 });
 
-test('le runtime API de réservation passe le parseur JavaScript de Node', async () => {
+test('la fiche événement charge la réservation premium et distingue confirmation validation et attente', async () => {
+  const [html, runtime, css] = await Promise.all([
+    read('apps/web/velvet-members-beta-live.html'),
+    read('apps/beta/static/assets/zwit-event-booking.js'),
+    read('apps/beta/static/assets/zwit-event-booking.css')
+  ]);
+  assert.match(html, /zwit-event-booking\.css/);
+  assert.match(html, /zwit-event-booking\.js/);
+  assert.match(runtime, /Confirmation/);
+  assert.match(runtime, /Après validation/);
+  assert.match(runtime, /Rejoindre la liste d’attente/);
+  assert.match(runtime, /data-zwit-booking-guests/);
+  assert.match(runtime, /stopImmediatePropagation/);
+  assert.match(css, /zwit-booking-meter/);
+  assert.match(css, /zwit-booking-people/);
+});
+
+test('les runtimes de réservation v1.5 passent le parseur JavaScript de Node', async () => {
   await execFileAsync(process.execPath, ['--check', 'functions/api/members/event-registrations.js']);
+  await execFileAsync(process.execPath, ['--check', 'apps/beta/static/assets/zwit-event-booking.js']);
 });
