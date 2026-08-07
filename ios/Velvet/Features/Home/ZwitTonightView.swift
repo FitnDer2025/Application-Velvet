@@ -17,7 +17,7 @@ struct ZwitTonightView: View {
     @State private var wantedProfileTypes = Set<String>()
     @State private var note = ""
 
-    private let client = APIClient(baseURL: APIConfiguration.baseURL)
+    private let client = APIClient()
 
     var body: some View {
         ZStack {
@@ -86,7 +86,7 @@ struct ZwitTonightView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
         .background(.ultraThinMaterial)
-        .background(VelvetColor.wine.opacity(0.10))
+        .background(VelvetColor.velvetBurgundy.opacity(0.10))
         .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 26, style: .continuous)
