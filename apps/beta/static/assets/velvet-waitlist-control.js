@@ -179,7 +179,7 @@
     const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }));
     const link = document.createElement('a');
     link.href = url;
-    link.download = `velvet-preinscriptions-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `zwit-preinscriptions-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
     setStatus('Export CSV généré.');
