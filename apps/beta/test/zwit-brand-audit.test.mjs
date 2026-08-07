@@ -46,7 +46,7 @@ function stripTechnicalVelvet(value) {
     .replace(/\bVelvet[A-Z][A-Za-z0-9_]*\b/g, '')
     .replace(/\bvelvet[A-Z][A-Za-z0-9_]*\b/g, '')
     .replace(/\b(?:public\.)?velvet_[a-z0-9_.-]+\b/gi, '')
-    .replace(/\bdata-velvet-[a-z0-9_-]+\b/gi, '')
+    .replace(/\bdata-[a-z0-9_-]*velvet[a-z0-9_-]*\b/gi, '')
     .replace(/\.velvet-[a-z0-9_-]+\b/gi, '')
     .replace(/\b(?:class|id)=["'][^"']*\bvelvet-[a-z0-9_-]+[^"']*["']/gi, '')
     .replace(/\bVelvet\/[A-Za-z0-9_./+%-]+\b/g, '')
