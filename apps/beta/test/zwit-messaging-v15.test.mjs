@@ -62,8 +62,57 @@ test('Web affiche le choix du destinataire et verrouille les relances excédenta
   assert.match(css, /zwit-request-banner/);
 });
 
-test('les runtimes de demande de conversation passent le parseur JavaScript de Node', async () => {
+test('les vocaux restent privés, bornés à 5 minutes et 12 Mo', async () => {
+  const api = await read('functions/api/members/voice-message.js');
+  assert.match(api, /MAX_AUDIO_BYTES = 12 \* 1024 \* 1024/);
+  assert.match(api, /Math\.min\(300/);
+  assert.match(api, /audio\/webm/);
+  assert.match(api, /audio\/mp4/);
+  assert.match(api, /audio\/mpeg/);
+  assert.match(api, /storage\/v1\/object\/velvet-media/);
+  assert.match(api, /signedMediaUrl/);
+});
+
+test('un vocal traverse le même message SQL et ne contourne pas la demande de conversation', async () => {
+  const api = await read('functions/api/members/voice-message.js');
+  assert.match(api, /\/rest\/v1\/messages\?select=/);
+  assert.match(api, /L'insert messages traverse le trigger v1\.5 conversation-request/);
+  assert.match(api, /media_type: 'document'/);
+  assert.match(api, /mime_type: file\.type/);
+  assert.match(api, /Message vocal/);
+});
+
+test('un vocal incomplet est supprimé de Supabase et du stockage', async () => {
+  const api = await read('functions/api/members/voice-message.js');
+  assert.match(api, /createdMessageId/);
+  assert.match(api, /method: 'DELETE'/);
+  assert.match(api, /deleteStoredFile/);
+  assert.match(api, /message_attachment_persistence_failed/);
+});
+
+test('Web enregistre, annule et coupe automatiquement un vocal à cinq minutes', async () => {
+  const [html, runtime, css] = await Promise.all([
+    read('apps/web/velvet-members-beta-live.html'),
+    read('apps/beta/static/assets/zwit-voice-notes.js'),
+    read('apps/beta/static/assets/zwit-voice-notes.css')
+  ]);
+  assert.match(html, /zwit-voice-notes\.css/);
+  assert.match(html, /zwit-voice-notes\.js/);
+  assert.match(runtime, /MAX_SECONDS = 300/);
+  assert.match(runtime, /navigator\.mediaDevices\?\.getUserMedia/);
+  assert.match(runtime, /new MediaRecorder/);
+  assert.match(runtime, /\/api\/members\/voice-message/);
+  assert.match(runtime, /data-zwit-voice-cancel/);
+  assert.match(runtime, /elapsed >= MAX_SECONDS/);
+  assert.match(runtime, /Vocal Zwit/);
+  assert.match(css, /data-zwit-request-locked/);
+  assert.match(css, /zwit-voice-player/);
+});
+
+test('les runtimes de messagerie v1.5 passent le parseur JavaScript de Node', async () => {
   await execFileAsync(process.execPath, ['--check', 'functions/api/members/conversations.js']);
   await execFileAsync(process.execPath, ['--check', 'functions/api/members/conversation-request.js']);
+  await execFileAsync(process.execPath, ['--check', 'functions/api/members/voice-message.js']);
   await execFileAsync(process.execPath, ['--check', 'apps/beta/static/assets/zwit-conversation-respect.js']);
+  await execFileAsync(process.execPath, ['--check', 'apps/beta/static/assets/zwit-voice-notes.js']);
 });
