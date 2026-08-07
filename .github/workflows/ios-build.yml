@@ -37,13 +37,19 @@ jobs:
       - name: Compile Velvet for iOS Simulator
         run: |
           set -o pipefail
-          xcodebuild -quiet \
+          LOG="$RUNNER_TEMP/velvet-ios-build.log"
+          if ! xcodebuild -quiet \
             -project ios/Velvet.xcodeproj \
             -scheme Velvet \
             -configuration Debug \
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
-            build
+            build 2>&1 | tee "$LOG"; then
+            grep -E 'error:|fatal error:' "$LOG" | tail -n 40 | while IFS= read -r line; do
+              echo "::error title=Xcode compile::$line"
+            done
+            exit 1
+          fi
 
       - name: Compile Velvet Widget for iOS Simulator
         run: |
