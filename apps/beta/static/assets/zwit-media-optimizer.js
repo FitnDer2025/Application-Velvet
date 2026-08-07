@@ -84,7 +84,7 @@
       const blob = await canvasBlob(canvas, preferredType, quality);
       if (!blob) continue;
       if (!best || blob.size < best.size) best = blob;
-      if (blob.size <= TARGET_BYTES) break;
+      if (blob.size <= TARGET_BYTES || preferredType === 'image/png') break;
     }
     return best;
   }
@@ -96,7 +96,7 @@
       const initialScale = Math.min(1, MAX_EDGE / Math.max(1, maxDimension));
       if (file.size <= SMALL_FILE_BYPASS_BYTES && initialScale === 1) return file;
 
-      const preferredType = file.type === 'image/png' ? 'image/webp' : file.type;
+      const preferredType = file.type;
       let scale = initialScale;
       let bestBlob = null;
 
@@ -198,7 +198,7 @@
   }, true);
 
   window.ZwitMediaOptimizer = Object.freeze({
-    version: '2026.08.07-1',
+    version: '2026.08.07-2',
     maxEdge: MAX_EDGE,
     targetBytes: TARGET_BYTES,
     stats
