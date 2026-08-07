@@ -99,8 +99,9 @@
     element.style.objectFit = 'contain';
   }
 
-  function cleanControlValue() {
-    // Never rewrite live input/textarea values: emails, searches, messages and profile copy are user data.
+  function cleanControlValue(element) {
+    if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) return;
+    // Runtime branding is intentionally excluded from user-entered values.
   }
 
   function cleanElement(element) {
