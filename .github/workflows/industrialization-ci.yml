@@ -67,6 +67,10 @@ jobs:
           set -o pipefail
           LOG="$RUNNER_TEMP/zwit-tests.log"
           if ! npm test 2>&1 | tee "$LOG"; then
+            names="$(grep -E '^not ok [0-9]+ - ' "$LOG" | sed -E 's/^not ok [0-9]+ - //' | paste -sd ' | ' -)"
+            if [ -n "$names" ]; then
+              echo "::error title=Failing test names::$names"
+            fi
             grep -E 'not ok|AssertionError|ERR_ASSERTION|error:|fail' "$LOG" | tail -n 80 | while IFS= read -r line; do
               echo "::error title=Zwit tests::$line"
             done
