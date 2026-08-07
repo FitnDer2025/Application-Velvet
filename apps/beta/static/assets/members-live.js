@@ -1087,7 +1087,7 @@
     return `<form id="profileForm" class="form-shell">
       <section class="onboarding">
         <p class="eyebrow">${joiningPartner ? 'Rattachement au couple' : profile ? 'Modifier notre univers' : 'Première connexion'}</p>
-        <h1>${joiningPartner ? 'Complète ta partie du profil.' : profile ? 'Votre histoire évolue.' : 'Créons votre page Velvet.'}</h1>
+        <h1>${joiningPartner ? 'Complète ta partie du profil.' : profile ? 'Votre histoire évolue.' : 'Créons votre page Zwit.'}</h1>
         <p>${joiningPartner ? `Tu as rejoint ${e(profile.display_name)}. Les informations communes pourront être enrichies par vous deux, mais cette fiche personnelle restera uniquement modifiable depuis ton compte.` : 'Cette fiche est enregistrée dans Supabase et visible uniquement par les membres admis à la BETA. Aucun contenu fictif ne sera ajouté.'}</p>
 
         <section class="form-step">
@@ -1307,7 +1307,7 @@
         discoveryStep(commonIndex + 4, 'Votre univers', 'Quelles pratiques font partie de vos envies ?', 'Sélectionnez ce que vous appréciez déjà ou souhaitez réellement explorer ensemble.', `
           ${multiField('practices', 'Nos pratiques et envies communes', REFERENCES.practices, profile?.practices)}
         `),
-        discoveryStep(commonIndex + 5, 'Votre philosophie', 'Quelles valeurs doivent guider vos rencontres ?', 'Ces valeurs aideront les autres membres à comprendre immédiatement votre manière de vivre Velvet.', `
+        discoveryStep(commonIndex + 5, 'Votre philosophie', 'Quelles valeurs doivent guider vos rencontres ?', 'Ces valeurs aideront les autres membres à comprendre immédiatement votre manière de vivre Zwit.', `
           ${multiField('values_list', 'Les valeurs qui comptent pour nous', REFERENCES.values, profile?.values_list)}
         `),
         discoveryStep(commonIndex + 6, 'Votre rythme', 'Quand êtes-vous généralement disponibles ?', 'Ces repères permettront à Zwit de vous proposer des sorties et des profils compatibles avec votre quotidien.', `
@@ -1619,7 +1619,7 @@
       state.profile = result.profile;
       await refreshData();
       state.editing = false;
-      toast('Profil enregistré dans la mémoire Velvet.');
+      toast('Profil enregistré dans la mémoire Zwit.');
       if (firstPublication && profileType === 'couple') {
         prepareCoupleInvitation(true);
       } else if (state.profile?.admission_status !== 'approved') {
@@ -2299,7 +2299,7 @@
         <label>Nom de cette recherche<input id="savedSearchName" maxlength="80" placeholder="Ex. Couples échangistes autour de Lille"></label>
         <button class="primary" type="button" data-save-search${signature ? '' : ' disabled'}>Enregistrer</button>
         <button class="secondary" type="button" data-delete-search${state.selectedSavedSearchId ? '' : ' disabled'}>Supprimer</button>
-        <small>${signature ? (state.savedSearchPersistenceAvailable ? 'Synchronisée avec ton compte Velvet.' : 'Enregistrée sur cet appareil jusqu’à l’installation de la migration Supabase.') : 'Disponible avec Zwit Signature.'}</small>
+        <small>${signature ? (state.savedSearchPersistenceAvailable ? 'Synchronisée avec ton compte Zwit.' : 'Enregistrée sur cet appareil jusqu’à l’installation de la migration Supabase.') : 'Disponible avec Zwit Signature.'}</small>
       </section>
       <div class="discover-layout">
         <form id="discoverFilters" class="card discover-filter-panel">
@@ -3452,7 +3452,7 @@
     return `<div class="page">${pageHead(
       'Activité authentique',
       'Notifications',
-      'Chaque élément correspond à une action réellement enregistrée dans Velvet.',
+      'Chaque élément correspond à une action réellement enregistrée dans Zwit.',
       state.unreadCount ? `<button class="secondary" data-read-all-notifications>Tout marquer comme lu · ${state.unreadCount}</button>` : ''
     )}
       ${notifications.length ? `<section class="notification-feed profile-preview-feed">${notifications.map(notificationTile).join('')}</section>` : emptyState('Aucune notification', 'Les messages, réactions, accès aux albums et inscriptions apparaîtront ici lorsqu’une action réelle aura lieu.', '○')}
@@ -4177,7 +4177,7 @@
         };
         state.socialActions[id] = social;
       } catch (error) {
-        toast('La consultation n’a pas pu être ajoutée à ta mémoire Velvet.', true);
+        toast('La consultation n’a pas pu être ajoutée à ta mémoire Zwit.', true);
       }
     }
     content.innerHTML = renderProfile(profile, id === state.profile.id);

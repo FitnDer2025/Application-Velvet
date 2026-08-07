@@ -66,7 +66,7 @@
       city: 'Lille',
       address_public: 'Lille · adresse communiquée avant la soirée',
       phone_public: '03 20 00 00 00',
-      email_public: 'contact@maison-velvet.demo',
+      email_public: 'contact@maison-zwit.demo',
       opening_hours: { public: 'Vendredi et samedi à partir de 21 h 30' },
       amenities: ['Lounge', 'Vestiaire', 'Bar', 'Piste de danse', 'Parking privé'],
       visibility: 'published',

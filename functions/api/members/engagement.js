@@ -96,7 +96,7 @@ async function notifyProfileView(env, access, actorProfileId, targetProfileId) {
 
   const actorName = clean(actorRows?.[0]?.display_name, 120) || 'Un membre Zwit';
   const title = `${actorName} a consulté votre profil`;
-  const body = `${actorName} vient de découvrir votre univers Velvet.`;
+  const body = `${actorName} vient de découvrir votre univers Zwit.`;
   await serviceRest(env, '/rest/v1/member_notifications', {
     method: 'POST',
     headers: { prefer: 'return=minimal' },

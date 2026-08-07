@@ -205,7 +205,7 @@
       const conversation = list(directory.conversations).find((row) => String(row.id) === String(conversationId));
       const name = conversation?.participant_display_name || conversation?.subject || 'Conversation privée';
       content.innerHTML = `<div class="page velvet-direct-conversation">
-        <header class="page-head"><div><p class="eyebrow">Messagerie privée</p><h1>${e(name)}</h1><p>Conversation confidentielle Velvet.</p></div><button type="button" class="secondary" data-direct-conversation-back>Retour</button></header>
+        <header class="page-head"><div><p class="eyebrow">Messagerie privée</p><h1>${e(name)}</h1><p>Conversation confidentielle Zwit.</p></div><button type="button" class="secondary" data-direct-conversation-back>Retour</button></header>
         <section class="conversation-peer-header">${conversationAvatar(conversation)}<span><strong>${e(name)}</strong><small>${conversation?.kind === 'event' ? 'Salon Zwit' : 'Échange privé'}</small></span></section>
         <section class="card">
           <div class="messages">${list(result.messages).length

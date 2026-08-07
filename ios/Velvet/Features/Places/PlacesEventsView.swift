@@ -16,7 +16,7 @@ struct PlacesEventsView: View {
                     VelvetPageHeader(
                         "Agenda réel",
                         title: "Sorties",
-                        subtitle: "Les événements et établissements effectivement publiés dans Velvet."
+                        subtitle: "Les événements et établissements effectivement publiés dans Zwit."
                     )
 
                     ScrollView(.horizontal, showsIndicators: false) {

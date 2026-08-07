@@ -153,7 +153,7 @@
     const prompt = clean(pack?.brief || project.prompt || project.objective || 'Créer une campagne Zwit premium qui montre une connexion sincère et la qualité de l’expérience.', 1200);
     return `<div class="vs31-workspace">
       <section class="vs31-generator">
-        <div class="vs31-heading"><div><span class="vs3-kicker">V3.1 · Génération réelle</span><h3>Studio photo & vidéo</h3><p>Crée une photographie publicitaire avec Workers AI, puis transforme-la en clip social avec une démonstration fictive de Velvet.</p></div><div class="vs31-ai-state" data-v31-capability><i></i><span>Vérification de Workers AI…</span></div></div>
+        <div class="vs31-heading"><div><span class="vs3-kicker">V3.1 · Génération réelle</span><h3>Studio photo & vidéo</h3><p>Crée une photographie publicitaire avec Workers AI, puis transforme-la en clip social avec une démonstration fictive de Zwit.</p></div><div class="vs31-ai-state" data-v31-capability><i></i><span>Vérification de Workers AI…</span></div></div>
         <div class="vs31-form">
           <label class="wide">Prompt créatif<textarea data-v31-prompt>${esc(prompt)}</textarea></label>
           <label>Style<select data-v31-preset><option value="rencontre-premium">Rencontre premium</option><option value="soiree-chic">Soirée chic</option><option value="lifestyle-urbain">Lifestyle urbain</option><option value="velvet-pro">Zwit Pro</option></select></label>
@@ -276,7 +276,7 @@
     if (!item) return;
     const link = document.createElement('a');
     link.href = item.dataUri;
-    link.download = `velvet-${item.scenario}-${item.seed}.jpg`;
+    link.download = `zwit-${item.scenario}-${item.seed}.jpg`;
     link.click();
   }
 
@@ -414,7 +414,7 @@
     ctx.translate(0, (1 - textIn) * 28);
     ctx.fillStyle = '#F4F4F2';
     ctx.font = `500 ${Math.max(38, width * 0.065)}px Georgia`;
-    wrap(ctx, seconds < 9.3 ? scenario.headline : 'Velvet.', pad, height * 0.69, width * 0.78, height * 0.058, 3);
+    wrap(ctx, seconds < 9.3 ? scenario.headline : 'Zwit.', pad, height * 0.69, width * 0.78, height * 0.058, 3);
     ctx.fillStyle = 'rgba(244,244,242,.86)';
     ctx.font = `500 ${Math.max(17, width * 0.027)}px Inter, sans-serif`;
     wrap(ctx, seconds < 9.3 ? scenario.subline : 'Là où les plus belles rencontres commencent.', pad, height * 0.84, width * 0.78, height * 0.035, 3);
@@ -521,7 +521,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `velvet-${item.scenario}-${item.seed}.webm`;
+      link.download = `zwit-${item.scenario}-${item.seed}.webm`;
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 15_000);
       notify('Clip social généré et téléchargé');

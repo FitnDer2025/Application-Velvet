@@ -85,10 +85,13 @@ struct HomeView: View {
                         .padding(.vertical, 10)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 24)
+                .padding(.top, 58)
                 .padding(.bottom, 28)
             }
             .refreshable { await store.load() }
+
+            ContextualRecommendationsV15Overlay()
+            PrivateSpacesV15Overlay()
         }
         .toolbar(.hidden, for: .navigationBar)
     }
@@ -118,7 +121,7 @@ struct HomeView: View {
                 Text("Profil en cours d’admission")
                     .font(VelvetTypography.body(size: 14, weight: .semibold))
                     .foregroundStyle(VelvetColor.ivory)
-                Text("L’espace complet s’ouvrira après validation par Velvet.")
+                Text("L’espace complet s’ouvrira après validation par Zwit.")
                     .font(VelvetTypography.body(size: 12))
                     .foregroundStyle(VelvetColor.textSecondary)
             }

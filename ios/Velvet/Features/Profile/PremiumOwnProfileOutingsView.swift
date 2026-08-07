@@ -6,6 +6,7 @@ struct PremiumOwnProfileOutingsView: View {
 
     @State private var plans: PlanStateResponse?
     @State private var selectedTab = "profile"
+    @State private var showsTonight = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -13,6 +14,8 @@ struct PremiumOwnProfileOutingsView: View {
             ownTabs
 
             switch selectedTab {
+            case "passport":
+                ZwitPassportView()
             case "outings":
                 MemberOutingsHistoryView(profile: profile, plans: plans)
             case "publish":
@@ -33,6 +36,11 @@ struct PremiumOwnProfileOutingsView: View {
         .background(VelvetBackground())
         .task {
             plans = try? await store.service.plans()
+        }
+        .sheet(isPresented: $showsTonight) {
+            NavigationStack {
+                ZwitTonightView()
+            }
         }
     }
 
@@ -81,7 +89,9 @@ struct PremiumOwnProfileOutingsView: View {
     private var ownTabs: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 5) {
+                tonightButton
                 tab("Profil", value: "profile", icon: "person.text.rectangle")
+                tab("Passeport", value: "passport", icon: "checkmark.shield")
                 tab("Sorties", value: "outings", icon: "calendar.badge.clock")
                 tab("Déclarer une sortie", value: "publish", icon: "plus.circle.fill")
             }
@@ -89,6 +99,25 @@ struct PremiumOwnProfileOutingsView: View {
         }
         .padding(.vertical, 8)
         .background(VelvetColor.velvetBlack.opacity(0.92))
+    }
+
+    private var tonightButton: some View {
+        Button {
+            showsTonight = true
+        } label: {
+            Label("Ce soir", systemImage: "moon.stars")
+                .font(VelvetTypography.body(size: 11, weight: .semibold))
+                .foregroundStyle(VelvetColor.champagneGold)
+                .padding(.horizontal, 13)
+                .frame(height: 40)
+                .background(VelvetColor.champagneGold.opacity(0.09))
+                .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 13, style: .continuous)
+                        .stroke(VelvetColor.champagneGold.opacity(0.20), lineWidth: 0.7)
+                }
+        }
+        .buttonStyle(.plain)
     }
 
     private func tab(_ title: String, value: String, icon: String) -> some View {

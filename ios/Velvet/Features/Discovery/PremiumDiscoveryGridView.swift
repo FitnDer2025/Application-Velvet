@@ -45,7 +45,7 @@ struct PremiumDiscoveryGridView: View {
                     VelvetPageHeader(
                         "Recherche sur mesure",
                         title: "Recherche",
-                        subtitle: "Une sélection élégante et lisible pour découvrir rapidement les univers Velvet."
+                        subtitle: "Une sélection élégante et lisible pour découvrir rapidement les univers Zwit."
                     )
 
                     VelvetSearchField(prompt: "Nom, ville, univers…", text: $query)
@@ -112,7 +112,7 @@ struct PremiumDiscoveryGridView: View {
                         VelvetEmptyState(
                             symbol: "lock.shield",
                             title: "Admission nécessaire",
-                            message: "La recherche s’ouvre dès que ton profil est admis par Velvet."
+                            message: "La recherche s’ouvre dès que ton profil est admis par Zwit."
                         )
                     } else if profiles.isEmpty, !store.isLoading {
                         VelvetEmptyState(

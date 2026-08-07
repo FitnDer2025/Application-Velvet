@@ -65,7 +65,7 @@ export function buildCoupleInvitationEmail({ profileName, registrationUrl }) {
     '',
     'Votre histoire vous attend.',
     '',
-    `${profileName || 'Votre moitié'} a entrouvert la porte de votre espace Velvet.`,
+    `${profileName || 'Votre moitié'} a entrouvert la porte de votre espace Zwit.`,
     'Une première part de votre histoire y a déjà été confiée. Il ne manque plus que votre voix.',
     '',
     'Ce lien est personnel. Il vous conduit vers votre propre espace, afin de raconter qui vous êtes, à votre rythme.',
@@ -114,7 +114,7 @@ export function buildCoupleInvitationEmail({ profileName, registrationUrl }) {
                 </tr>
                 <tr>
                   <td style="padding:24px 34px 0;color:#dbd0d3;font-size:16px;line-height:1.72;">
-                    ${safeName} a entrouvert la porte de votre espace Velvet. Une première part de votre histoire y a déjà été confiée. <strong style="color:#fff7ef;font-weight:600;">Il ne manque plus que votre voix.</strong>
+                    ${safeName} a entrouvert la porte de votre espace Zwit. Une première part de votre histoire y a déjà été confiée. <strong style="color:#fff7ef;font-weight:600;">Il ne manque plus que votre voix.</strong>
                   </td>
                 </tr>
                 <tr>

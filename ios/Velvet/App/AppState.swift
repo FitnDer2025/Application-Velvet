@@ -30,6 +30,7 @@ final class AppState: ObservableObject {
     @Published var alertMessage: String?
 
     let session: SessionService
+    private var pendingCheckinToken: String?
 
     init(session: SessionService = SessionService()) {
         self.session = session
@@ -76,6 +77,9 @@ final class AppState: ObservableObject {
         await perform {
             let response = try await session.saveProfile(request)
             phase = response.profile.isAdmitted ? .home(response.profile) : .profileSetup(response.profile)
+            if response.profile.isAdmitted {
+                await redeemPendingCheckinIfPossible()
+            }
         }
     }
 
@@ -85,6 +89,9 @@ final class AppState: ObservableObject {
                 throw APIError.transport("Le profil Zwit est introuvable.")
             }
             phase = profile.isAdmitted ? .home(profile) : .profileSetup(profile)
+            if profile.isAdmitted {
+                await redeemPendingCheckinIfPossible()
+            }
         }
     }
 
@@ -93,6 +100,13 @@ final class AppState: ObservableObject {
     }
 
     func handle(url: URL) {
+        if let token = ZwitCheckinDeepLink.token(from: url) {
+            pendingCheckinToken = token
+            if case .home = phase {
+                Task { await redeemPendingCheckinIfPossible() }
+            }
+            return
+        }
         if let tokens = RecoveryTokens(url: url) {
             phase = .passwordReset(tokens)
             return
@@ -113,6 +127,7 @@ final class AppState: ObservableObject {
             await NotificationService.detachCurrentDevice()
             await session.logout()
             VelvetNotificationSnapshotStore.clear()
+            pendingCheckinToken = nil
             phase = .signedOut
         }
     }
@@ -127,8 +142,26 @@ final class AppState: ObservableObject {
         if let memberProfile = profile.profile {
             phase = memberProfile.isAdmitted ? .home(memberProfile) : .profileSetup(memberProfile)
             await NotificationService.registerIfAuthorized()
+            if memberProfile.isAdmitted {
+                await redeemPendingCheckinIfPossible()
+            }
         } else {
             phase = .onboarding(account)
+        }
+    }
+
+    private func redeemPendingCheckinIfPossible() async {
+        guard case .home = phase, let token = pendingCheckinToken else { return }
+        do {
+            let result = try await session.redeemCheckin(token: token)
+            pendingCheckinToken = nil
+            alertMessage = "Présence confirmée · \(result.checkin.eventTitle). Ton Passeport Zwit vient d’être mis à jour."
+        } catch APIError.unauthorized {
+            // Le deep-link reste en mémoire pendant cette session et sera repris après reconnexion.
+            phase = .signedOut
+        } catch {
+            pendingCheckinToken = nil
+            alertMessage = ErrorMessage.text(for: error)
         }
     }
 

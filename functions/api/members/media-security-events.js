@@ -100,7 +100,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
         entity_type: 'security',
         entity_id: entityId,
         title: 'Capture signalée',
-        body: 'Le propriétaire de la photo a été prévenu par Velvet. Toute diffusion sans consentement peut entraîner la suspension du compte.',
+        body: 'Le propriétaire de la photo a été prévenu par Zwit. Toute diffusion sans consentement peut entraîner la suspension du compte.',
         metadata: {
           captureType: eventType,
           mediaId: validUuid(mediaId) ? mediaId : null,

@@ -195,6 +195,8 @@ struct ConversationView: View {
 
                 composer
             }
+
+            MessagingV15Overlay(conversationID: conversation.id.uuidString)
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(VelvetColor.velvetBlack.opacity(0.95), for: .navigationBar)
@@ -206,6 +208,10 @@ struct ConversationView: View {
                 guard !Task.isCancelled else { return }
                 await store.refreshMessages(conversationID: conversation.id)
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .zwitMessagingV15DidSend)) { notification in
+            guard notification.object as? UUID == conversation.id else { return }
+            Task { await store.refreshMessages(conversationID: conversation.id) }
         }
     }
 

@@ -49,7 +49,7 @@
   function homeMarkup() {
     return `<section class="vsr-home">
       <span class="vsr-kicker">ZWIT STUDIO</span>
-      <h1>Le vrai Velvet.<br>En mouvement.</h1>
+      <h1>Le vrai Zwit.<br>En mouvement.</h1>
       <p>Décrivez la démonstration. Zwit prépare la narration française, ouvre l’espace Membres Marketing et enregistre sa navigation réelle jusqu’à la vidéo finale.</p>
       <div class="vsr-compose"><textarea data-vsr-home>${esc(DEFAULT_BRIEF)}</textarea><button class="vsr-create" data-vsr-open>Créer la vidéo<small>Navigation live + voix française + export</small></button></div>
       <div class="vsr-proof"><span>Véritable interface Membres</span><span>Navigation enregistrée en direct</span><span>Profils fictifs Marketing</span><span>Aucun secours vocal anglais</span></div>
@@ -411,7 +411,7 @@
       if (state.outputUrl) URL.revokeObjectURL(state.outputUrl);
       state.outputUrl = URL.createObjectURL(result.blob);
       const extension = result.mime.includes('mp4') ? 'mp4' : 'webm';
-      const filename = `velvet-demo-live-${Date.now()}.${extension}`;
+      const filename = `zwit-demo-live-${Date.now()}.${extension}`;
       const preview = modal.querySelector('[data-vsr-preview]');
       preview.innerHTML = `<video src="${state.outputUrl}" controls playsinline></video>`;
       actions.hidden = false;

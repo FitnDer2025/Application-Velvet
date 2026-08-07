@@ -39,7 +39,7 @@ struct SignUpView: View {
                         VStack(alignment: .leading, spacing: VelvetSpacing.lg) {
                             VelvetSectionHeader(
                                 "Invitation privée",
-                                title: "Entre dans Velvet.",
+                                title: "Entre dans Zwit.",
                                 subtitle: "Le code est personnel. Chaque membre accepte ensuite ses propres consentements."
                             )
                             VelvetField(

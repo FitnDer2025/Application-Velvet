@@ -173,7 +173,7 @@
 
   const events = [
     { id: uuid(80000000, 1), title: 'Nuit Zwit · Élégance & Connexions', description: 'Une soirée pensée pour favoriser les échanges dans une ambiance chic, musicale et bienveillante.', starts_at: isoIn(4, 21), ends_at: isoIn(5, 3), location_public: 'L’Only · Lille', audience: 'Couples et femmes', capacity: 120, registered_count: 84, establishment_id: venues[0].claimed_establishment_id, organizer_profile_id: profiles[4].id, latitude: venues[0].latitude, longitude: venues[0].longitude },
-    { id: uuid(80000000, 2), title: 'Cocktail Découverte', description: 'Une première rencontre simple et rassurante pour découvrir la communauté Velvet.', starts_at: isoIn(7, 20), ends_at: isoIn(8, 1), location_public: 'La Tentation · Mouscron', audience: 'Couples, femmes et nouveaux membres', capacity: 90, registered_count: 62, establishment_id: venues[1].claimed_establishment_id, organizer_profile_id: profiles[2].id, latitude: venues[1].latitude, longitude: venues[1].longitude },
+    { id: uuid(80000000, 2), title: 'Cocktail Découverte', description: 'Une première rencontre simple et rassurante pour découvrir la communauté Zwit.', starts_at: isoIn(7, 20), ends_at: isoIn(8, 1), location_public: 'La Tentation · Mouscron', audience: 'Couples, femmes et nouveaux membres', capacity: 90, registered_count: 62, establishment_id: venues[1].claimed_establishment_id, organizer_profile_id: profiles[2].id, latitude: venues[1].latitude, longitude: venues[1].longitude },
     { id: uuid(80000000, 3), title: 'Parenthèse Spa & Complicité', description: 'Un rendez-vous intimiste autour du bien-être et de la convivialité.', starts_at: isoIn(11, 19), ends_at: isoIn(12, 0), location_public: 'O’Pulsion · Hauts-de-France', audience: 'Couples', capacity: 36, registered_count: 28, establishment_id: venues[2].claimed_establishment_id, organizer_profile_id: profiles[0].id, latitude: venues[2].latitude, longitude: venues[2].longitude }
   ];
 
@@ -258,7 +258,7 @@
   function fixtureResponse(url, init = {}) {
     const path = url.pathname;
     const method = String(init.method || 'GET').toUpperCase();
-    if (path === '/api/members/profile') return json({ profile: profiles[0], account: { userId: currentUserId, email: 'marketing@velvet.internal', roles: ['admin', 'direction'] }, access, membership: { plan_code: 'member_signature', status: 'active' }, personalProfileComplete: true });
+    if (path === '/api/members/profile') return json({ profile: profiles[0], account: { userId: currentUserId, email: 'marketing@zwit.internal', roles: ['admin', 'direction'] }, access, membership: { plan_code: 'member_signature', status: 'active' }, personalProfileComplete: true });
     if (path === '/api/members/verification') return json({ status: 'verified', verified: true, adultVerified: true, accessBlockedByVerification: false, providerConfigured: true });
     if (path === '/api/members/directory') return json(directory);
     if (path === '/api/members/organizer-request') return json({ request: null });

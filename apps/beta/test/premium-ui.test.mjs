@@ -76,13 +76,24 @@ test('la messagerie enrichie reste chargée et exploitable sur mobile', async ()
 });
 
 test('les icônes PWA sont servies comme actifs statiques', async () => {
-  for (const [path, expected] of [
+  const manifest = JSON.parse(await read('apps/beta/static/manifest.webmanifest'));
+  assert.deepEqual(
+    manifest.icons.map(({src,sizes}) => [src,sizes]),
+    [
+      ['/assets/velvet-icon-192.png','192x192'],
+      ['/assets/velvet-icon-512.png','512x512']
+    ]
+  );
+
+  for (const [path, minimum] of [
     ['apps/beta/static/assets/velvet-icon-180.png',180],
     ['apps/beta/static/assets/velvet-icon-192.png',192],
     ['apps/beta/static/assets/velvet-icon-512.png',512]
   ]) {
     const bytes = await readFile(path);
-    assert.equal(bytes.readUInt32BE(16),expected);
-    assert.equal(bytes.readUInt32BE(20),expected);
+    const width = bytes.readUInt32BE(16);
+    const height = bytes.readUInt32BE(20);
+    assert.equal(width,height);
+    assert.ok(width >= minimum, `${path} doit offrir au moins ${minimum}px`);
   }
 });

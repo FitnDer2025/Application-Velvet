@@ -123,7 +123,7 @@ function localPack(project, brief) {
     ['Communauté', 'Une communauté choisie.', 'Diversité adulte et bienveillance'],
     ['Proximité', `Zwit arrive en ${brief.region}.`, 'Carte régionale élégante'],
     ['Zwit Pro', 'Organiser. Remplir. Fidéliser.', 'Cockpit professionnel premium'],
-    ['Invitation', 'Votre invitation pour découvrir Velvet.', 'Carte digitale avec ruban bordeaux'],
+    ['Invitation', 'Votre invitation pour découvrir Zwit.', 'Carte digitale avec ruban bordeaux'],
     ['Fonctionnalités', 'Tout Zwit, en un seul univers.', 'Recherche, messages, carte et événements'],
     ['Signature', signature, 'Logo Zwit et halo champagne']
   ];

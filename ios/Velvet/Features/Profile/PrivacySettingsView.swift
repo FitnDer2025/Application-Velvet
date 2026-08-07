@@ -434,7 +434,7 @@ private struct AccountDeletionView: View {
                         VelvetSectionHeader(
                             "Action irréversible",
                             title: "Supprimer le compte",
-                            subtitle: "L’accès, le profil et les données rattachées au compte seront supprimés selon la politique de conservation Velvet."
+                            subtitle: "L’accès, le profil et les données rattachées au compte seront supprimés selon la politique de conservation Zwit."
                         )
                         VelvetField(
                             title: "Écris SUPPRIMER pour confirmer",

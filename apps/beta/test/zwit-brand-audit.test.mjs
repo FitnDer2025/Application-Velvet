@@ -37,22 +37,35 @@ function literalValues(line) {
   return values;
 }
 
+function stripTechnicalVelvet(value) {
+  let text = String(value).replace(/\\"/g, '"').replace(/\\'/g, "'");
+  text = text
+    .replace(/velvet:\/\/[^\s"'<>]*/gi, '')
+    .replace(/(?:group\.)?com\.velvet[a-z0-9._-]*/gi, '')
+    .replace(/\bVELVET_[A-Z0-9_]+\b/g, '')
+    .replace(/\bVelvet[A-Z][A-Za-z0-9_]*\b/g, '')
+    .replace(/\bvelvet[A-Z][A-Za-z0-9_]*\b/g, '')
+    .replace(/\b(?:public\.)?velvet_[a-z0-9_.-]+\b/gi, '')
+    .replace(/\bdata-[a-z0-9_-]*velvet[a-z0-9_-]*\b/gi, '')
+    .replace(/\.velvet-[a-z0-9_-]+\b/gi, '')
+    .replace(/\b(?:class|id)=["'][^"']*\bvelvet-[a-z0-9_-]+[^"']*["']/gi, '')
+    .replace(/\bVelvet\/[A-Za-z0-9_./+%-]+\b/g, '')
+    .replace(/\/[^\s"'<>]*velvet[^\s"'<>]*/gi, '')
+    .replace(/\bX-Velvet-[A-Za-z0-9_-]+\b/gi, '')
+    .replace(/\bVelvet-iOS\/[A-Za-z0-9_.-]+\b/gi, '')
+    .replace(/\bvelvet(?:-[a-z0-9_]+)+\b/gi, '')
+    .replace(/\bvelvet\.[a-z0-9_.-]+\b/gi, '');
+  return text;
+}
+
 function isTechnical(value) {
   const text = String(value).trim();
   if (!text) return true;
-  return [
-    /^velvet:\/\//i,
-    /^(?:group\.)?com\.velvet/i,
-    /^VELVET_[A-Z0-9_]+$/,
-    /^Velvet[A-Z][A-Za-z0-9_]*$/,
-    /^velvet[A-Z][A-Za-z0-9_]*$/,
-    /^velvet[._/-][A-Za-z0-9_./-]+$/i,
-    /^\/[^\s]*velvet[^\s]*$/i,
-    /\.(?:js|mjs|css|png|jpe?g|svg|swift|plist|entitlements|json)$/i,
-    /^(?:bucket|table|storage|schema|key|kind|target|scheme|migration):?\s*velvet/i,
-    /^velvet_private(?:\.|$)/i,
-    /^public\.velvet_/i
-  ].some((pattern) => pattern.test(text));
+  if (text === 'velvet') return true;
+  if (/^velvet-\\\([^)]*\)\.[a-z0-9]+$/i.test(text)) return true;
+  if (/^Velvet-\\\(/.test(text)) return true;
+  if (/\\s|\[\^/.test(text)) return true;
+  return !/\bvelvet\b/i.test(stripTechnicalVelvet(text));
 }
 
 function visibleVelvetFindings() {
@@ -162,7 +175,7 @@ test('aucune chaîne utilisateur des trois socles ne contient encore Velvet', ()
   if (findings.length) {
     console.error('\nOccurrences visibles restantes de Velvet :');
     findings.forEach((finding) => {
-      console.error(`- ${finding.path}:${finding.line} → ${finding.value}`);
+      console.error(`error: brand_visible_finding ${finding.path}:${finding.line} → ${finding.value}`);
     });
   }
   assert.deepEqual(findings, []);

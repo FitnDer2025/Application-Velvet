@@ -210,7 +210,7 @@
       state.plan = { ...payload.plan, product: state.draft.product, brief: state.draft.brief, format: state.draft.format, duration: state.draft.duration };
       const result = root.querySelector('[data-vss-result]');
       if (result) result.innerHTML = resultMarkup();
-      setMessage(`${state.plan.scenes.length} scènes prêtes. Tu peux maintenant lancer le vrai tournage Velvet.`, 'ok');
+      setMessage(`${state.plan.scenes.length} scènes prêtes. Tu peux maintenant lancer le vrai tournage Zwit.`, 'ok');
     } catch (error) {
       setMessage(error.message || 'Le scénario n’a pas pu être généré.', 'error');
     } finally {
@@ -271,7 +271,7 @@
     if (event.target.closest('[data-vss-test-voice]')) {
       event.preventDefault();
       setBusy(true, 'Lecture…');
-      speak(state.draft.product === 'pro' ? 'Zwit Pro. Donnez à votre établissement la visibilité qu’il mérite.' : 'Velvet. Là où les plus belles rencontres commencent.', true)
+      speak(state.draft.product === 'pro' ? 'Zwit Pro. Donnez à votre établissement la visibilité qu’il mérite.' : 'Zwit. Là où les plus belles rencontres commencent.', true)
         .then(() => setMessage('Voix française prête pour le tournage.', 'ok'))
         .catch((error) => setMessage(error.message, 'error'))
         .finally(() => setBusy(false));

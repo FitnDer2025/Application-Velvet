@@ -469,7 +469,7 @@
       {
         audience: 'À propos du couple', kicker: 'Votre philosophie',
         title: 'Quelles valeurs doivent guider vos rencontres ?',
-        guide: 'Ces choix aideront immédiatement les autres membres à comprendre votre manière de vivre Velvet.',
+        guide: 'Ces choix aideront immédiatement les autres membres à comprendre votre manière de vivre Zwit.',
         body: (d) => checkGrid('values_list', VALUES, selected('values_list'))
       },
       {

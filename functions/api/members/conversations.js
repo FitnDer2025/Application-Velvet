@@ -19,6 +19,14 @@ async function ownMembership(env, access, conversationId) {
   return rows?.[0] || null;
 }
 
+async function ensureConversationRequest(env, access, conversationId) {
+  const result = await restJson(env, '/rest/v1/rpc/zwit_v15_ensure_conversation_request', access.session, {
+    method: 'POST',
+    body: JSON.stringify({ target_conversation_id: conversationId })
+  });
+  return result?.[0] || null;
+}
+
 export async function onRequestPost({ request, env }) {
   try {
     const access = await memberSession(request, env);
@@ -49,7 +57,19 @@ export async function onRequestPost({ request, env }) {
         body: JSON.stringify({ hidden_at: null, left_at: null })
       }
     ).catch(() => null);
-    return withSession({ ok: true, conversationId }, access.session, 201);
+
+    const conversationRequest = await ensureConversationRequest(env, access, conversationId);
+    return withSession({
+      ok: true,
+      conversationId,
+      conversationRequest: conversationRequest ? {
+        status: conversationRequest.status,
+        role: conversationRequest.role,
+        canSend: conversationRequest.can_send,
+        introMessagesSent: Number(conversationRequest.intro_messages_sent || 0),
+        followUpAt: conversationRequest.follow_up_at || null
+      } : null
+    }, access.session, 201);
   } catch (error) {
     return json({ error: error.message || 'conversation_start_failed' }, 400);
   }

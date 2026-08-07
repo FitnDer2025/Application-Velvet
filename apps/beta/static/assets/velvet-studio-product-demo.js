@@ -107,7 +107,7 @@
       <h1>Décrivez la démonstration.<br>Zwit réalise la vidéo.</h1>
       <p>L’IA écrit l’histoire et la voix off. Les images proviennent directement de l’environnement de démonstration Zwit afin de rester fidèles au site et à son fonctionnement.</p>
       <div class="vpd-compose">
-        <textarea data-vpd-home-prompt placeholder="Exemple : Crée une démonstration générale de Velvet. Montre l’accueil, la recherche de membres, un profil, la messagerie, les événements et la carte. Utilise uniquement l’interface Zwit avec une voix off claire et premium."></textarea>
+        <textarea data-vpd-home-prompt placeholder="Exemple : Crée une démonstration générale de Zwit. Montre l’accueil, la recherche de membres, un profil, la messagerie, les événements et la carte. Utilise uniquement l’interface Zwit avec une voix off claire et premium."></textarea>
         <button class="vpd-main-button" data-vpd-open>Créer la démonstration<small>Interface Zwit + voix off + montage</small></button>
       </div>
       <div class="vpd-benefits"><span>Interface Zwit réelle</span><span>Données fictives internes</span><span>Aucune image inventée</span><span>Voix off française</span></div>
@@ -296,7 +296,7 @@
     return new Promise((resolve, reject) => {
       const image = new Image();
       image.onload = () => resolve(image);
-      image.onerror = () => reject(new Error('Impossible de préparer un écran Velvet.'));
+      image.onerror = () => reject(new Error('Impossible de préparer un écran Zwit.'));
       image.src = src;
     });
   }
@@ -629,13 +629,13 @@
   }
 
   function cleanFileName(value) {
-    return String(value || 'demo-velvet')
+    return String(value || 'demo-zwit')
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/gi, '-')
       .replace(/^-|-$/g, '')
       .toLowerCase()
-      .slice(0, 70) || 'demo-velvet';
+      .slice(0, 70) || 'demo-zwit';
   }
 
   function downloadBlob(blob, name) {

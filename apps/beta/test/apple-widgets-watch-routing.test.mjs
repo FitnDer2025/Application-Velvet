@@ -4,6 +4,13 @@ import test from 'node:test';
 
 const read = (path) => readFile(new URL(`../../../${path}`, import.meta.url), 'utf8');
 
+function snapshotDefinition(source, structName) {
+  const escaped = structName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = source.match(new RegExp(`struct ${escaped}[^\\{]*\\{([\\s\\S]*?)\\n\\}`, 'm'));
+  assert.ok(match, `${structName} should exist`);
+  return match[1];
+}
+
 test('notification navigation leaves the modal before opening sensitive destinations', async () => {
   const [notifications, shell, service, appState] = await Promise.all([
     read('ios/Velvet/Features/Home/NotificationsView.swift'),
@@ -34,15 +41,23 @@ test('iPhone widget exposes only aggregate counters through a team-scoped app gr
     read('ios/Config/Release.xcconfig')
   ]);
 
+  const appSnapshot = snapshotDefinition(snapshot, 'VelvetNotificationSnapshot');
+  const widgetSnapshot = snapshotDefinition(widget, 'WidgetNotificationSnapshot');
+  for (const definition of [appSnapshot, widgetSnapshot]) {
+    for (const field of ['total', 'messages', 'visits', 'likes', 'events', 'security', 'other', 'updatedAt']) {
+      assert.match(definition, new RegExp(`let ${field}:`));
+    }
+    assert.doesNotMatch(definition, /displayName|notificationBody|messageBody|previewUrl|profileId|userId|photoUrl/);
+  }
+
   assert.match(snapshot, /VelvetAppGroup/);
-  assert.match(snapshot, /messages: Int/);
-  assert.match(snapshot, /visits: Int/);
-  assert.match(snapshot, /likes: Int/);
   assert.match(snapshot, /WidgetCenter\.shared\.reloadTimelines/);
   assert.match(widget, /VelvetAppGroup/);
   assert.match(widget, /velvet:\/\/notifications/);
   assert.match(widget, /Affiche uniquement les compteurs non lus/);
-  assert.doesNotMatch(widget, /displayName|notification\.body|messageBody|previewUrl/);
+  // ZwitWidgetBrand.displayName est uniquement le nom de marque rendu par le widget,
+  // pas une donnée membre persistée ou transmise via l'App Group.
+  assert.match(widget, /ZwitWidgetBrand\.displayName/);
   assert.match(appInfo, /<key>VelvetAppGroup<\/key>/);
   assert.match(widgetInfo, /<key>VelvetAppGroup<\/key>/);
   assert.match(appEntitlements, /\$\(VELVET_APP_GROUP\)/);
@@ -80,7 +95,7 @@ test('Apple Watch app and complication receive counter-only snapshots through a 
   assert.match(debugConfig, /VELVET_WATCH_APP_GROUP = group\.com\.velvetapplication\.\$\(DEVELOPMENT_TEAM\)\.watch/);
   assert.match(watchWidget, /accessoryCircular/);
   assert.match(watchWidget, /accessoryRectangular/);
-  assert.doesNotMatch(watchApp, /displayName|notification\.body|previewUrl/);
+  assert.doesNotMatch(watchApp, /notification\.body|previewUrl|profileId|userId|photoUrl/);
   assert.match(project, /VelvetWidget\.appex/);
   assert.match(project, /VelvetWatch\.app/);
   assert.match(project, /VelvetWatchWidget\.appex/);

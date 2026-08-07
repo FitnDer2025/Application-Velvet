@@ -151,7 +151,7 @@
   function speakVoice(project) {
     if (!('speechSynthesis' in window)) return notify('Synthèse vocale indisponible sur ce navigateur.', 'error');
     speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(project?.voiceOver || 'Velvet. Là où les plus belles rencontres commencent.');
+    const utterance = new SpeechSynthesisUtterance(project?.voiceOver || 'Zwit. Là où les plus belles rencontres commencent.');
     utterance.lang = 'fr-FR';
     utterance.rate = clamp(project?.voice?.pace || 0.95, 0.65, 1.25);
     utterance.pitch = /mascul/i.test(project?.voice?.gender || '') ? 0.78 : 1.08;

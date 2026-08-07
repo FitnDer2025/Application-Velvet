@@ -72,7 +72,7 @@
       <h1>Décrivez la démonstration.<br>Zwit réalise la vidéo.</h1>
       <p>L’IA écrit la narration et la voix off. Les images proviennent directement de l’environnement Zwit avec des données fictives internes.</p>
       <div class="vsl-compose">
-        <textarea data-vsl-home-prompt placeholder="Crée une démonstration générale de Velvet. Montre l’accueil, la recherche, un profil, la messagerie, les sorties et la carte, avec une voix off française premium."></textarea>
+        <textarea data-vsl-home-prompt placeholder="Crée une démonstration générale de Zwit. Montre l’accueil, la recherche, un profil, la messagerie, les sorties et la carte, avec une voix off française premium."></textarea>
         <button class="vsl-primary" data-vsl-open>Créer la démonstration<small>Interface Zwit + voix off + montage</small></button>
       </div>
       <div class="vsl-points"><span>Ouverture immédiate</span><span>Aucune image inventée</span><span>Données synthétiques</span><span>Export vidéo avec voix</span></div>
@@ -211,7 +211,7 @@
       const image = new Image();
       const timer = setTimeout(() => reject(new Error('Préparation d’un écran trop longue.')), timeout);
       image.onload = () => { clearTimeout(timer); resolve(image); };
-      image.onerror = () => { clearTimeout(timer); reject(new Error('Impossible de préparer un écran Velvet.')); };
+      image.onerror = () => { clearTimeout(timer); reject(new Error('Impossible de préparer un écran Zwit.')); };
       image.src = src;
     });
   }
@@ -348,7 +348,7 @@
     return {blob,duration:Math.round(totalDuration)};
   }
 
-  function fileName(value){return String(value||'demo-velvet').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase().slice(0,65)||'demo-velvet';}
+  function fileName(value){return String(value||'demo-zwit').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase().slice(0,65)||'demo-zwit';}
 
   async function runProduction() {
     if (state.running) return;

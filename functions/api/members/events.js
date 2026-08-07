@@ -61,7 +61,7 @@ async function moderateEvent(env, title, description) {
       messages: [
         {
           role: 'system',
-          content: 'Tu es le moteur de sécurité Velvet. Les événements sont réservés à des adultes consentants. Ne refuse pas une soirée libertine adulte. Signale uniquement les indices de mineurs, contrainte, violence, exploitation, activité manifestement illégale ou danger grave. Réponds uniquement en JSON.'
+          content: 'Tu es le moteur de sécurité Zwit. Les événements sont réservés à des adultes consentants. Ne refuse pas une soirée libertine adulte. Signale uniquement les indices de mineurs, contrainte, violence, exploitation, activité manifestement illégale ou danger grave. Réponds uniquement en JSON.'
         },
         {
           role: 'user',

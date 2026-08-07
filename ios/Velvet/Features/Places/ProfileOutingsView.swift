@@ -126,8 +126,8 @@ struct ProfileVenuePlanningSheet: View {
                     }
 
                     Text(profile.profileType == .couple
-                         ? "La présence sera affichée au pluriel sur Velvet."
-                         : "La présence sera affichée au singulier sur Velvet.")
+                         ? "La présence sera affichée au pluriel sur Zwit."
+                         : "La présence sera affichée au singulier sur Zwit.")
                         .font(VelvetTypography.caption(size: 9))
                         .foregroundStyle(VelvetColor.textSecondary)
                 }
