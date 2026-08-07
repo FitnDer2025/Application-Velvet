@@ -96,6 +96,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     }, access.session.access_token);
     if (!upload.ok) throw new Error('voice_upload_failed');
 
+    // L'insert messages traverse le trigger v1.5 conversation-request : un vocal respecte exactement le même garde anti-relance qu'un texte.
     const created = await restJson(
       env,
       '/rest/v1/messages?select=id,conversation_id,sender_user_id,sender_identity,body,created_at,edited_at',
