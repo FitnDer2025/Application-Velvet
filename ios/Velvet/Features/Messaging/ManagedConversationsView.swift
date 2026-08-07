@@ -34,7 +34,7 @@ struct ManagedConversationsView: View {
                             ForEach(conversations) { conversation in
                                 HStack(spacing: 8) {
                                     NavigationLink {
-                                        RealtimeAppleConversationView(conversation: conversation)
+                                        ZwitPremiumConversationView(conversation: conversation)
                                     } label: {
                                         ManagedConversationRow(conversation: conversation)
                                     }
