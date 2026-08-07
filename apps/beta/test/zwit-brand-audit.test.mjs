@@ -51,7 +51,11 @@ function isTechnical(value) {
     /\.(?:js|mjs|css|png|jpe?g|svg|swift|plist|entitlements|json)$/i,
     /^(?:bucket|table|storage|schema|key|kind|target|scheme|migration):?\s*velvet/i,
     /^velvet_private(?:\.|$)/i,
-    /^public\.velvet_/i
+    /^public\.velvet_/i,
+    /^\[?data-velvet-[a-z0-9_-]+\]?$/i,
+    /\\s|\[\^/,
+    /^X-Velvet-/i,
+    /^Velvet-iOS\//i
   ].some((pattern) => pattern.test(text));
 }
 
