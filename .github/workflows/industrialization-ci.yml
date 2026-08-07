@@ -78,4 +78,16 @@ jobs:
           fi
       - run: npm run build:beta
       - run: npx playwright install --with-deps chromium webkit
-      - run: npm run recipe:browser
+      - name: Run browser recipe
+        run: |
+          set -o pipefail
+          LOG="$RUNNER_TEMP/zwit-browser-recipe.log"
+          if ! npm run recipe:browser 2>&1 | tee "$LOG"; then
+            (grep -E 'Error:|error:|failed|FAIL|Timeout|expect\(|Assertion|locator|page\.' "$LOG" || true) | tail -n 120 | while IFS= read -r line; do
+              echo "::error title=Zwit browser recipe::$line"
+            done
+            tail -n 80 "$LOG" | while IFS= read -r line; do
+              echo "::error title=Zwit browser tail::$line"
+            done
+            exit 1
+          fi
