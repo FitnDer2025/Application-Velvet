@@ -11,8 +11,9 @@
     { word: 'Silenzio', lang: 'it' },
     { word: '嘘', lang: 'zh' }
   ];
-  const wordInterval = 1800;
-  const wordDuration = 2850;
+  // Premium, memorable, but never blocks access for an excessive amount of time.
+  const wordInterval = 700;
+  const wordDuration = 1450;
   const wordsEnd = ((words.length - 1) * wordInterval) + wordDuration;
   const legacyLogo = /(?:velvet|zwit)[^/?#]*(?:logo|icon|mark)|zwit-logo-1024\.(?:jpg|png|svg|webp)|velvet-icon[^/?#]*/i;
 
@@ -35,9 +36,9 @@
     .zwit-opening-v3{
       position:fixed;z-index:2147483647;inset:0;display:grid;place-items:center;
       overflow:hidden;background:#020203;color:#f5efe9;opacity:0;
-      transition:opacity 1s ease;
+      transition:opacity .65s ease;
     }
-    .zwit-opening-v3.visible{opacity:1}.zwit-opening-v3.leaving{opacity:0}
+    .zwit-opening-v3.visible{opacity:1}.zwit-opening-v3.leaving{opacity:0;pointer-events:none}
     .zwit-opening-v3:before{
       content:"";position:absolute;inset:-16%;background:
       radial-gradient(circle at 50% 44%,#53322355 0,transparent 31%),
@@ -64,7 +65,7 @@
     .zwit-opening-v3 .zwit-fog i:nth-child(2){right:-20%;top:2%}
     .zwit-opening-v3 .zwit-fog i:nth-child(3){left:14%;bottom:-28%}
     .zwit-opening-v3 .zwit-fog i:nth-child(4){right:10%;bottom:-22%}
-    .zwit-opening-v3.fogging .zwit-fog{animation:zwitFogFluid 2.2s ease forwards}
+    .zwit-opening-v3.fogging .zwit-fog{animation:zwitFogFluid 1.05s ease forwards}
     .zwit-opening-v3 .zwit-logo-environment{
       position:absolute;inset:-8%;z-index:1;opacity:0;overflow:hidden;
       transform:scale(1.1);filter:blur(28px) brightness(.42) saturate(.86);
@@ -81,15 +82,15 @@
     .zwit-opening-v3 .zwit-signature{
       position:absolute;left:0;right:0;bottom:max(28px,env(safe-area-inset-bottom));z-index:8;
       text-align:center;color:#c9beb6;font:500 11px/1.5 Inter,Arial;letter-spacing:.08em;
-      opacity:0;transition:opacity 1.1s ease .8s;
+      opacity:0;transition:opacity .55s ease .25s;
     }
-    .zwit-opening-v3.revealed .zwit-word-stage{opacity:0;transition:opacity .8s ease}
-    .zwit-opening-v3.revealed .zwit-logo-environment{animation:zwitEnvironmentReveal 2s ease forwards}
-    .zwit-opening-v3.revealed .zwit-logo-reveal{animation:zwitLogoRevealFluid 2s cubic-bezier(.19,.8,.2,1) forwards}
+    .zwit-opening-v3.revealed .zwit-word-stage{opacity:0;transition:opacity .35s ease}
+    .zwit-opening-v3.revealed .zwit-logo-environment{animation:zwitEnvironmentReveal .9s ease forwards}
+    .zwit-opening-v3.revealed .zwit-logo-reveal{animation:zwitLogoRevealFluid .9s cubic-bezier(.19,.8,.2,1) forwards}
     .zwit-opening-v3.revealed .zwit-signature{opacity:.78}
     .zwit-opening-v3.reduced .zwit-word{animation:none;opacity:0}
     .zwit-opening-v3.reduced .zwit-word:first-child{opacity:1;filter:none;transform:none}
-    .zwit-opening-v3.reduced.revealed .zwit-logo-reveal{animation-duration:.3s}
+    .zwit-opening-v3.reduced.revealed .zwit-logo-reveal{animation-duration:.2s}
     @keyframes zwitWordFluid{
       0%,10%{opacity:0;filter:blur(24px);transform:translateY(14px) scale(.93)}
       30%,65%{opacity:1;filter:blur(0);transform:translateY(0) scale(1)}
@@ -147,14 +148,14 @@
     document.body.appendChild(layer);
     requestAnimationFrame(() => layer.classList.add('visible'));
 
-    const fogAt = reduced ? 1000 : wordsEnd - 650;
-    const revealAt = reduced ? 1250 : wordsEnd + 800;
-    const leaveAt = reduced ? 2400 : revealAt + 3100;
+    const fogAt = reduced ? 450 : Math.max(1700, wordsEnd - 500);
+    const revealAt = reduced ? 650 : wordsEnd + 250;
+    const leaveAt = reduced ? 1350 : revealAt + 950;
     setTimeout(() => layer.classList.add('fogging'), fogAt);
     setTimeout(() => layer.classList.add('revealed'), revealAt);
     setTimeout(() => {
       layer.classList.add('leaving');
-      setTimeout(() => layer.remove(), 1050);
+      setTimeout(() => layer.remove(), 700);
     }, leaveAt);
   }
 
