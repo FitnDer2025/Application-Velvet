@@ -21,8 +21,11 @@ export async function onRequestGet({ request, env }) {
     const spaceId = url.searchParams.get('spaceId') || '';
     const afterMessageId = Math.max(0, Number(url.searchParams.get('afterMessageId') || 0));
     if (!spaceId) {
-      const spaces = await rpc(env, access, 'zwit_v15_my_spaces');
-      return withSession({ spaces }, access.session);
+      const [spaces, eventChatCandidates] = await Promise.all([
+        rpc(env, access, 'zwit_v15_my_spaces'),
+        rpc(env, access, 'zwit_v15_my_event_chat_candidates').catch(() => [])
+      ]);
+      return withSession({ spaces, eventChatCandidates }, access.session);
     }
     if (!validUuid(spaceId)) return withSession({ error: 'invalid_space' }, access.session, 400);
     const [messages, members] = await Promise.all([
