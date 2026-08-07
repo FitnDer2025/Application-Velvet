@@ -73,8 +73,14 @@
 
   const removableSelectors = ['#velvetMarketingBadge','#velvetMarketingProBadge','[data-beta-badge]','[data-demo-badge]','.beta-badge','.demo-badge'];
   const normalized = (value) => String(value || '').replace(/\s+/g, ' ').trim();
+  const technicalOrUserValue = (value) => {
+    const text = String(value || '');
+    return /[A-Z0-9._%+-]+@[A-Z0-9.-]*velvet[A-Z0-9.-]*/i.test(text)
+      || /(?:velvet:\/\/|com\.velvet|VELVET_[A-Z0-9_]+|velvet[_-](?:media|beta|control|studio|notification))/i.test(text);
+  };
   const replaceCopy = (value) => {
     const source = String(value || '');
+    if (technicalOrUserValue(source)) return source;
     const trimmed = normalized(source);
     if (!trimmed) return source;
     if (exact.has(trimmed)) return source.replace(trimmed, exact.get(trimmed));
@@ -93,23 +99,14 @@
     element.style.objectFit = 'contain';
   }
 
-  function cleanControlValue(element) {
-    if (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)) return;
-    const current = element.value;
-    const next = replaceCopy(current);
-    if (next === current) return;
-    const start = element.selectionStart;
-    const end = element.selectionEnd;
-    element.value = next;
-    if (Number.isInteger(start) && Number.isInteger(end)) {
-      try { element.setSelectionRange(start, end); } catch {}
-    }
+  function cleanControlValue() {
+    // Never rewrite live input/textarea values: emails, searches, messages and profile copy are user data.
   }
 
   function cleanElement(element) {
     if (!(element instanceof Element)) return;
     normalizeBrandImage(element);
-    for (const attribute of ['title','aria-label','placeholder','alt','value']) {
+    for (const attribute of ['title','aria-label','placeholder','alt']) {
       if (!element.hasAttribute(attribute)) continue;
       const current = element.getAttribute(attribute);
       const next = replaceCopy(current);
@@ -187,8 +184,6 @@
 
   clean(document);
   observer.observe(document.documentElement, { subtree:true, childList:true, characterData:true });
-  document.addEventListener('focusin', (event) => cleanElement(event.target), true);
-  document.addEventListener('submit', (event) => clean(event.target), true);
   window.addEventListener('pageshow', () => clean(document));
   [0,250,1000,2400].forEach((delay) => setTimeout(() => clean(document), delay));
 
