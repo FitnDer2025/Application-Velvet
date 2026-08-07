@@ -116,12 +116,17 @@ declare
 begin
   if v_user_id is null then raise exception 'authentication_required'; end if;
 
-  select count(*)::integer,
-         max(cm.user_id) filter (where cm.user_id <> v_user_id)
-    into v_member_count, v_recipient
+  select count(*)::integer into v_member_count
   from public.conversation_members cm
   where cm.conversation_id = target_conversation_id
     and cm.left_at is null;
+
+  select cm.user_id into v_recipient
+  from public.conversation_members cm
+  where cm.conversation_id = target_conversation_id
+    and cm.left_at is null
+    and cm.user_id <> v_user_id
+  limit 1;
 
   if v_member_count <> 2 or v_recipient is null or not exists (
     select 1 from public.conversation_members cm
