@@ -544,7 +544,7 @@ struct EventCreationView: View {
             )
             appState.alertMessage = result.publicationStatus == "review"
                 ? "La sortie est enregistrée et attend une validation humaine."
-                : "La sortie est publiée dans Velvet."
+                : "La sortie est publiée dans Zwit."
             dismiss()
         } catch {
             appState.alertMessage = ErrorMessage.text(for: error)

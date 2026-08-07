@@ -565,7 +565,7 @@ final class SessionService: Sendable {
     func uploadPhoto(data: Data, mediaRole: String, individualProfileID: UUID? = nil) async throws -> ProfilePhoto {
         var parts: [MultipartPart] = [
             .field("mediaRole", value: mediaRole),
-            .file("photo", fileName: "velvet-\(UUID().uuidString).jpg", mimeType: "image/jpeg", data: data)
+            .file("photo", fileName: "zwit-\(UUID().uuidString).jpg", mimeType: "image/jpeg", data: data)
         ]
         if let individualProfileID {
             parts.append(.field("individualProfileId", value: individualProfileID.uuidString))

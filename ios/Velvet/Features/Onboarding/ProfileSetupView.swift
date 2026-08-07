@@ -172,7 +172,7 @@ struct ProfileSetupView: View {
                     title: verification?.verification.majorityVerified == true
                         ? "Vérification validée"
                         : "Vérification externe",
-                    subtitle: "Le prestataire renvoie uniquement un statut. Aucun document n’est stocké par Velvet."
+                    subtitle: "Le prestataire renvoie uniquement un statut. Aucun document n’est stocké par Zwit."
                 )
                 if verification?.providerConfigured == true {
                     VelvetPrimaryButton("Commencer la vérification", isLoading: isWorking) {

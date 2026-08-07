@@ -81,7 +81,7 @@ struct DiscoveryView: View {
                         VelvetEmptyState(
                             symbol: "lock.shield",
                             title: "Admission nécessaire",
-                            message: "La recherche s’ouvre dès que ton profil est admis par Velvet."
+                            message: "La recherche s’ouvre dès que ton profil est admis par Zwit."
                         )
                     } else if profiles.isEmpty, !store.isLoading {
                         VelvetEmptyState(
