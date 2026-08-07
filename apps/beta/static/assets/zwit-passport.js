@@ -137,6 +137,12 @@
     }, 40);
   }
 
+  function invalidatePassport({ refreshVisible = false } = {}) {
+    cachedPassport = null;
+    cachedAt = 0;
+    if (refreshVisible && activeRoute === 'me') loadPassport({ force: true });
+  }
+
   document.addEventListener('click', (event) => {
     const routeButton = event.target.closest('[data-route]');
     if (routeButton?.dataset.route) {
@@ -153,16 +159,18 @@
     const refresh = event.target.closest('[data-passport-refresh]');
     if (refresh) {
       event.preventDefault();
-      cachedPassport = null;
-      cachedAt = 0;
-      loadPassport({ force: true });
+      invalidatePassport({ refreshVisible: true });
     }
+  });
+
+  document.addEventListener('zwit:passport-refresh', () => {
+    // Un check-in réel doit apparaître sans attendre l'expiration du cache 30 s.
+    invalidatePassport({ refreshVisible: true });
   });
 
   new MutationObserver(() => schedulePassport()).observe(content, { childList: true });
 
   if (new URL(location.href).searchParams.get('verification') === 'success') {
-    cachedPassport = null;
-    cachedAt = 0;
+    invalidatePassport();
   }
 })();
