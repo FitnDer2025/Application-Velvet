@@ -4,6 +4,16 @@ import { cleanList, cleanText, memberSession, restJson, withSession } from '../m
 const PRO_ROLES = new Set(['pro_owner', 'pro_staff', 'admin']);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const REGISTRATION_MODES = new Set(['instant', 'approval', 'closed']);
+const TRANSACTIONAL_REGISTRATION_ERRORS = new Set([
+  'event_capacity_reached',
+  'registration_not_confirmable'
+]);
+
+function proWriteError(error) {
+  const message = cleanText(error?.message, 120);
+  if (TRANSACTIONAL_REGISTRATION_ERRORS.has(message)) return message;
+  return message || 'pro_workspace_write_failed';
+}
 
 async function proAccess(request, env) {
   const access = await memberSession(request, env);
@@ -208,6 +218,6 @@ export async function onRequestPost({ request, env }) {
     }
     return withSession({ ok: true, ...(await workspace(env, access)) }, access.session);
   } catch (error) {
-    return json({ error: error.message || 'pro_workspace_write_failed' }, 400);
+    return json({ error: proWriteError(error) }, 400);
   }
 }
