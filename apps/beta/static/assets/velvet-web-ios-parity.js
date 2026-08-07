@@ -2,9 +2,9 @@
   'use strict';
 
   const MOBILE_QUERY = '(max-width: 900px)';
-  const PRIMARY_ROUTES = ['home', 'discover', 'venues', 'conversations', 'me'];
+  // iOS is the UX source of truth: Accueil · Membres · Carte · Lieux · Messages · Profil.
+  const PRIMARY_ROUTES = ['home', 'discover', 'maps', 'venues', 'conversations', 'me'];
   const PRIMARY_FOR_ROUTE = {
-    maps: 'venues',
     events: 'venues',
     settings: 'me'
   };
@@ -115,7 +115,8 @@
       if (!control.hasAttribute('data-v11-touch')) control.setAttribute('data-v11-touch', '');
     });
     document.body.classList.add('velvet-v11');
-    document.documentElement.dataset.velvetWebVersion = '1.1';
+    document.documentElement.dataset.velvetWebVersion = '1.5';
+    document.documentElement.dataset.zwitUiSource = 'ios';
   }
 
   function synchronize() {
@@ -159,7 +160,8 @@
   synchronize();
 
   window.VelvetWebV11 = {
-    version: '1.1',
+    version: '1.5',
+    sourceOfTruth: 'ios',
     primaryRoutes: [...PRIMARY_ROUTES],
     closeMenu,
     toggleMenu,
