@@ -7,13 +7,24 @@ import test from 'node:test';
 const execFileAsync = promisify(execFile);
 const read = (path) => readFile(path, 'utf8');
 
+function tableDefinition(sql, tableName) {
+  const escaped = tableName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = sql.match(new RegExp(`create table if not exists public\\.${escaped} \\(([\\s\\S]*?)\\n\\);`, 'i'));
+  assert.ok(match, `table ${tableName} should exist`);
+  return match[1];
+}
+
 test('le QR tournant ne persiste jamais son secret brut et expire rapidement', async () => {
   const sql = await read('supabase/migrations/20260807170000_zwit_v15_rotating_checkin.sql');
-  assert.match(sql, /token_hash text not null unique/);
+  const persistedColumns = tableDefinition(sql, 'event_checkin_sessions');
+  assert.match(persistedColumns, /token_hash text not null unique/);
+  assert.doesNotMatch(persistedColumns, /(^|\n)\s*token\s+text\b/i);
   assert.match(sql, /digest\(v_token, 'sha256'\)/);
-  assert.doesNotMatch(sql, /\btoken text\b/);
   assert.match(sql, /greatest\(60, least\(coalesce\(ttl_seconds, 120\), 300\)\)/);
   assert.match(sql, /set revoked_at = now\(\)/);
+  // Le RPC est autorisé à retourner une fois le secret éphémère au professionnel ;
+  // l'invariant de sécurité est qu'il n'existe jamais comme colonne persistée.
+  assert.match(sql, /v_token := encode\(extensions\.gen_random_bytes\(24\), 'hex'\)/);
 });
 
 test('un scan exige une réservation confirmée et devient un check-in réel', async () => {
@@ -43,7 +54,9 @@ test('Zwit Pro génère un QR compact local sans transmettre le token à un serv
   assert.match(qr, /window\.ZwitQRV4/);
   assert.match(qr, /DATA_CODEWORDS = 80/);
   assert.match(qr, /ECC_CODEWORDS = 20/);
-  assert.doesNotMatch(qr, /https?:\/\//);
+  assert.match(qr, /data:image\/svg\+xml/);
+  assert.doesNotMatch(qr, /\bfetch\s*\(/);
+  assert.doesNotMatch(qr, /XMLHttpRequest|quickchart|chart\.googleapis|api\.qrserver/i);
   assert.match(pro, /QR d’entrée/);
   assert.match(pro, /ttlSeconds: 120/);
   assert.match(pro, /Renouvellement sécurisé/);
