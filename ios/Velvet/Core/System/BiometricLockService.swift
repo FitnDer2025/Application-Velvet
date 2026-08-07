@@ -45,7 +45,7 @@ final class BiometricLockService: ObservableObject {
                 return false
             }
             guard await authenticate(
-                reason: "Active \(biometryName) pour protéger ton espace privé Velvet."
+                reason: "Active \(biometryName) pour protéger ton espace privé Zwit."
             ) else {
                 return false
             }
@@ -78,7 +78,7 @@ final class BiometricLockService: ObservableObject {
             return true
         }
         let success = await authenticate(
-            reason: "Déverrouille ton espace privé Velvet."
+            reason: "Déverrouille ton espace privé Zwit."
         )
         isUnlocked = success
         return success

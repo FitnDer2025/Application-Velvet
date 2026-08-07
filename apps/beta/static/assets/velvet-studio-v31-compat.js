@@ -392,7 +392,7 @@
   }
 
   function cleanFileName(value) {
-    return String(value || 'video-velvet').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase().slice(0, 70) || 'video-velvet';
+    return String(value || 'video-zwit').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase().slice(0, 70) || 'video-zwit';
   }
 
   function downloadBlob(blob, name) {

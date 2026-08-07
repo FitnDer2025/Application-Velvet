@@ -276,7 +276,7 @@
     if (!item) return;
     const link = document.createElement('a');
     link.href = item.dataUri;
-    link.download = `velvet-${item.scenario}-${item.seed}.jpg`;
+    link.download = `zwit-${item.scenario}-${item.seed}.jpg`;
     link.click();
   }
 
