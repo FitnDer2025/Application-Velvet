@@ -211,7 +211,7 @@
       const image = new Image();
       const timer = setTimeout(() => reject(new Error('Préparation d’un écran trop longue.')), timeout);
       image.onload = () => { clearTimeout(timer); resolve(image); };
-      image.onerror = () => { clearTimeout(timer); reject(new Error('Impossible de préparer un écran Velvet.')); };
+      image.onerror = () => { clearTimeout(timer); reject(new Error('Impossible de préparer un écran Zwit.')); };
       image.src = src;
     });
   }
@@ -348,7 +348,7 @@
     return {blob,duration:Math.round(totalDuration)};
   }
 
-  function fileName(value){return String(value||'demo-velvet').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase().slice(0,65)||'demo-velvet';}
+  function fileName(value){return String(value||'demo-zwit').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase().slice(0,65)||'demo-zwit';}
 
   async function runProduction() {
     if (state.running) return;
