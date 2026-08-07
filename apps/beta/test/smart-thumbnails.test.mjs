@@ -38,10 +38,10 @@ test('smart thumbnails are lazy and excluded from full-quality photo surfaces', 
   assert.ok(runtime.includes("'IntersectionObserver' in window"));
   assert.ok(runtime.includes("'.feed-photo img'"));
   assert.ok(runtime.includes("'.home-discovery-card img'"));
-  assert.ok(runtime.includes('`${LEGACY_CLASS_PREFIX}-parity-activity-media img`'));
+  assert.ok(runtime.includes('`.${LEGACY_CLASS_PREFIX}-parity-activity-media img`'));
   assert.ok(runtime.includes("'.profile-carousel'"));
   assert.ok(runtime.includes("'.album-photo'"));
-  assert.ok(runtime.includes('`${LEGACY_CLASS_PREFIX}-photo-lightbox`'));
+  assert.ok(runtime.includes('`.${LEGACY_CLASS_PREFIX}-photo-lightbox`'));
   assert.ok(runtime.includes('image.dataset.zwitFullSrc = latest'));
   assert.ok(runtime.includes('image.src = full'));
 });
