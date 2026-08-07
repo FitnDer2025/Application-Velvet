@@ -23,7 +23,27 @@ function canUseInternalMediaFallback(env, path) {
     && Boolean(env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
-async function signedInternalMediaUrl(env, path, expiresIn) {
+function cleanTransform(transform) {
+  if (!transform || typeof transform !== 'object') return null;
+  const width = Math.max(1, Math.min(2500, Math.round(Number(transform.width) || 0)));
+  const height = Math.max(1, Math.min(2500, Math.round(Number(transform.height) || 0)));
+  const quality = Math.max(20, Math.min(100, Math.round(Number(transform.quality) || 80)));
+  const resize = ['cover', 'contain', 'fill'].includes(transform.resize) ? transform.resize : 'contain';
+  const output = { quality, resize };
+  if (Number(transform.width) > 0) output.width = width;
+  if (Number(transform.height) > 0) output.height = height;
+  return output.width || output.height ? output : null;
+}
+
+function signedBody(expiresIn, transform) {
+  const normalized = cleanTransform(transform);
+  return JSON.stringify({
+    expiresIn,
+    ...(normalized ? { transform: normalized } : {})
+  });
+}
+
+async function signedInternalMediaUrl(env, path, expiresIn, transform = null) {
   const base = String(env.SUPABASE_URL || '').replace(/\/$/, '');
   const key = String(env.SUPABASE_SERVICE_ROLE_KEY || '');
   if (!base || !key) return null;
@@ -34,13 +54,13 @@ async function signedInternalMediaUrl(env, path, expiresIn) {
       authorization: `Bearer ${key}`,
       'content-type': 'application/json'
     },
-    body: JSON.stringify({ expiresIn })
+    body: signedBody(expiresIn, transform)
   });
   const payload = await response.json().catch(() => ({}));
   return response.ok && payload.signedURL ? mediaUrl(env, String(payload.signedURL)) : null;
 }
 
-export async function signedMediaUrl(env, session, path, expiresIn = 600) {
+export async function signedMediaUrl(env, session, path, expiresIn = 600, transform = null) {
   if (!path) return null;
   const ttl = Math.max(60, Math.min(3600, Number(expiresIn) || 600));
   const response = await supabase(
@@ -48,7 +68,7 @@ export async function signedMediaUrl(env, session, path, expiresIn = 600) {
     `/storage/v1/object/sign/velvet-media/${path}`,
     {
       method: 'POST',
-      body: JSON.stringify({ expiresIn: ttl })
+      body: signedBody(ttl, transform)
     },
     session.access_token
   );
@@ -57,7 +77,7 @@ export async function signedMediaUrl(env, session, path, expiresIn = 600) {
     return mediaUrl(env, String(payload.signedURL));
   }
   if (canUseInternalMediaFallback(env, path)) {
-    return signedInternalMediaUrl(env, path, ttl);
+    return signedInternalMediaUrl(env, path, ttl, transform);
   }
   return null;
 }
