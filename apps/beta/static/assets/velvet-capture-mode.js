@@ -16,3 +16,12 @@
   script.dataset.zwitMediaOptimizer = 'true';
   document.head.appendChild(script);
 })();
+
+(() => {
+  if (window.ZwitSmartThumbnails || document.querySelector('script[data-zwit-smart-thumbnails]')) return;
+  const script = document.createElement('script');
+  script.src = '/assets/zwit-smart-thumbnails.js?v=20260807-1';
+  script.async = true;
+  script.dataset.zwitSmartThumbnails = 'true';
+  document.head.appendChild(script);
+})();
