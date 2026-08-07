@@ -42,7 +42,7 @@ export async function onRequest(context) {
       'cache-control': 'no-store'
     });
     appendSessionCookies(headers, session);
-    return new Response('Accès non autorisé pour ce rôle Velvet.', { status: 403, headers });
+    return new Response('Accès non autorisé pour ce rôle Zwit.', { status: 403, headers });
   }
 
   const upstream = await context.next();

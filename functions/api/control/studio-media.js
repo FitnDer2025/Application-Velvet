@@ -111,7 +111,7 @@ function fallbackPlan(brief, duration, format) {
 
   const voiceOver = [
     ...scenes.map((scene) => scene.voice),
-    'Velvet. Là où les plus belles rencontres commencent.'
+    'Zwit. Là où les plus belles rencontres commencent.'
   ].join(' ');
 
   return {
@@ -122,7 +122,7 @@ function fallbackPlan(brief, duration, format) {
     narrativeArc: 'mystère → attirance → émotion → connexion → désir → projection',
     brief,
     voiceOver,
-    closingLine: 'Velvet. Là où les plus belles rencontres commencent.',
+    closingLine: 'Zwit. Là où les plus belles rencontres commencent.',
     scenes
   };
 }
@@ -190,16 +190,16 @@ async function generatePlan(env, body) {
   const fallback = fallbackPlan(brief, duration, format);
 
   const system = [
-    'Tu es le réalisateur et concepteur-rédacteur d’une campagne française premium pour Velvet.',
+    'Tu es le réalisateur et concepteur-rédacteur d’une campagne française premium pour Zwit.',
     'Zwit est un univers de rencontres et d’expériences entre adultes fondé sur la confiance, le consentement, l’élégance et la discrétion.',
-    'Tu ne réalises pas un catalogue de fonctionnalités. Tu racontes une histoire sensuelle, émotionnelle et subtile à travers la véritable interface Velvet.',
+    'Tu ne réalises pas un catalogue de fonctionnalités. Tu racontes une histoire sensuelle, émotionnelle et subtile à travers la véritable interface Zwit.',
     'La sensualité repose sur le mystère, les mots, l’attente, le feeling et la projection. Elle ne doit jamais devenir explicite, vulgaire ou sexuelle.',
     'Le scénario est le réalisateur : chaque phrase de voix off doit déclencher l’écran et l’action qui illustrent précisément ce qui est raconté.',
     'Utilise exclusivement les écrans réels autorisés : home, discover, profile, messages, events, map.',
     'Arc obligatoire : une envie intime → une découverte → une attirance → les premiers mots → la projection dans une sortie → l’envie de rejoindre Zwit.',
     'La narration doit être naturelle à l’oral, française, chaleureuse, lente, cinématographique et composée de phrases courtes.',
     'Ne dis jamais « fonctionnalité », « plateforme », « utilisateur », « filtre » ou « application » dans la voix off.',
-    'Ne montre aucun couple filmé, aucune scène extérieure et aucune photographie inventée : l’histoire est racontée uniquement par la navigation dans Velvet.',
+    'Ne montre aucun couple filmé, aucune scène extérieure et aucune photographie inventée : l’histoire est racontée uniquement par la navigation dans Zwit.',
     'Chaque scène doit avoir screen, action, emotion, title, onScreen, voice et duration.',
     'Actions autorisées : arrive, browse, open_profile, read_profile, open_message, read_message, open_event, explore_map, close.',
     'Réponds exclusivement avec un objet JSON valide, sans markdown.'
