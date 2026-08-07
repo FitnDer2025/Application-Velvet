@@ -68,7 +68,44 @@ test('la fiche événement charge la réservation premium et distingue confirmat
   assert.match(css, /zwit-booking-people/);
 });
 
+test('les décisions Pro passent par une transaction verrouillée et ne peuvent pas surbooker', async () => {
+  const [migration, api] = await Promise.all([
+    read('supabase/migrations/20260807164000_zwit_v15_event_guestlist_pro.sql'),
+    read('functions/api/pro/workspace.js')
+  ]);
+  assert.match(migration, /zwit_v15_manage_event_registration/);
+  assert.match(migration, /for update/);
+  assert.match(migration, /event_capacity_reached/);
+  assert.match(migration, /establishment_staff/);
+  assert.match(migration, /registration_not_confirmed/);
+  assert.match(api, /rpc\/zwit_v15_manage_event_registration/);
+  assert.doesNotMatch(api, /event_registrations\?id=eq\.\$\{encodeURIComponent\(body\.registrationId\)\}/);
+});
+
+test('Zwit Pro expose le cockpit guest-list et les réglages de réservation réels', async () => {
+  const [pro, runtime, css, api] = await Promise.all([
+    read('apps/beta/static/assets/pro-live.js'),
+    read('apps/beta/static/assets/zwit-pro-guestlist.js'),
+    read('apps/beta/static/assets/zwit-pro-guestlist.css'),
+    read('functions/api/pro/workspace.js')
+  ]);
+  assert.match(pro, /zwit-pro-guestlist\.js/);
+  assert.match(pro, /zwit-pro-guestlist\.css/);
+  assert.match(runtime, /Guest-list & accueil/);
+  assert.match(runtime, /À valider/);
+  assert.match(runtime, /Valider l’arrivée/);
+  assert.match(runtime, /update_event_booking/);
+  assert.match(css, /zpg-cockpit/);
+  assert.match(api, /registration_mode/);
+  assert.match(api, /registration_closes_at/);
+  assert.match(api, /max_places_per_registration/);
+  assert.match(api, /guest_list_enabled/);
+});
+
 test('les runtimes de réservation v1.5 passent le parseur JavaScript de Node', async () => {
   await execFileAsync(process.execPath, ['--check', 'functions/api/members/event-registrations.js']);
   await execFileAsync(process.execPath, ['--check', 'apps/beta/static/assets/zwit-event-booking.js']);
+  await execFileAsync(process.execPath, ['--check', 'functions/api/pro/workspace.js']);
+  await execFileAsync(process.execPath, ['--check', 'apps/beta/static/assets/zwit-pro-guestlist.js']);
+  await execFileAsync(process.execPath, ['--check', 'apps/beta/static/assets/pro-live.js']);
 });
