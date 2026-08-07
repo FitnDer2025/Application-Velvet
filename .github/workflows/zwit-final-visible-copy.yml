@@ -1,0 +1,81 @@
+name: Zwit final visible copy cleanup
+
+on:
+  push:
+    branches:
+      - release/zwit-v1.5-seven-capitals
+    paths:
+      - '.github/workflows/zwit-final-visible-copy.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/zwit-v1.5-seven-capitals
+      - name: Replace final user-facing Velvet strings
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          changes = {
+              Path('functions/api/control/studio-social-plan.js'): [
+                  ('Velvet. Là où les plus belles rencontres commencent.', 'Zwit. Là où les plus belles rencontres commencent.', 1),
+              ],
+              Path('functions/api/control/studio-v3.js'): [
+                  ('Votre invitation pour découvrir Velvet.', 'Votre invitation pour découvrir Zwit.', 1),
+              ],
+              Path('functions/api/control/studio.js'): [
+                  ('Velvet. Là où les plus belles rencontres commencent.', 'Zwit. Là où les plus belles rencontres commencent.', 1),
+              ],
+              Path('functions/api/control/workspace.js'): [
+                  ('`VELVET-${token.slice(0, 4)}-${token.slice(4, 8)}-${token.slice(8, 12)}`', '`ZWIT-${token.slice(0, 4)}-${token.slice(4, 8)}-${token.slice(8, 12)}`', 1),
+              ],
+              Path('functions/api/members/_browser-push.js'): [
+                  ('`velvet-${eventType}`', '`zwit-${eventType}`', 1),
+              ],
+              Path('functions/api/members/account-actions.js'): [
+                  ('contactez Velvet.', 'contactez Zwit.', 1),
+              ],
+              Path('functions/api/members/couple-invitation-email.js'): [
+                  ('votre espace Velvet.', 'votre espace Zwit.', 1),
+              ],
+              Path('functions/api/members/engagement.js'): [
+                  ('votre univers Velvet.', 'votre univers Zwit.', 1),
+              ],
+              Path('functions/api/members/events.js'): [
+                  ('moteur de sécurité Velvet.', 'moteur de sécurité Zwit.', 1),
+              ],
+          }
+
+          for path, replacements in changes.items():
+              source = path.read_text(encoding='utf-8')
+              for old, new, expected in replacements:
+                  count = source.count(old)
+                  if count != expected:
+                      raise SystemExit(f'{path}: expected {expected} occurrence(s) of {old!r}, found {count}')
+                  source = source.replace(old, new)
+              path.write_text(source, encoding='utf-8')
+          PY
+      - name: Verify final visible copy
+        run: |
+          grep -F 'Zwit. Là où les plus belles rencontres commencent.' functions/api/control/studio-social-plan.js
+          grep -F 'découvrir Zwit.' functions/api/control/studio-v3.js
+          grep -F 'Zwit. Là où les plus belles rencontres commencent.' functions/api/control/studio.js
+          grep -F 'ZWIT-${token.slice(0, 4)}' functions/api/control/workspace.js
+          grep -F 'zwit-${eventType}' functions/api/members/_browser-push.js
+          grep -F 'contactez Zwit.' functions/api/members/account-actions.js
+          grep -F 'votre espace Zwit.' functions/api/members/couple-invitation-email.js
+          grep -F 'votre univers Zwit.' functions/api/members/engagement.js
+          grep -F 'moteur de sécurité Zwit.' functions/api/members/events.js
+      - name: Commit cleanup
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add functions/api/control/studio-social-plan.js functions/api/control/studio-v3.js functions/api/control/studio.js functions/api/control/workspace.js functions/api/members/_browser-push.js functions/api/members/account-actions.js functions/api/members/couple-invitation-email.js functions/api/members/engagement.js functions/api/members/events.js
+          git commit -m 'fix(brand): finish Zwit server-side visible copy migration'
+          git push origin HEAD:release/zwit-v1.5-seven-capitals
