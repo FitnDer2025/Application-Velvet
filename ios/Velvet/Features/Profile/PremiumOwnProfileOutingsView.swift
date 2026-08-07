@@ -13,6 +13,8 @@ struct PremiumOwnProfileOutingsView: View {
             ownTabs
 
             switch selectedTab {
+            case "passport":
+                ZwitPassportView()
             case "outings":
                 MemberOutingsHistoryView(profile: profile, plans: plans)
             case "publish":
@@ -82,6 +84,7 @@ struct PremiumOwnProfileOutingsView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 5) {
                 tab("Profil", value: "profile", icon: "person.text.rectangle")
+                tab("Passeport", value: "passport", icon: "checkmark.shield")
                 tab("Sorties", value: "outings", icon: "calendar.badge.clock")
                 tab("Déclarer une sortie", value: "publish", icon: "plus.circle.fill")
             }
