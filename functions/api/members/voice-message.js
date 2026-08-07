@@ -56,6 +56,8 @@ async function deleteStoredFile(env, session, path) {
 
 export async function onRequestPost({ request, env, waitUntil }) {
   let uploadedPath = '';
+  let createdMessageId = '';
+  let createdConversationId = '';
   let cleanupSession = null;
   try {
     const access = await memberSession(request, env);
@@ -105,6 +107,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
     );
     const message = created?.[0];
     if (!message?.id) throw new Error('message_persistence_failed');
+    createdMessageId = message.id;
+    createdConversationId = conversationId;
 
     const attachmentRows = await restJson(
       env,
@@ -161,6 +165,14 @@ export async function onRequestPost({ request, env, waitUntil }) {
       }
     }, access.session, 201);
   } catch (error) {
+    if (createdMessageId && createdConversationId && cleanupSession) {
+      await restJson(
+        env,
+        `/rest/v1/messages?id=eq.${encodeURIComponent(createdMessageId)}&conversation_id=eq.${encodeURIComponent(createdConversationId)}`,
+        cleanupSession,
+        { method: 'DELETE', headers: { prefer: 'return=minimal' } }
+      ).catch(() => null);
+    }
     if (uploadedPath && cleanupSession) await deleteStoredFile(env, cleanupSession, uploadedPath);
     return json({ error: cleanText(error.message, 120) || 'voice_message_failed' }, 400);
   }
