@@ -15,14 +15,16 @@ test('le système visuel premium reste synchronisé avec la marque Zwit', async 
   assert.match(manifest,/velvet-icon-512\.png/);
 });
 
-test('la navigation mobile Membres conserve cinq espaces communs avec iOS', async () => {
+test('la navigation mobile Membres reprend les six espaces du shell iOS', async () => {
   const html = await read('apps/web/velvet-members-beta-live.html');
   const nav = html.match(/<nav class="bottom-nav"[\s\S]*?<\/nav>/)?.[0] || '';
   const destinations = [...nav.matchAll(/data-route="([^"]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(destinations,['home','discover','venues','conversations','me']);
-  for (const label of ['Accueil','Membres','Lieux','Messages','Profil']) assert.match(nav,new RegExp(label));
+  assert.deepEqual(destinations,['home','discover','maps','venues','conversations','me']);
+  for (const label of ['Accueil','Membres','Carte','Lieux','Messages','Profil']) assert.match(nav,new RegExp(label));
   assert.match(html,/velvet-web-ios-parity\.css/);
   assert.match(html,/velvet-web-ios-parity\.js/);
+  assert.match(html,/zwit-ios-source-of-truth\.css/);
+  assert.match(html,/zwit-ios-source-of-truth\.js/);
   assert.doesNotMatch(html,/velvet-people-first\.js/);
 });
 
@@ -58,8 +60,9 @@ test('la direction artistique traite profils, fil et établissements', async () 
   assert.match(premiumUi,/notifications\.innerHTML = icon\('bell'\)/);
   assert.match(premiumUi,/menuButton\.innerHTML = icon\('menu'\)/);
   assert.match(auth,/velvet-editorial-ui\.css/);
-  assert.match(sw,/const CACHE = 'velvet-beta-shell-v30'/);
-  assert.match(sw,/velvet-web-ios-parity\.js/);
+  assert.match(sw,/const CACHE = 'velvet-beta-shell-v31'/);
+  assert.match(sw,/velvet-web-ios-parity\.js\?v=20260807-1/);
+  assert.match(sw,/zwit-ios-source-of-truth\.js\?v=20260807-1/);
 });
 
 test('la messagerie enrichie reste chargée et exploitable sur mobile', async () => {
