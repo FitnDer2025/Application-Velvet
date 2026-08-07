@@ -23,7 +23,7 @@ function contract(name, run) {
 
 contract('member experience loads the Zwit media optimizer', async () => {
   const loader = await source(loaderPath);
-  assert.ok(loader.includes('/assets/zwit-media-optimizer.js?v=20260807-1'));
+  assert.ok(loader.includes('/assets/zwit-media-optimizer.js?v=20260807-2'));
   assert.ok(loader.includes('script.dataset.zwitMediaOptimizer'));
 });
 
@@ -34,6 +34,7 @@ contract('optimizer preserves high display quality while reducing storage pressu
   assert.ok(optimizer.includes('const SMALL_FILE_BYPASS_BYTES = 900 * 1024'));
   assert.ok(optimizer.includes('const QUALITY_STEPS = [0.94, 0.92, 0.90, 0.88]'));
   assert.ok(optimizer.includes("ctx.imageSmoothingQuality = 'high'"));
+  assert.ok(optimizer.includes('const preferredType = file.type'));
 });
 
 contract('optimizer never blocks a usable original when optimization is unavailable', async () => {
