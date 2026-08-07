@@ -419,7 +419,7 @@
         })
       });
     } catch {
-      alert('Les alertes ne sont pas encore configurées sur cet environnement Velvet.');
+      alert('Les alertes ne sont pas encore configurées sur cet environnement Zwit.');
     }
     refreshNotifications();
   }

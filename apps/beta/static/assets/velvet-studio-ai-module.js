@@ -210,7 +210,7 @@
       state.plan = { ...payload.plan, product: state.draft.product, brief: state.draft.brief, format: state.draft.format, duration: state.draft.duration };
       const result = root.querySelector('[data-vss-result]');
       if (result) result.innerHTML = resultMarkup();
-      setMessage(`${state.plan.scenes.length} scènes prêtes. Tu peux maintenant lancer le vrai tournage Velvet.`, 'ok');
+      setMessage(`${state.plan.scenes.length} scènes prêtes. Tu peux maintenant lancer le vrai tournage Zwit.`, 'ok');
     } catch (error) {
       setMessage(error.message || 'Le scénario n’a pas pu être généré.', 'error');
     } finally {
