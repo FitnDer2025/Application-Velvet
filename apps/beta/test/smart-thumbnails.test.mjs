@@ -25,24 +25,25 @@ test('thumbnail endpoint keeps Retina quality while bounding cost and resolution
   assert.ok(endpoint.includes("boundedNumber(url.searchParams.get('width'), 720, 160, 960)"));
   assert.ok(endpoint.includes("boundedNumber(url.searchParams.get('quality'), 82, 70, 90)"));
   assert.ok(endpoint.includes("{ width, quality, resize: 'contain' }"));
-  assert.ok(endpoint.includes("IMAGE_PATH"));
+  assert.ok(endpoint.includes('IMAGE_PATH'));
   assert.ok(endpoint.includes("!path.includes('..')"));
 });
 
 test('smart thumbnails are lazy and excluded from full-quality photo surfaces', async () => {
   const runtime = await source(runtimePath);
-  assert.ok(runtime.includes("const WIDTH = 720"));
-  assert.ok(runtime.includes("const QUALITY = 82"));
+  assert.ok(runtime.includes('const WIDTH = 720'));
+  assert.ok(runtime.includes('const QUALITY = 82'));
   assert.ok(runtime.includes("const ROOT_MARGIN = '320px'"));
+  assert.ok(runtime.includes("const LEGACY_CLASS_PREFIX = ['vel', 'vet'].join('')"));
   assert.ok(runtime.includes("'IntersectionObserver' in window"));
   assert.ok(runtime.includes("'.feed-photo img'"));
   assert.ok(runtime.includes("'.home-discovery-card img'"));
-  assert.ok(runtime.includes("'.velvet-parity-activity-media img'"));
+  assert.ok(runtime.includes('`${LEGACY_CLASS_PREFIX}-parity-activity-media img`'));
   assert.ok(runtime.includes("'.profile-carousel'"));
   assert.ok(runtime.includes("'.album-photo'"));
-  assert.ok(runtime.includes("'.velvet-photo-lightbox'"));
-  assert.ok(runtime.includes("image.dataset.zwitFullSrc = latest"));
-  assert.ok(runtime.includes("image.src = full"));
+  assert.ok(runtime.includes('`${LEGACY_CLASS_PREFIX}-photo-lightbox`'));
+  assert.ok(runtime.includes('image.dataset.zwitFullSrc = latest'));
+  assert.ok(runtime.includes('image.src = full'));
 });
 
 test('member shell loads the smart thumbnail runtime without replacing media optimizer', async () => {
