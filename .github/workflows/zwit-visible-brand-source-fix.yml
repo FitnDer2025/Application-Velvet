@@ -1,0 +1,73 @@
+name: Zwit visible brand source fix
+
+on:
+  push:
+    branches:
+      - release/zwit-v1.5-seven-capitals
+    paths:
+      - '.github/workflows/zwit-visible-brand-source-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-visible-brand:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/zwit-v1.5-seven-capitals
+      - name: Replace remaining public Marketing and Member strings
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          changes = {
+              Path('apps/beta/static/assets/members-live.js'): [
+                  ('Chaque élément correspond à une action réellement enregistrée dans Velvet.', 'Chaque élément correspond à une action réellement enregistrée dans Zwit.', 1),
+                  ('La consultation n’a pas pu être ajoutée à ta mémoire Velvet.', 'La consultation n’a pas pu être ajoutée à ta mémoire Zwit.', 1),
+              ],
+              Path('apps/beta/static/assets/members-onboarding-v2.js'): [
+                  ('Ces choix aideront immédiatement les autres membres à comprendre votre manière de vivre Velvet.', 'Ces choix aideront immédiatement les autres membres à comprendre votre manière de vivre Zwit.', 1),
+              ],
+              Path('apps/beta/static/assets/velvet-marketing-mode.js'): [
+                  ('Une première rencontre simple et rassurante pour découvrir la communauté Velvet.', 'Une première rencontre simple et rassurante pour découvrir la communauté Zwit.', 1),
+                  ('marketing@velvet.internal', 'marketing@zwit.internal', 1),
+              ],
+              Path('apps/beta/static/assets/velvet-marketing-pro-campaign-bridge.js'): [
+                  ('Toutes les informations sont sur Velvet.', 'Toutes les informations sont sur Zwit.', 1),
+              ],
+              Path('apps/beta/static/assets/velvet-marketing-pro-mode.js'): [
+                  ('contact@maison-velvet.demo', 'contact@maison-zwit.demo', 1),
+              ],
+              Path('apps/beta/static/assets/velvet-marketing-pro-studio-bridge.js'): [
+                  ('maison-velvet.demo', 'maison-zwit.demo', 2),
+              ],
+          }
+
+          for path, replacements in changes.items():
+              source = path.read_text(encoding='utf-8')
+              for old, new, expected in replacements:
+                  count = source.count(old)
+                  if count != expected:
+                      raise SystemExit(f'{path}: expected {expected} occurrence(s) of {old!r}, found {count}')
+                  source = source.replace(old, new)
+              path.write_text(source, encoding='utf-8')
+          PY
+      - name: Verify public copy
+        run: |
+          grep -F 'réellement enregistrée dans Zwit.' apps/beta/static/assets/members-live.js
+          grep -F 'mémoire Zwit.' apps/beta/static/assets/members-live.js
+          grep -F 'vivre Zwit.' apps/beta/static/assets/members-onboarding-v2.js
+          grep -F 'communauté Zwit.' apps/beta/static/assets/velvet-marketing-mode.js
+          grep -F 'marketing@zwit.internal' apps/beta/static/assets/velvet-marketing-mode.js
+          grep -F 'Toutes les informations sont sur Zwit.' apps/beta/static/assets/velvet-marketing-pro-campaign-bridge.js
+          grep -F 'contact@maison-zwit.demo' apps/beta/static/assets/velvet-marketing-pro-mode.js
+          grep -F 'maison-zwit.demo' apps/beta/static/assets/velvet-marketing-pro-studio-bridge.js
+      - name: Commit copy fixes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/beta/static/assets/members-live.js apps/beta/static/assets/members-onboarding-v2.js apps/beta/static/assets/velvet-marketing-mode.js apps/beta/static/assets/velvet-marketing-pro-campaign-bridge.js apps/beta/static/assets/velvet-marketing-pro-mode.js apps/beta/static/assets/velvet-marketing-pro-studio-bridge.js
+          git commit -m 'fix(brand): migrate remaining Zwit Marketing copy'
+          git push origin HEAD:release/zwit-v1.5-seven-capitals
