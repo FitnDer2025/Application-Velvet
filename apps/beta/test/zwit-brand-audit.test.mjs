@@ -52,13 +52,16 @@ function stripTechnicalVelvet(value) {
     .replace(/\bVelvet\/[A-Za-z0-9_./+%-]+\b/g, '')
     .replace(/\/[^\s"'<>]*velvet[^\s"'<>]*/gi, '')
     .replace(/\bX-Velvet-[A-Za-z0-9_-]+\b/gi, '')
-    .replace(/\bVelvet-iOS\/[A-Za-z0-9_.-]+\b/gi, '');
+    .replace(/\bVelvet-iOS\/[A-Za-z0-9_.-]+\b/gi, '')
+    .replace(/\bvelvet(?:-[a-z0-9_]+)+\b/gi, '');
   return text;
 }
 
 function isTechnical(value) {
   const text = String(value).trim();
   if (!text) return true;
+  if (text === 'velvet') return true;
+  if (/^Velvet-\\\(/.test(text)) return true;
   if (/\\s|\[\^/.test(text)) return true;
   return !/\bvelvet\b/i.test(stripTechnicalVelvet(text));
 }
