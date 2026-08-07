@@ -110,7 +110,7 @@
     return `<section class="card settings-card velvet-verification-card" data-velvet-verification-card>
       <p class="eyebrow">Confiance Zwit</p>
       <h2>Identité et majorité</h2>
-      <p>Le contrôle est réalisé par un prestataire tiers. Zwit reçoit seulement le résultat nécessaire pour attribuer le badge ; aucune pièce d’identité, identité civile ou date de naissance n’est conservée par Velvet.</p>
+      <p>Le contrôle est réalisé par un prestataire tiers. Zwit reçoit seulement le résultat nécessaire pour attribuer le badge ; aucune pièce d’identité, identité civile ou date de naissance n’est conservée par Zwit.</p>
       <div class="velvet-feature-status ${verified ? 'verified' : ''}">
         <span aria-hidden="true">${verified ? '✓' : '◇'}</span>
         <div><strong>${escapeHtml(verificationStatusLabel(verification.status))}</strong><small>${verified ? `Vérifiée le ${escapeHtml(formatDate(verification.verified_at))}` : payload?.accessBlockedByVerification ? 'L’accès communautaire reste fermé jusqu’à la confirmation.' : payload?.bypassedForInternalRecipe ? 'Compte autorisé uniquement pour la recette interne.' : 'Le verrou sera activé avant toute ouverture externe.'}</small></div>
