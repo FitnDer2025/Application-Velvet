@@ -63,12 +63,16 @@ async function signedInternalMediaUrl(env, path, expiresIn, transform = null) {
 export async function signedMediaUrl(env, session, path, expiresIn = 600, transform = null) {
   if (!path) return null;
   const ttl = Math.max(60, Math.min(3600, Number(expiresIn) || 600));
+  const normalized = cleanTransform(transform);
   const response = await supabase(
     env,
     `/storage/v1/object/sign/velvet-media/${path}`,
     {
       method: 'POST',
-      body: signedBody(ttl, transform)
+      body: JSON.stringify({
+        expiresIn: ttl,
+        ...(normalized ? { transform: normalized } : {})
+      })
     },
     session.access_token
   );
