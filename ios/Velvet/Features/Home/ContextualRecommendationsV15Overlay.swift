@@ -106,14 +106,20 @@ struct ContextualRecommendationsV15Overlay: View {
     private func load() async {
         guard !loading else { return }
         loading = true; defer { loading = false }
-        do { recommendations = try await session.contextualRecommendationsV15(); error = nil }
-        catch { self.error = ErrorMessage.text(for: error) }
+        do {
+            recommendations = try await session.contextualRecommendationsV15()
+            error = nil
+        } catch {
+            self.error = ErrorMessage.text(for: error)
+        }
     }
 
     private func feedback(_ item: ContextualRecommendationV15, more: Bool) async {
         do {
             try await session.recommendationFeedbackV15(type: item.type, id: item.id, moreLikeThis: more)
             await load()
-        } catch { error = ErrorMessage.text(for: error) }
+        } catch {
+            self.error = ErrorMessage.text(for: error)
+        }
     }
 }
