@@ -40,7 +40,7 @@
       scene('Le libertinage évolue', 'Un ruban bordeaux se déploie et dessine le V Zwit sur fond noir profond.', 'Le libertinage évolue.', 4, 'Silk Reveal', 'Créer l’arrêt visuel et installer la marque.'),
       scene('Des rencontres qui ont du sens', 'Capture premium de la recherche membres, profils vérifiés et filtres de proximité.', 'Des rencontres de qualité.', 8, 'Glass Morph', 'Montrer la qualité de la communauté.'),
       scene('Tout un univers à proximité', 'Carte Zwit, établissements, événements et agenda autour de Lille et de la Belgique.', 'Des lieux. Des événements. Une communauté.', 8, 'Champagne Glow', 'Présenter l’écosystème complet.'),
-      scene('La confiance intégrée', 'Messagerie, albums privés temporaires, Pacte Zwit et décisions de consentement.', 'Confiance. Discrétion. Consentement.', 9, 'Zwit Fade', 'Rassurer et différencier Velvet.'),
+      scene('La confiance intégrée', 'Messagerie, albums privés temporaires, Pacte Zwit et décisions de consentement.', 'Confiance. Discrétion. Consentement.', 9, 'Zwit Fade', 'Rassurer et différencier Zwit.'),
       scene('Zwit Pro', 'Un responsable de club crée une soirée, suit les inscriptions et pilote son remplissage.', 'Organiser. Remplir. Fidéliser.', 9, 'Glass Morph', 'Mettre en valeur la dimension business.'),
       scene('Signature', 'Le logo Zwit apparaît avec le ruban, une lumière champagne et la signature officielle.', 'Là où les plus belles rencontres commencent.', 7, 'Zwit Blur', 'Conclure avec une empreinte mémorable.')
     ];
@@ -73,7 +73,7 @@
       audience: 'Couples, femmes seules et professionnels du secteur',
       objective: 'Présenter Zwit comme la nouvelle référence premium des rencontres libres et de l’écosystème événementiel.',
       prompt: 'Crée une publicité sociale verticale qui démontre que Zwit ne se limite pas à une liste de profils : Zwit réunit rencontres, confiance, établissements, événements et outils professionnels dans une seule expérience premium.',
-      voiceOver: 'Pendant des années, les rencontres se sont limitées à des profils et des messages. Zwit réunit enfin les personnes, les lieux et les expériences dans un même écosystème pensé autour de la confiance, de la discrétion et du consentement. Velvet. Là où les plus belles rencontres commencent.',
+      voiceOver: 'Pendant des années, les rencontres se sont limitées à des profils et des messages. Zwit réunit enfin les personnes, les lieux et les expériences dans un même écosystème pensé autour de la confiance, de la discrétion et du consentement. Zwit. Là où les plus belles rencontres commencent.',
       music: {
         genre: 'Cinématographique premium',
         tempo: 92,
@@ -341,7 +341,7 @@
   }
 
   function buildVoiceOver(current) {
-    return `Le libertinage évolue. ${current.objective} Zwit réunit les personnes, les établissements et les événements dans une expérience pensée autour de la confiance, de la discrétion et du consentement. Velvet. Là où les plus belles rencontres commencent.`;
+    return `Le libertinage évolue. ${current.objective} Zwit réunit les personnes, les établissements et les événements dans une expérience pensée autour de la confiance, de la discrétion et du consentement. Zwit. Là où les plus belles rencontres commencent.`;
   }
 
   function wait(ms) {
@@ -645,7 +645,7 @@
 
   function addScene() {
     const current = project();
-    const next = scene('Nouvelle scène', 'Décris le plan ou sélectionne un asset Velvet.', 'Nouveau message', 6, 'Zwit Fade', 'Compléter la narration.');
+    const next = scene('Nouvelle scène', 'Décris le plan ou sélectionne un asset Zwit.', 'Nouveau message', 6, 'Zwit Fade', 'Compléter la narration.');
     current.scenes.push(next);
     state.selectedSceneId = next.id;
     persist();
@@ -659,7 +659,7 @@
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `${current.title.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'velvet-studio'}.json`;
+    link.download = `${current.title.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'zwit-studio'}.json`;
     link.click();
     URL.revokeObjectURL(link.href);
   }
@@ -719,7 +719,7 @@
       ${topBar('Projets', 'Agence marketing IA intégrée à Zwit', '<button class="vs1-btn primary" data-action="new-project">+ Nouveau projet</button>')}
       <main class="vs1-project-main">
         <section class="vs1-hero-card">
-          <div><span class="vs1-kicker">Sprint 1 · Studio de production</span><h1>Conçois, dirige et monte les campagnes Velvet.</h1><p>Prompt principal, visionneuse temps réel, storyboard éditable, timeline multipiste, agents IA, voix off, musique, assets et historique de versions.</p></div>
+          <div><span class="vs1-kicker">Sprint 1 · Studio de production</span><h1>Conçois, dirige et monte les campagnes Zwit.</h1><p>Prompt principal, visionneuse temps réel, storyboard éditable, timeline multipiste, agents IA, voix off, musique, assets et historique de versions.</p></div>
           <button class="vs1-btn primary large" data-action="new-project">Créer une campagne</button>
         </section>
         <div class="vs1-metrics">

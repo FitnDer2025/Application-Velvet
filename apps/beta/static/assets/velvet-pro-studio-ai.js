@@ -672,7 +672,7 @@
       const animated={id:uid(),project_id:render.project_id||state.project?.id,establishment_id:venueId(),render_type:'video',format:'9:16',variant_index:1,previewUrl:URL.createObjectURL(blob),blob,created_at:new Date().toISOString()};state.selectedRender=animated;state.generated.unshift(animated);state.progress='Teaser vidéo prêt. Vous pouvez le prévisualiser et le télécharger.';
       if(!state.migrationPending&&animated.project_id){try{await uploadRender(animated,animated.project_id)}catch{}}
       renderStudio();
-      const stage=$('.vpsai-preview-stage');if(stage)stage.innerHTML=`<video src="${animated.previewUrl}" controls autoplay loop style="max-width:94%;max-height:74vh;border-radius:12px"></video><div class="vpsai-render-actions"><a href="${animated.previewUrl}" download="teaser-velvet.webm">Télécharger la vidéo</a></div>`;
+      const stage=$('.vpsai-preview-stage');if(stage)stage.innerHTML=`<video src="${animated.previewUrl}" controls autoplay loop style="max-width:94%;max-height:74vh;border-radius:12px"></video><div class="vpsai-render-actions"><a href="${animated.previewUrl}" download="teaser-zwit.webm">Télécharger la vidéo</a></div>`;
     } catch(error){state.error=error.message;state.progress='';renderStudio();}
   }
 

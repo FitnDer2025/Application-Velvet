@@ -129,9 +129,9 @@
       if (!modalPrompt.value || modalPrompt.value.includes('Présente Zwit comme une expérience premium')) modalPrompt.value = DEFAULT_STORY;
     }
     const heading = document.querySelector('.vsr-home h1');
-    if (heading) heading.innerHTML = 'Une envie.<br>Une histoire. Velvet.';
+    if (heading) heading.innerHTML = 'Une envie.<br>Une histoire. Zwit.';
     const intro = document.querySelector('.vsr-home > p');
-    if (intro) intro.textContent = 'Décrivez l’émotion à transmettre. Le scénario raconte une histoire et dirige la navigation dans le véritable espace Membres Velvet.';
+    if (intro) intro.textContent = 'Décrivez l’émotion à transmettre. Le scénario raconte une histoire et dirige la navigation dans le véritable espace Membres Zwit.';
     document.querySelectorAll('[data-vsr-stage]').forEach(watchStage);
   }
 

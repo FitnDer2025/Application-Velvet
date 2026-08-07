@@ -222,7 +222,7 @@
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         action: 'generate_image',
-        prompt: `${direction.backgroundPrompt}. Poster background only. Preserve clean negative space for exact event typography added later by Velvet. No text, no letters, no numbers, no logo.`,
+        prompt: `${direction.backgroundPrompt}. Poster background only. Preserve clean negative space for exact event typography added later by Zwit. No text, no letters, no numbers, no logo.`,
         format: body.format || '4:5'
       })
     });
