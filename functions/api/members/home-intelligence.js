@@ -15,6 +15,8 @@ const PROFILE_SELECT = [
   'media_assets(id,media_role,is_primary,storage_path,moderation_status,created_at)'
 ].join(',');
 const geocodeCache = new Map();
+const MAX_EXTERNAL_GEOCODES = 8;
+const HOME_PROFILE_LIMIT = 120;
 
 function number(value, fallback = null) {
   const parsed = Number(value);
@@ -30,13 +32,15 @@ function cleanZone(value) {
     .slice(0, 100);
 }
 
-async function geocodeZone(value) {
+async function geocodeZone(value, budget) {
   const zone = cleanZone(value);
   if (zone.length < 2) return null;
   if (geocodeCache.has(zone)) return geocodeCache.get(zone);
+  if (!budget || budget.remaining <= 0) return null;
+  budget.remaining -= 1;
   const task = (async () => {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 2500);
+    const timer = setTimeout(() => controller.abort(), 1800);
     try {
       const response = await fetch(
         `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(zone)}&fields=nom,centre&boost=population&limit=1`,
@@ -54,6 +58,7 @@ async function geocodeZone(value) {
     }
   })();
   geocodeCache.set(zone, task);
+  if (geocodeCache.size > 500) geocodeCache.delete(geocodeCache.keys().next().value);
   return task;
 }
 
@@ -174,20 +179,21 @@ export async function onRequestGet({ request, env }) {
     const admission = await requireAdmittedMember(env, access);
     if (admission.response) return admission.response;
     const token = access.session;
+    const externalGeocodeBudget = { remaining: MAX_EXTERNAL_GEOCODES };
 
     const [profileRows, rawCandidates, preferenceRows, locationRows, favorites, reactions, recommendations,
       venueCatalog, venueRelationships, establishments, events] = await Promise.all([
       restJson(env, `/rest/v1/member_profiles?select=${encodeURIComponent(PROFILE_SELECT)}&id=eq.${encodeURIComponent(admission.admission.id)}&limit=1`, token),
-      restJson(env, `/rest/v1/member_profiles?select=${encodeURIComponent(PROFILE_SELECT)}&id=neq.${encodeURIComponent(admission.admission.id)}&visibility=in.(beta_members,published)&profile_photo_ready=eq.true&order=updated_at.desc&limit=300`, token),
+      restJson(env, `/rest/v1/member_profiles?select=${encodeURIComponent(PROFILE_SELECT)}&id=neq.${encodeURIComponent(admission.admission.id)}&visibility=in.(beta_members,published)&profile_photo_ready=eq.true&order=updated_at.desc&limit=${HOME_PROFILE_LIMIT}`, token),
       restJson(env, `/rest/v1/member_experience_preferences?select=discovery_radius_km,profile_sort,ai_personalization_enabled&user_id=eq.${encodeURIComponent(access.account.userId)}&limit=1`, token).catch(() => []),
       restJson(env, `/rest/v1/member_location_settings?select=enabled,latitude_bucket,longitude_bucket&user_id=eq.${encodeURIComponent(access.account.userId)}&limit=1`, token),
       restJson(env, `/rest/v1/favorites?select=profile_id,created_at&owner_user_id=eq.${encodeURIComponent(access.account.userId)}&order=created_at.desc`, token),
       restJson(env, `/rest/v1/profile_reactions?select=target_profile_id,reaction,updated_at&reactor_profile_id=eq.${encodeURIComponent(admission.admission.id)}`, token),
-      restJson(env, '/rest/v1/recommendations?select=id,author_profile_id,target_type,target_id,body,rating,created_at&status=eq.published&order=created_at.desc&limit=800', token),
+      restJson(env, '/rest/v1/recommendations?select=id,author_profile_id,target_type,target_id,body,rating,created_at&status=eq.published&order=created_at.desc&limit=400', token),
       restJson(env, '/rest/v1/rpc/member_venue_catalog', token, { method: 'POST', body: '{}' }),
       restJson(env, `/rest/v1/profile_venue_relationships?select=venue_id,relation_type,occurred_on,updated_at&profile_id=eq.${encodeURIComponent(admission.admission.id)}`, token),
       restJson(env, '/rest/v1/establishments?select=id,directory_venue_id,name,kind,description,city,verified_at&visibility=eq.published&order=name.asc&limit=500', token),
-      restJson(env, '/rest/v1/events?select=id,owner_type,establishment_id,organizer_profile_id,title,description,starts_at,ends_at,capacity,location_public,audience,price_cents,currency,registration_open,dress_code,event_category,cap_zone,cap_venue,created_at,updated_at&visibility=eq.published&moderation_status=eq.approved&starts_at=gte.now()&order=starts_at.asc&limit=300', token)
+      restJson(env, '/rest/v1/events?select=id,owner_type,establishment_id,organizer_profile_id,title,description,starts_at,ends_at,capacity,location_public,audience,price_cents,currency,registration_open,dress_code,event_category,cap_zone,cap_venue,created_at,updated_at&visibility=eq.published&moderation_status=eq.approved&starts_at=gte.now()&order=starts_at.asc&limit=200', token)
     ]);
 
     const current = (await enrichProfilesMedia(env, token, profileRows || []))?.[0];
@@ -208,7 +214,7 @@ export async function onRequestGet({ request, env }) {
     });
 
     const rankedProfiles = await Promise.all(candidates.map(async (candidate) => {
-      const coordinates = await geocodeZone(candidate.location_zone);
+      const coordinates = center ? await geocodeZone(candidate.location_zone, externalGeocodeBudget) : null;
       const distanceKm = haversine(center, coordinates);
       const reaction = reactionByProfile.get(candidate.id) || 0;
       const recommendationCount = recommendationsByTarget.get(candidate.id) || 0;
@@ -265,7 +271,8 @@ export async function onRequestGet({ request, env }) {
     const nearbyEvents = [];
     for (const event of events || []) {
       let coordinates = eventLocation(event, establishmentsById, venuesById);
-      if (!coordinates) {
+      if (!coordinates && externalGeocodeBudget.remaining > 0) {
+        externalGeocodeBudget.remaining -= 1;
         coordinates = await geocodeVenueAddress({
           address_public: event.location_public,
           city: event.location_public,
