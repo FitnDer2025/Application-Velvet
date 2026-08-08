@@ -11,6 +11,13 @@ test('profile media signing is chunked instead of one unbounded Storage request'
   assert.doesNotMatch(media, /JSON\.stringify\(\{ expiresIn: ttl, paths: uniquePaths \}\)/);
 });
 
+test('member media and internal AI portraits never share one Storage authorization batch', () => {
+  assert.match(media, /const internalPaths = uniquePaths\.filter\(\(path\) => canUseInternalMediaFallback\(env, path\)\)/);
+  assert.match(media, /const memberPaths = uniquePaths\.filter\(\(path\) => !canUseInternalMediaFallback\(env, path\)\)/);
+  assert.match(media, /signInternalMediaBatch/);
+  assert.match(media, /SUPABASE_SERVICE_ROLE_KEY/);
+});
+
 test('media fallback remains strictly bounded to protect the Cloudflare subrequest budget', () => {
   assert.match(media, /SIGNED_URL_FALLBACK_LIMIT\s*=\s*18/);
   assert.match(media, /slice\(0, SIGNED_URL_FALLBACK_LIMIT\)/);
