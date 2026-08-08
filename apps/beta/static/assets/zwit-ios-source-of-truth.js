@@ -4,6 +4,7 @@
   if (!location.pathname.startsWith('/membres')) return;
 
   const LOGO = '/assets/zwit-logo-transparent.png?v=20260806-10';
+  const MOBILE_POLISH_CSS = '/assets/zwit-mobile-polish.css?v=20260808-1';
   const ICONS = {
     home: '<path d="M3.5 10.4 12 3.6l8.5 6.8v9.1a1.7 1.7 0 0 1-1.7 1.7H5.2a1.7 1.7 0 0 1-1.7-1.7z"/><path d="M9 21v-7h6v7"/>',
     discover: '<path d="M8.6 11.2a3.3 3.3 0 1 0 0-6.6 3.3 3.3 0 0 0 0 6.6Z"/><path d="M2.8 19.3c.6-3.3 2.7-5.2 5.8-5.2 2.3 0 4.1 1 5.1 2.9"/><path d="M15.5 10a2.7 2.7 0 1 0 0-5.4"/><path d="M16.2 13.8c2.7.3 4.4 2 4.9 4.6"/>',
@@ -36,6 +37,15 @@
     return `<svg class="zwit-ios-symbol" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
   }
 
+  function ensureMobilePolishCss() {
+    if (document.querySelector('link[data-zwit-mobile-polish]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = MOBILE_POLISH_CSS;
+    link.dataset.zwitMobilePolish = '1';
+    document.head.append(link);
+  }
+
   function upgradeBrand() {
     document.querySelectorAll('.brand-mark').forEach((mark) => {
       if (mark.dataset.zwitIosLogo === '1') return;
@@ -47,6 +57,42 @@
       mark.append(image);
       mark.dataset.zwitIosLogo = '1';
     });
+  }
+
+  function normalizeMobileHeader() {
+    const actions = document.querySelector('.mobile-head-actions');
+    if (!actions) return;
+
+    // Ce soir vit dans Profil comme sur iOS ; il ne concurrence plus les actions du header.
+    actions.querySelectorAll('[data-zwit-route="tonight"]').forEach((node) => node.remove());
+
+    const notificationButtons = [...actions.querySelectorAll('[data-route="notifications"]')];
+    notificationButtons.slice(1).forEach((node) => node.remove());
+    const notifications = notificationButtons[0];
+    if (notifications) {
+      const correctIcon = notifications.children.length === 1
+        && notifications.firstElementChild?.matches('svg.zwit-mobile-header-icon');
+      if (!correctIcon) {
+        notifications.innerHTML = svg('notifications');
+        notifications.firstElementChild?.classList.add('zwit-mobile-header-icon');
+      }
+      notifications.setAttribute('aria-label', 'Notifications');
+      notifications.dataset.zwitIosStandaloneIcon = '1';
+    }
+
+    const menuButtons = [...actions.querySelectorAll('#mobileMenuButton')];
+    menuButtons.slice(1).forEach((node) => node.remove());
+    const menu = menuButtons[0];
+    if (menu) {
+      const correctIcon = menu.children.length === 1
+        && menu.firstElementChild?.matches('svg.zwit-mobile-header-icon');
+      if (!correctIcon) {
+        menu.innerHTML = svg('menu');
+        menu.firstElementChild?.classList.add('zwit-mobile-header-icon');
+      }
+      menu.setAttribute('aria-label', 'Ouvrir la navigation');
+      menu.dataset.zwitIosStandaloneIcon = '1';
+    }
   }
 
   function upgradeNavigation() {
@@ -68,17 +114,7 @@
       target.dataset.zwitIosIcon = 'tonight';
     });
 
-    const notifications = document.querySelector('.mobile-head-actions [data-route="notifications"]');
-    if (notifications && notifications.dataset.zwitIosStandaloneIcon !== '1') {
-      notifications.innerHTML = svg('notifications');
-      notifications.dataset.zwitIosStandaloneIcon = '1';
-    }
-
-    const menu = document.querySelector('#mobileMenuButton');
-    if (menu && menu.dataset.zwitIosStandaloneIcon !== '1') {
-      menu.innerHTML = svg('menu');
-      menu.dataset.zwitIosStandaloneIcon = '1';
-    }
+    normalizeMobileHeader();
   }
 
   function upgradeMessagingComposer() {
@@ -157,6 +193,7 @@
     frame = 0;
     document.body.classList.add('zwit-ios-source-of-truth');
     document.documentElement.dataset.zwitUiSource = 'ios';
+    ensureMobilePolishCss();
     upgradeBrand();
     upgradeNavigation();
     upgradeDynamicSurfaces();
@@ -185,7 +222,7 @@
   schedule();
 
   window.ZwitIOSSourceOfTruth = {
-    version: '1.5',
+    version: '1.5.1',
     synchronize,
     icons: Object.keys(ICONS)
   };
