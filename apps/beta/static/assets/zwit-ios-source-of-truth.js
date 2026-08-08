@@ -5,6 +5,7 @@
 
   const LOGO = '/assets/zwit-logo-transparent.png?v=20260806-10';
   const MOBILE_POLISH_CSS = '/assets/zwit-mobile-polish.css?v=20260808-1';
+  const INFRASTRUCTURE_ERROR = /Too many subrequests|single Worker invocation|developers\.cloudflare\.com\/workers\/wrangler\/configuration\/\#limits/i;
   const ICONS = {
     home: '<path d="M3.5 10.4 12 3.6l8.5 6.8v9.1a1.7 1.7 0 0 1-1.7 1.7H5.2a1.7 1.7 0 0 1-1.7-1.7z"/><path d="M9 21v-7h6v7"/>',
     discover: '<path d="M8.6 11.2a3.3 3.3 0 1 0 0-6.6 3.3 3.3 0 0 0 0 6.6Z"/><path d="M2.8 19.3c.6-3.3 2.7-5.2 5.8-5.2 2.3 0 4.1 1 5.1 2.9"/><path d="M15.5 10a2.7 2.7 0 1 0 0-5.4"/><path d="M16.2 13.8c2.7.3 4.4 2 4.9 4.6"/>',
@@ -63,7 +64,6 @@
     const actions = document.querySelector('.mobile-head-actions');
     if (!actions) return;
 
-    // Ce soir vit dans Profil comme sur iOS ; il ne concurrence plus les actions du header.
     actions.querySelectorAll('[data-zwit-route="tonight"]').forEach((node) => node.remove());
 
     const notificationButtons = [...actions.querySelectorAll('[data-route="notifications"]')];
@@ -177,7 +177,16 @@
     window.setTimeout(() => document.getElementById('zwitPassport')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 220);
   }
 
+  function sanitizeInfrastructureErrors() {
+    const content = document.querySelector('#content');
+    if (!content || content.dataset.zwitInfrastructureRecovery === '1') return;
+    if (!INFRASTRUCTURE_ERROR.test(content.textContent || '')) return;
+    content.dataset.zwitInfrastructureRecovery = '1';
+    content.innerHTML = `<div class="page zwit-ios-surface"><section class="card zwit-service-recovery" role="alert"><p class="eyebrow">Connexion Zwit</p><h1>Un instant.</h1><p>La connexion aux données a été interrompue. Tes informations sont conservées ; réessaie simplement dans quelques secondes.</p><button type="button" class="primary" data-zwit-retry-service>Réessayer</button></section></div>`;
+  }
+
   function upgradeDynamicSurfaces() {
+    sanitizeInfrastructureErrors();
     document.querySelectorAll('.page,.form-shell,.velvet-direct-conversation').forEach((node) => {
       node.classList.add('zwit-ios-surface');
     });
@@ -208,6 +217,11 @@
     if (event.target.closest('[data-zwit-passport-focus]')) {
       event.preventDefault();
       focusPassport();
+      return;
+    }
+    if (event.target.closest('[data-zwit-retry-service]')) {
+      event.preventDefault();
+      location.reload();
     }
   });
 
