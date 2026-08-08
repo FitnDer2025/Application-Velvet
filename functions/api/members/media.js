@@ -2,6 +2,9 @@ import { supabase } from '../auth/_shared.js';
 
 const INTERNAL_ENVIRONMENTS = new Set(['development', 'dev', 'staging', 'preview', 'internal', 'test']);
 const EPHEMERAL_PREFIX = 'messages-ephemeral/';
+const SIGNED_URL_BATCH_SIZE = 10;
+const SIGNED_URL_BATCH_LIMIT = 12;
+const SIGNED_URL_FALLBACK_LIMIT = 18;
 
 function mediaUrl(env, signedPath) {
   const supabaseBase = String(env.SUPABASE_URL).replace(/\/$/, '');
@@ -92,6 +95,20 @@ export async function signedMediaUrl(env, session, path, expiresIn = 600, transf
   return signMedia(env, session, path, expiresIn, transform);
 }
 
+async function signMediaBatch(env, session, paths, ttl) {
+  const response = await supabase(
+    env,
+    '/storage/v1/object/sign/velvet-media',
+    {
+      method: 'POST',
+      body: JSON.stringify({ expiresIn: ttl, paths })
+    },
+    session.access_token
+  );
+  const payload = await response.json().catch(() => []);
+  return { ok: response.ok && Array.isArray(payload), payload };
+}
+
 export async function signedMediaUrls(env, session, paths = [], expiresIn = 600) {
   const uniquePaths = [...new Set((paths || [])
     .map((path) => String(path || '').trim())
@@ -100,26 +117,38 @@ export async function signedMediaUrls(env, session, paths = [], expiresIn = 600)
   if (!uniquePaths.length) return urls;
 
   const ttl = Math.max(60, Math.min(3600, Number(expiresIn) || 600));
-  const response = await supabase(
-    env,
-    '/storage/v1/object/sign/velvet-media',
-    {
-      method: 'POST',
-      body: JSON.stringify({ expiresIn: ttl, paths: uniquePaths })
-    },
-    session.access_token
-  );
-  const payload = await response.json().catch(() => []);
+  const failedPaths = [];
+  const maxBatchedPaths = SIGNED_URL_BATCH_SIZE * SIGNED_URL_BATCH_LIMIT;
+  const batchedPaths = uniquePaths.slice(0, maxBatchedPaths);
 
-  if (response.ok && Array.isArray(payload)) {
-    payload.forEach((item, index) => {
-      const path = String(item?.path || uniquePaths[index] || '');
+  for (let offset = 0; offset < batchedPaths.length; offset += SIGNED_URL_BATCH_SIZE) {
+    const batch = batchedPaths.slice(offset, offset + SIGNED_URL_BATCH_SIZE);
+    const result = await signMediaBatch(env, session, batch, ttl);
+    if (!result.ok) {
+      failedPaths.push(...batch);
+      continue;
+    }
+    result.payload.forEach((item, index) => {
+      const path = String(item?.path || batch[index] || '');
       if (path && item?.signedURL) urls.set(path, mediaUrl(env, String(item.signedURL)));
+      else if (path) failedPaths.push(path);
     });
   }
 
-  // Le seul secours individuel autorisé reste celui des agents IA internes.
-  // En production, un échec de signature en lot ne déclenche jamais N sous-requêtes.
+  // Secours strictement borné : si Storage rejette un lot, on restaure les médias
+  // prioritaires sans pouvoir recréer un fan-out supérieur au plafond Worker.
+  const fallbackCandidates = [
+    ...failedPaths,
+    ...uniquePaths.slice(maxBatchedPaths)
+  ].filter((path, index, rows) => path && !urls.has(path) && rows.indexOf(path) === index)
+    .slice(0, SIGNED_URL_FALLBACK_LIMIT);
+
+  for (const path of fallbackCandidates) {
+    const fallback = await signMedia(env, session, path, ttl, null);
+    if (fallback) urls.set(path, fallback);
+  }
+
+  // Les agents IA internes conservent leur secours service-role uniquement hors production.
   for (const path of uniquePaths) {
     if (urls.has(path) || !canUseInternalMediaFallback(env, path)) continue;
     const fallback = await signedInternalMediaUrl(env, path, ttl, null);
@@ -130,7 +159,6 @@ export async function signedMediaUrls(env, session, paths = [], expiresIn = 600)
 
 export async function signedEphemeralMediaUrl(env, session, path, expiresIn = 60) {
   if (!String(path || '').startsWith(EPHEMERAL_PREFIX)) return null;
-  // Même après ouverture, l'URL reste très courte et ne doit jamais être mise en cache durablement.
   return signMedia(env, session, path, Math.max(60, Math.min(120, Number(expiresIn) || 60)), null);
 }
 

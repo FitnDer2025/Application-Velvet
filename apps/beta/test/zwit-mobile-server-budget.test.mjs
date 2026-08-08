@@ -14,14 +14,18 @@ test('l accueil membre reste sous un budget explicite de sous-requetes externes'
   assert.doesNotMatch(home, /order=updated_at\.desc&limit=300/);
 });
 
-test('les medias de profils sont signes en lot et non fichier par fichier', async () => {
+test('les medias de profils sont signes par petits lots avec secours borne', async () => {
   const media = await read('functions/api/members/media.js');
   assert.match(media, /export async function signedMediaUrls/);
   assert.match(media, /\/storage\/v1\/object\/sign\/velvet-media/);
-  assert.match(media, /paths: uniquePaths/);
+  assert.match(media, /const SIGNED_URL_BATCH_SIZE = 10/);
+  assert.match(media, /const SIGNED_URL_FALLBACK_LIMIT = 18/);
+  assert.match(media, /slice\(offset, offset \+ SIGNED_URL_BATCH_SIZE\)/);
+  assert.match(media, /JSON\.stringify\(\{ expiresIn: ttl, paths \}\)/);
+  assert.doesNotMatch(media, /JSON\.stringify\(\{ expiresIn: ttl, paths: uniquePaths \}\)/);
   assert.match(media, /collectMediaPaths\(rows\)/);
   assert.match(media, /const urls = await signedMediaUrls\(env, session, collectMediaPaths\(rows\)\)/);
-  assert.match(media, /En production, un échec de signature en lot ne déclenche jamais N sous-requêtes/);
+  assert.match(media, /slice\(0, SIGNED_URL_FALLBACK_LIMIT\)/);
 });
 
 test('le Web mobile charge le Halo Dock sur six destinations sans retour a la grille deux lignes', async () => {
