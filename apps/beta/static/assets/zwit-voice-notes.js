@@ -59,14 +59,20 @@
   }
 
   function renderVoiceBubble(message) {
-    const attachment = message?.attachments?.find((item) => item.kind === 'voice' || String(item.mime_type || '').startsWith('audio/'));
-    if (!attachment?.previewUrl) return;
+    const attachment = message?.attachments?.find((item) =>
+      item.kind === 'voice'
+      || item.attachment_kind === 'voice'
+      || String(item.mime_type || item.mimeType || '').startsWith('audio/')
+    );
+    const previewUrl = attachment?.previewUrl || attachment?.preview_url || '';
+    if (!previewUrl) return;
     const messages = document.querySelector('.velvet-direct-conversation .messages');
     if (!messages) return;
     const article = document.createElement('article');
     article.className = 'message mine zwit-voice-message';
     article.dataset.messageId = message.id || '';
-    article.innerHTML = `<small>Vous</small><div class="zwit-voice-player"><span aria-hidden="true">⌁</span><audio controls preload="metadata" src="${attachment.previewUrl}"></audio><small>${secondsLabel(attachment.durationSeconds || 0)}</small></div>`;
+    const duration = attachment.durationSeconds ?? attachment.duration_seconds ?? 0;
+    article.innerHTML = `<small>Vous</small><div class="zwit-voice-player"><span aria-hidden="true">⌁</span><audio controls preload="metadata" src="${previewUrl}"></audio><small>${secondsLabel(duration)}</small></div>`;
     messages.appendChild(article);
     messages.scrollTo({ top: messages.scrollHeight, behavior: 'smooth' });
   }

@@ -172,7 +172,7 @@ extension SessionService {
         })
 
         let response = try await APIClient().upload(
-            "/api/members/messages",
+            "/api/members/message-media",
             parts: parts,
             as: CreatedMessageResponse.self
         )

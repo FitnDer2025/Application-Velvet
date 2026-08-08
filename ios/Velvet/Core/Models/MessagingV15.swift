@@ -47,7 +47,43 @@ struct ZwitVoiceAttachment: Decodable, Sendable {
     let mimeType: String?
     let originalName: String?
     let sizeBytes: Int?
-    let kind: String?
+    let attachmentKind: String?
     let durationSeconds: Int?
     let previewUrl: URL?
+}
+
+struct ZwitEphemeralSendResponse: Decodable, Sendable {
+    let ok: Bool
+    let message: ZwitEphemeralMessage
+}
+
+struct ZwitEphemeralMessage: Decodable, Sendable {
+    let id: UUID?
+    let conversationId: UUID?
+    let body: String?
+    let createdAt: String?
+    let ephemeral: ZwitEphemeralMetadata?
+}
+
+struct ZwitEphemeralMetadata: Decodable, Sendable {
+    let mode: String
+    let expiresAt: String
+    let mediaType: String
+}
+
+struct ZwitEphemeralOpenResponse: Decodable, Sendable {
+    let ok: Bool
+    let media: ZwitEphemeralOpenedMedia
+}
+
+struct ZwitEphemeralOpenedMedia: Decodable, Sendable {
+    let attachmentId: UUID?
+    let mimeType: String?
+    let originalName: String?
+    let mode: String
+    let expiresAt: String
+    let openedAt: String?
+    let sender: Bool
+    let previewUrl: URL
+    let urlExpiresIn: Int
 }

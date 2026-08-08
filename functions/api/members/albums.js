@@ -6,8 +6,37 @@ import {
   restJson,
   withSession
 } from './_shared.js';
+import { enrichProfileMedia } from './media.js';
 
 const LEVELS = ['public','request','trusted_circle','private_circle','favorites','temporary'];
+const ALBUM_SELECT = [
+  'id',
+  'name',
+  'confidentiality',
+  'expires_at',
+  'created_at',
+  'media_assets(id,owner_user_id,media_type,media_role,storage_path,moderation_status,created_at)',
+  'album_access_grants(grantee_user_id,grantee_profile_id,granted_at,expires_at,revoked_at)'
+].join(',');
+
+export async function onRequestGet({ request, env }) {
+  try {
+    const access = await memberSession(request, env);
+    if (access.response) return access.response;
+    const admission = await requireAdmittedMember(env, access);
+    if (admission.response) return admission.response;
+
+    const rows = await restJson(
+      env,
+      `/rest/v1/albums?select=${encodeURIComponent(ALBUM_SELECT)}&profile_id=eq.${encodeURIComponent(admission.admission.id)}&order=created_at.desc`,
+      access.session
+    );
+    const enriched = await enrichProfileMedia(env, access.session, { albums: rows || [] });
+    return withSession({ albums: enriched.albums || [] }, access.session);
+  } catch (error) {
+    return json({ error: error.message || 'album_read_failed' }, 400);
+  }
+}
 
 export async function onRequestPost({ request, env }) {
   try {

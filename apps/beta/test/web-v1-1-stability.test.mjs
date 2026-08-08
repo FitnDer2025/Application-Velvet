@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 const read = (path) => readFile(path, 'utf8');
 
-test('le menu mobile V1.1 a un contrôleur unique et reste au-dessus du voile', async () => {
+test('le menu mobile V1.5 a un contrôleur unique et reste au-dessus du voile', async () => {
   const [html, shell, core, messaging, premium, feed, recovery, styles, messagingStyles] = await Promise.all([
     read('apps/web/velvet-members-beta-live.html'),
     read('apps/beta/static/assets/velvet-web-ios-parity.js'),
@@ -158,7 +158,7 @@ test('les notifications utilisent le même parcours depuis le commutateur et le 
   assert.match(endpoint, /browser_enabled: true/);
 });
 
-test('le cache V30 force le chargement des parcours Web les plus récents sur les PWA existantes', async () => {
+test('le cache V31 force le chargement du shell iOS-source et des parcours v1.5 sur les PWA existantes', async () => {
   const [html, worker] = await Promise.all([
     read('apps/web/velvet-members-beta-live.html'),
     read('apps/beta/static/sw.js')
@@ -172,12 +172,18 @@ test('le cache V30 force le chargement des parcours Web les plus récents sur le
     'velvet-mobile-feed-hotfix.js?v=20260803-3',
     'velvet-interaction-recovery.css?v=20260803-3',
     'velvet-interaction-recovery.js?v=20260803-3',
-    'velvet-web-ios-parity.css?v=20260803-3',
-    'velvet-web-ios-parity.js?v=20260803-3',
+    'velvet-web-ios-parity.css?v=20260807-1',
+    'velvet-web-ios-parity.js?v=20260807-1',
+    'zwit-ios-source-of-truth.css?v=20260807-1',
+    'zwit-ios-source-of-truth.js?v=20260807-1',
+    'zwit-passport.js?v=20260807-1',
+    'zwit-tonight.js?v=20260807-1',
+    'zwit-voice-notes.js?v=20260807-1',
+    'zwit-ephemeral-messaging.js?v=20260807-1',
     'location-verification.js?v=20260803-1'
   ]) {
     assert.match(html, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(worker, /velvet-beta-shell-v30/);
+  assert.match(worker, /velvet-beta-shell-v31/);
 });

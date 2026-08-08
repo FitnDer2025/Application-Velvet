@@ -15,6 +15,17 @@ import {
 import { onRequestPost as memberProfileCopyPost } from '../../../functions/api/members/profile-copy.js';
 import { onRequestPost as coupleProfilePost } from '../../../functions/api/members/couple-profile.js';
 import { onRequestGet as memberDirectory } from '../../../functions/api/members/directory.js';
+import { onRequestGet as homeIntelligenceGet } from '../../../functions/api/members/home-intelligence.js';
+import {
+  onRequestGet as experiencePreferencesGet,
+  onRequestPost as experiencePreferencesPost
+} from '../../../functions/api/members/experience-preferences.js';
+import { onRequestDelete as photoManagementDelete } from '../../../functions/api/members/photo-management.js';
+import {
+  onRequestDelete as memberEventsDelete,
+  onRequestGet as memberEventsGet,
+  onRequestPost as memberEventsPost
+} from '../../../functions/api/members/events.js';
 import {
   onRequestGet as organizerRequestGet,
   onRequestPost as organizerRequestPost
@@ -23,6 +34,7 @@ import {
   onRequestGet as messagesGet,
   onRequestPost as messagesPost
 } from '../../../functions/api/members/messages.js';
+import { onRequestPost as messageMediaPost } from '../../../functions/api/members/message-media.js';
 import {
   onRequestDelete as memberPlansDelete,
   onRequestGet as memberPlansGet,
@@ -32,7 +44,11 @@ import {
   onRequestGet as accountActionsGet,
   onRequestPost as accountActionsPost
 } from '../../../functions/api/members/account-actions.js';
-import { onRequestPost as conversationsPost } from '../../../functions/api/members/conversations.js';
+import { onRequestPost as accountDeletionPost } from '../../../functions/api/members/account-deletion.js';
+import {
+  onRequestDelete as conversationsDelete,
+  onRequestPost as conversationsPost
+} from '../../../functions/api/members/conversations.js';
 import {
   onRequestGet as socialActionsGet,
   onRequestPost as socialActionsPost
@@ -41,7 +57,10 @@ import {
   onRequestGet as eventRegistrationsGet,
   onRequestPost as eventRegistrationsPost
 } from '../../../functions/api/members/event-registrations.js';
-import { onRequestPost as albumsPost } from '../../../functions/api/members/albums.js';
+import {
+  onRequestGet as albumsGet,
+  onRequestPost as albumsPost
+} from '../../../functions/api/members/albums.js';
 import {
   onRequestDelete as albumMediaDelete,
   onRequestPost as albumMediaPost
@@ -61,13 +80,6 @@ import {
   onRequestPost as memberPhotosPost
 } from '../../../functions/api/members/photos.js';
 import {
-  onRequestGet as adminInviteGet,
-  onRequestPost as adminInvitePost
-} from '../../../functions/api/admin/invites.js';
-import { onRequestPost as adminVenueImportPost } from '../../../functions/api/admin/venue-import.js';
-import { onRequestGet as communeReferenceGet } from '../../../functions/api/reference/communes.js';
-import { onRequestGet as venueReferenceGet } from '../../../functions/api/reference/venues.js';
-import {
   onRequestGet as memberSettingsGet,
   onRequestPost as memberSettingsPost
 } from '../../../functions/api/members/settings.js';
@@ -76,6 +88,11 @@ import {
   onRequestGet as pushSubscriptionsGet,
   onRequestPost as pushSubscriptionsPost
 } from '../../../functions/api/members/push-subscriptions.js';
+import {
+  onRequestDelete as pushDevicesDelete,
+  onRequestGet as pushDevicesGet,
+  onRequestPost as pushDevicesPost
+} from '../../../functions/api/members/push-devices.js';
 import {
   onRequestDelete as memberLocationDelete,
   onRequestGet as memberLocationGet,
@@ -102,6 +119,7 @@ import {
   onRequestGet as memberNotificationsGet,
   onRequestPost as memberNotificationsPost
 } from '../../../functions/api/members/notifications.js';
+import { onRequestPost as mediaSecurityEventsPost } from '../../../functions/api/members/media-security-events.js';
 import { onRequestGet as memberMapGet } from '../../../functions/api/members/map.js';
 import {
   onRequestDelete as memberDiscoveryDelete,
@@ -112,6 +130,42 @@ import {
   onRequestGet as venueRelationshipsGet,
   onRequestPost as venueRelationshipsPost
 } from '../../../functions/api/members/venue-relationships.js';
+import {
+  onRequestDelete as tonightDelete,
+  onRequestGet as tonightGet,
+  onRequestPost as tonightPost
+} from '../../../functions/api/members/tonight.js';
+import { onRequestGet as passportGet } from '../../../functions/api/members/passport.js';
+import { onRequestPost as checkInPost } from '../../../functions/api/members/check-in.js';
+import {
+  onRequestGet as conversationRequestGet,
+  onRequestPatch as conversationRequestPatch
+} from '../../../functions/api/members/conversation-request.js';
+import { onRequestPost as voiceMessagePost } from '../../../functions/api/members/voice-message.js';
+import {
+  onRequestPatch as ephemeralMessagePatch,
+  onRequestPost as ephemeralMessagePost
+} from '../../../functions/api/members/ephemeral-message.js';
+import {
+  onRequestGet as videoCallGet,
+  onRequestPost as videoCallPost
+} from '../../../functions/api/members/video-call.js';
+import {
+  onRequestGet as spacesGet,
+  onRequestPost as spacesPost
+} from '../../../functions/api/members/spaces.js';
+import { onRequestGet as contextualRecommendationsGet } from '../../../functions/api/members/contextual-recommendations.js';
+import {
+  onRequestGet as recommendationFeedbackGet,
+  onRequestPost as recommendationFeedbackPost
+} from '../../../functions/api/members/recommendation-feedback.js';
+import {
+  onRequestGet as adminInviteGet,
+  onRequestPost as adminInvitePost
+} from '../../../functions/api/admin/invites.js';
+import { onRequestPost as adminVenueImportPost } from '../../../functions/api/admin/venue-import.js';
+import { onRequestGet as communeReferenceGet } from '../../../functions/api/reference/communes.js';
+import { onRequestGet as venueReferenceGet } from '../../../functions/api/reference/venues.js';
 import {
   onRequestGet as proWorkspaceGet,
   onRequestPost as proWorkspacePost
@@ -163,20 +217,31 @@ const API_ROUTES = new Map([
   ['POST /api/members/profile-copy', memberProfileCopyPost],
   ['POST /api/members/couple-profile', coupleProfilePost],
   ['GET /api/members/directory', memberDirectory],
+  ['GET /api/members/home-intelligence', homeIntelligenceGet],
+  ['GET /api/members/experience-preferences', experiencePreferencesGet],
+  ['POST /api/members/experience-preferences', experiencePreferencesPost],
+  ['DELETE /api/members/photo-management', photoManagementDelete],
+  ['GET /api/members/events', memberEventsGet],
+  ['POST /api/members/events', memberEventsPost],
+  ['DELETE /api/members/events', memberEventsDelete],
   ['GET /api/members/organizer-request', organizerRequestGet],
   ['POST /api/members/organizer-request', organizerRequestPost],
   ['GET /api/members/messages', messagesGet],
   ['POST /api/members/messages', messagesPost],
+  ['POST /api/members/message-media', messageMediaPost],
   ['GET /api/members/plans', memberPlansGet],
   ['POST /api/members/plans', memberPlansPost],
   ['DELETE /api/members/plans', memberPlansDelete],
   ['GET /api/members/account-actions', accountActionsGet],
   ['POST /api/members/account-actions', accountActionsPost],
+  ['POST /api/members/account-deletion', accountDeletionPost],
   ['POST /api/members/conversations', conversationsPost],
+  ['DELETE /api/members/conversations', conversationsDelete],
   ['GET /api/members/social-actions', socialActionsGet],
   ['POST /api/members/social-actions', socialActionsPost],
   ['GET /api/members/event-registrations', eventRegistrationsGet],
   ['POST /api/members/event-registrations', eventRegistrationsPost],
+  ['GET /api/members/albums', albumsGet],
   ['POST /api/members/albums', albumsPost],
   ['POST /api/members/album-media', albumMediaPost],
   ['DELETE /api/members/album-media', albumMediaDelete],
@@ -188,16 +253,14 @@ const API_ROUTES = new Map([
   ['POST /api/members/photos', memberPhotosPost],
   ['PATCH /api/members/photos', memberPhotosPatch],
   ['DELETE /api/members/photos', memberPhotosDelete],
-  ['GET /api/admin/invites', adminInviteGet],
-  ['POST /api/admin/invites', adminInvitePost],
-  ['POST /api/admin/venue-import', adminVenueImportPost],
-  ['GET /api/reference/communes', communeReferenceGet],
-  ['GET /api/reference/venues', venueReferenceGet],
   ['GET /api/members/settings', memberSettingsGet],
   ['POST /api/members/settings', memberSettingsPost],
   ['GET /api/members/push-subscriptions', pushSubscriptionsGet],
   ['POST /api/members/push-subscriptions', pushSubscriptionsPost],
   ['DELETE /api/members/push-subscriptions', pushSubscriptionsDelete],
+  ['GET /api/members/push-devices', pushDevicesGet],
+  ['POST /api/members/push-devices', pushDevicesPost],
+  ['DELETE /api/members/push-devices', pushDevicesDelete],
   ['GET /api/members/location', memberLocationGet],
   ['POST /api/members/location', memberLocationPost],
   ['DELETE /api/members/location', memberLocationDelete],
@@ -212,12 +275,35 @@ const API_ROUTES = new Map([
   ['POST /api/members/photo-reactions', photoReactionsPost],
   ['GET /api/members/notifications', memberNotificationsGet],
   ['POST /api/members/notifications', memberNotificationsPost],
+  ['POST /api/members/media-security-events', mediaSecurityEventsPost],
   ['GET /api/members/map', memberMapGet],
   ['GET /api/members/discovery', memberDiscoveryGet],
   ['POST /api/members/discovery', memberDiscoveryPost],
   ['DELETE /api/members/discovery', memberDiscoveryDelete],
   ['GET /api/members/venue-relationships', venueRelationshipsGet],
   ['POST /api/members/venue-relationships', venueRelationshipsPost],
+  ['GET /api/members/tonight', tonightGet],
+  ['POST /api/members/tonight', tonightPost],
+  ['DELETE /api/members/tonight', tonightDelete],
+  ['GET /api/members/passport', passportGet],
+  ['POST /api/members/check-in', checkInPost],
+  ['GET /api/members/conversation-request', conversationRequestGet],
+  ['PATCH /api/members/conversation-request', conversationRequestPatch],
+  ['POST /api/members/voice-message', voiceMessagePost],
+  ['POST /api/members/ephemeral-message', ephemeralMessagePost],
+  ['PATCH /api/members/ephemeral-message', ephemeralMessagePatch],
+  ['GET /api/members/video-call', videoCallGet],
+  ['POST /api/members/video-call', videoCallPost],
+  ['GET /api/members/spaces', spacesGet],
+  ['POST /api/members/spaces', spacesPost],
+  ['GET /api/members/contextual-recommendations', contextualRecommendationsGet],
+  ['GET /api/members/recommendation-feedback', recommendationFeedbackGet],
+  ['POST /api/members/recommendation-feedback', recommendationFeedbackPost],
+  ['GET /api/admin/invites', adminInviteGet],
+  ['POST /api/admin/invites', adminInvitePost],
+  ['POST /api/admin/venue-import', adminVenueImportPost],
+  ['GET /api/reference/communes', communeReferenceGet],
+  ['GET /api/reference/venues', venueReferenceGet],
   ['GET /api/pro/workspace', proWorkspaceGet],
   ['POST /api/pro/workspace', proWorkspacePost],
   ['GET /api/pro/studio-ai', proStudioGet],
@@ -249,7 +335,7 @@ function securityHeaders(response) {
   secured.headers.set('x-content-type-options', 'nosniff');
   secured.headers.set('x-frame-options', 'SAMEORIGIN');
   secured.headers.set('referrer-policy', 'no-referrer');
-  secured.headers.set('permissions-policy', 'camera=(), microphone=(), display-capture=(self), geolocation=(self), payment=(), usb=()');
+  secured.headers.set('permissions-policy', 'camera=(self), microphone=(self), display-capture=(self), geolocation=(self), payment=(), usb=()');
   secured.headers.set('x-robots-tag', 'noindex, nofollow, noarchive');
   secured.headers.set('strict-transport-security', 'max-age=31536000; includeSubDomains');
   secured.headers.set('cross-origin-opener-policy', 'same-origin');

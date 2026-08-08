@@ -55,12 +55,10 @@ async function deleteStoredFile(env, session, path) {
 
 async function rollbackMessage(env, session, messageId, conversationId) {
   if (!messageId) return;
-  await restJson(
-    env,
-    `/rest/v1/messages?id=eq.${encodeURIComponent(messageId)}&conversation_id=eq.${encodeURIComponent(conversationId)}`,
-    session,
-    { method: 'DELETE', headers: { prefer: 'return=minimal' } }
-  ).catch(() => null);
+  await restJson(env, '/rest/v1/rpc/zwit_v15_rollback_own_message', session, {
+    method: 'POST',
+    body: JSON.stringify({ target_message_id: messageId, target_conversation_id: conversationId })
+  }).catch(() => null);
 }
 
 export async function onRequestPost({ request, env, waitUntil }) {
@@ -106,10 +104,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
       ? `🔒 ${label} éphémère · Voir une fois`
       : `🔒 ${label} éphémère · Disponible ${expiresMinutes} min`;
 
-    // Même table messages = même trigger de demande de conversation.
     const created = await restJson(
       env,
-      '/rest/v1/messages?select=id,conversation_id,sender_user_id,sender_identity,body,created_at',
+      '/rest/v1/messages?select=id,conversation_id,sender_user_id,sender_identity,body,created_at,edited_at',
       access.session,
       {
         method: 'POST',
@@ -128,20 +125,20 @@ export async function onRequestPost({ request, env, waitUntil }) {
 
     const attachmentRows = await restJson(
       env,
-      '/rest/v1/message_attachments?select=id,message_id,conversation_id,media_type,mime_type,original_name,size_bytes,storage_path,created_at',
+      '/rest/v1/rpc/zwit_v15_register_message_attachment',
       access.session,
       {
         method: 'POST',
-        headers: { prefer: 'return=representation' },
         body: JSON.stringify({
-          message_id: message.id,
-          conversation_id: conversationId,
-          uploader_user_id: access.account.userId,
-          storage_path: uploadedPath,
-          media_type: type.mediaType,
-          mime_type: file.type,
-          original_name: `Éphémère Zwit · ${mode === 'view_once' ? 'voir une fois' : `${expiresMinutes} min`}.${type.extension}`,
-          size_bytes: file.size
+          target_message_id: message.id,
+          target_conversation_id: conversationId,
+          target_storage_path: uploadedPath,
+          target_media_type: type.mediaType,
+          target_mime_type: file.type,
+          target_original_name: `Éphémère Zwit · ${mode === 'view_once' ? 'voir une fois' : `${expiresMinutes} min`}.${type.extension}`,
+          target_size_bytes: file.size,
+          target_attachment_kind: 'ephemeral',
+          target_duration_seconds: null
         })
       }
     );
@@ -186,10 +183,11 @@ export async function onRequestPost({ request, env, waitUntil }) {
     return withSession({
       ok: true,
       message: {
-        id: message.id,
-        conversationId,
-        body,
-        createdAt: message.created_at,
+        ...message,
+        attachments: [{
+          ...attachment,
+          previewUrl: null
+        }],
         ephemeral: { mode, expiresAt, mediaType: type.mediaType }
       }
     }, access.session, 201);

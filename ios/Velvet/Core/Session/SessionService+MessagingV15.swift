@@ -50,4 +50,36 @@ extension SessionService {
         )
         return response.message
     }
+
+    func sendEphemeralMessage(
+        conversationID: UUID,
+        data: Data,
+        fileName: String,
+        mimeType: String,
+        mode: String = "view_once",
+        expiresMinutes: Int = 10
+    ) async throws -> ZwitEphemeralMessage {
+        let normalizedMode = mode == "expires" ? "expires" : "view_once"
+        let response: ZwitEphemeralSendResponse = try await APIClient().upload(
+            "/api/members/ephemeral-message",
+            parts: [
+                .field("conversationId", value: conversationID.uuidString),
+                .field("mode", value: normalizedMode),
+                .field("expiresMinutes", value: String(max(5, min(24 * 60, expiresMinutes)))),
+                .file("media", fileName: fileName, mimeType: mimeType, data: data)
+            ]
+        )
+        return response.message
+    }
+
+    func openEphemeralMessage(messageID: UUID) async throws -> ZwitEphemeralOpenedMedia {
+        struct Request: Encodable, Sendable {
+            let messageId: UUID
+        }
+        let response: ZwitEphemeralOpenResponse = try await APIClient().patch(
+            "/api/members/ephemeral-message",
+            body: Request(messageId: messageID)
+        )
+        return response.media
+    }
 }

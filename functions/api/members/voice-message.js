@@ -54,6 +54,14 @@ async function deleteStoredFile(env, session, path) {
   await supabase(env, `/storage/v1/object/velvet-media/${path}`, { method: 'DELETE' }, session.access_token).catch(() => null);
 }
 
+async function rollbackMessage(env, session, messageId, conversationId) {
+  if (!messageId) return;
+  await restJson(env, '/rest/v1/rpc/zwit_v15_rollback_own_message', session, {
+    method: 'POST',
+    body: JSON.stringify({ target_message_id: messageId, target_conversation_id: conversationId })
+  }).catch(() => null);
+}
+
 export async function onRequestPost({ request, env, waitUntil }) {
   let uploadedPath = '';
   let createdMessageId = '';
@@ -88,11 +96,10 @@ export async function onRequestPost({ request, env, waitUntil }) {
     }, access.session.access_token);
     if (!upload.ok) throw new Error('voice_upload_failed');
 
-    // L'insert messages traverse le trigger v1.5 conversation-request :
-    // impossible d'utiliser un vocal pour contourner la règle anti-harcèlement.
+    // L'insert messages traverse le trigger v1.5 conversation-request : un vocal respecte exactement le même garde anti-relance qu'un texte.
     const created = await restJson(
       env,
-      '/rest/v1/messages?select=id,conversation_id,sender_user_id,sender_identity,body,created_at',
+      '/rest/v1/messages?select=id,conversation_id,sender_user_id,sender_identity,body,created_at,edited_at',
       access.session,
       {
         method: 'POST',
@@ -112,20 +119,20 @@ export async function onRequestPost({ request, env, waitUntil }) {
 
     const attachmentRows = await restJson(
       env,
-      '/rest/v1/message_attachments?select=id,message_id,conversation_id,media_type,mime_type,original_name,size_bytes,storage_path,created_at',
+      '/rest/v1/rpc/zwit_v15_register_message_attachment',
       access.session,
       {
         method: 'POST',
-        headers: { prefer: 'return=representation' },
         body: JSON.stringify({
-          message_id: message.id,
-          conversation_id: conversationId,
-          uploader_user_id: access.account.userId,
-          storage_path: uploadedPath,
-          media_type: 'document',
-          mime_type: file.type,
-          original_name: `Vocal Zwit · ${durationSeconds}s.${extension}`,
-          size_bytes: file.size
+          target_message_id: message.id,
+          target_conversation_id: conversationId,
+          target_storage_path: uploadedPath,
+          target_media_type: 'document',
+          target_mime_type: file.type,
+          target_original_name: `Vocal Zwit · ${durationSeconds}s.${extension}`,
+          target_size_bytes: file.size,
+          target_attachment_kind: 'voice',
+          target_duration_seconds: durationSeconds
         })
       }
     );
@@ -161,17 +168,12 @@ export async function onRequestPost({ request, env, waitUntil }) {
       ok: true,
       message: {
         ...message,
-        attachments: [{ ...attachment, kind: 'voice', durationSeconds, previewUrl }]
+        attachments: [{ ...attachment, previewUrl }]
       }
     }, access.session, 201);
   } catch (error) {
     if (createdMessageId && createdConversationId && cleanupSession) {
-      await restJson(
-        env,
-        `/rest/v1/messages?id=eq.${encodeURIComponent(createdMessageId)}&conversation_id=eq.${encodeURIComponent(createdConversationId)}`,
-        cleanupSession,
-        { method: 'DELETE', headers: { prefer: 'return=minimal' } }
-      ).catch(() => null);
+      await rollbackMessage(env, cleanupSession, createdMessageId, createdConversationId);
     }
     if (uploadedPath && cleanupSession) await deleteStoredFile(env, cleanupSession, uploadedPath);
     return json({ error: cleanText(error.message, 120) || 'voice_message_failed' }, 400);

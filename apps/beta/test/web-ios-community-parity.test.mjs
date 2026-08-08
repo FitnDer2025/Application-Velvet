@@ -9,6 +9,8 @@ const files = {
   core: 'apps/beta/static/assets/members-live.js',
   shell: 'apps/beta/static/assets/velvet-web-ios-parity.js',
   styles: 'apps/beta/static/assets/velvet-web-ios-parity.css',
+  iosSourceStyles: 'apps/beta/static/assets/zwit-ios-source-of-truth.css',
+  iosSourceRuntime: 'apps/beta/static/assets/zwit-ios-source-of-truth.js',
   worker: 'apps/beta/static/sw.js',
   iosShell: 'ios/Velvet/Features/Home/MainShellView.swift',
   iosHome: 'ios/Velvet/Features/Home/PeopleFirstHomeView.swift',
@@ -16,12 +18,12 @@ const files = {
   plansApi: 'functions/api/members/plans.js'
 };
 
-test('Web desktop et mobile exposent les cinq espaces validés sur iOS', async () => {
+test('Web desktop et mobile exposent les six espaces validés sur iOS', async () => {
   const [html, iosShell] = await Promise.all([read(files.html), read(files.iosShell)]);
   const nav = html.match(/<nav class="bottom-nav"[\s\S]*?<\/nav>/)?.[0] || '';
   const routes = [...nav.matchAll(/data-route="([^"]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(routes, ['home', 'discover', 'venues', 'conversations', 'me']);
-  for (const label of ['Accueil', 'Membres', 'Lieux', 'Messages', 'Profil']) {
+  assert.deepEqual(routes, ['home', 'discover', 'maps', 'venues', 'conversations', 'me']);
+  for (const label of ['Accueil', 'Membres', 'Carte', 'Lieux', 'Messages', 'Profil']) {
     assert.match(nav, new RegExp(label));
     assert.match(iosShell, new RegExp(label));
   }
@@ -61,18 +63,24 @@ test('les sorties utilisent le modèle partagé de visites', async () => {
   assert.match(api, /profile_venue_visits/);
 });
 
-test('les surfaces responsive et le cache PWA utilisent le shell V1.1 actif', async () => {
-  const [html, shell, styles, worker] = await Promise.all([
-    read(files.html), read(files.shell), read(files.styles), read(files.worker)
+test('les surfaces responsive et le cache PWA utilisent le shell iOS-source V1.5 actif', async () => {
+  const [html, shell, styles, iosStyles, iosRuntime, worker] = await Promise.all([
+    read(files.html), read(files.shell), read(files.styles), read(files.iosSourceStyles), read(files.iosSourceRuntime), read(files.worker)
   ]);
   assert.doesNotThrow(() => new Function(shell));
+  assert.doesNotThrow(() => new Function(iosRuntime));
   assert.match(html, /members-live\.js\?v=20260803-4/);
-  assert.match(html, /velvet-web-ios-parity\.css\?v=20260803-3/);
-  assert.match(html, /velvet-web-ios-parity\.js\?v=20260803-3/);
+  assert.match(html, /velvet-web-ios-parity\.css\?v=20260807-1/);
+  assert.match(html, /velvet-web-ios-parity\.js\?v=20260807-1/);
+  assert.match(html, /zwit-ios-source-of-truth\.css\?v=20260807-1/);
+  assert.match(html, /zwit-ios-source-of-truth\.js\?v=20260807-1/);
   assert.match(styles, /@media \(max-width: 900px\)/);
   assert.match(styles, /\.home-feed-card/);
   assert.match(styles, /\.venue-directory-grid/);
   assert.match(styles, /\.hero-copy/);
-  assert.match(worker, /const CACHE = 'velvet-beta-shell-v30'/);
-  assert.match(worker, /velvet-web-ios-parity\.js\?v=20260803-3/);
+  assert.match(iosStyles, /grid-template-columns:\s*repeat\(6,minmax\(0,1fr\)\)/);
+  assert.match(iosRuntime, /dataset\.zwitUiSource = 'ios'/);
+  assert.match(worker, /const CACHE = 'velvet-beta-shell-v31'/);
+  assert.match(worker, /velvet-web-ios-parity\.js\?v=20260807-1/);
+  assert.match(worker, /zwit-ios-source-of-truth\.js\?v=20260807-1/);
 });

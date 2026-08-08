@@ -18,16 +18,17 @@ test('le Web mobile présente le fil social people-first complet', async () => {
   assert.match(core, /approvedProfilePhotos/);
   assert.match(styles, /\.home-feed-card/);
   assert.match(styles, /\.feed-avatar/);
-  assert.match(html, /velvet-web-ios-parity\.css\?v=20260803-3/);
-  assert.match(worker, /const CACHE = 'velvet-beta-shell-v30'/);
+  assert.match(html, /velvet-web-ios-parity\.css\?v=20260807-1/);
+  assert.match(html, /zwit-ios-source-of-truth\.css\?v=20260807-1/);
+  assert.match(worker, /const CACHE = 'velvet-beta-shell-v31'/);
 });
 
-test('la navigation sépare clairement Membres et Lieux', async () => {
+test('la navigation sépare clairement Membres Carte et Lieux', async () => {
   const html = await read('apps/web/velvet-members-beta-live.html');
   const nav = html.match(/<nav class="bottom-nav"[\s\S]*?<\/nav>/)?.[0] || '';
   const routes = [...nav.matchAll(/data-route="([^"]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(routes, ['home', 'discover', 'venues', 'conversations', 'me']);
-  for (const label of ['Accueil', 'Membres', 'Lieux', 'Messages', 'Profil']) assert.match(nav, new RegExp(label));
+  assert.deepEqual(routes, ['home', 'discover', 'maps', 'venues', 'conversations', 'me']);
+  for (const label of ['Accueil', 'Membres', 'Carte', 'Lieux', 'Messages', 'Profil']) assert.match(nav, new RegExp(label));
 });
 
 test('les profils et lieux exposent photos, détails, sorties et présences', async () => {
@@ -39,19 +40,21 @@ test('les profils et lieux exposent photos, détails, sorties et présences', as
   assert.match(core, /profilePreviewCard/);
 });
 
-test('iOS reste verrouillé sur les cinq espaces validés', async () => {
+test('iOS reste verrouillé sur les six espaces validés', async () => {
   const shell = await read('ios/Velvet/Features/Home/MainShellView.swift');
-  for (const value of ['case home', 'case people', 'case places', 'case messages', 'case profile']) {
+  for (const value of ['case home', 'case people', 'case map', 'case places', 'case messages', 'case profile']) {
     assert.match(shell, new RegExp(value));
   }
   assert.match(shell, /PeopleFirstHomeView/);
+  assert.match(shell, /MemberMapView/);
   assert.match(shell, /PeopleFirstClubDirectoryView/);
 });
 
-test('le shell Web gère menu, scrim et cinq destinations sans couche de contenu concurrente', async () => {
+test('le shell Web gère menu, scrim et six destinations sans couche de contenu concurrente', async () => {
   const shell = await read('apps/beta/static/assets/velvet-web-ios-parity.js');
   for (const contract of ['PRIMARY_ROUTES', 'closeMenu', 'toggleMenu', 'ensureScrim', 'synchronizeNavigation']) {
     assert.match(shell, new RegExp(contract));
   }
+  assert.match(shell, /\['home', 'discover', 'maps', 'venues', 'conversations', 'me'\]/);
   assert.doesNotMatch(shell, /content\.innerHTML/);
 });

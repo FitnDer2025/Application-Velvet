@@ -167,7 +167,7 @@ struct MainShellView: View {
         }
         .fullScreenCover(item: $routedConversation) { conversation in
             NavigationStack {
-                RealtimeAppleConversationView(conversation: conversation)
+                ZwitPremiumConversationView(conversation: conversation)
                     .environmentObject(store)
                     .environmentObject(chrome)
             }
