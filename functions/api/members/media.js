@@ -47,6 +47,18 @@ function signedBody(expiresIn, transform) {
   });
 }
 
+function collectSignedPayload(env, payload, paths, urls, failedPaths) {
+  if (!Array.isArray(payload)) {
+    failedPaths.push(...paths);
+    return;
+  }
+  payload.forEach((item, index) => {
+    const path = String(item?.path || paths[index] || '');
+    if (path && item?.signedURL) urls.set(path, mediaUrl(env, String(item.signedURL)));
+    else if (path) failedPaths.push(path);
+  });
+}
+
 async function signedInternalMediaUrl(env, path, expiresIn, transform = null) {
   const base = String(env.SUPABASE_URL || '').replace(/\/$/, '');
   const key = String(env.SUPABASE_SERVICE_ROLE_KEY || '');
@@ -62,6 +74,23 @@ async function signedInternalMediaUrl(env, path, expiresIn, transform = null) {
   });
   const payload = await response.json().catch(() => ({}));
   return response.ok && payload.signedURL ? mediaUrl(env, String(payload.signedURL)) : null;
+}
+
+async function signInternalMediaBatch(env, paths, ttl) {
+  const base = String(env.SUPABASE_URL || '').replace(/\/$/, '');
+  const key = String(env.SUPABASE_SERVICE_ROLE_KEY || '');
+  if (!base || !key || !paths.length) return { ok: false, payload: [] };
+  const response = await fetch(`${base}/storage/v1/object/sign/velvet-media`, {
+    method: 'POST',
+    headers: {
+      apikey: key,
+      authorization: `Bearer ${key}`,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({ expiresIn: ttl, paths })
+  });
+  const payload = await response.json().catch(() => []);
+  return { ok: response.ok && Array.isArray(payload), payload };
 }
 
 async function signMedia(env, session, path, expiresIn = 600, transform = null) {
@@ -109,6 +138,21 @@ async function signMediaBatch(env, session, paths, ttl) {
   return { ok: response.ok && Array.isArray(payload), payload };
 }
 
+async function signBatches(paths, signer, env, urls, failedPaths) {
+  const maxBatchedPaths = SIGNED_URL_BATCH_SIZE * SIGNED_URL_BATCH_LIMIT;
+  const batchedPaths = paths.slice(0, maxBatchedPaths);
+  for (let offset = 0; offset < batchedPaths.length; offset += SIGNED_URL_BATCH_SIZE) {
+    const batch = batchedPaths.slice(offset, offset + SIGNED_URL_BATCH_SIZE);
+    const result = await signer(batch);
+    if (!result.ok) {
+      failedPaths.push(...batch);
+      continue;
+    }
+    collectSignedPayload(env, result.payload, batch, urls, failedPaths);
+  }
+  failedPaths.push(...paths.slice(maxBatchedPaths));
+}
+
 export async function signedMediaUrls(env, session, paths = [], expiresIn = 600) {
   const uniquePaths = [...new Set((paths || [])
     .map((path) => String(path || '').trim())
@@ -117,40 +161,39 @@ export async function signedMediaUrls(env, session, paths = [], expiresIn = 600)
   if (!uniquePaths.length) return urls;
 
   const ttl = Math.max(60, Math.min(3600, Number(expiresIn) || 600));
-  const failedPaths = [];
-  const maxBatchedPaths = SIGNED_URL_BATCH_SIZE * SIGNED_URL_BATCH_LIMIT;
-  const batchedPaths = uniquePaths.slice(0, maxBatchedPaths);
+  // Ne jamais mélanger les portraits des agents IA internes avec les médias membres :
+  // leurs politiques Storage sont différentes et un objet interne ferait échouer tout le lot membre.
+  const internalPaths = uniquePaths.filter((path) => canUseInternalMediaFallback(env, path));
+  const memberPaths = uniquePaths.filter((path) => !canUseInternalMediaFallback(env, path));
+  const failedMemberPaths = [];
+  const failedInternalPaths = [];
 
-  for (let offset = 0; offset < batchedPaths.length; offset += SIGNED_URL_BATCH_SIZE) {
-    const batch = batchedPaths.slice(offset, offset + SIGNED_URL_BATCH_SIZE);
-    const result = await signMediaBatch(env, session, batch, ttl);
-    if (!result.ok) {
-      failedPaths.push(...batch);
-      continue;
-    }
-    result.payload.forEach((item, index) => {
-      const path = String(item?.path || batch[index] || '');
-      if (path && item?.signedURL) urls.set(path, mediaUrl(env, String(item.signedURL)));
-      else if (path) failedPaths.push(path);
-    });
-  }
+  await signBatches(
+    memberPaths,
+    (batch) => signMediaBatch(env, session, batch, ttl),
+    env,
+    urls,
+    failedMemberPaths
+  );
 
-  // Secours strictement borné : si Storage rejette un lot, on restaure les médias
-  // prioritaires sans pouvoir recréer un fan-out supérieur au plafond Worker.
-  const fallbackCandidates = [
-    ...failedPaths,
-    ...uniquePaths.slice(maxBatchedPaths)
-  ].filter((path, index, rows) => path && !urls.has(path) && rows.indexOf(path) === index)
-    .slice(0, SIGNED_URL_FALLBACK_LIMIT);
+  await signBatches(
+    internalPaths,
+    (batch) => signInternalMediaBatch(env, batch, ttl),
+    env,
+    urls,
+    failedInternalPaths
+  );
 
-  for (const path of fallbackCandidates) {
+  // Secours membre strictement borné : une politique Storage atypique ne peut pas recréer
+  // un fan-out supérieur au budget Worker.
+  for (const path of [...new Set(failedMemberPaths)].slice(0, SIGNED_URL_FALLBACK_LIMIT)) {
     const fallback = await signMedia(env, session, path, ttl, null);
     if (fallback) urls.set(path, fallback);
   }
 
-  // Les agents IA internes conservent leur secours service-role uniquement hors production.
-  for (const path of uniquePaths) {
-    if (urls.has(path) || !canUseInternalMediaFallback(env, path)) continue;
+  // Les portraits IA restent un environnement interne ; leur secours utilise le rôle serveur
+  // et reste lui aussi borné.
+  for (const path of [...new Set(failedInternalPaths)].slice(0, SIGNED_URL_FALLBACK_LIMIT)) {
     const fallback = await signedInternalMediaUrl(env, path, ttl, null);
     if (fallback) urls.set(path, fallback);
   }
