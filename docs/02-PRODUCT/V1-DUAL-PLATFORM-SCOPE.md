@@ -6,7 +6,7 @@ Statut : **BASELINE V1**
 
 La V1 doit démontrer qu’un même écosystème peut créer simultanément :
 
-1. une communauté Velvet utile, élégante et sûre ;
+1. une communauté Zwit utile, élégante et sûre ;
 2. un outil professionnel capable de publier, gérer et remplir des événements.
 
 La V1 n’a pas vocation à reproduire immédiatement toutes les fonctions des acteurs historiques. Elle doit livrer les boucles d’usage essentielles avec une architecture extensible.
@@ -17,7 +17,7 @@ La V1 n’a pas vocation à reproduire immédiatement toutes les fonctions des a
 
 ### Inclus en V1
 
-- inscription majeure et acceptation du Pacte Velvet ;
+- inscription majeure et acceptation du Pacte Zwit ;
 - profils individuels et profils couple ;
 - identité publique sous pseudonyme ;
 - onboarding avec recherches, envies, limites et disponibilités ;
@@ -51,7 +51,7 @@ La V1 n’a pas vocation à reproduire immédiatement toutes les fonctions des a
 
 ### Inclus en V1
 
-- demande de compte professionnel et validation par Velvet ;
+- demande de compte professionnel et validation par Zwit ;
 - fiche établissement ou organisateur ;
 - gestion des membres de l’équipe et rôles simples ;
 - création, duplication et publication d’événements ;

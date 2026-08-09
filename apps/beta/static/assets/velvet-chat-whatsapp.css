@@ -1,0 +1,522 @@
+/* Conversation Zwit — ergonomie inspirée des standards de messagerie mobile */
+.velvet-whatsapp-layout {
+  --chat-header: rgba(18, 15, 17, .96);
+  --chat-received: #211c1f;
+  --chat-sent: #74203f;
+  --chat-sent-2: #8f2850;
+  --chat-line: rgba(255, 255, 255, .075);
+  --chat-muted: rgba(244, 244, 242, .5);
+}
+
+.velvet-chat-topbar {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 4px;
+  min-height: 64px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--chat-line);
+  background: var(--chat-header);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, .18);
+  backdrop-filter: blur(28px) saturate(135%);
+  -webkit-backdrop-filter: blur(28px) saturate(135%);
+}
+
+.velvet-chat-back,
+.velvet-chat-peer {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.velvet-chat-back {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--cream);
+}
+
+.velvet-chat-back:active {
+  background: rgba(255, 255, 255, .07);
+  transform: scale(.96);
+}
+
+.velvet-chat-back svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.velvet-chat-peer {
+  grid-column: 2;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  color: inherit;
+}
+
+.velvet-chat-peer .conversation-avatar-v2 {
+  width: 44px;
+  height: 44px;
+  border-width: 1px;
+  font-size: 18px;
+}
+
+.velvet-chat-peer > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.velvet-chat-peer strong {
+  overflow: hidden;
+  color: var(--cream);
+  font-size: 16px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.velvet-chat-peer small {
+  overflow: hidden;
+  color: var(--chat-muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.velvet-chat-panel {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  border-color: transparent !important;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(100, 27, 54, .12), transparent 24rem),
+    radial-gradient(circle at 88% 88%, rgba(198, 169, 106, .045), transparent 22rem),
+    #0d0b0c !important;
+  box-shadow: none !important;
+}
+
+.velvet-chat-panel::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  opacity: .12;
+  background-image:
+    radial-gradient(circle at 18px 18px, rgba(255, 255, 255, .16) 1px, transparent 1px),
+    radial-gradient(circle at 58px 54px, rgba(198, 169, 106, .13) 1px, transparent 1px);
+  background-size: 76px 76px;
+}
+
+.velvet-chat-panel .messages,
+.velvet-chat-panel .composer {
+  position: relative;
+  z-index: 1;
+}
+
+.velvet-chat-panel .messages {
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(198, 169, 106, .28) transparent;
+}
+
+.velvet-chat-day {
+  align-self: center;
+  margin: 12px 0 10px;
+  padding: 5px 10px;
+  border: 1px solid rgba(255, 255, 255, .06);
+  border-radius: 999px;
+  background: rgba(32, 28, 30, .86);
+  color: rgba(244, 244, 242, .62);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: capitalize;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .14);
+}
+
+.velvet-whatsapp-layout .messages .message {
+  position: relative;
+  max-width: min(82%, 660px);
+  margin-top: 5px;
+  padding: 8px 10px 6px;
+  border: 0;
+  border-radius: 16px 16px 16px 5px;
+  background: var(--chat-received);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .18);
+}
+
+.velvet-whatsapp-layout .messages .message.mine {
+  border: 0;
+  border-radius: 16px 16px 5px 16px;
+  background: linear-gradient(145deg, var(--chat-sent-2), var(--chat-sent));
+}
+
+.velvet-whatsapp-layout .messages .message.grouped {
+  margin-top: 1px;
+  border-radius: 16px;
+}
+
+.velvet-whatsapp-layout .messages .message.group-start:not(.mine)::before,
+.velvet-whatsapp-layout .messages .message.group-start.mine::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 9px;
+  height: 12px;
+}
+
+.velvet-whatsapp-layout .messages .message.group-start:not(.mine)::before {
+  left: -6px;
+  background: linear-gradient(135deg, var(--chat-received) 0 50%, transparent 51%);
+}
+
+.velvet-whatsapp-layout .messages .message.group-start.mine::before {
+  right: -6px;
+  background: linear-gradient(225deg, var(--chat-sent-2) 0 50%, transparent 51%);
+}
+
+.velvet-whatsapp-layout .messages .message p {
+  display: inline;
+  margin: 0;
+  color: #f4f1f2;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.38;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.velvet-whatsapp-layout .messages .message.mine p {
+  color: #fff;
+}
+
+.velvet-whatsapp-layout .velvet-chat-sender {
+  margin: 0 0 3px;
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.velvet-private-chat .velvet-chat-sender {
+  display: none !important;
+}
+
+.velvet-chat-time {
+  float: right;
+  margin: 7px 0 -2px 10px;
+  color: rgba(244, 244, 242, .46);
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.message.mine .velvet-chat-time {
+  color: rgba(255, 255, 255, .6);
+}
+
+.velvet-whatsapp-layout .message-attachments {
+  clear: both;
+  margin: 5px 0 2px;
+}
+
+.velvet-whatsapp-layout .message-attachments img,
+.velvet-whatsapp-layout .message-attachments video {
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 11px;
+}
+
+.velvet-whatsapp-layout .composer.composer-v2 {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 44px;
+  align-items: end;
+  gap: 6px;
+  margin: 0;
+  padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, .065);
+  border-radius: 0;
+  background: rgba(18, 15, 17, .97);
+  box-shadow: 0 -8px 28px rgba(0, 0, 0, .22);
+  backdrop-filter: blur(26px) saturate(140%);
+  -webkit-backdrop-filter: blur(26px) saturate(140%);
+}
+
+.velvet-whatsapp-layout .composer.composer-v2 textarea[name="body"] {
+  grid-column: 2;
+  grid-row: 1;
+  min-height: 42px;
+  max-height: 124px;
+  margin: 0;
+  padding: 10px 14px;
+  overflow-y: auto;
+  resize: none;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 22px;
+  background: #242023;
+  color: var(--cream);
+  font-size: 15px;
+  line-height: 1.4;
+  box-shadow: none;
+}
+
+.velvet-whatsapp-layout .composer.composer-v2 textarea[name="body"]:focus {
+  border-color: rgba(198, 169, 106, .23);
+  box-shadow: 0 0 0 2px rgba(198, 169, 106, .055);
+}
+
+.velvet-whatsapp-layout .composer.composer-v2 .attachment-picker {
+  grid-column: 1;
+  grid-row: 1;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  align-self: end;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(244, 244, 242, .66);
+  cursor: pointer;
+}
+
+.velvet-whatsapp-layout .composer.composer-v2 .attachment-picker:active {
+  background: rgba(255, 255, 255, .065);
+  transform: scale(.96);
+}
+
+.velvet-whatsapp-layout .attachment-picker input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.velvet-whatsapp-layout .attachment-picker span,
+.velvet-whatsapp-layout .attachment-picker svg {
+  width: 23px;
+  height: 23px;
+  display: block;
+}
+
+.velvet-whatsapp-layout .attachment-picker svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.velvet-whatsapp-layout .composer.composer-v2 button[type="submit"] {
+  grid-column: 3;
+  grid-row: 1;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  align-self: end;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #a52e5c, #711c3c);
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(113, 28, 60, .34), inset 0 1px rgba(255, 255, 255, .14);
+}
+
+.velvet-whatsapp-layout .composer.composer-v2 button[type="submit"]:active {
+  transform: scale(.94);
+}
+
+.velvet-whatsapp-layout .composer button[type="submit"] svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.velvet-whatsapp-layout .composer .send-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.velvet-whatsapp-layout .attachment-selection {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  min-width: 0;
+  margin: 0 4px;
+  padding: 5px 9px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgba(100, 27, 54, .18);
+  color: rgba(244, 244, 242, .66);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.velvet-whatsapp-layout .attachment-selection:empty {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  body.velvet-whatsapp-chat {
+    overflow: hidden !important;
+    background: #0d0b0c;
+  }
+
+  body.velvet-whatsapp-chat .mobile-head,
+  body.velvet-whatsapp-chat .bottom-nav,
+  body.velvet-whatsapp-chat .nav-scrim {
+    display: none !important;
+  }
+
+  body.velvet-whatsapp-chat main {
+    width: 100%;
+    height: var(--velvet-chat-height, 100dvh);
+    min-height: 0;
+    margin: 0;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  .velvet-whatsapp-layout {
+    width: 100%;
+    height: var(--velvet-chat-height, 100dvh);
+    min-height: 0;
+    max-width: none !important;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  .velvet-chat-topbar {
+    position: relative;
+    min-height: calc(60px + env(safe-area-inset-top));
+    padding: calc(7px + env(safe-area-inset-top)) 8px 7px;
+  }
+
+  .velvet-chat-panel {
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .velvet-chat-panel .messages {
+    min-height: 0;
+    display: flex !important;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 12px 10px 18px;
+    gap: 1px;
+    scroll-padding-bottom: 12px;
+  }
+
+  .velvet-whatsapp-layout .messages .message {
+    max-width: 84%;
+  }
+
+  .velvet-whatsapp-layout .composer.composer-v2 {
+    position: relative;
+    bottom: auto;
+    margin: 0;
+  }
+}
+
+@media (min-width: 761px) {
+  .velvet-whatsapp-layout {
+    max-width: 920px;
+    margin-inline: auto;
+  }
+
+  .velvet-chat-panel {
+    display: grid;
+    grid-template-rows: minmax(420px, 62vh) auto;
+    padding: 0 !important;
+    overflow: hidden;
+    border-radius: 28px !important;
+  }
+
+  .velvet-chat-panel .messages {
+    overflow-y: auto;
+    padding: 24px;
+  }
+}
+
+html[data-theme="light"] .velvet-whatsapp-layout {
+  --chat-header: rgba(255, 250, 245, .96);
+  --chat-received: #fffaf5;
+  --chat-sent: #6d1d3a;
+  --chat-sent-2: #93415f;
+  --chat-line: rgba(100, 27, 54, .11);
+  --chat-muted: rgba(52, 25, 35, .56);
+}
+
+html[data-theme="light"] .velvet-chat-panel {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(228, 202, 211, .55), transparent 24rem),
+    #eee5df !important;
+}
+
+html[data-theme="light"] .velvet-chat-peer strong,
+html[data-theme="light"] .velvet-chat-back {
+  color: #341923;
+}
+
+html[data-theme="light"] .velvet-whatsapp-layout .messages .message p {
+  color: #341923;
+}
+
+html[data-theme="light"] .velvet-whatsapp-layout .messages .message.mine p {
+  color: #fff;
+}
+
+html[data-theme="light"] .velvet-whatsapp-layout .composer.composer-v2 {
+  background: rgba(255, 250, 245, .97);
+}
+
+html[data-theme="light"] .velvet-whatsapp-layout .composer.composer-v2 textarea[name="body"] {
+  background: #fff;
+  color: #341923;
+}

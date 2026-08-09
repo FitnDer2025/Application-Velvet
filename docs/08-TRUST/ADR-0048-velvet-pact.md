@@ -1,8 +1,8 @@
-# ADR-0048 - Pacte Velvet
+# ADR-0048 - Pacte Zwit
 
 Décision validée.
 
-Le Pacte Velvet permet à chaque membre d'exprimer ses préférences, ses attentes et ses limites.
+Le Pacte Zwit permet à chaque membre d'exprimer ses préférences, ses attentes et ses limites.
 
 ## Principes
 
@@ -19,9 +19,9 @@ Le Pacte Velvet permet à chaque membre d'exprimer ses préférences, ses attent
 - Préférences de rencontre
 - Limites
 
-Chaque Salon Velvet peut également définir un contexte de rencontre privé, visible uniquement par ses participants.
+Chaque Salon Zwit peut également définir un contexte de rencontre privé, visible uniquement par ses participants.
 
-Avant une rencontre planifiée, Velvet peut envoyer un rappel doux encourageant les participants à échanger sur leurs attentes et limites. Aucun consentement obligatoire par case à cocher n'est imposé.
+Avant une rencontre planifiée, Zwit peut envoyer un rappel doux encourageant les participants à échanger sur leurs attentes et limites. Aucun consentement obligatoire par case à cocher n'est imposé.
 
 ## Charte commune
 
@@ -31,4 +31,4 @@ Avant une rencontre planifiée, Velvet peut envoyer un rappel doux encourageant 
 - Bienveillance
 - Tolérance zéro envers les comportements abusifs
 
-Le Pacte Velvet complète l'Indice de Confiance sans devenir un outil de notation.
+Le Pacte Zwit complète l'Indice de Confiance sans devenir un outil de notation.

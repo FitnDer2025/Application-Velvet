@@ -1,10 +1,10 @@
-# Velvet OS
+# Zwit OS
 
-Velvet OS est la source de vérité produit, UX, marque et technique de Velvet. Ce dépôt doit permettre à Cyril, ChatGPT et Codex de construire une plateforme premium avec un coût de développement maîtrisé, sans sacrifier la sécurité, le consentement ni la maintenabilité.
+Zwit OS est la source de vérité produit, UX, marque et technique de Velvet. Ce dépôt doit permettre à Cyril, ChatGPT et Codex de construire une plateforme premium avec un coût de développement maîtrisé, sans sacrifier la sécurité, le consentement ni la maintenabilité.
 
 ## Cap produit V1
 
-Velvet est construit comme une double plateforme unifiée :
+Zwit est construit comme une double plateforme unifiée :
 
 - **Community** : profils, découverte, albums, conversations, confiance et participation ;
 - **Professionals** : établissements, organisateurs, événements, réservations, billetterie et pilotage ;
@@ -56,7 +56,7 @@ Avant tout code, identifier :
 6. `docs/04-VELVET-CONVERSATIONS/` — décisions du chantier Conversations
 7. `docs/04-FEATURES/` — spécifications par fonctionnalité
 8. `docs/05-UX/` — parcours et règles d’interface
-9. `docs/06-AI/` — Velvet Intelligence et Velvet Memory
+9. `docs/06-AI/` — Zwit Intelligence et Zwit Memory
 10. `docs/07-PROFESSIONALS/` — espace professionnel
 11. `docs/08-EVENTS/` — événements, sorties et voyages
 12. `docs/09-BUSINESS/` — modèle économique
@@ -65,11 +65,11 @@ Avant tout code, identifier :
 15. `docs/12-FOUNDER-NOTES/` — notes non normatives
 16. `docs/13-HISTORY/` — historique du projet
 
-## Identité Velvet canonique
+## Identité Zwit canonique
 
 - Logo : V ruban bordeaux/rose, logotype or champagne.
 - Signature : « Là où les plus belles rencontres commencent. »
-- Couleurs principales : Noir Velvet `#0D0D0D`, Anthracite `#1B1B1D`, Gris Velours `#2D2D30`, Blanc cassé `#F4F4F2`, Bordeaux Velvet `#641B36`, Or Champagne `#C6A96A`.
+- Couleurs principales : Noir Zwit `#0D0D0D`, Anthracite `#1B1B1D`, Gris Velours `#2D2D30`, Blanc cassé `#F4F4F2`, Bordeaux Zwit `#641B36`, Or Champagne `#C6A96A`.
 - Direction : sombre, cinématographique, élégante, intime, inclusive et jamais vulgaire.
 
 ## Règles de vérité
@@ -80,10 +80,11 @@ Avant tout code, identifier :
 - En cas de conflit, l’ADR le plus récent remplace l’ancien.
 - Codex ne doit pas inventer une règle métier manquante : il crée un point `TBD` ou une issue.
 - Toute action sensible respecte la confidentialité par défaut, le consentement et le moindre privilège.
-- Une pull request ne doit pas être fusionnée automatiquement sans validation humaine explicite.
+- Codex dispose d'une autonomie complète de livraison : branche, commits, pull request, fusion et déploiement après réussite des contrôles.
+- Les scripts et migrations SQL Supabase peuvent être préparés et testés par Codex, mais leur exécution distante reste exclusivement réalisée par Cyril.
 
 ## État actuel
 
-Le dépôt contient le socle documentaire de Velvet, les décisions détaillées du chantier Velvet Conversations, les principes de marque, les profils dynamiques, le Pacte Velvet, le Trust Index, les notifications confidentielles et désormais la fondation Codex-first de la V1 double plateforme Community + Professionals.
+Le dépôt contient le socle documentaire de Zwit, les décisions détaillées du chantier Zwit Conversations, les principes de marque, les profils dynamiques, le Pacte Zwit, le Trust Index, les notifications confidentielles et désormais la fondation Codex-first de la V1 double plateforme Community + Professionals.
 
 La prochaine étape est de transformer cette fondation en backlog exécutable, puis en tranches verticales testables conformément au plan de livraison.

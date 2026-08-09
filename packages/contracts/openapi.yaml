@@ -1,0 +1,252 @@
+openapi: 3.1.0
+info:
+  title: Zwit Platform API
+  version: 0.1.0
+  description: Contrat commun à Zwit Membres, Zwit Pro et Zwit Control.
+servers:
+  - url: https://api.velvet.example/v1
+    description: Production placeholder
+  - url: http://localhost:8080/v1
+    description: Développement local
+tags:
+  - name: Auth
+  - name: Members
+  - name: Pro
+  - name: Events
+  - name: Control
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Créer un compte membre
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, displayName]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 12, maxLength: 200 }
+                displayName: { type: string, minLength: 1, maxLength: 120 }
+                profileType: { type: string, enum: [individual, couple] }
+                audience: { $ref: "#/components/schemas/Audience" }
+      responses:
+        "201": { $ref: "#/components/responses/AuthSuccess" }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Ouvrir une session
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, audience]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+                audience: { $ref: "#/components/schemas/Audience" }
+      responses:
+        "200": { $ref: "#/components/responses/AuthSuccess" }
+        "401": { $ref: "#/components/responses/Error" }
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Renouveler une session avec rotation du refresh token
+      operationId: refresh
+      responses:
+        "200":
+          description: Nouveau jeton d’accès, refresh token renouvelé en cookie HttpOnly
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "401": { $ref: "#/components/responses/Error" }
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Révoquer la session courante
+      operationId: logout
+      responses:
+        "204": { description: Session révoquée }
+  /me:
+    get:
+      tags: [Auth]
+      summary: Lire l’identité et les rôles de la session
+      operationId: me
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Identité courante
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "401": { $ref: "#/components/responses/Error" }
+  /member-profiles/me:
+    patch:
+      tags: [Members]
+      summary: Modifier le profil du membre connecté
+      operationId: updateMemberProfile
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                displayName: { type: string, maxLength: 120 }
+                city: { type: string, maxLength: 120 }
+                publicStory: { type: string, maxLength: 5000 }
+                onboardingStatus:
+                  type: string
+                  enum: [started, identity, profile, preferences, completed]
+                privateDetails:
+                  type: object
+                  additionalProperties: true
+                  description: Chiffré en AES-256-GCM avant stockage.
+      responses:
+        "200": { description: Profil mis à jour }
+        "401": { $ref: "#/components/responses/Error" }
+  /establishments/{id}:
+    get:
+      tags: [Pro]
+      summary: Lire la fiche publique d’un établissement
+      operationId: getEstablishment
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Fiche établissement publiée }
+        "404": { $ref: "#/components/responses/Error" }
+  /pro/establishments/{id}:
+    patch:
+      tags: [Pro]
+      summary: Modifier un établissement autorisé
+      operationId: updateEstablishment
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200": { description: Établissement mis à jour et événement outbox créé }
+        "403": { $ref: "#/components/responses/Error" }
+  /events:
+    post:
+      tags: [Events]
+      summary: Créer un événement établissement ou organisateur privé
+      operationId: createEvent
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ownerType, title, startsAt, capacity]
+              properties:
+                ownerType: { type: string, enum: [establishment, organizer] }
+                establishmentId: { type: string, format: uuid }
+                organizerProfileId: { type: string, format: uuid }
+                title: { type: string, maxLength: 180 }
+                description: { type: string }
+                startsAt: { type: string, format: date-time }
+                endsAt: { type: string, format: date-time }
+                capacity: { type: integer, minimum: 1, maximum: 10000 }
+                visibility: { type: string, enum: [draft, review, published, cancelled] }
+      responses:
+        "201": { description: Événement créé }
+        "403": { $ref: "#/components/responses/Error" }
+  /events/{id}/registrations:
+    post:
+      tags: [Events]
+      summary: Inscrire le membre connecté ou le placer en liste d’attente
+      operationId: registerForEvent
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "201": { description: Inscription confirmée ou placée en attente }
+        "404": { $ref: "#/components/responses/Error" }
+  /control/audit:
+    get:
+      tags: [Control]
+      summary: Lire les 100 derniers événements du journal chaîné
+      operationId: controlAudit
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Événements d’audit }
+        "403": { $ref: "#/components/responses/Error" }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT-EdDSA
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  schemas:
+    Audience:
+      type: string
+      enum: [members, pro, control]
+    TokenResponse:
+      type: object
+      required: [accessToken, expiresIn, requestId]
+      properties:
+        accessToken: { type: string }
+        expiresIn: { type: integer, example: 900 }
+        requestId: { type: string }
+    AuthSuccess:
+      allOf:
+        - $ref: "#/components/schemas/TokenResponse"
+        - type: object
+          properties:
+            user:
+              type: object
+              properties:
+                id: { type: string, format: uuid }
+                email: { type: string, format: email }
+                roles:
+                  type: array
+                  items: { type: string }
+    Error:
+      type: object
+      required: [error, requestId]
+      properties:
+        error: { type: string }
+        message: { type: string }
+        requestId: { type: string }
+  responses:
+    AuthSuccess:
+      description: Authentification réussie. Le refresh token est posé en cookie HttpOnly.
+      headers:
+        Set-Cookie:
+          schema: { type: string }
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AuthSuccess"
+    Error:
+      description: Erreur normalisée
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"

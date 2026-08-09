@@ -1,0 +1,26 @@
+{
+  "name": "Zwit",
+  "short_name": "Zwit",
+  "description": "Zwit, l’écosystème premium des membres et des professionnels.",
+  "id": "/membres/",
+  "start_url": "/membres/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0D0D0D",
+  "theme_color": "#0D0D0D",
+  "icons": [
+    {
+      "src": "/assets/velvet-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/velvet-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

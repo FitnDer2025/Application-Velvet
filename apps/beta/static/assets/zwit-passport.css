@@ -1,0 +1,155 @@
+.zwit-passport{
+  position:relative;
+  overflow:hidden;
+  margin:0 0 22px;
+  padding:22px;
+  border:1px solid color-mix(in srgb,var(--gold,#d8bd77) 22%,transparent);
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 100% 0,color-mix(in srgb,var(--wine,#7d294c) 18%,transparent),transparent 42%),
+    color-mix(in srgb,var(--panel,#141216) 95%,transparent);
+  box-shadow:0 22px 70px rgba(0,0,0,.16);
+  backdrop-filter:blur(20px) saturate(125%);
+  -webkit-backdrop-filter:blur(20px) saturate(125%);
+}
+.zwit-passport::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:2px;
+  background:linear-gradient(180deg,transparent,var(--gold,#d8bd77),transparent);
+  opacity:.7;
+}
+.zwit-passport__head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:18px;
+}
+.zwit-passport__eyebrow{
+  margin:0 0 6px;
+  color:var(--gold,#d8bd77);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.17em;
+  text-transform:uppercase;
+}
+.zwit-passport h2{
+  margin:0;
+  color:var(--text,#f6f1ee);
+  font:500 clamp(23px,3vw,31px)/1.08 Georgia,"Times New Roman",serif;
+  letter-spacing:-.025em;
+}
+.zwit-passport__intro{
+  max-width:620px;
+  margin:8px 0 0;
+  color:var(--muted,#aaa3a0);
+  font-size:13px;
+  line-height:1.55;
+}
+.zwit-passport__seal{
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  width:48px;
+  height:48px;
+  border:1px solid color-mix(in srgb,var(--gold,#d8bd77) 35%,transparent);
+  border-radius:16px;
+  background:color-mix(in srgb,var(--gold,#d8bd77) 9%,transparent);
+  color:var(--gold,#d8bd77);
+}
+.zwit-passport__seal svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.6}
+.zwit-passport__proofs{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.zwit-passport__proof{
+  min-width:0;
+  padding:14px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  background:rgba(255,255,255,.035);
+}
+.zwit-passport__proof-top{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+}
+.zwit-passport__status{
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  width:25px;
+  height:25px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:999px;
+  color:var(--muted,#aaa3a0);
+}
+.zwit-passport__status svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+.zwit-passport__proof[data-status="verified"] .zwit-passport__status{
+  border-color:color-mix(in srgb,var(--gold,#d8bd77) 42%,transparent);
+  background:color-mix(in srgb,var(--gold,#d8bd77) 10%,transparent);
+  color:var(--gold,#d8bd77);
+}
+.zwit-passport__proof[data-status="pending"] .zwit-passport__status{
+  border-color:rgba(255,255,255,.18);
+  color:var(--text,#f6f1ee);
+}
+.zwit-passport__proof strong{
+  overflow:hidden;
+  color:var(--text,#f6f1ee);
+  font-size:12px;
+  font-weight:720;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.zwit-passport__proof p{
+  min-height:38px;
+  margin:10px 0 0;
+  color:var(--muted,#aaa3a0);
+  font-size:11px;
+  line-height:1.5;
+}
+.zwit-passport__action{
+  margin-top:10px;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:var(--gold,#d8bd77);
+  cursor:pointer;
+  font:700 11px/1.3 inherit;
+}
+.zwit-passport__action:hover{text-decoration:underline}
+.zwit-passport__action:disabled{opacity:.5;cursor:wait;text-decoration:none}
+.zwit-passport__privacy{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  margin:15px 0 0;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.07);
+  color:var(--muted,#aaa3a0);
+  font-size:10px;
+  line-height:1.45;
+}
+.zwit-passport__privacy svg{flex:0 0 auto;width:13px;height:13px;margin-top:1px;stroke:currentColor;fill:none;stroke-width:1.7}
+.zwit-passport--loading .zwit-passport__proof{min-height:102px;animation:zwit-passport-pulse 1.4s ease-in-out infinite}
+@keyframes zwit-passport-pulse{0%,100%{opacity:.55}50%{opacity:1}}
+html[data-theme="light"] .zwit-passport{
+  background:radial-gradient(circle at 100% 0,rgba(125,41,76,.08),transparent 42%),rgba(255,255,255,.88);
+  box-shadow:0 20px 55px rgba(52,35,42,.08);
+}
+html[data-theme="light"] .zwit-passport__proof{border-color:rgba(52,35,42,.09);background:rgba(80,50,62,.025)}
+html[data-theme="light"] .zwit-passport__privacy{border-color:rgba(52,35,42,.08)}
+@media(max-width:980px){.zwit-passport__proofs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){
+  .zwit-passport{margin:0 0 16px;padding:18px 15px;border-radius:22px}
+  .zwit-passport__head{margin-bottom:14px}
+  .zwit-passport__seal{width:43px;height:43px;border-radius:14px}
+  .zwit-passport__proofs{display:flex;overflow-x:auto;grid-template-columns:none;gap:9px;margin-right:-15px;padding-right:15px;scroll-snap-type:x proximity;scrollbar-width:none}
+  .zwit-passport__proofs::-webkit-scrollbar{display:none}
+  .zwit-passport__proof{flex:0 0 min(76vw,255px);scroll-snap-align:start}
+}

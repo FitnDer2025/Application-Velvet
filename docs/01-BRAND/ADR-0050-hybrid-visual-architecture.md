@@ -2,7 +2,7 @@
 
 Décision validée.
 
-Velvet adopte une architecture visuelle hybride adaptée au contexte émotionnel.
+Zwit adopte une architecture visuelle hybride adaptée au contexte émotionnel.
 
 ## Univers public
 
@@ -11,7 +11,7 @@ Les espaces communautaires et de découverte utilisent une ambiance claire, él�
 - Champagne clair
 - Blanc cassé
 - Gris chaud
-- Rouge Velvet en accent
+- Rouge Zwit en accent
 - Or satiné pour les éléments Premium
 
 Sont concernés notamment l'accueil, la découverte, les profils publics, les événements, les organisateurs, les professionnels et les paramètres.
@@ -21,10 +21,10 @@ Sont concernés notamment l'accueil, la découverte, les profils publics, les é
 Les espaces intimes utilisent une ambiance plus feutrée :
 - Anthracite profond
 - Noir velours
-- Rouge Velvet
+- Rouge Zwit
 - Reflets champagne
 
-Sont concernés notamment les Salons Velvet, conversations, albums privés, Carnet Velvet, expériences et souvenirs.
+Sont concernés notamment les Salons Zwit, conversations, albums privés, Carnet Zwit, expériences et souvenirs.
 
 La transition entre les deux univers doit rester fluide et cohérente.
 

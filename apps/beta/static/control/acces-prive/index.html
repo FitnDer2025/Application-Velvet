@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0C0C0D">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>Zwit Contrôle — Salle d’attente</title>
+  <link rel="icon" href="/assets/zwit-logo-transparent.png?v=20260806-9" type="image/png">
+  <link rel="stylesheet" href="/assets/velvet-waitlist-admin.css?v=20260806-9">
+</head>
+<body data-waitlist-surface="control">
+  <header class="top vwa-topbar">
+    <a class="vwa-brand" href="/control/" aria-label="Retour à Zwit Contrôle"><img src="/assets/zwit-logo-transparent.png?v=20260806-9" alt=""><b>ZWIT CONTRÔLE</b></a>
+    <nav class="vwa-top-actions" aria-label="Actions principales">
+      <a href="/acces-prive/" target="_blank" rel="noopener">Voir la page publique</a>
+      <a class="primary" href="/marketing/acces-prive/">Ouvrir le kit Marketing</a>
+    </nav>
+  </header>
+
+  <main class="vwa-shell">
+    <section class="vwa-hero">
+      <div>
+        <p class="vwa-kicker">COMMUNICATIONS · ACCÈS PRIVÉ</p>
+        <h1>La salle d’attente Zwit.</h1>
+        <p>Suivez la traction avant ouverture, identifiez les territoires les plus actifs et pilotez les invitations membres et professionnelles.</p>
+      </div>
+      <button type="button" class="vwa-button" id="refreshWaitlist">Actualiser</button>
+    </section>
+
+    <aside class="vwa-notice" id="migrationNotice" hidden>
+      <strong>Activation Supabase nécessaire</strong>
+      <span>Le module est prêt, mais la migration de la salle d’attente doit encore être appliquée pour recevoir les préinscriptions.</span>
+    </aside>
+
+    <section class="vwa-metrics" id="waitlistMetrics" aria-label="Indicateurs de préinscription">
+      <article><small>Total</small><strong>—</strong><span>préinscriptions</span></article>
+      <article><small>Membres</small><strong>—</strong><span>accès particuliers</span></article>
+      <article><small>Professionnels</small><strong>—</strong><span>leads Zwit Pro</span></article>
+      <article><small>7 derniers jours</small><strong>—</strong><span>nouveaux inscrits</span></article>
+      <article><small>Invités</small><strong>—</strong><span>accès envoyés</span></article>
+      <article><small>Convertis</small><strong>—</strong><span>comptes activés</span></article>
+    </section>
+
+    <section class="vwa-grid vwa-insights">
+      <article class="vwa-panel">
+        <header><div><p class="vwa-kicker">DENSITÉ</p><h2>Territoires les plus actifs</h2></div></header>
+        <div class="vwa-ranking" id="territoryRanking"><p class="vwa-empty">Chargement…</p></div>
+      </article>
+      <article class="vwa-panel">
+        <header><div><p class="vwa-kicker">ACQUISITION</p><h2>Sources qui convertissent</h2></div></header>
+        <div class="vwa-ranking" id="sourceRanking"><p class="vwa-empty">Chargement…</p></div>
+      </article>
+    </section>
+
+    <section class="vwa-panel vwa-list-panel">
+      <header class="vwa-list-heading">
+        <div><p class="vwa-kicker">BASE QUALIFIÉE</p><h2>Préinscriptions</h2></div>
+        <button type="button" class="vwa-button secondary" id="exportWaitlist">Exporter CSV</button>
+      </header>
+      <form class="vwa-filters" id="waitlistFilters">
+        <label><span>Rechercher</span><input type="search" name="search" placeholder="E-mail, ville, établissement…"></label>
+        <label><span>Public</span><select name="audience"><option value="">Tous</option><option value="member">Membres</option><option value="pro">Professionnels</option></select></label>
+        <label><span>État</span><select name="status"><option value="">Tous</option><option value="registered">Préinscrit</option><option value="qualified">Qualifié</option><option value="invited">Invité</option><option value="converted">Converti</option><option value="withdrawn">Désinscrit</option><option value="rejected">Écarté</option></select></label>
+        <button type="submit" class="vwa-button">Filtrer</button>
+      </form>
+      <p class="vwa-status" id="controlStatus" role="status" aria-live="polite"></p>
+      <div class="vwa-table-wrap">
+        <table>
+          <thead><tr><th>Préinscrit</th><th>Public</th><th>Territoire</th><th>Source</th><th>Prioritaire</th><th>Inscription</th><th>État</th></tr></thead>
+          <tbody id="waitlistRows"><tr><td colspan="7" class="vwa-empty">Chargement des préinscriptions…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/assets/velvet-waitlist-control.js?v=20260806-1"></script>
+  <script src="/assets/account-access-menu.js?v=20260806-1"></script>
+</body>
+</html>

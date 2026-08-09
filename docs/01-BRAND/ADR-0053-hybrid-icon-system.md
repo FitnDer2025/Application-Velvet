@@ -2,17 +2,17 @@
 
 Décision validée.
 
-Velvet utilise une bibliothèque d'icônes moderne et reconnue comme base afin de garantir lisibilité, cohérence multiplateforme, rapidité d'intégration et maintenance simple.
+Zwit utilise une bibliothèque d'icônes moderne et reconnue comme base afin de garantir lisibilité, cohérence multiplateforme, rapidité d'intégration et maintenance simple.
 
-Des icônes exclusives sont créées uniquement pour les concepts propres à Velvet, notamment :
-- Invitation Velvet
-- Salon Velvet
-- Carnet Velvet
-- Pacte Velvet
+Des icônes exclusives sont créées uniquement pour les concepts propres à Zwit, notamment :
+- Invitation Zwit
+- Salon Zwit
+- Carnet Zwit
+- Pacte Zwit
 - Indice de Confiance
-- Organisateur Velvet Certifié
+- Organisateur Zwit Certifié
 - Professionnel Certifié
-- Expérience Velvet
+- Expérience Zwit
 - Galerie artistique
 - Badge Premium
 

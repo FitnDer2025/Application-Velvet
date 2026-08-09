@@ -1,12 +1,14 @@
-# Velvet Product Metrics
+# Zwit Product Metrics
 
-**Dernière mise à jour :** 23 juillet 2026
+**Dernière mise à jour :** 4 août 2026
 
 ## Indicateur global
 
-**Architecture produit : 80 %**
+**Architecture produit : 82 %**
 
 Cet indicateur mesure l'avancement des arbitrages et spécifications structurantes. Il ne mesure pas l'avancement du développement logiciel.
+
+ADR-GOV-003 clarifie l'autonomie de livraison sans modifier les pourcentages d'avancement produit.
 
 ## Avancement par domaine
 
@@ -22,10 +24,10 @@ Cet indicateur mesure l'avancement des arbitrages et spécifications structurant
 | Événements | 90 % |
 | Clubs | 70 % |
 | Professionnels | 90 % |
-| Voyages Velvet | 90 % |
-| Administration / back-office | 40 % |
-| IA Velvet | 75 % |
-| Monétisation | 70 % |
+| Voyages Zwit | 90 % |
+| Administration / back-office | 85 % |
+| IA Zwit | 80 % |
+| Monétisation | 95 % |
 | Gamification | 70 % |
 | Mobile avancé | 50 % |
 | Analytics | 20 % |
@@ -40,9 +42,22 @@ Cet indicateur mesure l'avancement des arbitrages et spécifications structurant
 - Recherche & découverte : 70 % → 95 %
 - Événements : 60 % → 90 %
 - Professionnels : 50 % → 90 %
-- IA Velvet : 40 % → 75 %
+- IA Zwit : 40 % → 75 %
 - Gamification : 25 % → 70 %
-- Ajout du domaine Voyages Velvet : 90 %
+- Ajout du domaine Voyages Zwit : 90 %
+
+## Progression apportée par ADR-MON-057
+
+- Administration / back-office : 40 % → 65 %
+- Monétisation : 70 % → 95 %
+- Le solde dépend de l'accord écrit du prestataire de paiement et de la revue juridique avant vente réelle.
+
+## Progression apportée par ADR-UX-061
+
+- Administration / back-office : 65 % → 85 %
+- IA Zwit : 75 % → 80 %
+- Contrôle dispose d’un cockpit réel, d’une file humaine, d’un historique IA explicable et de réglages média bornés.
+- Le solde dépend des futurs connecteurs d’identité, de marketing et de la validation en recette authentifiée.
 
 ## Règles de calcul
 
@@ -54,8 +69,8 @@ Cet indicateur mesure l'avancement des arbitrages et spécifications structurant
 
 ## Domaine actif
 
-**Gamification — 70 %**
+**Administration / back-office — 85 %**
 
 ## Prochain seuil
 
-Le domaine pourra être considéré comme suffisamment verrouillé lorsque les règles d'affichage, de confidentialité, d'attribution, d'évolution et de retrait des distinctions auront été précisées.
+Le domaine pourra atteindre son prochain seuil après activation de la migration du cockpit, preuve sur les décisions réelles de recette et raccordement des connecteurs futurs validés.

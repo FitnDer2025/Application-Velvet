@@ -1,4 +1,4 @@
-# ADR-TECH-045 — Velvet V1 en application web responsive installable (PWA)
+# ADR-TECH-045 — Zwit V1 en application web responsive installable (PWA)
 
 - **Statut :** Acceptée
 - **Date :** 2026-07-23
@@ -7,7 +7,7 @@
 
 ## Contexte
 
-Velvet doit livrer une V1 unifiée comprenant l'environnement communautaire et l'espace professionnel, avec une équipe extrêmement réduite reposant sur Cyril, ChatGPT et Codex. Le choix de distribution doit limiter le coût, accélérer les itérations et conserver une expérience mobile convaincante.
+Zwit doit livrer une V1 unifiée comprenant l'environnement communautaire et l'espace professionnel, avec une équipe extrêmement réduite reposant sur Cyril, ChatGPT et Codex. Le choix de distribution doit limiter le coût, accélérer les itérations et conserver une expérience mobile convaincante.
 
 Trois options ont été étudiées :
 
@@ -17,7 +17,7 @@ Trois options ont été étudiées :
 
 ## Décision
 
-La V1 de Velvet sera une **application web responsive mobile-first, installable en Progressive Web App (PWA)**.
+La V1 de Zwit sera une **application web responsive mobile-first, installable en Progressive Web App (PWA)**.
 
 Les applications natives iOS et Android ne font pas partie du périmètre V1.
 
@@ -52,7 +52,7 @@ Les applications natives iOS et Android ne font pas partie du périmètre V1.
 
 ## Critères d'acceptation
 
-- Velvet est entièrement utilisable dans un navigateur mobile et desktop ;
+- Zwit est entièrement utilisable dans un navigateur mobile et desktop ;
 - l'application peut être installée sur les plateformes PWA compatibles ;
 - le mode standalone conserve navigation, authentification et retour sécurisé ;
 - aucune donnée sensible n'est exposée dans le cache applicatif ;
@@ -61,4 +61,4 @@ Les applications natives iOS et Android ne font pas partie du périmètre V1.
 
 ## Justification
 
-Cette décision offre le meilleur équilibre entre qualité d'expérience, vitesse d'exécution, maîtrise du développement par Codex et limitation du capital engagé. Elle permet de valider Velvet avant de financer deux applications natives distinctes.
+Cette décision offre le meilleur équilibre entre qualité d'expérience, vitesse d'exécution, maîtrise du développement par Codex et limitation du capital engagé. Elle permet de valider Zwit avant de financer deux applications natives distinctes.

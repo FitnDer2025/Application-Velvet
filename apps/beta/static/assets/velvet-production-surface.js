@@ -1,0 +1,236 @@
+(() => {
+  'use strict';
+
+  if (window.__VELVET_PRODUCTION_SURFACE__) return;
+  window.__VELVET_PRODUCTION_SURFACE__ = true;
+
+  const OFFICIAL_LOGO = '/assets/zwit-logo-transparent.png?v=20260806-10';
+  const path = window.location.pathname;
+  const title = path.startsWith('/control')
+    ? 'Zwit Contrôle'
+    : path.startsWith('/pro') || path.startsWith('/marketing-pro')
+      ? 'Zwit Pro'
+      : path.startsWith('/studio-capture')
+        ? 'Zwit Studio'
+        : path.startsWith('/membres') || path.startsWith('/marketing')
+          ? 'Zwit Membres'
+          : 'Zwit — Connexion';
+
+  const exact = new Map([
+    ['Zwit Membres — BETA privée', 'Zwit Membres'],
+    ['Zwit — BETA Marketing', 'Zwit Membres'],
+    ['Zwit Pro — BETA Marketing', 'Zwit Pro'],
+    ['Zwit BETA — Conditions', 'Zwit — Conditions d’utilisation'],
+    ['Zwit BETA — Confidentialité', 'Zwit — Confidentialité'],
+    ['Zwit BETA — Sécurité', 'Zwit — Sécurité'],
+    ['BETA PRIVÉE · 18+', 'ACCÈS PRIVÉ · 18+'],
+    ['BETA privée', 'Accès privé'],
+    ['BETA Marketing', 'Zwit'],
+    ['BETA MARKETING', 'ZWIT'],
+    ['PRO MARKETING', 'PRO'],
+    ['Données réelles · À jour', 'Synchronisation active'],
+    ['Données réelles · Configuration partielle', 'Synchronisation partielle'],
+    ['Données réelles Supabase', 'Synchronisation sécurisée'],
+    ['Données fictives · environnement marketing', 'Espace professionnel'],
+    ['Accès BETA', 'Accès Zwit'],
+    ['Conditions BETA', 'Conditions d’utilisation'],
+    ['J’accepte les conditions de la BETA.', 'J’accepte les conditions d’utilisation de Zwit.'],
+    ['Les quatre validations sont obligatoires pour cette BETA.', 'Les quatre validations sont obligatoires pour activer ton accès.'],
+    ['Accès réservé aux personnes invitées à tester les quatre univers Zwit.', 'Accès réservé aux personnes disposant d’une invitation Zwit.'],
+    ['Cet environnement de démonstration est réservé à Zwit Control.', 'Cet espace est réservé aux comptes autorisés.'],
+    ['BETA MARKETING · DONNÉES FICTIVES', ''],
+    ['BETA MARKETING PRO · DONNÉES FICTIVES', ''],
+    ['Zwit Marketing Membre', 'Aperçu Zwit Membre'],
+    ['Zwit Marketing Pro', 'Aperçu Zwit Pro'],
+    ['Ouvrir Zwit Marketing', 'Ouvrir l’aperçu Zwit'],
+    ['Agents de test', 'Agents qualité'],
+    ['Agent de test', 'Agent qualité'],
+    ['Tests automatisés', 'Contrôles automatisés'],
+    ['Test automatisé', 'Contrôle automatisé']
+  ]);
+
+  const phraseRules = [
+    [/\bBETA PRIVÉE\b/gi, 'ACCÈS PRIVÉ'],
+    [/\bBETA MARKETING PRO\b/gi, 'ZWIT PRO'],
+    [/\bBETA MARKETING\b/gi, 'ZWIT'],
+    [/\bBETA fermée\b/gi, 'Zwit'],
+    [/\bAccès BETA\b/gi, 'Accès Zwit'],
+    [/\bconditions de la BETA\b/gi, 'conditions d’utilisation de Zwit'],
+    [/\bdonnées réelles\b/gi, 'données synchronisées'],
+    [/\bdonnées fictives\b/gi, 'contenus de présentation'],
+    [/\benvironnement de démonstration\b/gi, 'espace sécurisé'],
+    [/\benvironnement marketing\b/gi, 'espace Zwit'],
+    [/\bversion de test\b/gi, 'version actuelle'],
+    [/\bprofil test\b/gi, 'profil qualité'],
+    [/\bprofils test\b/gi, 'profils qualité'],
+    [/\bVELVETPRO\b/g, 'ZWITPRO'],
+    [/\bVelvetPro\b/g, 'ZwitPro'],
+    [/\bvelvetpro\b/g, 'zwitpro'],
+    [/\bVELVET\b/g, 'ZWIT'],
+    [/\bVelvet\b/g, 'Zwit'],
+    [/\bvelvet\b/g, 'zwit']
+  ];
+
+  const removableSelectors = ['#velvetMarketingBadge','#velvetMarketingProBadge','[data-beta-badge]','[data-demo-badge]','.beta-badge','.demo-badge'];
+  const normalized = (value) => String(value || '').replace(/\s+/g, ' ').trim();
+  const technicalOrUserValue = (value) => {
+    const text = String(value || '');
+    return /[A-Z0-9._%+-]+@[A-Z0-9.-]*velvet[A-Z0-9.-]*/i.test(text)
+      || /(?:velvet:\/\/|com\.velvet|VELVET_[A-Z0-9_]+|velvet[_-](?:media|beta|control|studio|notification))/i.test(text);
+  };
+  const replaceCopy = (value) => {
+    const source = String(value || '');
+    if (technicalOrUserValue(source)) return source;
+    const trimmed = normalized(source);
+    if (!trimmed) return source;
+    if (exact.has(trimmed)) return source.replace(trimmed, exact.get(trimmed));
+    return phraseRules.reduce((copy, [pattern, replacement]) => copy.replace(pattern, replacement), source);
+  };
+
+  const isLegacyBrandAsset = (value) => /(?:zwit-logo-1024\.jpg|zwit-logo\.svg|zwit-icon\.svg|velvet-icon\.svg|velvet-icon-(?:180|192|512)\.png)(?:[?#].*)?$/i.test(String(value || ''));
+
+  function normalizeBrandImage(element) {
+    if (!(element instanceof HTMLImageElement)) return;
+    const current = element.getAttribute('src') || element.currentSrc || '';
+    if (!isLegacyBrandAsset(current)) return;
+    if (element.getAttribute('src') !== OFFICIAL_LOGO) element.setAttribute('src', OFFICIAL_LOGO);
+    element.removeAttribute('srcset');
+    element.style.background = 'transparent';
+    element.style.objectFit = 'contain';
+  }
+
+  function cleanControlValue(element) {
+    if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) return;
+    // Runtime branding is intentionally excluded from user-entered values.
+  }
+
+  function cleanElement(element) {
+    if (!(element instanceof Element)) return;
+    normalizeBrandImage(element);
+    for (const attribute of ['title','aria-label','placeholder','alt']) {
+      if (!element.hasAttribute(attribute)) continue;
+      const current = element.getAttribute(attribute);
+      const next = replaceCopy(current);
+      if (next !== current) element.setAttribute(attribute, next);
+    }
+    cleanControlValue(element);
+  }
+
+  function cleanTextNode(node) {
+    if (!(node instanceof Text)) return;
+    if (node.parentElement?.closest('script,style,code,pre,textarea')) return;
+    const next = replaceCopy(node.nodeValue);
+    if (next !== node.nodeValue) node.nodeValue = next;
+  }
+
+  function clean(root = document) {
+    document.title = title;
+    removableSelectors.forEach((selector) => document.querySelectorAll(selector).forEach((node) => node.remove()));
+    if (root instanceof Text) return cleanTextNode(root);
+    if (root instanceof Element) cleanElement(root);
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+    let current = walker.currentNode;
+    while (current) {
+      if (current instanceof Text) cleanTextNode(current);
+      else cleanElement(current);
+      current = walker.nextNode();
+    }
+  }
+
+  function installCanvasBrandGuard() {
+    const prototype = window.CanvasRenderingContext2D?.prototype;
+    if (!prototype || prototype.__zwitBrandGuard) return;
+    const fillText = prototype.fillText;
+    const strokeText = prototype.strokeText;
+    prototype.fillText = function guardedFillText(text, ...args) { return fillText.call(this, replaceCopy(text), ...args); };
+    prototype.strokeText = function guardedStrokeText(text, ...args) { return strokeText.call(this, replaceCopy(text), ...args); };
+    Object.defineProperty(prototype, '__zwitBrandGuard', { value: true });
+  }
+
+  function installSpeechBrandGuard() {
+    const NativeUtterance = window.SpeechSynthesisUtterance;
+    if (!NativeUtterance || window.__ZWIT_SPEECH_BRAND_GUARD__) return;
+    const ZwitUtterance = function ZwitUtterance(text = '') { return new NativeUtterance(replaceCopy(text)); };
+    ZwitUtterance.prototype = NativeUtterance.prototype;
+    Object.setPrototypeOf(ZwitUtterance, NativeUtterance);
+    window.SpeechSynthesisUtterance = ZwitUtterance;
+    window.__ZWIT_SPEECH_BRAND_GUARD__ = true;
+  }
+
+  const style = document.createElement('style');
+  style.id = 'velvetProductionSurfaceStyles';
+  style.textContent = `
+    #velvetMarketingBadge,#velvetMarketingProBadge,[data-beta-badge],[data-demo-badge],.beta-badge,.demo-badge{display:none!important}
+    .zwit-opening-v2{visibility:visible!important}
+    .zwit-opening-v2 img,.zwit-brand img,.zwit-brand-lockup img,[data-zwit-logo]{background:transparent!important;object-fit:contain!important;filter:drop-shadow(0 18px 34px rgba(0,0,0,.48))!important}
+    .zwit-opening-v2 .zwit-word span{display:none!important}
+  `;
+  document.head.appendChild(style);
+  installCanvasBrandGuard();
+  installSpeechBrandGuard();
+
+  let queued = false;
+  const observer = new MutationObserver((mutations) => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => clean(node));
+        if (mutation.type === 'characterData') cleanTextNode(mutation.target);
+      });
+      document.title = title;
+    });
+  });
+
+  clean(document);
+  observer.observe(document.documentElement, { subtree:true, childList:true, characterData:true });
+  window.addEventListener('pageshow', () => clean(document));
+  [0,250,1000,2400].forEach((delay) => setTimeout(() => clean(document), delay));
+
+  const loadExperience = () => {
+    if (document.querySelector('script[data-zwit-experience]')) return;
+    const experience = document.createElement('script');
+    experience.src = '/assets/zwit-experience.js?v=20260806-10';
+    experience.dataset.zwitExperience = 'true';
+    document.head.appendChild(experience);
+  };
+
+  const loadRefinement = () => {
+    if (document.querySelector('script[data-zwit-experience-refinement]')) {
+      loadExperience();
+      return;
+    }
+    const refinement = document.createElement('script');
+    refinement.src = '/assets/zwit-experience-refinement.js?v=20260806-10';
+    refinement.dataset.zwitExperienceRefinement = 'true';
+    refinement.addEventListener('load', loadExperience, { once:true });
+    document.head.appendChild(refinement);
+  };
+
+  const loadInteractionDateFix = () => {
+    if (document.querySelector('script[data-zwit-interaction-date-fix]')) return;
+    const script = document.createElement('script');
+    script.src = '/assets/zwit-interaction-date-fix.js?v=20260806-10';
+    script.dataset.zwitInteractionDateFix = 'true';
+    document.head.appendChild(script);
+  };
+
+  const loadBrandSystem = () => {
+    if (window.ZWIT_BRAND || document.querySelector('script[data-zwit-brand-system]')) {
+      loadRefinement();
+      loadInteractionDateFix();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = '/assets/zwit-brand-system.js?v=20260806-10';
+    script.dataset.zwitBrandSystem = 'true';
+    script.addEventListener('load', () => {
+      loadRefinement();
+      loadInteractionDateFix();
+    }, { once:true });
+    document.head.appendChild(script);
+  };
+
+  loadBrandSystem();
+})();

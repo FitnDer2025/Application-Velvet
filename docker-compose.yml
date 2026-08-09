@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:18.4-alpine
+    environment:
+      POSTGRES_DB: velvet
+      POSTGRES_USER: velvet
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-velvet-local-only}
+    ports:
+      - "5432:5432"
+    volumes:
+      - velvet_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U velvet -d velvet"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://velvet:${POSTGRES_PASSWORD:-velvet-local-only}@postgres:5432/velvet
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://velvet:${POSTGRES_PASSWORD:-velvet-local-only}@postgres:5432/velvet
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  velvet_postgres:

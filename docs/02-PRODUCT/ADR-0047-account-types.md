@@ -1,8 +1,8 @@
-# ADR-0047 - Types de comptes Velvet
+# ADR-0047 - Types de comptes Zwit
 
 Décision validée.
 
-Velvet distingue trois expériences de compte :
+Zwit distingue trois expériences de compte :
 
 ## Membre
 
@@ -22,7 +22,7 @@ Son tableau de bord comprend :
 - Messagerie organisateur
 - Réputation d'organisateur
 
-Le statut `Organisateur Velvet Certifié` peut être accordé après plusieurs événements réussis, un niveau de confiance élevé et le respect durable des règles Velvet.
+Le statut `Organisateur Zwit Certifié` peut être accordé après plusieurs événements réussis, un niveau de confiance élevé et le respect durable des règles Velvet.
 
 ## Professionnel
 

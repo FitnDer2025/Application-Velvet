@@ -1,6 +1,6 @@
-# Velvet ADR Status
+# Zwit ADR Status
 
-**Dernière mise à jour :** 23 juillet 2026
+**Dernière mise à jour :** 4 août 2026
 
 Ce tableau permet de vérifier rapidement les domaines déjà arbitrés avant toute nouvelle proposition.
 
@@ -10,15 +10,19 @@ Ce tableau permet de vérifier rapidement les domaines déjà arbitrés avant to
 | Recherche et découverte | ADR-024 à ADR-036 | ✅ Accepté | `docs/adr/ADR-DA-024-036-intelligent-discovery.md` |
 | ADR-037 | Numéro non retenu | ⛔ Sans objet | Sujet professionnel déjà arbitré antérieurement |
 | Professionnels et IA métier | ADR-038 à ADR-040 | ✅ Accepté | `docs/adr/ADR-PRO-038-041-professional-ecosystem-and-trips.md` |
-| Voyages Velvet | ADR-041 | ✅ Accepté | `docs/adr/ADR-PRO-038-041-professional-ecosystem-and-trips.md` |
+| Voyages Zwit | ADR-041 | ✅ Accepté | `docs/adr/ADR-PRO-038-041-professional-ecosystem-and-trips.md` |
 | ADR-042 | Sujet déjà couvert | 🔒 Verrouillé | Modèle freemium, essai, promotions et parrainage déjà décidés |
+| Monétisation opérationnelle | ADR-MON-057 | ✅ Accepté | `docs/03-ADR/ADR-MON-057-MEMBER-PRO-MONETIZATION.md` |
+| Fondation iOS native | ADR-TECH-058 | ✅ Accepté | `docs/03-ADR/ADR-TECH-058-IOS-NATIVE-FOUNDATION.md` |
 | Gamification | ADR-043 à ADR-044 | ✅ Accepté | `docs/adr/ADR-GAM-043-044-positive-gamification.md` |
+| Gouvernance de livraison | ADR-GOV-003 | ✅ Accepté | `docs/adr/ADR-GOV-003-code-delivery-autonomy.md` |
+| Cockpit Zwit Contrôle | ADR-UX-061 | ✅ Accepté | `docs/03-ADR/ADR-UX-061-CONTROL-PILOTING-COCKPIT.md` |
 
 ## Domaine actif
 
-**Gamification — approfondissement restant après ADR-044.**
+**Zwit Contrôle — cockpit de pilotage opérationnel.**
 
-La prochaine décision doit compléter ce domaine sans rouvrir la philosophie de gamification positive ni le principe des distinctions évolutives.
+Le chantier actif rend les décisions IA, les actions humaines et les communications directement pilotables, sans rouvrir les règles métier de modération déjà validées.
 
 ## Discipline
 

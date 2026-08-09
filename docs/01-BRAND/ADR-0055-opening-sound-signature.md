@@ -2,7 +2,7 @@
 
 Décision validée.
 
-Velvet possède une unique signature sonore de marque, jouée uniquement au lancement de l'application et synchronisée avec le ruban rouge formant le `V` du logo.
+Zwit possède une unique signature sonore de marque, jouée uniquement au lancement de l'application et synchronisée avec le ruban rouge formant le `V` du logo.
 
 ## Caractéristiques
 

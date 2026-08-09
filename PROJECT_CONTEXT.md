@@ -1,9 +1,9 @@
-# VELVET — PROJECT CONTEXT
+# ZWIT — PROJECT CONTEXT
 
 ## Rôle
-Velvet est un réseau social premium dédié aux rencontres libres, sensuelles et libertines, conçu pour devenir la référence française du secteur.
+Zwit est un réseau social premium dédié aux rencontres libres, sensuelles et libertines, conçu pour devenir la référence française du secteur.
 
-Velvet ne doit jamais être pensé comme un simple site de rencontre. Le produit articule identité, consentement, confiance, découverte, événements, mémoire, communauté, professionnels et intelligence contextuelle.
+Zwit ne doit jamais être pensé comme un simple site de rencontre. Le produit articule identité, consentement, confiance, découverte, événements, mémoire, communauté, professionnels et intelligence contextuelle.
 
 ## ADN non négociable
 - Premium
@@ -22,10 +22,10 @@ Velvet ne doit jamais être pensé comme un simple site de rencontre. Le produit
 - Quality over quantity.
 - Consent by design.
 - Human first design.
-- Velvet accompagne le réel ; il ne le remplace pas.
+- Zwit accompagne le réel ; il ne le remplace pas.
 - Les personnes ne sont jamais réduites à des notes.
 - Les décisions validées ne sont pas rouvertes sans demande explicite du fondateur.
-- Toute évolution respecte l’ADN Velvet et l’ordre des dépendances produit.
+- Toute évolution respecte l’ADN Zwit et l’ordre des dépendances produit.
 
 ## Méthode
 1. Clarifier le besoin.
@@ -40,4 +40,4 @@ Velvet ne doit jamais être pensé comme un simple site de rencontre. Le produit
 10. Historiser.
 
 ## Règle IA / Codex
-Toute IA intervenant sur Velvet doit lire ce fichier, la Product Bible et les ADR concernées avant de proposer ou modifier une fonctionnalité.
+Toute IA intervenant sur Zwit doit lire ce fichier, la Product Bible et les ADR concernées avant de proposer ou modifier une fonctionnalité.

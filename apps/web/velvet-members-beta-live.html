@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#0b080a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Zwit">
+  <title>Zwit Membres — BETA privée</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/assets/velvet-icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/velvet-icon-180.png">
+  <script>
+    try {
+      const theme = localStorage.getItem('velvet-member-theme-v1') === 'light' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+    } catch {}
+  </script>
+  <link rel="stylesheet" href="/assets/members-live.css">
+  <link rel="stylesheet" href="/assets/members-onboarding-v2.css?v=20260804-1">
+  <link rel="stylesheet" href="/assets/velvet-premium-ui.css">
+  <link rel="stylesheet" href="/assets/velvet-editorial-ui.css">
+  <link rel="stylesheet" href="/assets/velvet-messaging-upgrade.css?v=20260803-3">
+  <link rel="stylesheet" href="/assets/velvet-mobile-feed-hotfix.css?v=20260803-3">
+  <link rel="stylesheet" href="/assets/velvet-chat-whatsapp.css?v=20260731-1">
+  <link rel="stylesheet" href="/assets/zwit-conversation-respect.css?v=20260807-1">
+  <link rel="stylesheet" href="/assets/zwit-voice-notes.css?v=20260807-1">
+  <link rel="stylesheet" href="/assets/zwit-ephemeral-messaging.css?v=20260807-1">
+  <link rel="stylesheet" href="/assets/zwit-video-call.css?v=20260807-1">
+  <link rel="stylesheet" href="/assets/zwit-contextual-recommendations.css?v=20260807-1">
+  <link rel="stylesheet" href="/assets/zwit-private-spaces.css?v=20260807-1">
+  <link rel="stylesheet" href="/assets/velvet-mobile-viewport-guard.css?v=20260731-2">
+  <link rel="stylesheet" href="/assets/velvet-social-interactions-hotfix.css?v=20260731-1">
+  <link rel="stylesheet" href="/assets/velvet-social-realtime.css?v=20260731-1">
+  <link rel="stylesheet" href="/assets/velvet-experience-management.css?v=20260731-1">
+  <link rel="stylesheet" href="/assets/velvet-interaction-recovery.css?v=20260803-3">
+  <link rel="stylesheet" href="/assets/velvet-web-ios-parity.css?v=20260807-1">
+  <link rel="stylesheet" href="/assets/zwit-passport.css?v=20260807-1">
+  <link rel="stylesheet" href="/assets/zwit-tonight.css?v=20260807-1">
+  <link rel="stylesheet" href="/assets/zwit-event-booking.css?v=20260807-1">
+  <link rel="stylesheet" href="/assets/zwit-ios-source-of-truth.css?v=20260807-1">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navigation Zwit">
+      <a class="brand" href="/membres/" aria-label="Accueil Zwit">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span><strong>Zwit</strong><small>BETA privée</small></span>
+      </a>
+      <nav id="mainNav" aria-label="Espaces principaux">
+        <button type="button" data-route="home"><span>⌂</span>Accueil</button>
+        <button type="button" data-route="discover"><span>⌕</span>Membres</button>
+        <button type="button" data-route="maps"><span>⌖</span>Carte</button>
+        <button type="button" data-route="venues"><span>⌂</span>Lieux</button>
+        <button type="button" data-route="conversations"><span>◌</span>Messages</button>
+        <button type="button" data-route="me"><span>♡</span>Profil</button>
+      </nav>
+      <div class="sidebar-tools" aria-label="Outils et réglages">
+        <p>PLUS DE ZWIT</p>
+        <button type="button" class="zwit-tonight-nav" data-zwit-route="tonight"><span>◐</span>Ce soir</button>
+        <button type="button" data-route="events"><span>✦</span>Sorties & agenda</button>
+        <button type="button" data-route="notifications"><span>○</span>Notifications</button>
+        <button type="button" data-route="settings"><span>⚙</span>Paramètres</button>
+      </div>
+      <div class="sidebar-foot">
+        <p><span class="live-dot"></span>Données réelles Supabase</p>
+      </div>
+    </aside>
+
+    <header class="mobile-head">
+      <a class="brand compact" href="/membres/" aria-label="Accueil Zwit"><span class="brand-mark" aria-hidden="true"></span><strong>Zwit</strong></a>
+      <div class="mobile-head-actions">
+        <button type="button" data-zwit-route="tonight" aria-label="Ce soir"><span>◐</span>Ce soir</button>
+        <button type="button" data-route="notifications" aria-label="Notifications">○</button>
+        <button type="button" id="mobileMenuButton" aria-expanded="false" aria-controls="mainNav" aria-label="Ouvrir le menu">Menu</button>
+      </div>
+    </header>
+
+    <main id="content" tabindex="-1">
+      <section class="loading-state" aria-live="polite">
+        <span class="loader"></span>
+        <p>Connexion à la mémoire Zwit…</p>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navigation mobile">
+      <button type="button" data-route="home"><span>⌂</span><small>Accueil</small></button>
+      <button type="button" data-route="discover"><span>⌕</span><small>Membres</small></button>
+      <button type="button" data-route="maps"><span>⌖</span><small>Carte</small></button>
+      <button type="button" data-route="venues"><span>⌂</span><small>Lieux</small></button>
+      <button type="button" data-route="conversations"><span>◌</span><small>Messages</small></button>
+      <button type="button" data-route="me"><span>♡</span><small>Profil</small></button>
+    </nav>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/members-live.js?v=20260803-4" defer></script>
+  <script src="/assets/zwit-passport.js?v=20260807-1" defer></script>
+  <script src="/assets/zwit-tonight.js?v=20260807-1" defer></script>
+  <script src="/assets/zwit-event-booking.js?v=20260807-1" defer></script>
+  <script src="/assets/zwit-member-checkin.js?v=20260807-1" defer></script>
+  <script src="/assets/velvet-premium-ui.js?v=20260803-3" defer></script>
+  <script src="/assets/pwa-ios.js?v=20260803-2" defer></script>
+  <script src="/assets/photo-protection.js?v=20260731-5" defer></script>
+  <script src="/assets/location-verification.js?v=20260803-1" defer></script>
+  <script src="/assets/members-onboarding-v2.js?v=20260804-1" defer></script>
+  <script src="/assets/velvet-messaging-upgrade.js?v=20260803-3" defer></script>
+  <script src="/assets/velvet-mobile-feed-hotfix.js?v=20260803-3" defer></script>
+  <script src="/assets/velvet-chat-whatsapp.js?v=20260731-1" defer></script>
+  <script src="/assets/zwit-conversation-respect.js?v=20260807-1" defer></script>
+  <script src="/assets/zwit-voice-notes.js?v=20260807-1" defer></script>
+  <script src="/assets/zwit-ephemeral-messaging.js?v=20260807-1" defer></script>
+  <script src="/assets/zwit-video-call.js?v=20260807-1" defer></script>
+  <script src="/assets/zwit-contextual-recommendations.js?v=20260807-1" defer></script>
+  <script src="/assets/zwit-private-spaces.js?v=20260807-1" defer></script>
+  <script src="/assets/velvet-mobile-viewport-guard.js?v=20260731-2" defer></script>
+  <script src="/assets/velvet-social-interactions-hotfix.js?v=20260731-1" defer></script>
+  <script src="/assets/velvet-social-realtime.js?v=20260803-2" defer></script>
+  <script src="/assets/velvet-realtime-reconcile.js?v=20260731-1" defer></script>
+  <script src="/assets/velvet-push-deeplink.js?v=20260731-1" defer></script>
+  <script src="/assets/velvet-experience-management.js?v=20260731-1" defer></script>
+  <script src="/assets/velvet-interaction-recovery.js?v=20260803-3" defer></script>
+  <script src="/assets/velvet-web-ios-parity.js?v=20260807-1" defer></script>
+  <script src="/assets/account-access-menu.js?v=20260804-1" defer></script>
+  <script src="/assets/zwit-ios-source-of-truth.js?v=20260807-1" defer></script>
+</body>
+</html>

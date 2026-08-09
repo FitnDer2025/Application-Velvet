@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Zwit — V5 Profils & Établissements</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#09090b}
+    iframe{border:0;width:100%;height:100%;display:block}
+  </style>
+</head>
+<body>
+<iframe id="app" src="./velvet-v1-locked-dense-demo-v3.html" title="Zwit V1"></iframe>
+<script>
+const frame=document.getElementById('app');
+frame.addEventListener('load',()=>{
+  const w=frame.contentWindow,d=w.document;
+  const bridge=typeof w.eval==='function'
+    ?w.eval('({I,P,E,S,content,go,save,toast,menu})')
+    :w;
+  Object.assign(w,bridge);
+  const oldGo=bridge.go.bind(w);
+  const style=d.createElement('style');
+  style.textContent=`
+    :root{--cream:#f1e8dc;--ink:#09090b;--wine:#7c2749;--wine2:#4e182f;--gold2:#d7b77a}
+    .v4{max-width:1280px;margin:auto;color:var(--txt)}
+    .v4 button{font:inherit}
+    .v4-back{margin-bottom:14px}
+    .v4-hero{position:relative;min-height:620px;border-radius:32px;overflow:hidden;background:#111}
+    .v4-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .25s ease}
+    .v4-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#050506e8 0%,#08080b9c 37%,transparent 72%),linear-gradient(0deg,#050506f2 0%,transparent 52%)}
+    .v4-hero-copy{position:absolute;z-index:3;left:42px;bottom:38px;width:min(620px,68%)}
+    .v4-kicker{display:flex;align-items:center;gap:8px;color:var(--gold);font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+    .v4-title{font-family:Georgia;font-size:clamp(48px,7vw,86px);line-height:.95;margin:13px 0 16px}
+    .v4-lead{font-size:18px;line-height:1.65;color:#e8e1d9;max-width:610px}
+    .v4-badges{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+    .v4-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff26;background:#09090ba8;backdrop-filter:blur(10px);padding:8px 11px;border-radius:999px;font-size:12px}
+    .v4-actions{display:flex;gap:9px;flex-wrap:wrap}
+    .v4-primary,.v4-secondary{border:0;border-radius:999px;padding:12px 17px;color:white;cursor:pointer}
+    .v4-primary{background:linear-gradient(135deg,#96395f,var(--wine))}
+    .v4-secondary{background:#0b0b0db8;border:1px solid #ffffff2d}
+    .v4-arrow{position:absolute;z-index:4;top:50%;width:46px;height:46px;border-radius:50%;border:1px solid #ffffff35;background:#09090ba6;color:white;font-size:22px;cursor:pointer}
+    .v4-arrow.prev{left:18px}.v4-arrow.next{right:18px}
+    .v4-photo-count{position:absolute;z-index:4;right:22px;bottom:22px;background:#09090bc9;border:1px solid #ffffff25;border-radius:999px;padding:8px 12px;font-size:12px}
+    .v4-thumbs{display:flex;gap:8px;overflow:auto;padding:12px 2px 3px}
+    .v4-thumb{width:82px;height:62px;border-radius:13px;object-fit:cover;border:2px solid transparent;opacity:.55;cursor:pointer}
+    .v4-thumb.active{opacity:1;border-color:var(--gold)}
+    .v4-tabs{position:sticky;top:72px;z-index:9;display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:14px 0;background:#09090bee;backdrop-filter:blur(18px)}
+    .v4-tab{border:1px solid var(--line);border-radius:17px;background:#151518;color:var(--muted);padding:13px;cursor:pointer;text-align:left}
+    .v4-tab b{display:block;color:#fff;font-size:14px}.v4-tab small{display:block;margin-top:4px}
+    .v4-tab.active{border-color:#d7b77a88;background:linear-gradient(135deg,#d7b77a16,#7c274925);color:var(--gold)}
+    .v4-snapshot{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin:16px 0}
+    .v4-stat{padding:14px;border-radius:16px;background:#ffffff07;border:1px solid var(--line)}
+    .v4-stat small{display:block;color:var(--muted);margin-bottom:6px}.v4-stat strong{font-size:14px}
+    .v4-toc{display:flex;gap:8px;overflow:auto;margin:18px 0;padding-bottom:3px}
+    .v4-toc button{white-space:nowrap;border:1px solid var(--line);border-radius:999px;background:#ffffff06;color:#d9d4cf;padding:9px 12px;cursor:pointer}
+    .v4-layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.72fr);gap:18px}
+    .v4-section{scroll-margin-top:145px;border:1px solid var(--line);border-radius:26px;background:linear-gradient(145deg,#ffffff0d,#ffffff04);padding:25px;margin-bottom:18px}
+    .v4-section h2{font-family:Georgia;font-size:30px;margin:6px 0 14px}.v4-section h3{font-family:Georgia}
+    .v4-copy{color:#d8d2cc;font-size:16px;line-height:1.75}
+    .v4-quote{border-left:3px solid var(--gold);padding:7px 0 7px 17px;margin:18px 0;font-family:Georgia;font-size:21px;line-height:1.5;color:var(--cream)}
+    .v4-pill-grid{display:flex;gap:8px;flex-wrap:wrap}
+    .v4-pill{border-radius:999px;padding:9px 12px;background:#ffffff08;border:1px solid var(--line);font-size:12px}
+    .v4-practices{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .v4-practice{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:14px;border-radius:17px;background:#ffffff06;border:1px solid var(--line)}
+    .v4-level{color:var(--gold);font-size:11px;border:1px solid #d7b77a55;border-radius:999px;padding:6px 8px}
+    .v4-timeline{display:grid;gap:12px}
+    .v4-time{display:grid;grid-template-columns:74px 14px 1fr;gap:12px}
+    .v4-time i{width:12px;height:12px;border-radius:50%;background:var(--gold);margin-top:5px;box-shadow:0 0 0 5px #d7b77a18}
+    .v4-time strong{color:var(--gold)}
+    .v4-venues{display:grid;gap:11px}
+    .v4-venue{display:grid;grid-template-columns:92px 1fr auto;gap:13px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:19px;background:#ffffff05}
+    .v4-venue img{width:92px;height:76px;border-radius:14px;object-fit:cover}
+    .v4-venue p{margin:5px 0 0;color:var(--muted);font-size:13px}
+    .v4-reco{padding:17px;border:1px solid var(--line);border-radius:19px;background:#ffffff05;margin-top:10px}
+    .v4-reco-head{display:flex;gap:11px;align-items:center}.v4-reco img{width:48px;height:48px;border-radius:50%;object-fit:cover}
+    .v4-reco p{margin:10px 0 0;color:#d8d2cc;line-height:1.55}
+    .v4-side-card{border:1px solid var(--line);border-radius:22px;background:#ffffff07;padding:19px;margin-bottom:14px}
+    .v4-side-card h3{margin-top:0}
+    .v4-list{display:grid;gap:0}.v4-list div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #ffffff0d}
+    .v4-list span{color:var(--muted)}.v4-list strong{text-align:right}
+    .v4-map{height:190px;border-radius:18px;position:relative;overflow:hidden;background:radial-gradient(circle at 54% 48%,#d7b77a44 0 6px,transparent 7px),linear-gradient(35deg,#242832,#11151a)}
+    .v4-map:before,.v4-map:after{content:"";position:absolute;border:1px solid #ffffff16;border-radius:50%}
+    .v4-map:before{width:170px;height:170px;left:calc(54% - 85px);top:calc(48% - 85px)}.v4-map:after{width:90px;height:90px;left:calc(54% - 45px);top:calc(48% - 45px)}
+    .v4-map-label{position:absolute;left:14px;bottom:13px;z-index:2;background:#09090bc9;border-radius:12px;padding:9px 11px;font-size:12px}
+    .v4-person-hero{display:grid;grid-template-columns:minmax(280px,.8fr) 1.2fr;gap:22px;align-items:stretch}
+    .v4-person-photo{min-height:530px;border-radius:27px;overflow:hidden;position:relative;background:#121214}
+    .v4-person-photo img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+    .v4-person-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,#000d)}
+    .v4-person-photo .v4-photo-count{bottom:15px;right:15px}
+    .v4-person-story{display:flex;flex-direction:column;justify-content:center;border:1px solid var(--line);border-radius:27px;background:linear-gradient(145deg,#7c274922,#ffffff06);padding:32px}
+    .v4-person-story h1{font-family:Georgia;font-size:52px;margin:8px 0 14px}
+    .v4-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:18px}
+    .v4-fact{padding:13px;border-radius:15px;background:#ffffff07;border:1px solid var(--line)}
+    .v4-fact small{display:block;color:var(--muted);margin-bottom:5px}.v4-private{color:var(--gold);font-style:italic}
+    .v4-consent{display:grid;gap:9px}
+    .v4-consent-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:13px;border:1px solid var(--line);border-radius:15px;background:#ffffff05}
+    .v4-status{border-radius:999px;padding:6px 9px;font-size:11px}.v4-status.yes{color:#8be0b6;border:1px solid #8be0b655}.v4-status.talk{color:var(--gold);border:1px solid #d7b77a55}.v4-status.no{color:#e58ca8;border:1px solid #e58ca855}
+    .v4-albums-intro{display:flex;justify-content:space-between;gap:20px;align-items:end;margin:20px 0}
+    .v4-albums-intro h1{font-family:Georgia;font-size:52px;margin:6px 0}
+    .v4-albums{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+    .v4-album{min-height:260px;border:1px solid #d7b77a38;border-radius:25px;background:radial-gradient(circle at 80% 15%,#d7b77a18,transparent 38%),linear-gradient(145deg,#1b1719,#0d0c0e);padding:22px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+    .v4-lock{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:#d7b77a12;border:1px solid #d7b77a44;font-size:22px}
+    .v4-album h3{font-family:Georgia;font-size:24px;margin:20px 0 7px}.v4-album p{color:var(--muted);line-height:1.5}
+    .v4-conf{display:inline-flex;align-self:flex-start;border:1px solid var(--line);border-radius:999px;padding:7px 9px;color:var(--gold);font-size:10px}
+    .v4-album-foot{display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .v4-create{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+    .v4-create input,.v4-create select,.v4-edit input,.v4-edit textarea{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:13px;background:#17171b;color:white;padding:11px}
+    .v4-create .wide,.v4-edit .wide{grid-column:1/-1}
+    .v4-edit{display:grid;grid-template-columns:1fr 1fr;gap:10px}.v4-edit textarea{min-height:120px}
+    .v4-note{padding:14px;border-radius:16px;border:1px solid #d7b77a35;background:#d7b77a0d;color:#d9d2c8;line-height:1.55;margin-top:14px}
+    .v5{max-width:1280px;margin:auto}.v5 button{font:inherit}
+    .v5-hero{min-height:500px;border-radius:30px;overflow:hidden;position:relative;background:#151518}
+    .v5-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .v5-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#09090bea,transparent 72%),linear-gradient(0deg,#09090bf2,transparent 60%)}
+    .v5-hero-copy{position:absolute;z-index:2;left:38px;right:38px;bottom:34px;max-width:690px}
+    .v5-hero-copy h1{font-family:Georgia;font-size:clamp(46px,6vw,76px);margin:9px 0 12px;line-height:1}
+    .v5-badges,.v5-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .v5-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff26;background:#09090b9e;backdrop-filter:blur(12px);border-radius:999px;padding:8px 11px;font-size:11px}
+    .v5-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:18px}
+    .v5-place{border:1px solid var(--line);border-radius:25px;background:#ffffff06;overflow:hidden;cursor:pointer;transition:.22s}
+    .v5-place:hover{transform:translateY(-4px);border-color:#d7b77a55}
+    .v5-place-photo{height:255px;position:relative}.v5-place-photo img{width:100%;height:100%;object-fit:cover}
+    .v5-place-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 48%,#09090be8)}
+    .v5-place-type{position:absolute;z-index:2;left:15px;bottom:13px;color:var(--gold);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+    .v5-place-body{padding:18px}.v5-place-body h2{font-family:Georgia;font-size:28px;margin:0 0 7px}
+    .v5-place-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:15px 0}
+    .v5-place-meta div{padding:10px;border-radius:13px;background:#ffffff07}.v5-place-meta small{display:block;color:var(--muted);margin-bottom:4px}
+    .v5-layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.7fr);gap:18px;margin-top:18px}
+    .v5-section,.v5-side{border:1px solid var(--line);border-radius:23px;background:linear-gradient(145deg,#ffffff0a,#ffffff04);padding:22px;margin-bottom:15px}
+    .v5-section h2,.v5-side h3{font-family:Georgia;margin:5px 0 15px}.v5-section h2{font-size:31px}
+    .v5-gallery{display:grid;grid-template-columns:2fr 1fr 1fr;grid-auto-rows:180px;gap:8px}
+    .v5-gallery img{width:100%;height:100%;object-fit:cover;border-radius:15px}.v5-gallery img:first-child{grid-row:span 2}
+    .v5-agenda{display:grid;gap:10px}.v5-event{display:grid;grid-template-columns:76px 1fr auto;gap:14px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:17px;background:#ffffff05}
+    .v5-date{width:76px;height:76px;border-radius:16px;display:grid;place-items:center;text-align:center;background:#7c274928;color:var(--gold);font-weight:bold}
+    .v5-date b{display:block;font-size:27px;line-height:1}.v5-event h3{margin:0 0 5px}.v5-event p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+    .v5-capacity{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:12px}.v5-capacity i{height:5px;flex:1;max-width:120px;border-radius:99px;background:#ffffff14;overflow:hidden}.v5-capacity i:after{content:"";display:block;width:var(--fill);height:100%;background:linear-gradient(90deg,var(--gold),#7c2749)}
+    .v5-hours{display:grid;gap:0}.v5-hours div{display:flex;justify-content:space-between;gap:15px;padding:11px 0;border-bottom:1px solid #ffffff0e}.v5-hours span{color:var(--muted)}
+    .v5-organizer-card{display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:center}.v5-organizer-card img{width:62px;height:62px;border-radius:18px;object-fit:cover}
+    .v5-map{height:240px;border-radius:18px;display:grid;place-items:center;background:radial-gradient(circle at 52% 50%,#d7b77a55 0 6px,transparent 7px),linear-gradient(35deg,#242832,#11151a);color:var(--gold)}
+    .v5-dashboard-head{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:18px}.v5-dashboard-head h1{font-family:Georgia;font-size:52px;margin:5px 0}
+    .v5-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}.v5-kpi{padding:17px;border:1px solid var(--line);border-radius:18px;background:#ffffff06}.v5-kpi b{display:block;color:var(--gold);font-size:29px}.v5-kpi span{color:var(--muted);font-size:12px}
+    .v5-admin-strip{display:flex;gap:10px;align-items:center;padding:13px 16px;border:1px solid #78d8aa44;border-radius:16px;background:#78d8aa0c;margin-bottom:17px;color:#a5e7c5}
+    .v5-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.v5-form label{display:grid;gap:6px;color:var(--muted);font-size:12px}.v5-form .wide{grid-column:1/-1}
+    .v5-form input,.v5-form select,.v5-form textarea{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:13px;background:#17171b;color:#fff;padding:11px}.v5-form textarea{min-height:90px}
+    .v5-public-organizer{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:center}.v5-public-organizer img{width:220px;height:260px;object-fit:cover;border-radius:25px}
+    .v5-gate{max-width:650px;margin:70px auto;text-align:center;border:1px solid var(--line);border-radius:28px;padding:36px;background:radial-gradient(circle at 50% 0,#7c27492b,transparent 50%),#111114}
+    @media(max-width:1000px){.v4-snapshot{grid-template-columns:repeat(3,1fr)}.v4-layout{grid-template-columns:1fr}.v4-tabs{grid-template-columns:repeat(2,1fr)}.v4-albums{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:760px){
+      .v4-hero{min-height:650px;border-radius:0;margin:-14px -14px 0}.v4-hero:after{background:linear-gradient(0deg,#050506fa 0%,#07070a91 62%,transparent)}
+      .v4-hero-copy{left:19px;right:19px;bottom:24px;width:auto}.v4-title{font-size:48px}.v4-lead{font-size:15px}.v4-arrow{top:39%}
+      .v4-tabs{top:72px;margin:0 -14px;padding:10px 14px;display:flex;overflow:auto}.v4-tab{min-width:150px}
+      .v4-snapshot{grid-template-columns:repeat(2,1fr)}.v4-section{padding:18px;border-radius:21px}.v4-section h2{font-size:26px}
+      .v4-practices{grid-template-columns:1fr}.v4-venue{grid-template-columns:72px 1fr}.v4-venue img{width:72px;height:66px}.v4-venue>span{grid-column:2}
+      .v4-person-hero{grid-template-columns:1fr}.v4-person-photo{min-height:520px}.v4-person-story{padding:21px}.v4-person-story h1{font-size:43px}
+      .v4-facts{grid-template-columns:repeat(2,1fr)}.v4-albums{grid-template-columns:1fr}.v4-albums-intro{display:block}.v4-albums-intro h1{font-size:43px}
+      .v4-create,.v4-edit{grid-template-columns:1fr}.v4-create .wide,.v4-edit .wide{grid-column:auto}
+      .v5-grid,.v5-layout,.v5-public-organizer{grid-template-columns:1fr}.v5-hero{min-height:560px;border-radius:0;margin:-14px -14px 0}.v5-hero-copy{left:19px;right:19px;bottom:22px}.v5-hero-copy h1{font-size:47px}
+      .v5-gallery{grid-template-columns:1fr 1fr;grid-auto-rows:150px}.v5-gallery img:first-child{grid-column:1/-1;grid-row:auto}
+      .v5-event{grid-template-columns:62px 1fr}.v5-date{width:62px;height:62px}.v5-event .v5-actions{grid-column:1/-1}
+      .v5-dashboard-head{display:block}.v5-dashboard-head h1{font-size:42px}.v5-kpis{grid-template-columns:repeat(2,1fr)}.v5-form{grid-template-columns:1fr}.v5-form .wide{grid-column:auto}
+      .v5-public-organizer img{width:100%;height:340px}
+    }
+  `;
+  d.head.appendChild(style);
+
+  const PHOTO={
+    couple:[
+      w.I.c1,
+      'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1600&q=84',
+      'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=84',
+      'https://images.unsplash.com/photo-1544078751-58fee2d8a03b?auto=format&fit=crop&w=1600&q=84'
+    ],
+    women:[w.I.w1,w.I.w2,'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=84'],
+    men:[w.I.m1,w.I.m2,'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1000&q=84']
+  };
+
+  w.S.profileV4=w.S.profileV4||{};
+  w.S.profileV4Albums=w.S.profileV4Albums||[];
+  w.S.profileV4Requests=w.S.profileV4Requests||{};
+  w.S.v5VenueRegistrations=w.S.v5VenueRegistrations||{};
+  w.S.v5OrganizerEvents=w.S.v5OrganizerEvents||[];
+  w.S.organizerAccess=w.S.organizerAccess||{status:'approved',grantedBy:'Modération Zwit',grantedAt:'27 juillet 2026'};
+  w.menu=w.menu||[];
+  if(w.S.organizerAccess.status==='approved'&&!w.menu.some(item=>item[0]==='organizer')){
+    w.menu.splice(w.menu.length-1,0,['organizer','Organisateur']);
+  }
+  w.save();
+  let activeId='self',activeTab='couple',photoIndex=0,personPhotoIndex=0,editing=false;
+
+  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
+  const split=value=>String(value||'').split(' & ').map(x=>x.trim());
+
+  const SELF={
+    id:'self',name:'Camille & Julien',type:'Couple',city:'Lille',dist:'Centre-ville',compat:98,ages:'34 & 38',
+    orient:'Elle bi-curieuse · Lui hétéro',smoke:'Non-fumeurs',morph:'Féminine / Sportif',height:'168 / 181 cm',
+    search:'Couples et femmes',tags:['Rencontres suivies','Spa','Soirées privées'],img:w.I.c1
+  };
+
+  const VENUES_V5=[
+    {
+      id:'opulsions',name:'O’Pulsions',type:'Club privé',city:'Lille',distance:'18 km',rating:'4,8',reviews:128,
+      hero:w.I.club,tagline:'Une maison de nuit élégante, libre et profondément humaine.',
+      description:'O’Pulsions accueille les couples et profils sélectionnés dans un univers chaleureux où la qualité de l’accueil, la discrétion et le consentement passent avant tout. Plusieurs ambiances permettent de dîner, danser, discuter ou prolonger la soirée à son rythme.',
+      address:'Métropole lilloise · Adresse exacte après réservation',phone:'03 20 •• •• ••',
+      hours:[['Vendredi','22h00 — 04h00'],['Samedi','21h30 — 05h00'],['Dimanche','Événements privés']],
+      prices:[['Couple','45 € avec 2 consommations'],['Femme seule','Invitation selon soirée'],['Homme seul','70 € · soirées sélectionnées']],
+      equipment:['Bar premium','Dancefloor','Vestiaires sécurisés','Espace lounge','Terrasse privée','Parking discret'],
+      gallery:[w.I.club,w.I.party,'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=1000&q=82','https://images.unsplash.com/photo-1496024840928-4c417adf211d?auto=format&fit=crop&w=1000&q=82'],
+      organizer:{name:'Maison Velours Events',verified:true,img:w.I.w2,bio:'Organisation professionnelle depuis 2018 · Charte Zwit signée'},
+      events:[
+        {id:'op1',day:'31',month:'JUIL',name:'Nuit Velours',date:'Vendredi 31 juillet · 22h',audience:'Couples et femmes',booked:43,total:60,participants:['af','cl','nt']},
+        {id:'op2',day:'08',month:'AOÛT',name:'Rouge Intense',date:'Samedi 8 août · 21h30',audience:'Couples · Dress code rouge',booked:51,total:70,participants:['em','jm','sa']},
+        {id:'op3',day:'15',month:'AOÛT',name:'Premiers frissons',date:'Samedi 15 août · 21h',audience:'Nouveaux membres bienvenus',booked:29,total:50,participants:['af','em','cl','jm']}
+      ]
+    },
+    {
+      id:'orelax',name:'O’Relax',type:'Spa privé',city:'Hauts-de-France',distance:'26 km',rating:'4,7',reviews:94,
+      hero:w.I.spa,tagline:'Prendre le temps de se découvrir, loin du bruit.',
+      description:'Un spa intimiste imaginé pour les rencontres douces : bassin chauffé, sauna, hammam et salons calmes. La capacité volontairement limitée préserve le confort et la qualité des échanges.',
+      address:'Hauts-de-France · Localisation transmise aux inscrits',phone:'03 21 •• •• ••',
+      hours:[['Mercredi','19h00 — 01h00'],['Vendredi','20h00 — 02h00'],['Samedi','18h00 — 02h00']],
+      prices:[['Couple','55 €'],['Femme seule','Entrée offerte sur sélection'],['Privatisation','Sur devis']],
+      equipment:['Bassin chauffé','Sauna','Hammam','Espace massage','Douches privées','Parking'],
+      gallery:[w.I.spa,'https://images.unsplash.com/photo-1531853121101-cb94c8ed218d?auto=format&fit=crop&w=1000&q=82','https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1000&q=82',w.I.room],
+      organizer:{name:'Émilie · O’Relax',verified:true,img:w.I.w1,bio:'Hôte vérifiée · Accueil et bien-être depuis 2020'},
+      events:[
+        {id:'or1',day:'08',month:'AOÛT',name:'Évasion Spa',date:'Samedi 8 août · 20h',audience:'Couples et femmes',booked:22,total:28,participants:['em','jm','sa']},
+        {id:'or2',day:'22',month:'AOÛT',name:'Bulles & confidences',date:'Samedi 22 août · 19h',audience:'Couples',booked:16,total:24,participants:['af','nt']}
+      ]
+    },
+    {
+      id:'suite-velours',name:'Suite Velours',type:'Love room',city:'Arras',distance:'31 km',rating:'4,9',reviews:76,
+      hero:w.I.room,tagline:'Une parenthèse confidentielle pensée pour deux… ou davantage.',
+      description:'Une adresse élégante et totalement privatisable avec spa, ambiance lumineuse sur mesure et arrivée autonome. Les événements accueillis restent limités à de petits groupes invités.',
+      address:'Arras centre · Adresse après confirmation',phone:'Réservation exclusivement via Zwit',
+      hours:[['Arrivée journée','14h00'],['Arrivée nuit','18h00'],['Départ','11h00']],
+      prices:[['Journée','149 €'],['Nuit','249 €'],['Événement privé','À partir de 390 €']],
+      equipment:['Spa privatif','Lit king size','Bar discret','Parking privé','Arrivée autonome','Sonorisation'],
+      gallery:[w.I.room,'https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1000&q=82','https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=1000&q=82',w.I.spa],
+      organizer:{name:'Velours Signature',verified:true,img:w.I.m2,bio:'Hôte professionnel vérifié · Réponse moyenne 18 min'},
+      events:[
+        {id:'sv1',day:'15',month:'AOÛT',name:'Dîner confidentiel',date:'Samedi 15 août · 19h30',audience:'Sur invitation',booked:8,total:10,participants:['af','em','cl','jm']}
+      ]
+    }
+  ];
+
+  const PERSON_BANK={
+    Camille:{age:'34 ans',height:'168 cm',weight:'61 kg',hair:'Bruns',eyes:'Bleus',morph:'Féminine et naturelle',children:'Oui',job:'Information privée',attracted:'Femmes et hommes',bio:'Spontanée, sensible et très attentive au feeling. Camille aime la séduction progressive, les personnalités féminines naturelles et les ambiances où personne ne joue un rôle.',likes:['Douceur','Féminité','Humour','Confiance'],withWomen:['Séduction','Massage','Découverte bi','Moments à trois'],withMen:['Échanges complices','Mélangisme','Moments à quatre'],partnerRules:[['Rencontrer une femme seul','À discuter'],['Partager un moment avec une femme','D’accord'],['Échanger avec un autre couple','D’accord'],['Rencontrer sans elle','Non']]},
+    Julien:{age:'38 ans',height:'181 cm',weight:'79 kg',hair:'Châtains',eyes:'Verts',morph:'Sportif',children:'Oui',job:'Information privée',attracted:'Femmes',bio:'Calme, protecteur sans être directif et très attaché au confort de chacun. Julien aime prendre le temps de discuter et préfère une vraie connexion à une approche trop assurée.',likes:['Naturel','Élégance','Dialogue','Humour'],withWomen:['Séduction','Massage','Moments à trois'],withMen:['Complicité','Échanges sans ambiguïté','Moments à quatre'],partnerRules:[['Découvrir une femme seule','D’accord'],['Partager un moment sans lui','À discuter'],['Échanger avec un autre couple','D’accord'],['Rencontrer sans échange préalable','Non']]},
+    Emma:{age:'38 ans',height:'168 cm',weight:'59 kg',hair:'Châtains',eyes:'Verts',morph:'Féminine et sportive',children:'Oui',job:'Information privée',attracted:'Femmes et hommes',bio:'Solaire et curieuse, Emma aime la sensualité, les échanges vrais et la séduction qui s’installe sans scénario.',likes:['Spontanéité','Femmes naturelles','Spa','Danse'],withWomen:['Séduction','Massage','Découverte bi'],withMen:['Mélangisme','Moments à quatre'],partnerRules:[['Découverte avec une femme','D’accord'],['Rencontre seule','À discuter'],['Moments à quatre','D’accord'],['Échange sans dialogue','Non']]},
+    Nicolas:{age:'41 ans',height:'182 cm',weight:'81 kg',hair:'Bruns',eyes:'Noisette',morph:'Élancé',children:'Oui',job:'Entrepreneur',attracted:'Femmes',bio:'Posé, drôle et attentif, Nicolas privilégie la qualité du lien et veille à ce que personne ne se sente pressé.',likes:['Humour','Élégance','Discrétion','Dialogue'],withWomen:['Séduction','Massage','Moments à trois'],withMen:['Complicité','Moments à quatre'],partnerRules:[['Emma avec une femme','D’accord'],['Emma seule avec un couple','À discuter'],['Moments à quatre','D’accord'],['Rencontre imposée','Non']]}
+  };
+
+  function personTemplate(name,index,p){
+    if(PERSON_BANK[name])return PERSON_BANK[name];
+    const femalePair=p.type==='Couple femmes',female=index===0||femalePair;
+    const age=split(p.ages)[index]||p.ages;
+    const height=String(p.height||'').replaceAll(' cm','').split(' / ')[index]||p.height;
+    return {
+      age:`${age} ans`,height:`${height} cm`,weight:index===0?'60 kg':'80 kg',
+      hair:index===0?'Châtains':'Bruns',eyes:index===0?'Verts':'Noisette',morph:split(p.morph)[index]||p.morph,
+      children:'Information privée',job:index===0?'Information privée':'Profession renseignée',attracted:female?'Femmes et hommes':'Femmes',
+      bio:`${name} privilégie les personnalités naturelles, le dialogue et les rencontres qui prennent le temps de devenir évidentes.`,
+      likes:['Naturel','Respect','Humour','Complicité'],
+      withWomen:['Séduction','Massage','Moments partagés'],withMen:['Complicité','Moments à plusieurs'],
+      partnerRules:[['Découverte avec une femme','D’accord'],['Rencontre en solo','À discuter'],['Moments avec un couple','D’accord'],['Expérience non discutée','Non']]
+    };
+  }
+
+  function profileModel(p){
+    const names=split(p.name),isOwn=p.id==='self';
+    const saved=isOwn?w.S.profileV4:{};
+    const since=isOwn?'2016':p.id==='af'?'2014':'2018';
+    const model={
+      ...p,names,since,
+      description:saved.description||`${p.name} forme un couple complice, curieux et profondément attaché à la qualité des rencontres. Leur priorité n’est pas de multiplier les expériences, mais de partager des moments qui ont du sens avec des personnes naturelles et bienveillantes.`,
+      searchLong:saved.searchLong||`Ils recherchent avant tout ${p.search.toLowerCase()}, avec du dialogue, du respect et une vraie envie de se découvrir. Ils aiment échanger avant une sortie et ne prévoient jamais à l’avance ce qui doit se passer.`,
+      desires:saved.desires||'Des rencontres suivies, des soirées privées, des spas, des dîners et quelques escapades où la complicité peut se construire sans pression.',
+      story:saved.story||`Ensemble depuis ${since}, leur histoire s’est construite autour d’une grande liberté de parole. Ils ont découvert cet univers progressivement, après en avoir longuement discuté. Chaque nouvelle étape est décidée à deux et chacun conserve sa propre voix.`,
+      location:saved.location||p.city,
+      radius:saved.radius||'80 km · Hauts-de-France et Belgique',
+      availability:saved.availability||'Vendredi soir, samedi et week-ends choisis',
+      publicPhotos:PHOTO.couple,
+      practices:[
+        ['Mélangisme','Apprécie'],['Trios avec une femme','À découvrir'],['Massage','Apprécie'],
+        ['Soirées privées','Recherche'],['Clubs élégants','Occasionnel'],['Voyages','À découvrir'],
+        ['Échangisme','Selon le feeling'],['Jeux de séduction','Apprécie']
+      ],
+      values:['Consentement','Communication','Bienveillance','Sensualité','Humour','Aucune pression'],
+      timeline:[[since,'Le début de leur histoire et d’une grande complicité.'],['Premiers échanges','Une découverte faite de discussions, de limites posées et d’envies partagées.'],['Première expérience','Une soirée privée rassurante, vécue sans scénario imposé.'],['Aujourd’hui','Des rencontres plus rares mais plus fortes, avec l’envie de créer des liens suivis.']],
+      venues:[['O’Pulsions','Club · Lille','Pour l’ambiance et la qualité de l’accueil',w.I.club],['O’Relax','Spa · Hauts-de-France','Pour prendre le temps de se découvrir',w.I.spa],['Suite Velours','Love room · Arras','Pour les escapades intimistes',w.I.room]],
+      recos:[['Emma & Nicolas','Un couple naturel, attentionné et très respectueux. On se sent rapidement en confiance.',w.I.c1],['Léa & Hugo','Beaucoup de dialogue et une vraie élégance dans leur manière de vivre les rencontres.',w.I.c2]],
+      people:names.map((name,index)=>({
+        ...personTemplate(name,index,p),
+        ...(isOwn?w.S.profileV4[`person-${name}`]||{}:{})
+      }))
+    };
+    return model;
+  }
+
+  function currentProfile(){
+    if(activeId==='self')return profileModel(SELF);
+    return profileModel(w.P.find(p=>p.id===activeId)||w.P[0]);
+  }
+
+  function isCouple(p){return p.names.length===2&&p.type.toLowerCase().includes('couple')}
+
+  function hero(p,isOwn){
+    const photos=p.publicPhotos,src=photos[photoIndex%photos.length];
+    return `<section class="v4-hero">
+      <img src="${src}" alt="Photo publique de ${esc(p.name)}">
+      <button class="v4-arrow prev" onclick="parent.v4Photo(-1)">‹</button><button class="v4-arrow next" onclick="parent.v4Photo(1)">›</button>
+      <div class="v4-hero-copy">
+        <div class="v4-kicker">Données fictives · Couple vérifié · En ligne récemment</div>
+        <h1 class="v4-title">${esc(p.name)}</h1>
+        <p class="v4-lead">${esc(p.description)}</p>
+        <div class="v4-badges"><span class="v4-badge">♥ ${p.compat}% compatible</span><span class="v4-badge">⌖ ${esc(p.location)}</span><span class="v4-badge">Ensemble depuis ${esc(p.since)}</span><span class="v4-badge">Trust 96</span></div>
+        <div class="v4-actions">
+          ${isOwn?'<button class="v4-primary" onclick="parent.v4Edit()">Modifier la fiche</button>':'<button class="v4-primary" onclick="parent.v4Message()">Écrire au couple</button>'}
+          <button class="v4-secondary" onclick="parent.v4Toast('Couple ajouté aux favoris')">♡ Favori</button>
+          <button class="v4-secondary" onclick="parent.v4Toast('Sélection du cercle ouverte')">Ajouter à un cercle</button>
+        </div>
+      </div>
+      <span class="v4-photo-count">${photoIndex%photos.length+1} / ${photos.length} · Photos publiques</span>
+    </section>
+    <div class="v4-thumbs">${photos.map((photo,index)=>`<img class="v4-thumb ${index===photoIndex%photos.length?'active':''}" src="${photo}" onclick="parent.v4SetPhoto(${index})" alt="">`).join('')}</div>`;
+  }
+
+  function tabs(p){
+    const couple=isCouple(p);
+    const items=couple?[
+      ['couple',p.name,'La vie intime du couple'],
+      ['person0',p.names[0],`Tout savoir sur ${p.names[0]}`],
+      ['person1',p.names[1],`Tout savoir sur ${p.names[1]}`],
+      ['albums','Albums privés','Contenus verrouillés']
+    ]:[['person0',p.names[0],'Profil complet'],['albums','Albums privés','Contenus verrouillés']];
+    return `<nav class="v4-tabs">${items.map(item=>`<button class="v4-tab ${activeTab===item[0]?'active':''}" onclick="parent.v4Tab('${item[0]}')"><b>${esc(item[1])}</b><small>${esc(item[2])}</small></button>`).join('')}</nav>`;
+  }
+
+  function snapshot(p){
+    return `<div class="v4-snapshot">${[
+      ['Localisation',p.location],['Distance',p.dist===0?'Votre profil':`${p.dist} km`],['Recherche',p.search],
+      ['Disponibilités','Week-ends choisis'],['Tabac',p.smoke],['Réponse','96% sous 24 h']
+    ].map(item=>`<div class="v4-stat"><small>${esc(item[0])}</small><strong>${esc(item[1])}</strong></div>`).join('')}</div>`;
+  }
+
+  function editCouple(p){
+    return `<section class="v4-section"><div class="v4-kicker">Édition du profil commun</div><h2>Raconter votre couple</h2>
+      <div class="v4-edit">
+        <label class="wide">Description du couple<textarea data-v4="description">${esc(p.description)}</textarea></label>
+        <label class="wide">Ce que vous recherchez<textarea data-v4="searchLong">${esc(p.searchLong)}</textarea></label>
+        <label class="wide">Vos envies<textarea data-v4="desires">${esc(p.desires)}</textarea></label>
+        <label class="wide">Votre histoire<textarea data-v4="story">${esc(p.story)}</textarea></label>
+        <label>Localisation<input data-v4="location" value="${esc(p.location)}"></label>
+        <label>Zone de déplacement<input data-v4="radius" value="${esc(p.radius)}"></label>
+        <label class="wide">Disponibilités<input data-v4="availability" value="${esc(p.availability)}"></label>
+      </div>
+      <div class="v4-actions" style="margin-top:14px"><button class="v4-primary" onclick="parent.v4Save()">Enregistrer</button><button class="v4-secondary" onclick="parent.v4Edit()">Annuler</button></div>
+    </section>`;
+  }
+
+  function couplePage(p,isOwn){
+    if(editing&&isOwn)return editCouple(p);
+    return `${snapshot(p)}
+      <div class="v4-toc">${[['about','Le couple'],['search','Recherche'],['practice','Pratiques'],['story','Histoire'],['venues','Lieux'],['reco','Recommandations'],['location','Localisation']].map(x=>`<button onclick="parent.v4Scroll('${x[0]}')">${x[1]}</button>`).join('')}</div>
+      <div class="v4-layout"><main>
+        <section id="about" class="v4-section"><div class="v4-kicker">Le couple</div><h2>Qui sont-ils vraiment ?</h2><p class="v4-copy">${esc(p.description)}</p>
+          <div class="v4-quote">« Les plus belles rencontres commencent bien avant le premier geste : elles commencent dans la façon de se parler. »</div>
+          <div class="v4-pill-grid">${p.values.map(value=>`<span class="v4-pill">${esc(value)}</span>`).join('')}</div>
+        </section>
+        <section id="search" class="v4-section"><div class="v4-kicker">Leurs envies & leur recherche</div><h2>Ce qu’ils souhaitent partager</h2><p class="v4-copy">${esc(p.searchLong)}</p><p class="v4-copy">${esc(p.desires)}</p>
+          <div class="v4-pill-grid">${p.tags.map(tag=>`<span class="v4-pill">${esc(tag)}</span>`).join('')}</div>
+        </section>
+        <section id="practice" class="v4-section"><div class="v4-kicker">Leurs pratiques communes</div><h2>Ce qu’ils aiment — et à quel rythme</h2>
+          <div class="v4-practices">${p.practices.map(item=>`<div class="v4-practice"><b>${esc(item[0])}</b><span class="v4-level">${esc(item[1])}</span></div>`).join('')}</div>
+          <div class="v4-note">Une pratique indiquée n’est jamais un consentement automatique. Chaque envie reste contextuelle, discutée et révocable.</div>
+        </section>
+        <section id="story" class="v4-section"><div class="v4-kicker">Leur parcours</div><h2>L’histoire de leur vie intime</h2>
+          <div class="v4-timeline">${p.timeline.map(step=>`<div class="v4-time"><strong>${esc(step[0])}</strong><i></i><div class="v4-copy">${esc(step[1])}</div></div>`).join('')}</div>
+        </section>
+        <section id="venues" class="v4-section"><div class="v4-kicker">Leurs lieux préférés</div><h2>Où peut-on les croiser ?</h2>
+          <div class="v4-venues">${p.venues.map(venue=>`<div class="v4-venue"><img src="${venue[3]}" alt=""><div><b>${esc(venue[0])}</b><p>${esc(venue[1])}<br>${esc(venue[2])}</p></div><button class="v4-secondary" onclick="parent.v4Toast('Fiche du lieu ouverte')">Voir le lieu</button></div>`).join('')}</div>
+        </section>
+        <section id="reco" class="v4-section"><div class="v4-kicker">Recommandations reçues</div><h2>Ce que les autres couples disent d’eux</h2>
+          ${p.recos.map(reco=>`<div class="v4-reco"><div class="v4-reco-head"><img src="${reco[2]}" alt=""><div><b>${esc(reco[0])}</b><div class="muted">Rencontre certifiée · ★★★★★</div></div></div><p>« ${esc(reco[1])} »</p></div>`).join('')}
+        </section>
+      </main><aside>
+        <section class="v4-side-card"><h3>Le couple en bref</h3><div class="v4-list">
+          <div><span>Ensemble depuis</span><strong>${esc(p.since)}</strong></div><div><span>Âges</span><strong>${esc(p.ages)} ans</strong></div>
+          <div><span>Orientations</span><strong>${esc(p.orient)}</strong></div><div><span>Recherche</span><strong>${esc(p.search)}</strong></div>
+          <div><span>Zone</span><strong>${esc(p.radius)}</strong></div><div><span>Disponibilités</span><strong>${esc(p.availability)}</strong></div>
+        </div></section>
+        <section id="location" class="v4-side-card"><h3>Localisation</h3><div class="v4-map"><span class="v4-map-label">⌖ ${esc(p.location)} · Position approximative</span></div><p class="muted">${esc(p.radius)}. L’adresse exacte n’est jamais affichée.</p></section>
+        <section class="v4-side-card"><h3>Confiance Zwit</h3><div class="v4-list"><div><span>Identités</span><strong class="verified">Vérifiées</strong></div><div><span>Couple</span><strong class="verified">Vérifié</strong></div><div><span>Photos</span><strong class="verified">Vérifiées</strong></div><div><span>Rencontres</span><strong>27 certifiées</strong></div></div></section>
+        <section class="v4-side-card"><h3>Découvrir chacun</h3><p class="muted">Le profil commun raconte leur histoire. Leurs fiches personnelles précisent leurs envies et leurs limites individuelles.</p>
+          <div class="v4-actions">${p.names.map((name,index)=>`<button class="v4-secondary" onclick="parent.v4Tab('person${index}')">${esc(name)} →</button>`).join('')}</div>
+        </section>
+      </aside></div>`;
+  }
+
+  function personPage(p,index,isOwn){
+    const person=p.people[index],female=p.type==='Couple femmes'||index===0,photos=female?PHOTO.women:PHOTO.men,src=photos[personPhotoIndex%photos.length];
+    if(editing&&isOwn){
+      return `<section class="v4-section"><div class="v4-kicker">Édition personnelle</div><h2>La fiche de ${esc(p.names[index])}</h2>
+        <div class="v4-edit"><label class="wide">Présentation<textarea data-person="bio">${esc(person.bio)}</textarea></label>
+          ${[['height','Taille'],['weight','Poids'],['morph','Morphologie'],['hair','Cheveux'],['eyes','Yeux'],['children','Enfants'],['job','Profession'],['attracted','Attiré(e) par']].map(field=>`<label>${field[1]}<input data-person="${field[0]}" value="${esc(person[field[0]])}"></label>`).join('')}
+          <label class="wide">Envies avec une femme<input data-person="withWomen" value="${esc(person.withWomen.join(', '))}"></label>
+          <label class="wide">Envies avec un homme<input data-person="withMen" value="${esc(person.withMen.join(', '))}"></label>
+        </div><div class="v4-actions" style="margin-top:14px"><button class="v4-primary" onclick="parent.v4SavePerson(${index})">Enregistrer</button><button class="v4-secondary" onclick="parent.v4Edit()">Annuler</button></div>
+      </section>`;
+    }
+    return `<section class="v4-person-hero">
+      <div class="v4-person-photo"><img src="${src}" alt="Photo individuelle"><button class="v4-arrow prev" onclick="parent.v4PersonPhoto(-1)">‹</button><button class="v4-arrow next" onclick="parent.v4PersonPhoto(1)">›</button><span class="v4-photo-count">${personPhotoIndex%photos.length+1} / ${photos.length} · Photos personnelles publiques</span></div>
+      <div class="v4-person-story"><div class="v4-kicker">Une personne, une voix, ses propres limites</div><h1>${esc(p.names[index])}</h1><p class="v4-copy">${esc(person.bio)}</p>
+        <div class="v4-badges"><span class="v4-badge">Attiré(e) par : ${esc(person.attracted)}</span>${person.likes.map(like=>`<span class="v4-badge">${esc(like)}</span>`).join('')}</div>
+        ${isOwn?'<button class="v4-primary" onclick="parent.v4Edit()">Modifier cette fiche</button>':''}
+      </div>
+    </section>
+    <div class="v4-layout" style="margin-top:18px"><main>
+      <section class="v4-section"><div class="v4-kicker">Carte d’identité personnelle</div><h2>En un coup d’œil</h2><div class="v4-facts">${[
+        ['Âge',person.age],['Taille',person.height],['Poids',person.weight],['Morphologie',person.morph],
+        ['Cheveux',person.hair],['Yeux',person.eyes],['Enfants',person.children],['Profession',person.job],['Attiré(e) par',person.attracted]
+      ].map(fact=>`<div class="v4-fact"><small>${esc(fact[0])}</small><strong class="${fact[1]==='Information privée'?'v4-private':''}">${esc(fact[1])}</strong></div>`).join('')}</div></section>
+      <section class="v4-section"><div class="v4-kicker">Ses envies personnelles</div><h2>Avec une femme</h2><div class="v4-pill-grid">${person.withWomen.map(item=>`<span class="v4-pill">${esc(item)}</span>`).join('')}</div>
+        <h2 style="margin-top:24px">Avec un homme</h2><div class="v4-pill-grid">${person.withMen.map(item=>`<span class="v4-pill">${esc(item)}</span>`).join('')}</div>
+      </section>
+      <section class="v4-section"><div class="v4-kicker">Équilibre du couple</div><h2>Ce qui est accepté pour son/sa partenaire</h2><p class="v4-copy">Ces positions appartiennent à ${esc(p.names[index])}. Elles ouvrent une discussion et ne constituent jamais une autorisation définitive.</p>
+        <div class="v4-consent">${person.partnerRules.map(rule=>`<div class="v4-consent-row"><b>${esc(rule[0])}</b><span class="v4-status ${rule[1]==='D’accord'?'yes':rule[1]==='Non'?'no':'talk'}">${esc(rule[1])}</span></div>`).join('')}</div>
+      </section>
+    </main><aside>
+      <section class="v4-side-card"><h3>Ce qui lui plaît</h3><div class="v4-pill-grid">${person.likes.map(item=>`<span class="v4-pill">${esc(item)}</span>`).join('')}</div></section>
+      ${isCouple(p)?`<section class="v4-side-card"><h3>Retour au couple</h3><p class="muted">Les envies personnelles s’inscrivent dans une histoire et des décisions communes.</p><button class="v4-secondary" onclick="parent.v4Tab('couple')">Voir ${esc(p.name)}</button></section>
+      <section class="v4-side-card"><h3>L’autre regard</h3><p class="muted">Découvrir aussi la fiche personnelle de ${esc(p.names[index===0?1:0])}.</p><button class="v4-secondary" onclick="parent.v4Tab('person${index===0?1:0}')">Ouvrir sa fiche</button></section>`:''}
+    </aside></div>`;
+  }
+
+  function albumDefaults(){
+    return [
+      {name:'Après minuit',level:'Privé sur demande',count:12},
+      {name:'Escapade en Belgique',level:'Cercle de confiance',count:18},
+      {name:'Notre jardin secret',level:'Cercle privé',count:9}
+    ].concat(w.S.profileV4Albums);
+  }
+
+  function albumsPage(p,isOwn){
+    const albums=albumDefaults();
+    return `<div class="v4-albums-intro"><div><div class="v4-kicker">Aucun aperçu avant autorisation</div><h1>Albums privés</h1><p class="v4-copy">Chaque album porte un nom et un niveau de confidentialité. Tant qu’il n’est pas déverrouillé, aucune photo, miniature ou couleur issue du contenu n’est visible.</p></div>${isOwn?'<button class="v4-primary" onclick="parent.v4ToggleCreate()">Créer un album</button>':''}</div>
+      ${isOwn&&w.S.v4CreateOpen?`<section class="v4-section"><div class="v4-kicker">Nouvel album privé</div><h2>Nommer et protéger l’album</h2><div class="v4-create">
+        <label>Nom de l’album<input id="v4AlbumName" placeholder="Ex. Notre escapade"></label>
+        <label>Confidentialité<select id="v4AlbumLevel"><option>Privé sur demande</option><option>Cercle de confiance</option><option>Cercle privé</option><option>Favoris uniquement</option><option>Temporaire</option></select></label>
+        <label class="wide">Description interne<input id="v4AlbumDesc" placeholder="Invisible tant que l’album est verrouillé"></label>
+        <button class="v4-primary" onclick="parent.v4CreateAlbum()">Publier l’album verrouillé</button>
+      </div></section>`:''}
+      <div class="v4-albums">${albums.map((album,index)=>`<article class="v4-album"><div><div class="v4-lock">⌑</div><h3>${esc(album.name)}</h3><p>Contenu intégralement masqué jusqu’à l’autorisation explicite du propriétaire.</p><span class="v4-conf">${esc(album.level)}</span></div>
+        <div class="v4-album-foot"><span class="muted">${album.count||0} contenus verrouillés</span>${isOwn?'<button class="v4-secondary" onclick="parent.v4Toast(\'Gestion de l’album ouverte\')">Gérer</button>':`<button class="v4-primary" onclick="parent.v4RequestAlbum(${index})">${w.S.profileV4Requests[`${activeId}-${index}`]?'Demandé ✓':'Demander l’accès'}</button>`}</div>
+      </article>`).join('')}</div>
+      <div class="v4-note">Le nom de l’album reste visible, mais son contenu ne laisse absolument rien paraître. L’accès est personnel, traçable, révocable et peut expirer.</div>`;
+  }
+
+  function venueDirectory(){
+    return `<div class="v5">
+      <div class="v5-dashboard-head"><div><div class="v4-kicker">Adresses sélectionnées · Données fictives</div><h1>Établissements</h1><p class="v4-copy">Des lieux vivants avec leur univers, leur agenda, leurs disponibilités et les membres qui prévoient de s’y retrouver.</p></div>
+        ${w.S.organizerAccess.status==='approved'?'<button class="v4-primary" onclick="parent.v5Organizer()">Mon espace organisateur</button>':''}
+      </div>
+      <div class="v5-grid">${VENUES_V5.map(venue=>`<article class="v5-place" onclick="parent.v5OpenVenue('${venue.id}')">
+        <div class="v5-place-photo"><img src="${venue.hero}" alt="${esc(venue.name)}"><span class="v5-place-type">${esc(venue.type)} · Établissement vérifié</span></div>
+        <div class="v5-place-body"><div class="v4-kicker">${esc(venue.city)} · ${esc(venue.distance)}</div><h2>${esc(venue.name)}</h2><p class="muted">${esc(venue.tagline)}</p>
+          <div class="v5-place-meta"><div><small>Prochaine soirée</small><strong>${esc(venue.events[0].date)}</strong></div><div><small>Places disponibles</small><strong>${venue.events[0].total-venue.events[0].booked} / ${venue.events[0].total}</strong></div></div>
+          <div class="v5-actions"><span class="v5-badge">★ ${venue.rating} · ${venue.reviews} avis</span><span class="v5-badge">${venue.events.length} événements à venir</span></div>
+        </div>
+      </article>`).join('')}</div>
+    </div>`;
+  }
+
+  function venueAgenda(venue){
+    return `<div class="v5-agenda">${venue.events.map(event=>{
+      const key=`${venue.id}-${event.id}`,registered=!!w.S.v5VenueRegistrations[key],remaining=Math.max(0,event.total-event.booked-(registered?1:0));
+      return `<article class="v5-event"><div class="v5-date"><div><b>${event.day}</b>${event.month}</div></div><div><h3>${esc(event.name)}</h3><p>${esc(event.date)}<br>${esc(event.audience)}</p>
+        <div class="v5-capacity"><span>${remaining} places disponibles</span><i style="--fill:${Math.min(100,Math.round((event.booked+(registered?1:0))/event.total*100))}%"></i><span>${event.booked+(registered?1:0)}/${event.total}</span></div></div>
+        <div class="v5-actions"><button class="v4-secondary" onclick="parent.v5Participants('${venue.id}','${event.id}')">Participants</button><button class="v4-primary" onclick="parent.v5Register('${venue.id}','${event.id}')">${registered?'Inscrit ✓':'S’inscrire'}</button></div></article>`;
+    }).join('')}</div>`;
+  }
+
+  function venueDetail(venue){
+    return `<div class="v5"><button class="v4-secondary v4-back" onclick="parent.v5Venues()">← Tous les établissements</button>
+      <section class="v5-hero"><img src="${venue.hero}" alt="${esc(venue.name)}"><div class="v5-hero-copy"><div class="v4-kicker">${esc(venue.type)} · ${esc(venue.city)} · Vérifié Zwit</div><h1>${esc(venue.name)}</h1><p class="v4-lead">${esc(venue.tagline)}</p>
+        <div class="v5-badges"><span class="v5-badge">★ ${venue.rating} · ${venue.reviews} avis</span><span class="v5-badge">⌖ ${venue.distance}</span><span class="v5-badge">${venue.events.length} événements à venir</span></div>
+        <div class="v5-actions"><button class="v4-primary" onclick="parent.v5Scroll('v5agenda')">Voir l’agenda</button><button class="v4-secondary" onclick="parent.v5Toast('Établissement ajouté aux favoris')">♡ Favori</button><button class="v4-secondary" onclick="parent.v5Toast('Itinéraire sécurisé ouvert')">Itinéraire</button></div>
+      </div></section>
+      <div class="v5-layout"><main>
+        <section class="v5-section"><div class="v4-kicker">Le lieu</div><h2>Une expérience, pas une simple adresse</h2><p class="v4-copy">${esc(venue.description)}</p><div class="v4-pill-grid">${venue.equipment.map(item=>`<span class="v4-pill">${esc(item)}</span>`).join('')}</div></section>
+        <section class="v5-section"><div class="v4-kicker">Galerie publique</div><h2>Découvrir l’ambiance</h2><div class="v5-gallery">${venue.gallery.map(photo=>`<img src="${photo}" alt="Ambiance de ${esc(venue.name)}">`).join('')}</div></section>
+        <section id="v5agenda" class="v5-section"><div class="v4-kicker">Agenda & réservations</div><h2>Les prochaines expériences</h2>${venueAgenda(venue)}</section>
+        <section class="v5-section"><div class="v4-kicker">Avis de la communauté</div><h2>Recommandé par les membres</h2>
+          <div class="v4-reco"><div class="v4-reco-head"><img src="${w.I.c1}" alt=""><div><b>Emma & Nicolas</b><div class="muted">Visite certifiée · ★★★★★</div></div></div><p>« Une équipe attentive, une ambiance élégante et surtout beaucoup de respect. On y revient avec plaisir. »</p></div>
+          <div class="v4-reco"><div class="v4-reco-head"><img src="${w.I.c2}" alt=""><div><b>Léa & Hugo</b><div class="muted">Visite certifiée · ★★★★★</div></div></div><p>« Le lieu est beau, mais c’est surtout la qualité de l’accueil qui fait la différence. »</p></div>
+        </section>
+      </main><aside>
+        <section class="v5-side"><h3>Informations pratiques</h3><div class="v5-hours"><div><span>Adresse</span><strong>${esc(venue.address)}</strong></div><div><span>Contact</span><strong>${esc(venue.phone)}</strong></div><div><span>Dress code</span><strong>Élégant · Soigné</strong></div><div><span>Réservation</span><strong>Recommandée</strong></div></div></section>
+        <section class="v5-side"><h3>Horaires</h3><div class="v5-hours">${venue.hours.map(x=>`<div><span>${esc(x[0])}</span><strong>${esc(x[1])}</strong></div>`).join('')}</div></section>
+        <section class="v5-side"><h3>Tarifs</h3><div class="v5-hours">${venue.prices.map(x=>`<div><span>${esc(x[0])}</span><strong>${esc(x[1])}</strong></div>`).join('')}</div></section>
+        <section class="v5-side"><h3>Organisé par</h3><div class="v5-organizer-card"><img src="${venue.organizer.img}" alt=""><div><b>${esc(venue.organizer.name)} ${venue.organizer.verified?'✓':''}</b><p class="muted">${esc(venue.organizer.bio)}</p></div></div><button class="v4-secondary" style="margin-top:14px" onclick="parent.v5OrganizerPublic('${venue.id}')">Voir la page organisateur</button></section>
+        <section class="v5-side"><h3>Localisation protégée</h3><div class="v5-map">⌖ ${esc(venue.city)}</div><p class="muted">L’adresse précise peut être réservée aux membres inscrits à l’événement.</p></section>
+      </aside></div>
+    </div>`;
+  }
+
+  function venueParticipants(venue,event){
+    const people=event.participants.map(id=>w.P.find(p=>p.id===id)).filter(Boolean);
+    return `<div class="v5"><button class="v4-secondary v4-back" onclick="parent.v5OpenVenue('${venue.id}')">← Retour à ${esc(venue.name)}</button>
+      <div class="v4-kicker">${esc(event.date)} · ${esc(venue.name)}</div><h1 class="hero">Participants — ${esc(event.name)}</h1>
+      <p class="v4-copy">${event.booked} inscriptions au total. Seuls les membres ayant accepté d’être visibles apparaissent ici.</p>
+      <div class="v5-grid">${people.map(p=>`<article class="v5-place" onclick="parent.v5OpenMember('${p.id}')"><div class="v5-place-photo"><img src="${p.img}" alt=""><span class="v5-place-type">${esc(p.type)} · ${esc(p.city)}</span></div><div class="v5-place-body"><h2>${esc(p.name)}</h2><p class="muted">${p.compat}% compatible · ${esc(p.search)}</p><div class="v4-pill-grid">${p.tags.map(tag=>`<span class="v4-pill">${esc(tag)}</span>`).join('')}</div></div></article>`).join('')}</div>
+    </div>`;
+  }
+
+  function organizerPublic(venue){
+    return `<div class="v5"><button class="v4-secondary v4-back" onclick="parent.v5OpenVenue('${venue.id}')">← Retour à ${esc(venue.name)}</button>
+      <section class="v5-section"><div class="v5-public-organizer"><img src="${venue.organizer.img}" alt=""><div><div class="v4-kicker">Organisateur vérifié · Données fictives</div><h1 class="hero">${esc(venue.organizer.name)}</h1><p class="v4-copy">${esc(venue.organizer.bio)}. Une organisation centrée sur l’accueil, la sécurité, le consentement et la qualité des expériences proposées.</p>
+        <div class="v5-badges"><span class="v5-badge">Identité vérifiée</span><span class="v5-badge">Charte Zwit signée</span><span class="v5-badge">4,9 / 5</span><span class="v5-badge">2 140 participants accueillis</span></div>
+        <div class="v5-actions"><button class="v4-primary" onclick="parent.v5Toast('Conversation avec l’organisateur ouverte')">Contacter</button><button class="v4-secondary" onclick="parent.v5Toast('Organisateur suivi')">Suivre</button></div>
+      </div></div></section>
+      <section class="v5-section"><div class="v4-kicker">Agenda public</div><h2>Les prochaines soirées</h2>${venueAgenda(venue)}</section>
+      <section class="v5-section"><div class="v4-kicker">Sa signature</div><h2>Ce que les membres peuvent attendre</h2><div class="v4-pill-grid">${['Accueil personnalisé','Capacité maîtrisée','Sélection transparente','Consentement actif','Modération sur place','Suivi après événement'].map(x=>`<span class="v4-pill">${x}</span>`).join('')}</div></section>
+    </div>`;
+  }
+
+  function organizerDashboard(){
+    const access=w.S.organizerAccess;
+    if(access.status!=='approved')return `<div class="v5"><div class="v5-gate"><div class="v4-kicker">Accès professionnel contrôlé</div><h1>Espace Organisateur</h1><p class="v4-copy">Cette fonction n’est accessible qu’après validation du profil, de l’identité et de l’activité par un administrateur ou un modérateur Velvet.</p><button class="v4-primary" onclick="parent.v5RequestOrganizer()">Demander l’accès</button></div></div>`;
+    const venue=VENUES_V5[0],events=venue.events.concat(w.S.v5OrganizerEvents);
+    return `<div class="v5"><div class="v5-admin-strip"><b>✓ Accès Organisateur activé</b><span>Accordé par ${esc(access.grantedBy)} le ${esc(access.grantedAt)}</span></div>
+      <div class="v5-dashboard-head"><div><div class="v4-kicker">Tableau de bord privé · Maison Velours Events</div><h1>Organiser une soirée</h1><p class="v4-copy">Gérez votre vitrine, vos événements, leur capacité et les inscriptions depuis un espace unique.</p></div><div class="v5-actions"><button class="v4-secondary" onclick="parent.v5OrganizerPublic('opulsions')">Voir ma page publique</button><button class="v4-primary" onclick="parent.v5Scroll('v5create')">Créer un événement</button></div></div>
+      <div class="v5-kpis"><div class="v5-kpi"><b>${events.length}</b><span>soirées à venir</span></div><div class="v5-kpi"><b>${events.reduce((n,e)=>n+e.booked,0)}</b><span>inscriptions confirmées</span></div><div class="v5-kpi"><b>4,9</b><span>note organisateur</span></div><div class="v5-kpi"><b>92%</b><span>taux de remplissage</span></div></div>
+      <div class="v5-layout"><main>
+        <section class="v5-section"><div class="v4-kicker">Agenda administrable</div><h2>Vos prochaines soirées</h2><div class="v5-agenda">${events.map(event=>`<article class="v5-event"><div class="v5-date"><div><b>${esc(event.day)}</b>${esc(event.month)}</div></div><div><h3>${esc(event.name)}</h3><p>${esc(event.date)} · ${esc(event.audience)}</p><div class="v5-capacity"><span>${Math.max(0,event.total-event.booked)} places disponibles</span><i style="--fill:${Math.round(event.booked/event.total*100)}%"></i><span>${event.booked}/${event.total}</span></div></div><div class="v5-actions"><button class="v4-secondary" onclick="parent.v5Toast('Liste des inscrits ouverte')">Inscrits</button><button class="v4-secondary" onclick="parent.v5Toast('Édition de la soirée ouverte')">Modifier</button></div></article>`).join('')}</div></section>
+        <section id="v5create" class="v5-section"><div class="v4-kicker">Nouvelle publication</div><h2>Créer une soirée</h2><div class="v5-form">
+          <label>Nom de la soirée<input id="v5EventName" placeholder="Ex. Nuit Champagne"></label><label>Date et heure<input id="v5EventDate" type="datetime-local"></label>
+          <label>Lieu<select id="v5EventVenue"><option>O’Pulsions</option><option>Lieu secret</option><option>Suite privatisée</option></select></label><label>Nombre total de places<input id="v5EventCapacity" type="number" min="2" value="60"></label>
+          <label>Public attendu<select id="v5EventAudience"><option>Couples et femmes</option><option>Couples uniquement</option><option>Sur invitation</option><option>Tous profils validés</option></select></label><label>Confidentialité<select id="v5EventPrivacy"><option>Visible par tous les membres</option><option>Cercles sélectionnés</option><option>Sur invitation uniquement</option></select></label>
+          <label class="wide">Description<textarea id="v5EventDescription" placeholder="Ambiance, programme, dress code, conditions d’accès…"></textarea></label>
+          <div class="wide v5-actions"><button class="v4-secondary" onclick="parent.v5Toast('Brouillon enregistré')">Enregistrer en brouillon</button><button class="v4-primary" onclick="parent.v5CreateEvent()">Publier la soirée</button></div>
+        </div></section>
+      </main><aside>
+        <section class="v5-side"><h3>Votre vitrine</h3><div class="v5-organizer-card"><img src="${venue.organizer.img}" alt=""><div><b>${esc(venue.organizer.name)} ✓</b><p class="muted">Profil public complet à 86%</p></div></div><div class="v5-actions"><button class="v4-secondary" onclick="parent.v5Toast('Édition de la présentation ouverte')">Modifier la présentation</button></div></section>
+        <section class="v5-side"><h3>Photos & identité</h3><p class="muted">24 photos publiques · Logo vérifié · 3 couvertures disponibles.</p><button class="v4-secondary" onclick="parent.v5Toast('Gestionnaire de médias ouvert')">Gérer les photos</button></section>
+        <section class="v5-side"><h3>Outils inclus</h3><div class="v5-hours"><div><span>Messagerie participants</span><strong>Active</strong></div><div><span>Liste d’attente</span><strong>Automatique</strong></div><div><span>Validation manuelle</span><strong>Active</strong></div><div><span>Check-in confidentiel</span><strong>Disponible</strong></div><div><span>Statistiques</span><strong>Temps réel</strong></div></div></section>
+      </aside></div>
+    </div>`;
+  }
+
+  function render(){
+    const p=currentProfile(),isOwn=activeId==='self';
+    if(isOwn)oldGo('me');else oldGo('member',activeId);
+    if(!isCouple(p)&&activeTab==='couple')activeTab='person0';
+    w.content.innerHTML=`<div class="v4">${isOwn?'':'<button class="v4-secondary v4-back" onclick="parent.v4Back()">← Retour à Découvrir</button>'}
+      ${activeTab==='couple'?hero(p,isOwn):''}${tabs(p)}
+      ${activeTab==='couple'?couplePage(p,isOwn):activeTab==='person0'?personPage(p,0,isOwn):activeTab==='person1'?personPage(p,1,isOwn):albumsPage(p,isOwn)}
+    </div>`;
+  }
+
+  w.go=function(route,param){
+    if(route==='me'){activeId='self';activeTab='couple';photoIndex=0;editing=false;render();w.scrollTo(0,0);return}
+    if(route==='member'){activeId=param;activeTab=(w.P.find(p=>p.id===param)?.type||'').toLowerCase().includes('couple')?'couple':'person0';photoIndex=0;editing=false;render();w.scrollTo(0,0);return}
+    if(route==='venues'){oldGo('venues');w.content.innerHTML=venueDirectory();w.scrollTo(0,0);return}
+    if(route==='organizer'){oldGo('organizer');w.content.innerHTML=organizerDashboard();w.scrollTo(0,0);return}
+    oldGo(route,param);
+  };
+
+  window.v4Tab=tab=>{activeTab=tab;editing=false;personPhotoIndex=0;render();w.scrollTo(0,0)};
+  window.v4Photo=delta=>{const count=currentProfile().publicPhotos.length;photoIndex=(photoIndex+delta+count)%count;render()};
+  window.v4SetPhoto=index=>{photoIndex=index;render()};
+  window.v4PersonPhoto=delta=>{personPhotoIndex=(personPhotoIndex+delta+PHOTO.women.length)%PHOTO.women.length;render()};
+  window.v4Scroll=id=>d.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});
+  window.v4Toast=text=>w.toast(text);
+  window.v4Message=()=>oldGo('conversations',activeId);
+  window.v4Back=()=>oldGo('discover');
+  window.v4Edit=()=>{editing=!editing;render()};
+  window.v4Save=()=>{d.querySelectorAll('[data-v4]').forEach(input=>w.S.profileV4[input.dataset.v4]=input.value);w.save();editing=false;render();w.toast('Profil commun enregistré')};
+  window.v4SavePerson=index=>{
+    const p=currentProfile(),name=p.names[index],saved=w.S.profileV4[`person-${name}`]||{};
+    d.querySelectorAll('[data-person]').forEach(input=>saved[input.dataset.person]=input.dataset.person.startsWith('with')?input.value.split(',').map(x=>x.trim()).filter(Boolean):input.value);
+    w.S.profileV4[`person-${name}`]=saved;w.save();editing=false;render();w.toast('Fiche personnelle enregistrée')
+  };
+  window.v4ToggleCreate=()=>{w.S.v4CreateOpen=!w.S.v4CreateOpen;w.save();render()};
+  window.v4CreateAlbum=()=>{
+    const name=d.getElementById('v4AlbumName')?.value.trim(),level=d.getElementById('v4AlbumLevel')?.value;
+    if(!name){w.toast('Donnez un nom à l’album');return}
+    w.S.profileV4Albums.push({name,level,count:0});w.S.v4CreateOpen=false;w.save();render();w.toast('Album privé créé')
+  };
+  window.v4RequestAlbum=index=>{const key=`${activeId}-${index}`;w.S.profileV4Requests[key]=true;w.save();render();w.toast('Demande d’accès envoyée')};
+  window.v5Venues=()=>w.go('venues');
+  window.v5OpenVenue=id=>{
+    const venue=VENUES_V5.find(item=>item.id===id)||VENUES_V5[0];
+    oldGo('venues');w.content.innerHTML=venueDetail(venue);w.scrollTo(0,0)
+  };
+  window.v5Participants=(venueId,eventId)=>{
+    const venue=VENUES_V5.find(item=>item.id===venueId)||VENUES_V5[0],event=venue.events.find(item=>item.id===eventId)||venue.events[0];
+    oldGo('venues');w.content.innerHTML=venueParticipants(venue,event);w.scrollTo(0,0)
+  };
+  window.v5Register=(venueId,eventId)=>{
+    const key=`${venueId}-${eventId}`;
+    w.S.v5VenueRegistrations[key]=!w.S.v5VenueRegistrations[key];w.save();
+    window.v5OpenVenue(venueId);w.toast(w.S.v5VenueRegistrations[key]?'Inscription enregistrée':'Inscription annulée')
+  };
+  window.v5OpenMember=id=>w.go('member',id);
+  window.v5Organizer=()=>w.go('organizer');
+  window.v5OrganizerPublic=venueId=>{
+    const venue=VENUES_V5.find(item=>item.id===venueId)||VENUES_V5[0];
+    oldGo('venues');w.content.innerHTML=organizerPublic(venue);w.scrollTo(0,0)
+  };
+  window.v5RequestOrganizer=()=>{
+    w.S.organizerAccess={status:'pending',requestedAt:'Aujourd’hui'};w.save();w.content.innerHTML=organizerDashboard();w.toast('Demande transmise à la modération')
+  };
+  window.v5CreateEvent=()=>{
+    const name=d.getElementById('v5EventName')?.value.trim(),rawDate=d.getElementById('v5EventDate')?.value,capacity=Number(d.getElementById('v5EventCapacity')?.value)||0;
+    if(!name||!rawDate||capacity<2){w.toast('Complétez le nom, la date et la capacité');return}
+    const date=new Date(rawDate),months=['JANV','FÉVR','MARS','AVR','MAI','JUIN','JUIL','AOÛT','SEPT','OCT','NOV','DÉC'];
+    w.S.v5OrganizerEvents.push({
+      id:`custom-${Date.now()}`,day:String(date.getDate()).padStart(2,'0'),month:months[date.getMonth()],name,
+      date:date.toLocaleString('fr-FR',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}),
+      audience:d.getElementById('v5EventAudience')?.value||'Membres validés',booked:0,total:capacity,participants:[]
+    });
+    w.save();w.content.innerHTML=organizerDashboard();w.scrollTo(0,0);w.toast('Soirée publiée')
+  };
+  window.v5Scroll=id=>d.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});
+  window.v5Toast=text=>w.toast(text);
+});
+</script>
+</body>
+</html>

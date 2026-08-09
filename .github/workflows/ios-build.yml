@@ -1,0 +1,88 @@
+name: Velvet Apple build
+
+on:
+  push:
+    branches:
+      - v1-lived-demo
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios-build.yml'
+  pull_request:
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apple-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apple-build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Xcode version
+        run: xcodebuild -version
+
+      - name: List project targets
+        run: xcodebuild -project ios/Velvet.xcodeproj -list
+
+      - name: Compile Velvet for iOS Simulator
+        run: |
+          set -o pipefail
+          LOG="$RUNNER_TEMP/velvet-ios-build.log"
+          if ! xcodebuild -quiet \
+            -project ios/Velvet.xcodeproj \
+            -scheme Velvet \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build 2>&1 | tee "$LOG"; then
+            grep -E 'error:|fatal error:' "$LOG" | tail -n 40 | while IFS= read -r line; do
+              echo "::error title=Xcode compile::$line"
+            done
+            exit 1
+          fi
+
+      - name: Compile Velvet Widget for iOS Simulator
+        run: |
+          set -o pipefail
+          xcodebuild -quiet \
+            -project ios/Velvet.xcodeproj \
+            -target VelvetWidget \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Compile Velvet Watch for watchOS Simulator
+        run: |
+          set -o pipefail
+          xcodebuild -quiet \
+            -project ios/Velvet.xcodeproj \
+            -target VelvetWatch \
+            -configuration Debug \
+            -sdk watchsimulator \
+            -destination 'generic/platform=watchOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Compile Velvet Watch Widget for watchOS Simulator
+        run: |
+          set -o pipefail
+          xcodebuild -quiet \
+            -project ios/Velvet.xcodeproj \
+            -target VelvetWatchWidget \
+            -configuration Debug \
+            -sdk watchsimulator \
+            -destination 'generic/platform=watchOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build

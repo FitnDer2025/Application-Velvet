@@ -4,13 +4,13 @@
 Validé
 
 ## Décision
-Lorsqu'une capture d'écran d'un Salon Velvet est détectable de manière fiable par la plateforme, les autres participants sont informés qu'une capture a été réalisée.
+Lorsqu'une capture d'écran d'un Salon Zwit est détectable de manière fiable par la plateforme, les autres participants sont informés qu'une capture a été réalisée.
 
 ## Principes
 - Notification informative et non accusatrice.
 - Aucun blocage systématique de la capture.
 - Aucune sanction automatique.
-- Velvet ne prétend jamais détecter une capture lorsque la plateforme ne fournit pas cette information.
+- Zwit ne prétend jamais détecter une capture lorsque la plateforme ne fournit pas cette information.
 - Les limitations sont explicites selon iOS, Android et Web.
 
 ## Interface

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0C0C0D">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="description" content="Demandez votre accès privé à Zwit, le nouvel univers communautaire et professionnel dédié aux adultes consentants.">
+  <title>Zwit — Demander un accès privé</title>
+  <link rel="icon" href="/assets/zwit-logo-transparent.png?v=20260806-9" type="image/png">
+  <link rel="stylesheet" href="/assets/velvet-waitlist.css?v=20260806-9">
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+</head>
+<body>
+  <div class="vw-glow vw-glow-one" aria-hidden="true"></div>
+  <div class="vw-glow vw-glow-two" aria-hidden="true"></div>
+
+  <header class="vw-header">
+    <a class="vw-brand" href="/acces-prive/" aria-label="Zwit, accès privé">
+      <img class="vw-mark" src="/assets/zwit-logo-transparent.png?v=20260806-9" alt="">
+      <span>ZWIT</span>
+    </a>
+    <a class="vw-login" href="/?mode=login">J’ai déjà un accès</a>
+  </header>
+
+  <main>
+    <section class="vw-hero" aria-labelledby="vw-title">
+      <div class="vw-eyebrow"><span></span> OUVERTURE PRIVÉE · HAUTS-DE-FRANCE &amp; BELGIQUE</div>
+      <h1 id="vw-title">Les plus belles rencontres<br><em>commencent par la confiance.</em></h1>
+      <p class="vw-lead">Zwit prépare un nouvel espace premium pour découvrir des membres, des sorties et des établissements dans un environnement pensé autour du consentement, de la discrétion et de la qualité.</p>
+      <div class="vw-promise-grid" aria-label="Les engagements Zwit">
+        <article><b>01</b><span>Accès distribué progressivement</span></article>
+        <article><b>02</b><span>Communauté régionale qualifiée</span></article>
+        <article><b>03</b><span>Membres et professionnels réunis</span></article>
+      </div>
+    </section>
+
+    <section class="vw-registration" aria-labelledby="registration-title">
+      <div class="vw-card">
+        <div class="vw-card-heading">
+          <p class="vw-kicker">LISTE D’ACCÈS PRIVÉE</p>
+          <h2 id="registration-title">Faites partie des premiers.</h2>
+          <p>Quelques informations suffisent. Aucun profil intime, aucune photo et aucune pièce d’identité ne sont demandés à ce stade.</p>
+        </div>
+
+        <div class="vw-audience" role="tablist" aria-label="Type de préinscription">
+          <button type="button" role="tab" aria-selected="true" data-audience="member">Je suis membre</button>
+          <button type="button" role="tab" aria-selected="false" data-audience="pro">Je suis professionnel</button>
+        </div>
+
+        <form id="waitlistForm" novalidate>
+          <input type="hidden" name="audience" value="member">
+          <input type="hidden" name="source">
+          <input type="hidden" name="campaign">
+          <input type="hidden" name="medium">
+          <input type="hidden" name="content">
+          <input type="hidden" name="referral">
+          <input class="vw-honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+          <div class="vw-fields vw-member-fields">
+            <label class="vw-field">
+              <span>Votre profil</span>
+              <select name="memberType" required>
+                <option value="">Sélectionner</option>
+                <option value="couple">Couple</option>
+                <option value="woman">Femme</option>
+                <option value="man">Homme</option>
+                <option value="other">Autre profil adulte</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="vw-fields vw-pro-fields" hidden>
+            <label class="vw-field vw-wide">
+              <span>Nom de l’établissement ou de l’activité</span>
+              <input type="text" name="businessName" maxlength="120" autocomplete="organization">
+            </label>
+            <label class="vw-field">
+              <span>Votre activité</span>
+              <select name="professionalType">
+                <option value="">Sélectionner</option>
+                <option value="club">Club</option>
+                <option value="spa">Spa</option>
+                <option value="love_room">Love room</option>
+                <option value="event_organizer">Organisateur de soirées</option>
+                <option value="photographer">Photographe</option>
+                <option value="other">Autre professionnel</option>
+              </select>
+            </label>
+            <label class="vw-field">
+              <span>Nom du contact</span>
+              <input type="text" name="contactName" maxlength="100" autocomplete="name">
+            </label>
+          </div>
+
+          <div class="vw-fields">
+            <label class="vw-field vw-wide">
+              <span>Adresse e-mail</span>
+              <input type="email" name="email" maxlength="254" autocomplete="email" inputmode="email" placeholder="vous@exemple.fr" required>
+            </label>
+            <label class="vw-field">
+              <span>Ville ou code postal</span>
+              <input type="text" name="location" maxlength="90" autocomplete="postal-code" placeholder="Lille, 59000…" required>
+            </label>
+            <label class="vw-field">
+              <span>Pays</span>
+              <select name="country" required>
+                <option value="FR">France</option>
+                <option value="BE">Belgique</option>
+              </select>
+            </label>
+            <label class="vw-field vw-pro-phone" hidden>
+              <span>Téléphone <small>(facultatif)</small></span>
+              <input type="tel" name="phone" maxlength="30" autocomplete="tel">
+            </label>
+          </div>
+
+          <label class="vw-check vw-beta-check">
+            <input type="checkbox" name="wantsBeta" value="true">
+            <span>Je souhaite pouvoir participer aux premiers accès privés de Zwit.</span>
+          </label>
+          <label class="vw-check">
+            <input type="checkbox" name="adultAttestation" value="true" required>
+            <span>Je confirme avoir au moins 18 ans.</span>
+          </label>
+          <label class="vw-check">
+            <input type="checkbox" name="launchConsent" value="true" required>
+            <span>J’accepte de recevoir par e-mail les informations liées à ma préinscription, à l’ouverture et aux invitations Zwit. Je pourrai me désinscrire à tout moment.</span>
+          </label>
+
+          <div id="turnstileSlot" class="vw-turnstile" aria-label="Vérification anti-robot"></div>
+          <p class="vw-form-status" id="formStatus" role="status" aria-live="polite"></p>
+          <button class="vw-submit" type="submit">
+            <span>Demander mon accès privé</span><b aria-hidden="true">↗</b>
+          </button>
+          <p class="vw-privacy">Zwit applique un principe de collecte minimale. Consultez notre <a href="/legal/privacy/">politique de confidentialité</a>.</p>
+        </form>
+
+        <section class="vw-success" id="waitlistSuccess" hidden tabindex="-1">
+          <img class="vw-success-mark" src="/assets/zwit-logo-transparent.png?v=20260806-9" alt="">
+          <p class="vw-kicker">DEMANDE ENREGISTRÉE</p>
+          <h2>Bienvenue dans l’univers Zwit.</h2>
+          <p>Votre demande d’accès privé a bien été prise en compte. Les premiers accès seront distribués progressivement afin de préserver une expérience fluide, sûre et qualitative.</p>
+          <strong>Surveillez votre boîte mail : nous vous préviendrons dès que votre espace sera disponible.</strong>
+          <div class="vw-referral" id="referralBox" hidden>
+            <label for="referralLink">Invitez une personne de confiance</label>
+            <div><input id="referralLink" readonly><button type="button" id="copyReferral">Copier</button></div>
+          </div>
+          <a class="vw-secondary" href="/acces-prive/">Enregistrer une autre demande</a>
+        </section>
+      </div>
+    </section>
+
+    <section class="vw-manifesto" aria-label="La vision Zwit">
+      <p>ZWIT N’EST PAS UN SITE DE PLUS.</p>
+      <h2>Un écosystème régional où les membres, les lieux et les événements peuvent enfin se retrouver avec élégance.</h2>
+      <div>
+        <span>CONFIANCE</span><span>CONSENTEMENT</span><span>DISCRÉTION</span><span>ÉLÉGANCE</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="vw-footer">
+    <a class="vw-brand" href="/acces-prive/"><img class="vw-mark" src="/assets/zwit-logo-transparent.png?v=20260806-9" alt=""><span>ZWIT</span></a>
+    <p>Une expérience réservée aux adultes consentants.</p>
+    <nav aria-label="Liens légaux"><a href="/legal/privacy/">Confidentialité</a><a href="/legal/terms/">Conditions</a><a href="/legal/safety/">Sécurité</a></nav>
+  </footer>
+
+  <script src="/assets/velvet-waitlist.js?v=20260806-1"></script>
+</body>
+</html>

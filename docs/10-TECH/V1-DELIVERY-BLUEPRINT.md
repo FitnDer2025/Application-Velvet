@@ -1,7 +1,7 @@
-# Blueprint de livraison — Maquette V1 Velvet
+# Blueprint de livraison — Maquette V1 Zwit
 
 ## Objectif
-Fournir à l'équipe de développement et à CODEX un cadre exécutable pour transformer Velvet OS en une maquette V1 testable, puis en base de production.
+Fournir à l'équipe de développement et à CODEX un cadre exécutable pour transformer Zwit OS en une maquette V1 testable, puis en base de production.
 
 ## Principe d'architecture
 Architecture modulaire, mobile-first, sécurisée par défaut et compatible Web/PWA puis applications mobiles.
@@ -11,15 +11,15 @@ Architecture modulaire, mobile-first, sécurisée par défaut et compatible Web/
 - Identité individuelle et couple
 - Profils, photos publiques et privées
 - Discover et recommandations
-- Invitations Velvet
-- Salons Velvet
-- Carnet Velvet privé
+- Invitations Zwit
+- Salons Zwit
+- Carnet Zwit privé
 - Histoire de la relation
 - Événements, sorties et voyages
 - Bulles et publications
 - Réputation, confiance, signalement et blocage
 - Professionnels
-- Velvet Intelligence et Velvet Memory
+- Zwit Intelligence et Zwit Memory
 - Administration et modération
 
 ## Architecture logique recommandée pour la V1
@@ -70,10 +70,10 @@ Architecture modulaire, mobile-first, sécurisée par défaut et compatible Web/
 Les noms sont indicatifs ; les migrations doivent rester cohérentes avec les ADR.
 
 ## Règles critiques à implémenter côté serveur
-- Une Invitation Velvet non acceptée ne permet aucun second message.
+- Une Invitation Zwit non acceptée ne permet aucun second message.
 - L'ajout d'un participant à un Salon exige l'accord explicite de tous les membres présents.
 - Le nouveau participant ne voit que l'historique autorisé lors de son entrée.
-- Le Carnet Velvet n'est jamais accessible aux autres membres du Salon.
+- Le Carnet Zwit n'est jamais accessible aux autres membres du Salon.
 - Les statuts de lecture respectent la préférence de confidentialité et la réciprocité.
 - Les captures d'écran ne génèrent un événement que lorsqu'un signal fiable existe.
 - Le blocage coupe immédiatement les accès et interactions futures applicables.

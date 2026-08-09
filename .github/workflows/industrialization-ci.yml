@@ -1,0 +1,93 @@
+name: Velvet industrialization CI
+
+on:
+  push:
+    paths:
+      - "apps/api/**"
+      - "apps/beta/**"
+      - "packages/api-client/**"
+      - "docs/beta/**"
+      - "functions/**"
+      - "infra/**"
+      - "scripts/check-supabase-migrations.mjs"
+      - "scripts/security/**"
+      - "scripts/ops/**"
+      - "scripts/recipe/**"
+      - "tests/recipe/**"
+      - "playwright.config.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - "wrangler.jsonc"
+      - ".github/workflows/industrialization-ci.yml"
+  pull_request:
+    paths:
+      - "apps/api/**"
+      - "apps/beta/**"
+      - "packages/api-client/**"
+      - "docs/beta/**"
+      - "functions/**"
+      - "infra/**"
+      - "scripts/check-supabase-migrations.mjs"
+      - "scripts/security/**"
+      - "scripts/ops/**"
+      - "scripts/recipe/**"
+      - "tests/recipe/**"
+      - "playwright.config.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - "wrangler.jsonc"
+      - ".github/workflows/industrialization-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  security-and-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.18.0"
+      - run: npm ci --ignore-scripts
+      - run: npm run security:audit
+      - name: Run npm run check
+        run: |
+          set -o pipefail
+          LOG="$RUNNER_TEMP/zwit-contract-check.log"
+          if ! npm run check 2>&1 | tee "$LOG"; then
+            tail -n 60 "$LOG" | while IFS= read -r line; do
+              echo "::error title=Zwit contract check::$line"
+            done
+            exit 1
+          fi
+      - name: Run npm test
+        run: |
+          set -o pipefail
+          LOG="$RUNNER_TEMP/zwit-tests.log"
+          if ! npm test 2>&1 | tee "$LOG"; then
+            names="$( (grep -E '^(✖ |not ok [0-9]+ - )' "$LOG" || true) | sed -E 's/^(✖ |not ok [0-9]+ - )//' | paste -sd ' | ' -)"
+            if [ -n "$names" ]; then
+              echo "::error title=Failing test names::$names"
+            fi
+            (grep -E '^(✖ |not ok )|AssertionError|ERR_ASSERTION|error:|ℹ fail' "$LOG" || true) | tail -n 100 | while IFS= read -r line; do
+              echo "::error title=Zwit tests::$line"
+            done
+            exit 1
+          fi
+      - run: npm run build:beta
+      - run: npx playwright install --with-deps chromium webkit
+      - name: Run browser recipe
+        run: |
+          set -o pipefail
+          LOG="$RUNNER_TEMP/zwit-browser-recipe.log"
+          if ! npm run recipe:browser 2>&1 | tee "$LOG"; then
+            (grep -E 'Error:|error:|failed|FAIL|Timeout|expect\(|Assertion|locator|page\.' "$LOG" || true) | tail -n 120 | while IFS= read -r line; do
+              echo "::error title=Zwit browser recipe::$line"
+            done
+            tail -n 80 "$LOG" | while IFS= read -r line; do
+              echo "::error title=Zwit browser tail::$line"
+            done
+            exit 1
+          fi

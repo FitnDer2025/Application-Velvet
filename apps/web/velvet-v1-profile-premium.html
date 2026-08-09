@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Zwit — V1 profils & cercles</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#09090b}
+    iframe{border:0;width:100%;height:100%;display:block}
+  </style>
+</head>
+<body>
+<iframe id="app" src="./velvet-v1-locked-dense.html" title="Zwit V1"></iframe>
+<script>
+const frame = document.getElementById('app');
+
+frame.addEventListener('load', () => {
+  const w = frame.contentWindow;
+  const d = w.document;
+  const style = d.createElement('style');
+  style.textContent = `
+    .profile-premium{max-width:1260px;margin:auto}
+    .profile-cover{min-height:440px;border-radius:30px;overflow:hidden;position:relative;background:center/cover}
+    .profile-cover:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 12%,rgba(0,0,0,.28) 48%,rgba(0,0,0,.97) 100%)}
+    .profile-cover-copy{position:absolute;z-index:2;left:30px;right:30px;bottom:28px}
+    .profile-title{font-family:Georgia;font-size:clamp(38px,6vw,72px);margin:4px 0}
+    .profile-actions,.profile-switcher,.profile-tabs,.circle-actions{display:flex;gap:9px;flex-wrap:wrap}
+    .profile-switcher{margin:18px 0}
+    .identity-card{flex:1;min-width:180px;display:grid;grid-template-columns:54px 1fr;gap:11px;align-items:center;text-align:left;border:1px solid var(--line);border-radius:18px;padding:11px;background:#141417;color:#fff;cursor:pointer}
+    .identity-card img{width:54px;height:54px;border-radius:15px;object-fit:cover}
+    .identity-card small{display:block;color:var(--muted);margin-top:3px}
+    .identity-card.active{border-color:#c9a86a99;background:linear-gradient(135deg,#c9a86a18,#71244022);box-shadow:0 0 0 1px #c9a86a22 inset}
+    .profile-tabs{overflow:auto;padding:12px 0;position:sticky;top:72px;z-index:6;background:#09090bee;backdrop-filter:blur(14px)}
+    .profile-tabs button{white-space:nowrap;border:1px solid var(--line);border-radius:999px;padding:10px 14px;background:#17171a;color:var(--muted);cursor:pointer}
+    .profile-tabs button.active{color:var(--gold);border-color:#c9a86a88;background:#c9a86a12}
+    .profile-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(290px,.8fr);gap:18px}
+    .premium-card{border:1px solid var(--line);border-radius:24px;background:linear-gradient(145deg,#ffffff0d,#ffffff05);padding:22px;margin-bottom:18px}
+    .premium-card h2,.premium-card h3{margin-top:0}
+    .story-copy{font-size:16px;line-height:1.75;color:#ddd8d1}
+    .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .fact{padding:14px;border-radius:16px;background:#ffffff07;border:1px solid var(--line)}
+    .fact small{display:block;color:var(--muted);margin-bottom:5px}
+    .fact strong{font-size:15px}
+    .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .metric{text-align:center;padding:16px 8px;border-radius:18px;background:#ffffff07;border:1px solid #ffffff08}
+    .metric strong{display:block;font-size:25px;color:var(--gold)}
+    .profile-person{display:grid;grid-template-columns:170px 1fr;gap:18px;align-items:start}
+    .profile-person img{width:170px;height:220px;object-fit:cover;border-radius:22px}
+    .album-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .album{height:190px;border-radius:18px;background-size:cover;background-position:center;position:relative;overflow:hidden}
+    .album>span{position:absolute;left:12px;bottom:12px;right:12px;z-index:2;font-weight:bold}
+    .album:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 35%,#000e)}
+    .album.locked:before{content:attr(data-lock);position:absolute;z-index:3;inset:0;display:grid;place-items:center;text-align:center;padding:18px;background:#09090bbb;backdrop-filter:blur(8px);font-weight:bold;white-space:pre-line}
+    .audience{position:absolute;left:10px;top:10px;z-index:4;padding:6px 9px;border-radius:999px;background:#09090bd9;border:1px solid #ffffff22;font-size:10px}
+    .timeline{display:grid;gap:12px}
+    .timeline-item{display:grid;grid-template-columns:12px 1fr;gap:12px}
+    .timeline-item i{width:12px;height:12px;border-radius:50%;background:var(--gold);margin-top:6px;box-shadow:0 0 0 5px #c9a86a18}
+    .availability{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
+    .day{text-align:center;padding:11px 5px;border-radius:13px;background:#ffffff06;border:1px solid var(--line);font-size:11px}
+    .day.on{border-color:#c9a86a88;color:var(--gold)}
+    .edit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .edit-grid label{font-size:11px;color:var(--muted)}
+    .edit-grid input,.edit-grid textarea,.edit-grid select,.circle-form input,.visibility-select{margin-top:5px;width:100%;border:1px solid var(--line);border-radius:12px;background:#18181c;color:#fff;padding:11px}
+    .edit-grid textarea{min-height:110px;resize:vertical}
+    .wide{grid-column:1/-1}
+    .quote{font-family:Georgia;font-style:italic;font-size:24px;line-height:1.5;text-align:center;padding:34px;color:#e8dcc8}
+    .mini-list{display:grid;gap:9px}
+    .mini-row{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #ffffff0c}
+    .verified{color:#7bd6aa}
+    .privacy-note{padding:13px;border-radius:14px;background:#71244025;border:1px solid #c9a86a35;color:#ddd;line-height:1.55}
+    .trust-note{padding:13px;border-radius:14px;background:#1e6b5128;border:1px solid #7bd6aa55;color:#d8f4e7;line-height:1.55}
+    .private-tease{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .tease{height:130px;border-radius:15px;background-size:cover;background-position:center;position:relative;overflow:hidden}
+    .tease:after{content:'🔒';position:absolute;inset:0;display:grid;place-items:center;background:#0008;backdrop-filter:blur(6px);font-size:22px}
+    .section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+    .circle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .circle-card{border:1px solid var(--line);border-radius:20px;background:#ffffff06;padding:17px;position:relative;overflow:hidden}
+    .circle-card:before{content:"";position:absolute;width:90px;height:90px;border-radius:50%;right:-30px;top:-35px;background:#c9a86a14}
+    .circle-icon{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#c9a86a18;color:var(--gold);border:1px solid #c9a86a44;font-size:20px}
+    .circle-members{display:flex;margin:12px 0}
+    .circle-members img{width:38px;height:38px;border-radius:50%;object-fit:cover;border:3px solid #151518;margin-right:-10px}
+    .visibility-table{display:grid;gap:8px}
+    .visibility-row{display:grid;grid-template-columns:1.2fr 1.5fr 220px;align-items:center;gap:12px;padding:12px;border-radius:15px;background:#ffffff05;border:1px solid #ffffff08}
+    .visibility-row p{margin:3px 0 0;font-size:12px;color:var(--muted)}
+    .visibility-select{margin:0}
+    .circle-form{display:grid;grid-template-columns:1fr auto;gap:9px}
+    .circle-form input{margin:0}
+    .status-pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 10px;border:1px solid var(--line);font-size:11px}
+    .status-pill.ok{border-color:#7bd6aa55;color:#7bd6aa}
+    .status-pill.gold{border-color:#c9a86a66;color:var(--gold)}
+    .circle-picker{margin-top:12px;padding:14px;border-radius:16px;background:#ffffff06;border:1px solid var(--line)}
+    .member-subtitle{margin-top:0;color:var(--muted)}
+    .profile-summary{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .profile-summary img{width:64px;height:64px;border-radius:18px;object-fit:cover}
+    @media(max-width:900px){
+      .profile-layout{grid-template-columns:1fr}.facts{grid-template-columns:repeat(2,1fr)}
+      .circle-grid{grid-template-columns:1fr 1fr}.visibility-row{grid-template-columns:1fr 1fr}
+      .visibility-row>div:first-child{grid-column:1/-1}
+    }
+    @media(max-width:760px){
+      .profile-cover{min-height:500px;border-radius:0;margin:-14px -14px 0}
+      .profile-cover-copy{left:18px;right:18px;bottom:22px}.profile-title{font-size:42px}
+      .profile-tabs{top:72px;margin:0 -14px;padding:11px 14px}
+      .profile-switcher{display:grid;grid-template-columns:1fr}.identity-card{min-width:0}
+      .premium-card{border-radius:20px;padding:17px}.profile-person{grid-template-columns:105px 1fr}
+      .profile-person img{width:105px;height:145px}.facts{grid-template-columns:1fr 1fr}
+      .album-grid{grid-template-columns:1fr 1fr}.album{height:155px}
+      .private-tease{grid-template-columns:repeat(2,1fr)}.metrics{grid-template-columns:repeat(2,1fr)}
+      .availability{grid-template-columns:repeat(4,1fr)}.edit-grid{grid-template-columns:1fr}.wide{grid-column:auto}
+      .quote{font-size:20px;padding:22px 8px}.circle-grid{grid-template-columns:1fr}
+      .visibility-row{grid-template-columns:1fr}.visibility-row>div:first-child{grid-column:auto}
+      .circle-form{grid-template-columns:1fr}.section-head{display:block}
+    }
+  `;
+  d.head.appendChild(style);
+
+  const oldGo = w.go;
+  let selfIdentity = 'couple';
+  let selfSection = 'profile';
+  let editing = false;
+  let memberIdentity = 'couple';
+  let memberSection = 'profile';
+  let memberCircleOpen = false;
+
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  }[char]));
+
+  w.S.circles = w.S.circles || {
+    trust: ['af','em','cl'],
+    private: [{id:'friends',name:'Nos belles rencontres',members:['af','cl']}],
+    favorites: ['af','cl','jm'],
+    bubbles: [
+      {id:'e1',name:'Bulle · Nuit Velours',members:4,status:'active'},
+      {id:'e2',name:'Bulle · Évasion Spa',members:5,status:'active'}
+    ]
+  };
+  w.S.albumVisibility = w.S.albumVisibility || {
+    couplePublic:'Public',
+    coupleDiscovery:'Découverte',
+    couplePrivate:'Cercle privé',
+    celinePrivate:'Cercle de confiance',
+    cyrilPrivate:'Favoris'
+  };
+  w.S.profileVisibility = w.S.profileVisibility || {
+    identity:'Public',
+    physical:'Compatibles',
+    practices:'Masque Zwit',
+    availability:'Cercle de confiance',
+    privateStory:'Cercle privé'
+  };
+  w.S.encounters = w.S.encounters || {};
+  w.save();
+
+  function profileData(){
+    return Object.assign({
+      coupleBio:'Couple très complice, fusionnel et profondément amoureux.',
+      story:'Nous sommes ensemble depuis plus de quatorze ans. Notre histoire s’est construite sur une complicité très forte, beaucoup de dialogue et l’envie de continuer à nous surprendre. Nous avons découvert le libertinage progressivement, sans jamais chercher à collectionner les expériences. Ce qui nous attire, ce sont les connexions sincères, la sensualité, le respect et ces moments où tout paraît naturel. Aujourd’hui, Céline souhaite explorer doucement son côté bi-curieux dans une vraie alchimie à trois, tandis que Cyril veille particulièrement à ce que chacun se sente libre, désiré et respecté.',
+      philosophy:'Feeling indispensable, respect, communication, consentement, bienveillance, sensualité et humour.',
+      search:'Couples et femmes bienveillants, naturels et respectueux. Nous aimons les rencontres suivies, les soirées privées et les lieux élégants.',
+      city:'Lens', togetherSince:'2012', children:'Parents, organisation nécessaire',
+      travel:'Hauts-de-France, Belgique et escapades ponctuelles', languages:'Français',
+      pets:'Animaux acceptés', availability:'Vendredi soir, samedi et week-ends sans enfants',
+      celineBio:'Féminine, spontanée et sensible au charme autant qu’à la personnalité. J’aime laisser les choses se construire naturellement et découvrir une femme dans un cadre rassurant, sensuel et complice.',
+      celineAge:'37 ans', celineHeight:'165', celineWeight:'58', celineMorph:'Féminine et naturelle',
+      celineEyes:'Verts', celineHair:'Châtains', celineOrientation:'Bi-curieuse', celineJob:'Cadre',
+      celineTattoos:'Quelques tatouages', celinePiercings:'Piercings discrets',
+      celineCharacter:'Sensible, souriante, spontanée',
+      cyrilBio:'Calme, protecteur et ouvert. J’accorde beaucoup d’importance au confort de chacun, au dialogue et à une séduction naturelle sans personnes trop sûres d’elles.',
+      cyrilAge:'37 ans', cyrilHeight:'176', cyrilWeight:'72', cyrilMorph:'Sportif',
+      cyrilEyes:'Marron', cyrilHair:'Bruns', cyrilOrientation:'Hétéro', cyrilJob:'Directeur',
+      cyrilTattoos:'Tatoué', cyrilPiercings:'Aucun', cyrilCharacter:'Calme, protecteur, attentionné',
+      smoke:'Non-fumeurs'
+    }, w.S.profile);
+  }
+
+  const memberCopy = {
+    af:{
+      story:'Ensemble depuis douze ans, Aurélie et François aiment les rencontres qui prennent le temps de devenir naturelles. Leur équilibre repose sur une communication très simple : chacun peut exprimer ses envies, ses limites et son propre ressenti.',
+      philosophy:'Complicité, humour, élégance et liberté de parole.',
+      bios:[
+        'Solaire et curieuse, Aurélie aime la sensualité, les échanges vrais et les femmes qui ne jouent pas un rôle.',
+        'François est posé, drôle et attentif. Il privilégie la qualité du lien et ne force jamais le rythme.'
+      ],
+      traits:[['Féminine','Bi','Spontanée'],['Élancé','Hétéro','Attentionné']]
+    },
+    em:{
+      story:'Élodie et Marc sortent peu, mais choisissent leurs rencontres avec soin. Ils aiment dîner, parler longtemps et laisser la soirée prendre sa propre direction.',
+      philosophy:'Douceur, discrétion et connexion suivie.',
+      bios:[
+        'Élodie aime les personnalités sensibles, l’humour et les ambiances sans pression.',
+        'Marc est réservé au premier abord, puis très chaleureux lorsque le feeling s’installe.'
+      ],
+      traits:[['Naturelle','Bi-curieuse','Douce'],['Naturel','Hétéro','Discret']]
+    },
+    jm:{
+      story:'Julie et Manon forment un duo très complice, voyageur et curieux. Elles cherchent surtout des personnalités ouvertes et une énergie commune.',
+      philosophy:'Liberté, féminité, voyages et respect.',
+      bios:[
+        'Julie est spontanée, vive et toujours partante pour découvrir un nouvel endroit.',
+        'Manon est plus contemplative, sensuelle et particulièrement attentive aux détails.'
+      ],
+      traits:[['Féminine','Bisexuelle','Spontanée'],['Féminine','Bisexuelle','Sensible']]
+    },
+    nt:{
+      story:'Nathalie et Thomas aiment les week-ends improvisés, les clubs élégants et les rencontres où l’on rit beaucoup.',
+      philosophy:'Épicurisme, naturel et respect.',
+      bios:[
+        'Nathalie est pétillante, directe avec tact et très attachée au feeling.',
+        'Thomas est sociable, rassurant et amateur de longues conversations.'
+      ],
+      traits:[['Épicurienne','Bi','Pétillante'],['Épicurien','Hétéro','Sociable']]
+    },
+    sa:{
+      story:'Sophie et Alain privilégient la discrétion, les spas et les soirées à petit comité.',
+      philosophy:'Discrétion, douceur et confiance.',
+      bios:[
+        'Sophie est douce, observatrice et sensible aux belles attentions.',
+        'Alain est calme, bienveillant et aime que chacun trouve naturellement sa place.'
+      ],
+      traits:[['Ronde','Hétéroflexible','Douce'],['Rond','Hétéroflexible','Calme']]
+    }
+  };
+
+  function splitNames(p){
+    const names = p.name.split(' & ').map(x => x.trim());
+    return names.length > 1 ? names : [p.name];
+  }
+
+  function isShared(p){
+    return p.type.toLowerCase().includes('couple') && splitNames(p).length > 1;
+  }
+
+  function memberData(p){
+    const names = splitNames(p);
+    const copy = memberCopy[p.id] || {
+      story:`${p.name} privilégie les échanges naturels, les lieux élégants et les rencontres sans pression.`,
+      philosophy:'Respect, naturel et feeling.',
+      bios:names.map((name, index) => `${name} se présente librement, avec ses propres envies, sa personnalité et ses limites.`),
+      traits:names.map(() => [p.morph,p.orient,'Naturel'])
+    };
+    return {names, ...copy};
+  }
+
+  function selfIdentitySwitcher(){
+    const items = [
+      ['couple','Notre couple',w.I.c1,'Identité et histoire communes'],
+      ['celine','Céline',w.I.w1,'Sa fiche personnelle'],
+      ['cyril','Cyril',w.I.m1,'Sa fiche personnelle']
+    ];
+    return `<div class="profile-switcher">${items.map(item => `
+      <button class="identity-card ${selfIdentity===item[0]?'active':''}" onclick="parent.velvetSelfIdentity('${item[0]}')">
+        <img src="${item[2]}" alt=""><span><b>${item[1]}</b><small>${item[3]}</small></span>
+      </button>`).join('')}</div>`;
+  }
+
+  function sectionTabs(active, prefix, includeCircles=true){
+    const items = [
+      ['profile','Présentation'],['albums','Albums'],['events','Sorties'],
+      ['reco','Avis & recommandations'],['activity','Activité']
+    ];
+    if(includeCircles) items.push(['circles','Cercles & visibilité']);
+    return `<div class="profile-tabs">${items.map(item => `
+      <button class="${active===item[0]?'active':''}" onclick="parent.${prefix}('${item[0]}')">${item[1]}</button>
+    `).join('')}</div>`;
+  }
+
+  function selfHero(p){
+    return `<section class="profile-cover" style="background-image:url('${w.I.c1}')">
+      <div class="profile-cover-copy">
+        <div class="ey">Couple vérifié · Trust Index 98%</div>
+        <h1 class="profile-title">Céline & Cyril</h1>
+        <p>Ensemble depuis ${esc(p.togetherSince)} · ${esc(p.city)} · Dernière connexion il y a 8 min</p>
+        <div class="chips">
+          <span class="chip">Couple</span><span class="chip">Elle bi-curieuse</span>
+          <span class="chip">Non-fumeurs</span><span class="chip">Rencontres suivies</span>
+        </div>
+        <div class="profile-actions" style="margin-top:15px">
+          <button class="btn" onclick="parent.velvetProfileEdit()">${editing?'Fermer l’édition':'Modifier cette fiche'}</button>
+          <button class="btn secondary" onclick="parent.velvetToast('Lien du profil copié')">Partager</button>
+        </div>
+      </div>
+    </section>`;
+  }
+
+  function selfCouple(p){
+    return `<div class="profile-layout"><div>
+      <section class="premium-card"><div class="ey">Notre histoire</div><h2>Plus de quatorze ans de complicité</h2><div class="story-copy">${esc(p.story)}</div></section>
+      <section class="premium-card"><div class="ey">Notre philosophie</div><h2>Ce qui guide nos rencontres</h2>
+        <div class="chips">${['Respect','Consentement','Communication','Bienveillance','Sensualité','Humour','Aucune pression','Feeling indispensable'].map(x=>`<span class="chip">${x}</span>`).join('')}</div>
+        <p class="story-copy">${esc(p.philosophy)}</p>
+      </section>
+      <section class="premium-card"><div class="ey">Ce que nous recherchons</div><h2>Des connexions avant tout</h2>
+        <p class="story-copy">${esc(p.search)}</p>
+        <div class="chips">${['Couples','Femmes','Rencontres suivies','Soirées privées','Spa','Restaurant','Voyages','Trios F'].map(x=>`<span class="chip">${x}</span>`).join('')}</div>
+      </section>
+      <section class="premium-card"><div class="ey">Notre parcours</div><h2>Les étapes de notre histoire</h2>
+        <div class="timeline">
+          <div class="timeline-item"><i></i><div><strong>2012 — Notre rencontre</strong><div class="muted">Le début d’une histoire devenue profondément fusionnelle.</div></div></div>
+          <div class="timeline-item"><i></i><div><strong>Notre première découverte</strong><div class="muted">Une approche progressive construite autour du dialogue et de la confiance.</div></div></div>
+          <div class="timeline-item"><i></i><div><strong>Aujourd’hui</strong><div class="muted">L’envie de privilégier les belles connexions et d’explorer doucement le côté bi-curieux de Céline.</div></div></div>
+        </div>
+      </section>
+    </div><aside>
+      <section class="premium-card"><div class="ey">Informations du couple</div><h3>Céline & Cyril</h3>
+        <div class="mini-list">${[
+          ['Ensemble depuis',p.togetherSince],['Ville',p.city],['Enfants',p.children],['Déplacements',p.travel],
+          ['Langues',p.languages],['Disponibilités',p.availability],['Tabac',p.smoke],['Animaux',p.pets]
+        ].map(x=>`<div class="mini-row"><span class="muted">${x[0]}</span><strong>${esc(x[1])}</strong></div>`).join('')}</div>
+      </section>
+      <section class="premium-card"><div class="ey">Vérifications</div><h3>Profil de confiance</h3>
+        <div class="mini-list">${['Téléphone','E-mail','Couple','Photos','Identité'].map(x=>`<div class="mini-row"><span>${x}</span><b class="verified">✓ Vérifié</b></div>`).join('')}</div>
+      </section>
+      <section class="premium-card"><div class="ey">Disponibilités</div><h3>Prochaines semaines</h3>
+        <div class="availability">${['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map((x,i)=>`<div class="day ${i>3?'on':''}">${x}<br><small>${i>3?'Possible':'À prévoir'}</small></div>`).join('')}</div>
+      </section>
+    </aside></div>`;
+  }
+
+  function selfPerson(p, who){
+    const she = who === 'celine';
+    const pre = she ? 'celine' : 'cyril';
+    const name = she ? 'Céline' : 'Cyril';
+    const img = she ? w.I.w1 : w.I.m1;
+    const likes = she
+      ? ['Douceur','Séduction','Femmes féminines','Spa','Massage','Danse','Complicité','Humour']
+      : ['Complicité','Respect','Échanges naturels','Sport','Dîner','Voyages','Soirées privées','Humour'];
+    return `<section class="premium-card">
+      <div class="profile-person"><img src="${img}" alt=""><div><div class="ey">Fiche personnelle</div><h2>${name}</h2>
+        <p class="story-copy">${esc(p[pre+'Bio'])}</p>
+        <div class="chips"><span class="chip">${esc(p[pre+'Orientation'])}</span><span class="chip">${esc(p[pre+'Morph'])}</span><span class="chip">${esc(p[pre+'Character'])}</span></div>
+      </div></div>
+    </section>
+    <div class="profile-layout"><div>
+      <section class="premium-card"><div class="ey">À propos</div><h2>Tout savoir sur ${name}</h2>
+        <div class="facts">${[
+          ['Âge',p[pre+'Age']],['Taille',p[pre+'Height']+' cm'],['Poids',p[pre+'Weight']+' kg'],
+          ['Morphologie',p[pre+'Morph']],['Yeux',p[pre+'Eyes']],['Cheveux',p[pre+'Hair']],
+          ['Orientation',p[pre+'Orientation']],['Profession',p[pre+'Job']],['Tatouages',p[pre+'Tattoos']],
+          ['Piercings',p[pre+'Piercings']],['Caractère',p[pre+'Character']],['Tabac',p.smoke]
+        ].map(x=>`<div class="fact"><small>${x[0]}</small><strong>${esc(x[1])}</strong></div>`).join('')}</div>
+      </section>
+      <section class="premium-card"><div class="ey">Son univers</div><h2>Personnalité & envies</h2>
+        <div class="chips">${likes.map(x=>`<span class="chip">${x}</span>`).join('')}</div>
+      </section>
+    </div><aside>
+      <section class="premium-card"><div class="ey">Confidentialité personnelle</div><h3>Une voix qui lui appartient</h3>
+        <p class="muted">Cette fiche, ses textes et ses accès peuvent être gérés indépendamment de la fiche commune.</p>
+        <div class="trust-note">Toute modification sensible partagée par le couple nécessite la validation des deux partenaires.</div>
+      </section>
+    </aside></div>`;
+  }
+
+  function selfAlbums(){
+    const a = w.S.albumVisibility;
+    return `<section class="premium-card"><div class="section-head"><div><div class="ey">Notre galerie</div><h2>Albums, vidéos & souvenirs</h2></div>
+      <button class="btn" onclick="parent.velvetToast('Gestion des albums ouverte')">Gérer les albums</button></div>
+      <div class="album-grid">
+        <div class="album" style="background-image:url('${w.I.c1}')"><span class="audience">${esc(a.couplePublic)}</span><span>Nous deux · 18 photos</span></div>
+        <div class="album" style="background-image:url('${w.I.spa}')"><span class="audience">${esc(a.coupleDiscovery)}</span><span>Escapades spa · 9 photos</span></div>
+        <div class="album" style="background-image:url('${w.I.party}')"><span class="audience">Public</span><span>Nos sorties · 14 photos</span></div>
+        <div class="album locked" data-lock="🔒 Cercle privé&#10;12 contenus" style="background-image:url('${w.I.room}')"><span class="audience">${esc(a.couplePrivate)}</span></div>
+        <div class="album locked" data-lock="🔒 Cercle de confiance&#10;8 contenus" style="background-image:url('${w.I.w1}')"><span class="audience">${esc(a.celinePrivate)}</span></div>
+        <div class="album locked" data-lock="🔒 Favoris&#10;6 contenus" style="background-image:url('${w.I.m1}')"><span class="audience">${esc(a.cyrilPrivate)}</span></div>
+      </div>
+      <div class="privacy-note" style="margin-top:14px">Les contenus privés sont visibles comme des univers verrouillés. L’accès dépend du cercle choisi et peut être révoqué à tout moment. Aucun téléchargement n’est proposé.</div>
+    </section>
+    <section class="premium-card"><div class="ey">Niveaux de partage</div><h2>Choisir qui découvre chaque album</h2>
+      <div class="visibility-table">${[
+        ['couplePublic','Album « Nous deux »','Identité commune'],
+        ['coupleDiscovery','Album « Escapades spa »','Découverte progressive'],
+        ['couplePrivate','Album privé du couple','Contenus partagés'],
+        ['celinePrivate','Album personnel de Céline','Accord personnel'],
+        ['cyrilPrivate','Album personnel de Cyril','Accord personnel']
+      ].map(row=>`<div class="visibility-row"><div><b>${row[1]}</b><p>${row[2]}</p></div><span class="muted">Accès dynamique et révocable</span>
+        <select class="visibility-select" onchange="parent.velvetAlbumVisibility('${row[0]}',this.value)">
+          ${['Public','Découverte','Privé','Cercle de confiance','Cercle privé','Favoris'].map(value=>`<option ${a[row[0]]===value?'selected':''}>${value}</option>`).join('')}
+        </select></div>`).join('')}</div>
+    </section>`;
+  }
+
+  function selfEvents(){
+    return `<div class="profile-layout"><div>
+      <section class="premium-card"><div class="ey">À venir</div><h2>Nos prochaines sorties</h2>
+        ${w.E.map(e=>`<div class="feeditem"><img class="avatar" src="${e.img}" alt=""><div><b>${e.name}</b><div class="muted">${e.date} · ${e.place}</div></div><button class="btn secondary" onclick="parent.velvetOpenEvent('${e.id}')">Voir</button></div>`).join('')}
+      </section>
+      <section class="premium-card"><div class="ey">Souvenirs</div><h2>Nos sorties passées</h2>
+        <div class="timeline">
+          <div class="timeline-item"><i></i><div><strong>Soirée privée à Lille</strong><div class="muted">Une ambiance douce et un très beau feeling.</div></div></div>
+          <div class="timeline-item"><i></i><div><strong>Week-end spa en Belgique</strong><div class="muted">Détente, restaurant et rencontres naturelles.</div></div></div>
+          <div class="timeline-item"><i></i><div><strong>Découverte de Nuit Velours</strong><div class="muted">Établissement élégant ajouté à nos favoris.</div></div></div>
+        </div>
+      </section>
+    </div><aside><section class="premium-card"><div class="ey">Nos habitudes</div>
+      <div class="mini-list"><div class="mini-row"><span>Sorties par mois</span><strong>1 à 2</strong></div><div class="mini-row"><span>Format préféré</span><strong>Privé / Spa</strong></div><div class="mini-row"><span>Distance habituelle</span><strong>80 km</strong></div><div class="mini-row"><span>Préavis idéal</span><strong>1 semaine</strong></div></div>
+    </section></aside></div>`;
+  }
+
+  function selfReco(){
+    return `<div class="profile-layout"><div>
+      <section class="premium-card"><div class="ey">Avis reçus</div><h2>Ce que les membres disent de nous</h2>
+        <div class="feed">${[
+          [w.I.c1,'Aurélie & François','Un couple naturel, élégant et très attentionné. Une rencontre comme on les aime.'],
+          [w.I.c2,'Élodie & Marc','Beaucoup de dialogue et une vraie complicité. On se sent immédiatement à l’aise.'],
+          [w.I.w1,'Claire','Une belle énergie et énormément de douceur dans les échanges.']
+        ].map(x=>`<div class="feeditem"><img class="avatar" src="${x[0]}" alt=""><div><b>${x[1]} · ★★★★★</b><div class="muted">${x[2]}</div></div></div>`).join('')}</div>
+      </section>
+      <section class="premium-card"><div class="ey">Nos recommandations</div><h2>Profils que nous apprécions</h2><div class="grid g3">${w.P.slice(0,3).map(w.card).join('')}</div></section>
+    </div><aside><section class="premium-card"><div class="ey">Réputation privée</div><div class="metrics" style="grid-template-columns:1fr 1fr">
+      <div class="metric"><strong>4,9</strong><span>Note moyenne</span></div><div class="metric"><strong>27</strong><span>Rencontres</span></div>
+      <div class="metric"><strong>96%</strong><span>Taux de réponse</span></div><div class="metric"><strong>18</strong><span>Recommandations</span></div>
+    </div><p class="muted">Les rencontres certifiées et les sources de confiance restent privées.</p></section></aside></div>`;
+  }
+
+  function selfActivity(){
+    return `<section class="premium-card"><div class="ey">Notre activité</div><h2>Ce que nous avons partagé récemment</h2>
+      <div class="feed">
+        <div class="feeditem"><img class="avatar" src="${w.I.c1}" alt=""><div><b>Album public enrichi</b><div class="muted">3 nouvelles photos dans « Nous deux »</div></div><span class="chip">2 j</span></div>
+        <div class="feeditem"><img class="avatar" src="${w.I.party}" alt=""><div><b>Nouvelle sortie</b><div class="muted">Inscription à Nuit Velours confirmée à deux</div></div><span class="chip">4 j</span></div>
+        <div class="feeditem"><img class="avatar" src="${w.I.spa}" alt=""><div><b>Souvenir ajouté</b><div class="muted">Week-end spa ajouté au Livre Zwit</div></div><span class="chip">1 sem.</span></div>
+      </div>
+    </section>`;
+  }
+
+  function selfCircles(){
+    const circles = w.S.circles;
+    const people = id => w.P.find(p=>p.id===id);
+    return `<section class="premium-card"><div class="section-head"><div><div class="ey">Cercles Zwit</div><h2>La confiance se construit, elle ne s’affiche pas</h2></div><span class="status-pill ok">● Privé par conception</span></div>
+      <p class="story-copy">Vos cercles organisent vos liens, vos accès et vos souvenirs. Leur composition n’est jamais publique. Zwit peut s’en servir pour améliorer les recommandations sans révéler les membres, les rencontres certifiées ni l’origine de la confiance.</p>
+      <div class="circle-grid">
+        <div class="circle-card"><div class="circle-icon">✓</div><h3>Cercle de confiance</h3><p class="muted">Rencontres certifiées par les deux profils.</p>
+          <div class="circle-members">${circles.trust.map(id=>people(id)).filter(Boolean).map(p=>`<img src="${p.img}" alt="">`).join('')}</div>
+          <b>${circles.trust.length} liens de confiance</b>
+        </div>
+        <div class="circle-card"><div class="circle-icon">◇</div><h3>Cercles privés</h3><p class="muted">Groupes choisis pour discuter et partager.</p>
+          <div class="circle-members">${circles.private.flatMap(c=>c.members).slice(0,4).map(id=>people(id)).filter(Boolean).map(p=>`<img src="${p.img}" alt="">`).join('')}</div>
+          <b>${circles.private.length} cercle(s) actif(s)</b>
+        </div>
+        <div class="circle-card"><div class="circle-icon">♥</div><h3>Favoris</h3><p class="muted">Profils et univers que vous souhaitez retrouver.</p>
+          <div class="circle-members">${circles.favorites.map(id=>people(id)).filter(Boolean).map(p=>`<img src="${p.img}" alt="">`).join('')}</div>
+          <b>${circles.favorites.length} favoris</b>
+        </div>
+      </div>
+    </section>
+    <div class="profile-layout"><div>
+      <section class="premium-card"><div class="ey">Vos cercles privés</div><h2>Des espaces choisis</h2>
+        ${circles.private.map(c=>`<div class="feeditem"><div class="circle-icon">◇</div><div><b>${esc(c.name)}</b><div class="muted">${c.members.length} profils · discussion et album collaboratif</div></div><button class="btn secondary" onclick="parent.velvetToast('Cercle ouvert')">Ouvrir</button></div>`).join('')}
+        <div class="circle-form" style="margin-top:14px"><input id="newCircleName" placeholder="Nom du nouveau cercle"><button class="btn" onclick="parent.velvetCreateCircle()">Créer un cercle</button></div>
+      </section>
+      <section class="premium-card"><div class="ey">Bulles actives</div><h2>Une expérience peut devenir un lien durable</h2>
+        ${circles.bubbles.map(b=>`<div class="feeditem"><div class="circle-icon">◌</div><div><b>${esc(b.name)}</b><div class="muted">${b.members} participants · espace éphémère</div></div><button class="btn secondary" onclick="parent.velvetBubbleToCircle('${b.id}')">Faire évoluer en Cercle</button></div>`).join('') || '<p class="muted">Aucune Bulle active.</p>'}
+      </section>
+    </div><aside>
+      <section class="premium-card"><div class="ey">Rencontres certifiées</div><h3>« Nous nous sommes rencontrés »</h3>
+        <p class="muted">Une rencontre n’est certifiée qu’après confirmation des deux profils. Elle alimente la confiance, mais n’apparaît jamais publiquement.</p>
+        <div class="trust-note">Les recommandations issues de votre réseau de confiance restent anonymes : aucun nom ni compteur public.</div>
+      </section>
+      <section class="premium-card"><div class="ey">Albums collaboratifs</div><h3>Souvenirs de cercle</h3>
+        <p class="muted">Les médias partagés dans un cercle restent dans Zwit, avec accès révocable et sans téléchargement.</p>
+        <button class="btn secondary" onclick="parent.velvetToast('Album collaboratif créé dans le cercle')">Créer un album</button>
+      </section>
+    </aside></div>
+    <section class="premium-card"><div class="ey">Masque Zwit & audiences</div><h2>Contrôler la découverte de votre profil</h2>
+      <div class="visibility-table">${[
+        ['identity','Identité du couple','Nom, ville, photo principale'],
+        ['physical','Informations physiques','Âge, taille, morphologie'],
+        ['practices','Pratiques & préférences','Découverte progressive avec le Masque Zwit'],
+        ['availability','Disponibilités','Jours et zones de déplacement'],
+        ['privateStory','Histoire intime','Textes réservés à vos liens choisis']
+      ].map(row=>`<div class="visibility-row"><div><b>${row[1]}</b><p>${row[2]}</p></div><span class="muted">Visible selon votre relation</span>
+        <select class="visibility-select" onchange="parent.velvetProfileVisibility('${row[0]}',this.value)">
+          ${['Public','Compatibles','Masque Zwit','Cercle de confiance','Cercle privé','Favoris'].map(value=>`<option ${w.S.profileVisibility[row[0]]===value?'selected':''}>${value}</option>`).join('')}
+        </select></div>`).join('')}</div>
+      <div class="privacy-note" style="margin-top:14px"><b>Masque Zwit</b> ne rend pas le profil invisible : il montre juste assez pour susciter une découverte, puis révèle les informations selon la confiance et vos choix.</div>
+    </section>`;
+  }
+
+  function selfEdit(p){
+    const common = [
+      ['coupleBio','Présentation du couple','textarea'],['story','Notre histoire','textarea'],
+      ['philosophy','Notre philosophie','textarea'],['search','Ce que nous recherchons','textarea'],
+      ['city','Ville'],['togetherSince','Ensemble depuis'],['children','Enfants'],
+      ['travel','Déplacements'],['languages','Langues'],['availability','Disponibilités']
+    ];
+    const person = selfIdentity==='celine' ? [
+      ['celineBio','Présentation de Céline','textarea'],['celineAge','Âge'],['celineHeight','Taille'],
+      ['celineWeight','Poids'],['celineMorph','Morphologie'],['celineEyes','Yeux'],['celineHair','Cheveux'],
+      ['celineOrientation','Orientation'],['celineJob','Profession'],['celineTattoos','Tatouages'],
+      ['celinePiercings','Piercings'],['celineCharacter','Caractère']
+    ] : [
+      ['cyrilBio','Présentation de Cyril','textarea'],['cyrilAge','Âge'],['cyrilHeight','Taille'],
+      ['cyrilWeight','Poids'],['cyrilMorph','Morphologie'],['cyrilEyes','Yeux'],['cyrilHair','Cheveux'],
+      ['cyrilOrientation','Orientation'],['cyrilJob','Profession'],['cyrilTattoos','Tatouages'],
+      ['cyrilPiercings','Piercings'],['cyrilCharacter','Caractère']
+    ];
+    const fields = selfIdentity==='couple' ? common : person;
+    return `<section class="premium-card"><div class="section-head"><div><div class="ey">Édition de la fiche</div><h2>${selfIdentity==='couple'?'Notre couple':selfIdentity==='celine'?'Céline':'Cyril'}</h2></div>
+      <button class="btn" onclick="parent.velvetProfileSave()">Enregistrer</button></div>
+      <div class="edit-grid">${fields.map(field=>`<label class="${field[2]==='textarea'?'wide':''}">${field[1]}${
+        field[2]==='textarea'
+          ? `<textarea data-profile="${field[0]}">${esc(p[field[0]])}</textarea>`
+          : `<input data-profile="${field[0]}" value="${esc(p[field[0]])}">`
+      }</label>`).join('')}</div>
+      <div class="trust-note" style="margin-top:14px">Les changements de l’identité commune sont soumis à la double validation Céline + Cyril avant publication.</div>
+    </section>`;
+  }
+
+  function selfContent(p){
+    if(editing) return selfEdit(p);
+    if(selfSection==='albums') return selfAlbums();
+    if(selfSection==='events') return selfEvents();
+    if(selfSection==='reco') return selfReco();
+    if(selfSection==='activity') return selfActivity();
+    if(selfSection==='circles') return selfCircles();
+    return selfIdentity==='couple' ? selfCouple(p) : selfPerson(p,selfIdentity);
+  }
+
+  function renderMe(){
+    const p = profileData();
+    oldGo('me');
+    w.content.innerHTML = `<div class="profile-premium">${selfHero(p)}
+      <div class="metrics" style="margin:18px 0">
+        <div class="metric"><strong>3 248</strong><span>Visites</span></div>
+        <div class="metric"><strong>154</strong><span>Coups de cœur</span></div>
+        <div class="metric"><strong>642</strong><span>Messages</span></div>
+        <div class="metric"><strong>4,9</strong><span>Note</span></div>
+      </div>
+      ${selfIdentitySwitcher()}
+      ${sectionTabs(selfSection,'velvetSelfSection',true)}
+      ${selfContent(p)}
+      <div class="quote">« Les plus belles rencontres naissent d’une vraie connexion, pas d’un simple clic. »</div>
+    </div>`;
+  }
+
+  function memberIdentitySwitcher(p, data){
+    if(!isShared(p)) return '';
+    const items = [
+      ['couple',p.type==='Couple'?'Le couple':'Le duo',p.img,'Identité et histoire communes'],
+      ['one',data.names[0],p.id==='jm'?w.I.w2:w.I.w1,'Sa fiche personnelle'],
+      ['two',data.names[1],p.id==='jm'?w.I.w1:w.I.m1,'Sa fiche personnelle']
+    ];
+    return `<div class="profile-switcher">${items.map(item=>`
+      <button class="identity-card ${memberIdentity===item[0]?'active':''}" onclick="parent.velvetMemberIdentity('${item[0]}')">
+        <img src="${item[2]}" alt=""><span><b>${esc(item[1])}</b><small>${item[3]}</small></span>
+      </button>`).join('')}</div>`;
+  }
+
+  function memberTrustCard(p){
+    const isTrust = w.S.circles.trust.includes(p.id);
+    const isFavorite = w.S.circles.favorites.includes(p.id);
+    const encounter = w.S.encounters[p.id];
+    return `<section class="premium-card"><div class="ey">Votre lien</div><h3>Cercles & confiance</h3>
+      <div class="mini-list">
+        <div class="mini-row"><span>Compatibilité</span><strong>${p.compat}%</strong></div>
+        <div class="mini-row"><span>Favori</span><strong>${isFavorite?'Ajouté':'Non'}</strong></div>
+        <div class="mini-row"><span>Cercle de confiance</span><strong>${isTrust?'Oui':'Non'}</strong></div>
+        <div class="mini-row"><span>Rencontre certifiée</span><strong>${encounter==='confirmed'?'Confirmée':encounter==='pending'?'En attente':'Non'}</strong></div>
+      </div>
+      <div class="circle-actions" style="margin-top:12px">
+        <button class="btn secondary" onclick="parent.velvetCirclePicker()">${memberCircleOpen?'Fermer':'Ajouter à un cercle'}</button>
+        <button class="btn secondary" onclick="parent.velvetMeet('${p.id}')">Nous nous sommes rencontrés</button>
+      </div>
+      ${encounter==='pending'?`<button class="btn" style="margin-top:10px" onclick="parent.velvetConfirmMeet('${p.id}')">Simuler la confirmation mutuelle</button>`:''}
+      ${memberCircleOpen?`<div class="circle-picker"><b>Choisir un cercle</b><div class="circle-actions" style="margin-top:10px">
+        <button class="btn secondary" onclick="parent.velvetAddToCircle('${p.id}','favorites')">Favoris</button>
+        <button class="btn secondary" onclick="parent.velvetAddToCircle('${p.id}','trust')">Cercle de confiance</button>
+        ${w.S.circles.private.map(c=>`<button class="btn secondary" onclick="parent.velvetAddToPrivateCircle('${p.id}','${c.id}')">${esc(c.name)}</button>`).join('')}
+      </div></div>`:''}
+      <p class="muted" style="margin-bottom:0">Votre lien et vos rencontres certifiées ne sont jamais visibles sur la fiche publique.</p>
+    </section>`;
+  }
+
+  function memberOverview(p, data){
+    if(isShared(p) && memberIdentity!=='couple'){
+      const index = memberIdentity==='one' ? 0 : 1;
+      const name = data.names[index];
+      const image = p.id==='jm' ? (index===0?w.I.w2:w.I.w1) : (index===0?w.I.w1:w.I.m1);
+      const traits = data.traits[index] || [p.morph,p.orient,'Naturel'];
+      return `<section class="premium-card"><div class="profile-person"><img src="${image}" alt=""><div><div class="ey">Fiche personnelle</div><h2>${esc(name)}</h2>
+        <p class="story-copy">${esc(data.bios[index])}</p><div class="chips">${traits.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>
+      </div></div></section>
+      <div class="profile-layout"><div><section class="premium-card"><div class="ey">Sa voix</div><h2>Une expression personnelle</h2>
+        <p class="story-copy">${esc(data.bios[index])}</p>
+        <div class="facts"><div class="fact"><small>Âge</small><strong>${esc(p.ages.split(' & ')[index] || p.ages)} ans</strong></div>
+          <div class="fact"><small>Taille</small><strong>${esc(p.height.split(' / ')[index] || p.height)}</strong></div>
+          <div class="fact"><small>Morphologie</small><strong>${esc(traits[0])}</strong></div>
+          <div class="fact"><small>Orientation</small><strong>${esc(traits[1])}</strong></div>
+          <div class="fact"><small>Tabac</small><strong>${esc(p.smoke)}</strong></div>
+          <div class="fact"><small>Recherche</small><strong>${esc(p.search)}</strong></div>
+        </div>
+      </section></div><aside>${memberTrustCard(p)}</aside></div>`;
+    }
+    return `<div class="profile-layout"><div>
+      <section class="premium-card"><div class="ey">${isShared(p)?'Leur histoire':'Son histoire'}</div><h2>${isShared(p)?'Une identité commune, deux voix':'Une présentation humaine'}</h2>
+        <p class="story-copy">${esc(data.story)}</p>
+      </section>
+      <section class="premium-card"><div class="ey">Philosophie</div><h2>${esc(data.philosophy)}</h2>
+        <p class="story-copy">${isShared(p)?'La fiche commune raconte leur équilibre. Les deux fiches individuelles permettent à chacun de s’exprimer librement, avec ses propres envies et limites.':'Le profil se découvre progressivement, au rythme de la confiance.'}</p>
+      </section>
+      <section class="premium-card"><div class="ey">Recherche & univers</div><h2>${esc(p.search)}</h2>
+        <div class="chips">${p.tags.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>
+      </section>
+    </div><aside>
+      <section class="premium-card"><div class="ey">Informations</div><div class="mini-list">
+        ${[['Type',p.type],['Ville',p.city],['Distance',p.dist+' km'],['Âges',p.ages+' ans'],['Orientation',p.orient],['Morphologie',p.morph],['Taille',p.height],['Tabac',p.smoke]].map(x=>`<div class="mini-row"><span class="muted">${x[0]}</span><strong>${esc(x[1])}</strong></div>`).join('')}
+      </div></section>
+      ${memberTrustCard(p)}
+    </aside></div>`;
+  }
+
+  function memberAlbums(p, data){
+    const label = memberIdentity==='couple' ? p.name : data.names[memberIdentity==='one'?0:1] || p.name;
+    return `<section class="premium-card"><div class="ey">Albums de ${esc(label)}</div><h2>Une découverte par niveaux de confiance</h2>
+      <div class="album-grid">
+        <div class="album" style="background-image:url('${p.img}')"><span class="audience">Public</span><span>Présentation · 12 photos</span></div>
+        <div class="album" style="background-image:url('${w.I.party}')"><span class="audience">Découverte</span><span>Nos sorties · 9 photos</span></div>
+        <div class="album locked" data-lock="🔒 Privé&#10;Demander l’accès" style="background-image:url('${w.I.room}')" onclick="parent.velvetToast('Demande d’accès envoyée')"><span class="audience">Privé</span></div>
+        <div class="album locked" data-lock="🔒 Cercle de confiance" style="background-image:url('${w.I.spa}')"><span class="audience">Confiance</span></div>
+        <div class="album locked" data-lock="🔒 Cercle privé" style="background-image:url('${p.img}')"><span class="audience">Cercle privé</span></div>
+        <div class="album locked" data-lock="🔒 Favoris" style="background-image:url('${w.I.party}')"><span class="audience">Favoris</span></div>
+      </div>
+      <div class="privacy-note" style="margin-top:14px">Les aperçus donnent envie de découvrir sans révéler le contenu. Chaque accès est explicite, personnel et révocable.</div>
+    </section>`;
+  }
+
+  function memberEvents(p){
+    const events = w.E.filter((event,index)=>event.participants.includes(p.id)||index<2);
+    return `<section class="premium-card"><div class="ey">Sorties</div><h2>Prochains rendez-vous & souvenirs</h2>
+      <div class="grid g3">${events.map(w.eventCard).join('')}</div>
+    </section><section class="premium-card"><div class="ey">Livre Zwit</div><h2>Expériences partagées</h2>
+      <div class="timeline"><div class="timeline-item"><i></i><div><strong>Soirée à Lille</strong><div class="muted">Souvenir privé conservé dans leur Livre Velvet.</div></div></div>
+      <div class="timeline-item"><i></i><div><strong>Week-end spa</strong><div class="muted">Album collaboratif visible uniquement par le cercle concerné.</div></div></div></div>
+    </section>`;
+  }
+
+  function memberReco(p){
+    return `<div class="profile-layout"><div><section class="premium-card"><div class="ey">Recommandations</div><h2>Ce que la communauté retient</h2>
+      <div class="feed"><div class="feeditem"><img class="avatar" src="${w.I.c1}" alt=""><div><b>Profil vérifié · ★★★★★</b><div class="muted">« Une rencontre élégante, respectueuse et très naturelle. »</div></div></div>
+      <div class="feeditem"><img class="avatar" src="${w.I.w1}" alt=""><div><b>Recommandation après rencontre certifiée</b><div class="muted">« De la douceur, du dialogue et aucun jeu de rôle. »</div></div></div></div>
+    </section></div><aside><section class="premium-card"><div class="ey">Confiance Zwit</div><h3>Une réputation positive, jamais un palmarès</h3>
+      <p class="muted">Les recommandations publiques ne révèlent ni le réseau privé, ni les rencontres certifiées, ni les sources de propagation de confiance.</p>
+    </section>${memberTrustCard(p)}</aside></div>`;
+  }
+
+  function memberActivity(p){
+    return `<section class="premium-card"><div class="ey">Activité récente</div><h2>Dernières nouvelles</h2><div class="feed">
+      <div class="feeditem"><img class="avatar" src="${p.img}" alt=""><div><b>Album public enrichi</b><div class="muted">3 nouvelles photos</div></div><span class="chip">2 j</span></div>
+      <div class="feeditem"><img class="avatar" src="${p.img}" alt=""><div><b>Nouvelle sortie</b><div class="muted">Participation confirmée</div></div><span class="chip">4 j</span></div>
+      <div class="feeditem"><img class="avatar" src="${p.img}" alt=""><div><b>Profil mis à jour</b><div class="muted">Recherche et disponibilités précisées</div></div><span class="chip">1 sem.</span></div>
+    </div></section>`;
+  }
+
+  function memberCircles(p){
+    return `<div class="profile-layout"><div><section class="premium-card"><div class="ey">Cercles</div><h2>Votre relation avec ${esc(p.name)}</h2>
+      <p class="story-copy">Les cercles ne sont pas un compteur social. Ils déterminent ce que vous choisissez de partager et permettent de prolonger une belle expérience dans un espace privé.</p>
+      ${memberTrustCard(p)}
+    </section></div><aside><section class="premium-card"><div class="ey">Confidentialité</div><h3>Ce qui reste invisible</h3>
+      <div class="mini-list"><div class="mini-row"><span>Composition des cercles</span><strong>Privée</strong></div>
+      <div class="mini-row"><span>Rencontres certifiées</span><strong>Privées</strong></div>
+      <div class="mini-row"><span>Origine des recommandations</span><strong>Anonyme</strong></div>
+      <div class="mini-row"><span>Accès album</span><strong>Révocable</strong></div></div>
+    </section></aside></div>`;
+  }
+
+  function memberContent(p, data){
+    if(memberSection==='albums') return memberAlbums(p,data);
+    if(memberSection==='events') return memberEvents(p);
+    if(memberSection==='reco') return memberReco(p);
+    if(memberSection==='activity') return memberActivity(p);
+    if(memberSection==='circles') return memberCircles(p);
+    return memberOverview(p,data);
+  }
+
+  function renderMember(id){
+    const p = w.P.find(item=>item.id===id) || w.P[0];
+    const data = memberData(p);
+    if(!isShared(p)) memberIdentity='one';
+    oldGo('member',p.id);
+    w.param=p.id;
+    w.content.innerHTML=`<div class="profile-premium">
+      <button class="btn secondary" onclick="parent.velvetBackToDiscover()">← Retour à Découvrir</button>
+      <section class="profile-cover" style="margin-top:16px;background-image:url('${p.img}')">
+        <div class="profile-cover-copy"><div class="ey">${esc(p.type)} · ${esc(p.city)} · Profil vérifié</div>
+          <h1 class="profile-title">${esc(p.name)}</h1><p>${p.compat}% compatible · ${esc(p.ages)} ans · ${esc(p.orient)}</p>
+          <div class="profile-actions"><button class="btn" onclick="parent.velvetOpenConversation('${p.id}')">Écrire</button>
+            <button class="btn secondary" onclick="parent.velvetCirclePicker()">Ajouter à un cercle</button></div>
+        </div>
+      </section>
+      ${memberIdentitySwitcher(p,data)}
+      ${sectionTabs(memberSection,'velvetMemberSection',true)}
+      ${memberContent(p,data)}
+    </div>`;
+  }
+
+  function renderCirclesStandalone(){
+    selfSection='circles';
+    renderMe();
+  }
+
+  w.go = function(route, parameter){
+    if(route==='me'){
+      renderMe();
+      w.scrollTo(0,0);
+      return;
+    }
+    if(route==='member'){
+      if(w.param!==parameter){
+        memberIdentity='couple';
+        memberSection='profile';
+        memberCircleOpen=false;
+      }
+      renderMember(parameter);
+      w.scrollTo(0,0);
+      return;
+    }
+    if(route==='circles'){
+      renderCirclesStandalone();
+      w.scrollTo(0,0);
+      return;
+    }
+    oldGo(route,parameter);
+  };
+
+  window.velvetToast = text => w.toast(text);
+  window.velvetSelfIdentity = identity => {
+    selfIdentity=identity; selfSection='profile'; editing=false; renderMe(); w.scrollTo(0,0);
+  };
+  window.velvetSelfSection = section => {
+    selfSection=section; editing=false; renderMe(); w.scrollTo(0,0);
+  };
+  window.velvetProfileEdit = () => { editing=!editing; selfSection='profile'; renderMe(); };
+  window.velvetProfileSave = () => {
+    d.querySelectorAll('[data-profile]').forEach(element => {
+      w.S.profile[element.dataset.profile]=element.value;
+    });
+    w.save(); editing=false; renderMe(); w.toast('Fiche enregistrée · validation du couple prise en compte');
+  };
+  window.velvetAlbumVisibility = (key,value) => {
+    w.S.albumVisibility[key]=value; w.save(); renderMe(); w.toast('Audience de l’album mise à jour');
+  };
+  window.velvetProfileVisibility = (key,value) => {
+    w.S.profileVisibility[key]=value; w.save(); renderMe(); w.toast('Visibilité mise à jour');
+  };
+  window.velvetCreateCircle = () => {
+    const input=d.getElementById('newCircleName');
+    const name=input?.value.trim();
+    if(!name){ w.toast('Donnez un nom au cercle'); return; }
+    w.S.circles.private.push({id:'circle-'+Date.now(),name,members:[]});
+    w.save(); renderMe(); w.toast('Cercle privé créé');
+  };
+  window.velvetBubbleToCircle = id => {
+    const index=w.S.circles.bubbles.findIndex(b=>b.id===id);
+    if(index<0) return;
+    const bubble=w.S.circles.bubbles[index];
+    w.S.circles.private.push({id:'circle-'+Date.now(),name:bubble.name.replace('Bulle · ','Cercle · '),members:[]});
+    w.S.circles.bubbles.splice(index,1);
+    w.save(); renderMe(); w.toast('La Bulle est devenue un Cercle privé');
+  };
+  window.velvetOpenEvent = id => oldGo('participants',id);
+
+  window.velvetMemberIdentity = identity => {
+    memberIdentity=identity; memberSection='profile'; memberCircleOpen=false;
+    renderMember(w.param); w.scrollTo(0,0);
+  };
+  window.velvetMemberSection = section => {
+    memberSection=section; memberCircleOpen=false; renderMember(w.param); w.scrollTo(0,0);
+  };
+  window.velvetCirclePicker = () => {
+    memberCircleOpen=!memberCircleOpen; renderMember(w.param);
+  };
+  window.velvetAddToCircle = (id,type) => {
+    const list=w.S.circles[type];
+    const index=list.indexOf(id);
+    if(index>=0) list.splice(index,1); else list.push(id);
+    memberCircleOpen=false; w.save(); renderMember(id);
+    w.toast(index>=0?'Profil retiré du cercle':'Profil ajouté au cercle');
+  };
+  window.velvetAddToPrivateCircle = (id,circleId) => {
+    const circle=w.S.circles.private.find(c=>c.id===circleId);
+    if(!circle) return;
+    const index=circle.members.indexOf(id);
+    if(index>=0) circle.members.splice(index,1); else circle.members.push(id);
+    memberCircleOpen=false; w.save(); renderMember(id);
+    w.toast(index>=0?'Profil retiré du cercle privé':'Profil ajouté au cercle privé');
+  };
+  window.velvetMeet = id => {
+    if(w.S.encounters[id]==='confirmed'){ w.toast('Rencontre déjà certifiée par les deux profils'); return; }
+    w.S.encounters[id]='pending'; w.save(); renderMember(id);
+    w.toast('Confirmation envoyée à l’autre profil');
+  };
+  window.velvetConfirmMeet = id => {
+    w.S.encounters[id]='confirmed';
+    if(!w.S.circles.trust.includes(id)) w.S.circles.trust.push(id);
+    w.save(); renderMember(id);
+    w.toast('Rencontre certifiée · lien ajouté au Cercle de confiance');
+  };
+  window.velvetOpenConversation = id => oldGo('conversations',id);
+  window.velvetBackToDiscover = () => oldGo('discover');
+
+});
+</script>
+</body>
+</html>

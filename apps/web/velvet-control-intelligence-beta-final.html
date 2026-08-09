@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0D0D0D">
+  <title>Zwit Contrôle — Pilotage</title>
+  <link rel="icon" href="/assets/velvet-icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/velvet-icon-180.png">
+  <link rel="stylesheet" href="/assets/velvet-premium-ui.css">
+  <link rel="stylesheet" href="/assets/velvet-editorial-ui.css">
+  <link rel="stylesheet" href="/assets/control-pilot.css?v=20260804-3">
+</head>
+<body class="velvet-control-ui" data-velvet-view="control-pilot">
+  <div class="shell control-shell">
+    <header class="top control-top">
+      <div class="brand">ZWIT</div>
+      <span class="tag">CONTRÔLE</span>
+      <nav class="tabs" aria-label="Navigation Zwit Contrôle">
+        <button class="tab active" type="button" data-view="pilot">Pilotage</button>
+        <button class="tab" type="button" data-view="actions">À traiter <span class="control-nav-count" data-action-count hidden></span></button>
+        <button class="tab" type="button" data-view="intelligence">IA &amp; modération</button>
+        <button class="tab" type="button" data-view="communications">Communications</button>
+        <button class="tab" type="button" data-view="management">Gestion</button>
+      </nav>
+      <div class="spacer"></div>
+      <div class="release" data-control-status>Connexion sécurisée…</div>
+    </header>
+    <main id="controlApp" class="control-app" aria-live="polite">
+      <div class="control-loading"><span></span><p>Zwit Contrôle prépare le briefing…</p></div>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/velvet-premium-ui.js?v=20260804-control1" defer></script>
+  <script>
+    function safe(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[character]);
+    }
+    async function controlApi(path, options = {}) {
+      const response = await fetch(path, {
+        credentials: 'same-origin',
+        headers: { accept: 'application/json', 'content-type': 'application/json', ...(options.headers || {}) },
+        ...options
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || 'control_request_failed');
+      return payload;
+    }
+    function toastMsg(message) {
+      const toast = document.querySelector('#toast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(window.controlToastTimer);
+      window.controlToastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+  </script>
+</body>
+</html>

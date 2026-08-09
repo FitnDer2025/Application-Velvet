@@ -1,4 +1,4 @@
-# Velvet Web — Phase 1
+# Zwit Web — Phase 1
 
 Première version réelle et responsive de la landing page Velvet.
 

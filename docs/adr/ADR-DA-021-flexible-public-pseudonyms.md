@@ -4,7 +4,7 @@ Status: Accepted
 
 ## Decision
 
-Velvet allows broad freedom in public pseudonyms while protecting the community from abuse, illegality and impersonation.
+Zwit allows broad freedom in public pseudonyms while protecting the community from abuse, illegality and impersonation.
 
 ## Public identity model
 
@@ -20,12 +20,12 @@ Pseudonyms may reflect libertine culture and may be playful, suggestive, geograp
 
 ## Refused
 
-Velvet refuses pseudonyms containing or attempting to disguise:
+Zwit refuses pseudonyms containing or attempting to disguise:
 
 - insults or hateful content;
 - references to minors;
 - illegal content;
-- impersonation of Velvet, support, moderation or another person;
+- impersonation of Zwit, support, moderation or another person;
 - obvious spam;
 - meaningless or abusive character sequences.
 

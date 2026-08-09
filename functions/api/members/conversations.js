@@ -1,0 +1,119 @@
+import { json, readJson } from '../auth/_shared.js';
+import {
+  memberSession,
+  requireAdmittedMember,
+  restJson,
+  withSession
+} from './_shared.js';
+
+function validUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value || '');
+}
+
+async function ownMembership(env, access, conversationId) {
+  const rows = await restJson(
+    env,
+    `/rest/v1/conversation_members?select=conversation_id,user_id,left_at,hidden_at&conversation_id=eq.${encodeURIComponent(conversationId)}&user_id=eq.${encodeURIComponent(access.account.userId)}&limit=1`,
+    access.session
+  );
+  return rows?.[0] || null;
+}
+
+async function ensureConversationRequest(env, access, conversationId) {
+  const result = await restJson(env, '/rest/v1/rpc/zwit_v15_ensure_conversation_request', access.session, {
+    method: 'POST',
+    body: JSON.stringify({ target_conversation_id: conversationId })
+  });
+  return result?.[0] || null;
+}
+
+export async function onRequestPost({ request, env }) {
+  try {
+    const access = await memberSession(request, env);
+    if (access.response) return access.response;
+    const admission = await requireAdmittedMember(env, access);
+    if (admission.response) return admission.response;
+    const body = await readJson(request);
+    const profileId = String(body.profileId || '');
+    if (!validUuid(profileId)) return withSession({ error: 'invalid_target_profile' }, access.session, 400);
+    const result = await restJson(
+      env,
+      '/rest/v1/rpc/start_direct_profile_conversation',
+      access.session,
+      {
+        method: 'POST',
+        body: JSON.stringify({ target_profile_id: profileId })
+      }
+    );
+    const conversationId = Array.isArray(result) ? result[0] : result;
+    if (!validUuid(conversationId)) throw new Error('conversation_persistence_failed');
+    await restJson(
+      env,
+      `/rest/v1/conversation_members?conversation_id=eq.${encodeURIComponent(conversationId)}&user_id=eq.${encodeURIComponent(access.account.userId)}`,
+      access.session,
+      {
+        method: 'PATCH',
+        headers: { prefer: 'return=minimal' },
+        body: JSON.stringify({ hidden_at: null, left_at: null })
+      }
+    ).catch(() => null);
+
+    const conversationRequest = await ensureConversationRequest(env, access, conversationId);
+    return withSession({
+      ok: true,
+      conversationId,
+      conversationRequest: conversationRequest ? {
+        status: conversationRequest.status,
+        role: conversationRequest.role,
+        canSend: conversationRequest.can_send,
+        introMessagesSent: Number(conversationRequest.intro_messages_sent || 0),
+        followUpAt: conversationRequest.follow_up_at || null
+      } : null
+    }, access.session, 201);
+  } catch (error) {
+    return json({ error: error.message || 'conversation_start_failed' }, 400);
+  }
+}
+
+export async function onRequestDelete({ request, env }) {
+  try {
+    const access = await memberSession(request, env);
+    if (access.response) return access.response;
+    const admission = await requireAdmittedMember(env, access);
+    if (admission.response) return admission.response;
+    const conversationId = new URL(request.url).searchParams.get('id') || '';
+    if (!validUuid(conversationId)) {
+      return withSession({ error: 'invalid_conversation' }, access.session, 400);
+    }
+    const membership = await ownMembership(env, access, conversationId);
+    if (!membership || membership.left_at) {
+      return withSession({ error: 'conversation_access_denied' }, access.session, 403);
+    }
+    const now = new Date().toISOString();
+    await Promise.all([
+      restJson(
+        env,
+        `/rest/v1/conversation_members?conversation_id=eq.${encodeURIComponent(conversationId)}&user_id=eq.${encodeURIComponent(access.account.userId)}`,
+        access.session,
+        {
+          method: 'PATCH',
+          headers: { prefer: 'return=minimal' },
+          body: JSON.stringify({ hidden_at: now, last_read_at: now, last_delivered_at: now })
+        }
+      ),
+      restJson(
+        env,
+        `/rest/v1/member_notifications?user_id=eq.${encodeURIComponent(access.account.userId)}&entity_type=eq.conversation&entity_id=eq.${encodeURIComponent(conversationId)}&archived_at=is.null`,
+        access.session,
+        {
+          method: 'PATCH',
+          headers: { prefer: 'return=minimal' },
+          body: JSON.stringify({ read_at: now, archived_at: now })
+        }
+      ).catch(() => null)
+    ]);
+    return withSession({ ok: true, conversationId, hiddenAt: now }, access.session);
+  } catch (error) {
+    return json({ error: error.message || 'conversation_delete_failed' }, 400);
+  }
+}

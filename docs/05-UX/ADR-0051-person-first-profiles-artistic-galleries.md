@@ -2,7 +2,7 @@
 
 Décision validée.
 
-Sur un profil Velvet, la personne, le couple et leur univers prédominent. La photographie accompagne la découverte sans réduire le profil à une galerie de corps.
+Sur un profil Zwit, la personne, le couple et leur univers prédominent. La photographie accompagne la découverte sans réduire le profil à une galerie de corps.
 
 ## Profil
 
@@ -10,7 +10,7 @@ Le profil met en avant :
 - Une photographie principale
 - L'identité et la philosophie du membre ou du couple
 - Les valeurs, envies et centres d'intérêt
-- Le Pacte Velvet
+- Le Pacte Zwit
 - L'Indice de Confiance
 - Les événements, expériences et recommandations
 
@@ -24,7 +24,7 @@ Lorsqu'un album est ouvert, la photographie devient le contenu principal. L'exp�
 - Transitions sobres
 - Interface secondaire discrète
 
-## Réactions Velvet
+## Réactions Zwit
 
 Les photographies peuvent recevoir des réactions :
 - J'aime
